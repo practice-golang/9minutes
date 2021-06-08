@@ -1,25 +1,41 @@
 # 9minutes board
 
 ```
-9minutes or GUBUN board
+An expreimental 9minutes or GUBUN board
 
 WIP
 ```
+
+## Goal
+
+Escape a vaporware
+
 
 ## Getting started
 
 * Build and run
 * Then stop and edit `9minutes.ini`
 * Then run again
+* Open `http://localhost:2510` in browser
+
+
+## REST API
+
+See `requests-admin.http` and `requests-contents.http` on `vscode` with `rest-client` extension
+
+
+## HTML
+
+See `html` files in `/static` and `/templates`
 
 
 ## Todo
-- [ ] Search in boards
+- [ ] Search
 - [ ] Comment
 - [ ] Auth
 - [ ] Other DB except sqlite
-- [ ] Menu
 - [ ] Email
+- [ ] Menu
 - [ ] Test
 
 ## License
