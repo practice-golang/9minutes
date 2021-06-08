@@ -1,0 +1,308 @@
+package db
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"strings"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/practice-golang/9minutes/models"
+	// _ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
+)
+
+type Sqlite struct{ Dsn string }
+
+// initDB - Prepare DB
+func (d *Sqlite) initDB() (*sql.DB, error) {
+	var err error
+
+	Dbo, err = sql.Open("sqlite", d.Dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	return Dbo, nil
+}
+
+func (d *Sqlite) CreateDB() error {
+	return nil
+}
+
+// CreateTable - Create table
+func (d *Sqlite) CreateTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"		INTEGER,
+		"NAME"		TEXT,
+		"CODE"		TEXT,
+		"TYPE"		TEXT,
+		"TABLE"		TEXT UNIQUE,
+		"FIELDS"	TEXT,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateBasicBoard - Create board table
+func (d *Sqlite) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"				INTEGER,
+		"TITLE"				TEXT,
+		"CONTENT"			TEXT,
+		"WRITER_IDX"		TEXT,
+		"WRITER_NAME"		TEXT,
+		"WRITER_PASSWORD"	TEXT,
+		"REG_DTTM"			TEXT,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String)
+
+	log.Println("Sqlite/CreateBasicBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateCustomBoard - Create board table
+func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"		INTEGER,
+	`
+
+	if len(fields) > 0 {
+		for k, f := range fields {
+			log.Println(k, f.Name.String, f.Type.String, f.Order.Int64)
+			colType := ""
+			switch f.Type.String {
+			// cusom-tablelist
+			case "text":
+				colType = "TEXT"
+			case "number":
+				colType = "INTEGER"
+			case "real", "double":
+				colType = "REAL"
+
+			// cusom-board
+			case "title", "author", "input":
+				colType = "TEXT"
+			case "editor":
+				colType = "TEXT"
+
+			default:
+				colType = "TEXT"
+			}
+
+			sql += fmt.Sprintf(`%s		"%s"		%s,`, "\n", f.ColumnName.String, colType)
+		}
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String)
+
+	sql += `
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);
+	`
+
+	log.Println("Sqlite/CreateCustomBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// EditBasicBoard - Create board table
+func (d *Sqlite) EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	sql := `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW";`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+
+	log.Println("Sqlite/EditBasicBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func fieldListsDiff(old, new []map[string]interface{}) (add, remove, modify []map[string]interface{}) {
+	var diff []map[string]interface{}
+
+	for i := 0; i < 2; i++ {
+		for _, s1 := range old {
+			found := false
+			for _, s2 := range new {
+				if s1["idx"] == s2["idx"] {
+					if i == 0 && !cmp.Equal(s1, s2) {
+						modify = append(modify, s2)
+					}
+
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				diff = append(diff, s1)
+			}
+		}
+
+		if i == 0 {
+			remove = diff
+			old, new = new, old
+		} else {
+			add = diff
+		}
+
+		diff = []map[string]interface{}{}
+	}
+
+	return
+}
+
+// EditCustomBoard - Create custom table
+func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	// var err error
+	// log.Println(tableInfoOld.Table.String, tableInfoNew.Table.String)
+	// log.Println(tableInfoOld.Fields, tableInfoNew.Fields)
+
+	var newFieldITF []map[string]interface{}
+	_ = json.Unmarshal([]byte(tableInfoNew.Fields.(string)), &newFieldITF)
+
+	var oldFieldITF []map[string]interface{}
+
+	for _, f := range tableInfoOld.Fields.([]interface{}) {
+		oldF := f.(map[string]interface{})
+		oldFieldITF = append(oldFieldITF, oldF)
+	}
+
+	add, remove, modify := fieldListsDiff(oldFieldITF, newFieldITF)
+	log.Println("Add: ", add)
+	log.Println("Remove: ", remove)
+	log.Println("Modify: ", modify)
+
+	sql := ""
+	if tableInfoOld.Table.String != tableInfoNew.Table.String {
+		sql = `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW"; `
+
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+	}
+
+	if len(add) > 0 {
+		sql += `ALTER TABLE "#TABLE_NAME_NEW" `
+		for i, c := range add {
+			sql += ` ADD COLUMN ` + c["column"].(string) + ` `
+			switch c["type"].(string) {
+			// cusom-tablelist
+			case "text":
+				sql += ` TEXT`
+			case "number":
+				sql += ` INTEGER`
+			case "real":
+				sql += ` REAL`
+
+			// cusom-board
+			case "title", "author", "input":
+				sql += ` TEXT`
+			case "editor":
+				sql += ` TEXT`
+			}
+
+			if i < (len(add) - 1) {
+				sql += `, `
+			}
+		}
+		sql += `; `
+	}
+
+	if len(remove) > 0 {
+		sql += `ALTER TABLE "#TABLE_NAME_NEW" `
+		for i, c := range remove {
+			sql += ` DROP COLUMN ` + c["column"].(string)
+			if i < (len(remove) - 1) {
+				sql += `, `
+			}
+		}
+		sql += `; `
+	}
+
+	if len(modify) > 0 {
+		sql += `ALTER TABLE "#TABLE_NAME_NEW" `
+		for i, nc := range modify {
+			for _, ocINF := range tableInfoOld.Fields.([]interface{}) {
+				oc := ocINF.(map[string]interface{})
+				if nc["idx"].(float64) == oc["idx"].(float64) {
+					if nc["column"].(string) != oc["column"].(string) {
+						sql += ` RENAME COLUMN ` + oc["column"].(string) + ` TO ` + nc["column"].(string)
+						if i < (len(modify) - 1) {
+							sql += `, `
+						}
+					}
+					break
+				}
+			}
+		}
+		sql += `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+
+	log.Println("Sqlite/EditCustomBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteBoard - Delete a board table
+func (d *Sqlite) DeleteBoard(tableName string) error {
+	sql := `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableName)
+
+	log.Println("Sqlite/DeleteBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

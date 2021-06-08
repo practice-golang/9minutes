@@ -1,0 +1,190 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <h1>{{table}}</h1>
+        <a href="/admin/board">관리자</a>
+        <table>
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Title</th>
+                    <th>Writer</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="d, i in contents">
+                    <td>{{d.idx}}</td>
+                    <td class="content-title" @click="location.href=restURI+'/board?code='+boardCode+'&mode=read&id='+d.idx">{{d.title}}</td>
+                    <td>{{d["writer-name"]}}</td>
+                    <td><button @click="deleteData(d.idx)">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <template v-for="i in page.total">
+            <template v-if="i == page.current">
+                &nbsp;<span><b>{{i}}</b></span>&nbsp;
+            </template>
+            <template v-else>
+                &nbsp;<a href="javascript:" @click="movePage(i)">{{i}}</a>&nbsp;
+            </template>
+        </template>
+
+        <br />
+
+        <button @click="location.href='/board?code='+boardCode+'&mode=write'">Write</button>
+    </div>
+</body>
+
+<script>
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            // restURI: "http://localhost:2918",
+            restURI: window.location.protocol + "//" + window.location.host,
+            page: {
+                current: 1,
+                total: 1,
+                countPerPage: 5,
+                order: "desc",
+            },
+            table: "'##__TABLE_NAME__##'",
+            boardCode: "'##__BOARD_CODE__##'",
+            contents: [],
+        },
+        mounted() {
+            this.getData()
+        },
+        methods: {
+            async getTotalPage() {
+                let keywords = []
+
+                let response = await fetch(this.restURI + "/api/basic-board/total-page", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: {
+                            count: this.page.countPerPage
+                        },
+                        table: this.table
+                    })
+                })
+                if (response.ok) {
+                    r = await response.json()
+                    this.page.total = r["total-page"]
+                }
+            },
+            async getData() {
+                this.getTotalPage()
+
+                let keywords = []
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: {
+                            page: this.page.current - 1,
+                            count: this.page.countPerPage,
+                            order: this.page.order,
+                        },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.contents = await response.json()
+                }
+            },
+            async deleteData(idx) {
+                const confirm = await swal.fire({
+                    title: "Confirm",
+                    text: "Are you sure?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel"
+                })
+
+                if (!confirm.isConfirmed) {
+                    return false
+                }
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                    method: "DELETE",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: {
+                            idx: idx
+                        },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    swal.fire("Success", "Deleted successfully", "success")
+                    this.getData()
+                }
+            },
+            movePage(page) {
+                // page 1 = idx 0
+                this.page.current = page
+                this.getData()
+
+                return false
+            },
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+
+    .content-title {
+        cursor: pointer;
+    }
+
+    .content-title:hover {
+        text-decoration: underline;
+    }
+</style>
+
+</html>

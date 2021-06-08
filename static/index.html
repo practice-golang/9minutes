@@ -1,0 +1,71 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+    
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <a href="/admin/board">관리자</a>
+        <a href="/board?code=board1">Board1</a>
+    </div>
+</body>
+
+<script>
+    const messages = {
+        en: {
+            menu:{
+                admin: "Admin",
+            },
+        },
+        ko: {
+            menu: {
+                admin: "관리자",
+            },
+        }
+    }
+
+    const i18n = new VueI18n({
+        locale: 'en',
+        messages,
+    })
+
+    const vm = new Vue({
+        i18n,
+        el: "#app",
+        data: {
+            // restURI: "http://localhost:2918",
+            restURI: window.location.protocol + "//" + window.location.host + window.location.pathname,
+        },
+        mounted() {},
+        methods: {
+            setLocale(lang) {
+                i18n.locale = lang
+            },
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+</style>
+
+</html>

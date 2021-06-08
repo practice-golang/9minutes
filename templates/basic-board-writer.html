@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+
+    <script src="/assets/tinymce/tinymce.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <h1>{{table}}</h1>
+        <tr>
+            <td><input v-model="contents['writer-name']" placeholder="name" /></td>
+            <td><input v-model="contents['writer-password']" placeholder="password" /></td>
+        </tr>
+        <table>
+            <tr>
+                <td><input v-model="contents.title" placeholder="Title" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <!-- <textarea id="editor" v-model="contents.content"></textarea> -->
+                    <textarea id="editor"></textarea>
+                </td>
+            </tr>
+        </table>
+        <button onclick="history.back()">Cancel</button>
+        <button @click="writePost()">Write</button>
+    </div>
+</body>
+
+<script>
+    tinymce.init({
+        selector: "textarea#editor",
+        mode: "textareas",
+        theme: "silver",
+        height: "480",
+        force_p_newlines: false,
+        force_br_newlines: true,
+        // forced_root_block: false,
+        forced_root_block: '',
+        convert_newlines_to_brs: false,
+        remove_linebreaks: true,
+        // branding: false
+    })
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURI: window.location.protocol + "//" + window.location.host,
+            table: "'##__TABLE_NAME__##'",
+            boardCode: "'##__BOARD_CODE__##'",
+            contents: {
+                title: "",
+                content: "",
+                "writer-idx": "-1",
+                "writer-name": "",
+                "writer-password": ""
+            }
+        },
+        mounted() { },
+        methods: {
+            async writePost() {
+                this.contents.content = await tinymce.activeEditor.getContent()
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                    method: "PUT",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: this.contents,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    const result = await response.json()
+                    location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                }
+            }
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+</style>
+
+</html>

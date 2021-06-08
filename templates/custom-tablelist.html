@@ -1,0 +1,223 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <h1>Custom tablelist</h1>
+        <a href="/admin/board">관리자</a>
+        <table>
+            <thead>
+                <tr>
+                    <th v-for="f, k in columns">{{f.name}}</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td v-for="f, k in columns"><input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" /></td>
+                    <td><button @click="addData()">Add</button></td>
+                </tr>
+
+                <tr v-for="ds, i in contents">
+                    <template v-if="i !== contentsEditIDX">
+                        <td v-for="c, j in columns">{{ds[c.column]}}</td>
+                        <td><button @click="contentsEdit=Object.assign({}, ds);contentsEditIDX = i">Edit</button></td>
+                    </template>
+                    <template v-else>
+                        <td v-for="c, j in columns">
+                            <span v-if="c.json == 'idx'">{{contentsEdit[c.column]}}</span>
+                            <input v-else v-model="contentsEdit[c.column]" />
+                        </td>
+                        <td>
+                            <button @click="contentsEdit={};contentsEditIDX = -1">Cancel</button>
+                            <button @click="updateData()">Save</button>
+                        </td>
+                    </template>
+                </tr>
+            </tbody>
+        </table>
+
+        <template v-for="i in page.total">
+            <template v-if="i == page.current">
+                &nbsp;<span><b>{{i}}</b></span>&nbsp;
+            </template>
+            <template v-else>
+                &nbsp;<a href="javascript:" @click="movePage(i)">{{i}}</a>&nbsp;
+            </template>
+        </template>
+    </div>
+</body>
+
+<script>
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURI: window.location.protocol + "//" + window.location.host,
+            page: {
+                current: 1,
+                total: 1,
+                countPerPage: 5,
+                order: "desc",
+            },
+            columns: '##__COLUMNS__##',
+            table: "'##__TABLE_NAME__##'",
+            contents: [],
+            contentsAdd: {},
+            contentsEdit: {},
+            contentsEditIDX: -1,
+        },
+        mounted() {
+            this.getData()
+        },
+        methods: {
+            async getTotalPage() {
+                let keywords = []
+
+                let response = await fetch(this.restURI + "/api/custom-board/total-page", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: {
+                            count: this.page.countPerPage
+                        },
+                        table: this.table
+                    })
+                })
+                if (response.ok) {
+                    r = await response.json()
+                    this.page.total = r["total-page"]
+                }
+            },
+            async getData() {
+                this.getTotalPage()
+
+                let keywords = []
+
+                let columns = this.columns.map((c) => {
+                    return c.column
+                })
+
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "keywords": keywords,
+                        "options": {
+                            "page": this.page.current - 1,
+                            "count": this.page.countPerPage,
+                            "order": this.page.order,
+                        },
+                        "columns": columns,
+                        "table": this.table
+                    })
+                })
+
+                if (response.ok) {
+                    console.log(this.columns)
+                    this.contents = await response.json()
+                }
+            },
+            async addData() {
+                if (Object.keys(this.contentsAdd).length < 3) {
+                    swal.fire("Empty", "Fill all.", "warning")
+                    return false
+                }
+
+                for (let k in this.contentsAdd) {
+                    console.log(k, this.contentsAdd[k])
+                    if ((k != "idx" && k != "fields") && (this.contentsAdd[k] == 0 || this.contentsAdd[k].trim() == "" || !this.contentsAdd[k])) {
+                        swal.fire("Empty", "Fill all.", "warning")
+                        return false
+                    }
+                }
+
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "PUT",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: this.contentsAdd,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.getData()
+                    this.contentsAdd = {}
+                    swal.fire("Success", "Updated successfully", "success")
+                    return false
+                }
+
+                console.log(this.contentsAdd)
+            },
+            async updateData() {
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "PATCH",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: this.contentsEdit,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.getData()
+                    this.contentsEdit = {}
+                    this.contentsEditIDX = -1
+                    swal.fire("Success", "Updated successfully", "success")
+                    return false
+                }
+            },
+            movePage(page) {
+                // page 1 = idx 0
+                this.page.current = page
+                this.getData()
+
+                return false
+            },
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+
+    tbody>tr:hover {
+        background: #FFD3D3;
+    }
+</style>
+
+</html>

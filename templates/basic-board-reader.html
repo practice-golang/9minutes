@@ -1,0 +1,99 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <h1>{{table}}</h1>
+        <h2>{{contents.title}}</h2>
+        <table>
+            <tr>
+                <td>{{contents['writer-name']}}</td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td v-html="contents.content"></td>
+            </tr>
+        </table>
+        <button>Edit</button>
+        <button @click="location.href='/board?code='+boardCode">List</button>
+        <!-- <button @click="editPost()">Edit</button> -->
+    </div>
+</body>
+
+<script>
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURI: window.location.protocol + "//" + window.location.host,
+            table: "'##__TABLE_NAME__##'",
+            boardCode: "'##__BOARD_CODE__##'",
+            id: "",
+            contents: {
+                title: "",
+                content: "",
+                "writer-idx": "-1",
+                "writer-name": "",
+                "writer-password": ""
+            }
+        },
+        mounted() {
+            const uri = new URL(String(document.location.href))
+            this.id = String(uri.searchParams.get("id"))
+
+            this.getData()
+        },
+        methods: {
+            async getData() {
+                const keywords = [{idx: this.id}]
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: {
+                            count: 1,
+                        },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.contents = (await response.json())[0]
+                }
+            }
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+</style>
+
+</html>
