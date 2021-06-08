@@ -1,7 +1,7 @@
 # 9minutes board
 
 ```
-An expreimental 9minutes or GUBUN board
+An expreimental 9minutes or GUBUN board for personal use
 
 WIP
 ```
