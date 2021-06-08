@@ -40,7 +40,7 @@ See `html` files in `/static` and `/templates`
 - [ ] User auth
 - [ ] Other DB except sqlite
 - [ ] Email
-- [ ] Menu
+- [ ] ~~Menu~~
 - [ ] Test
 
 ## License
