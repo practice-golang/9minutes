@@ -42,6 +42,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 - [ ] Comment
 - [ ] User auth
 - [ ] Other DB except sqlite
+- [ ] User defined template
 - [ ] Email
 - [ ] ~~Menu~~
 - [ ] Test
