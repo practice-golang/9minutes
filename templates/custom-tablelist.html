@@ -26,8 +26,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td v-for="f, k in columns"><input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" /></td>
+                <tr @keyup.enter="addData()">
+                    <td v-for="f, k in columns">
+                        <input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" />
+                    </td>
                     <td><button @click="addData()">Add</button></td>
                 </tr>
 
@@ -152,7 +154,6 @@
                 })
 
                 if (response.ok) {
-                    console.log(this.columns)
                     this.contents = await response.json()
                 }
             },
@@ -163,7 +164,6 @@
                 }
 
                 for (let k in this.contentsAdd) {
-                    console.log(k, this.contentsAdd[k])
                     if ((k != "idx" && k != "fields") && (this.contentsAdd[k] == 0 || this.contentsAdd[k].trim() == "" || !this.contentsAdd[k])) {
                         swal.fire("Empty", "Fill all.", "warning")
                         return false
