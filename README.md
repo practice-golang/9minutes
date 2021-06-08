@@ -37,7 +37,7 @@ See `html` files in `/static` and `/templates`
 ## Todo
 - [ ] Search
 - [ ] Comment
-- [ ] Auth
+- [ ] User auth
 - [ ] Other DB except sqlite
 - [ ] Email
 - [ ] Menu
