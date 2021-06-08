@@ -17,6 +17,7 @@
     <div id="app">
         <h1>Custom board</h1>
         <a href="/admin/board">Admin</a>
+        <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
         <table>
             <thead>
                 <tr>
@@ -35,7 +36,7 @@
                 </tr>
             </tbody>
         </table>
-        
+
         <hr />
 
         <template v-for="i in page.total">
@@ -70,6 +71,7 @@
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
             contents: [],
+            searchKeyword: "",
         },
         mounted() {
             this.getData()
@@ -77,6 +79,17 @@
         methods: {
             async getTotalPage() {
                 let keywords = []
+
+                let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
+                    return c.column
+                })
 
                 let response = await fetch(this.restURI + "/api/custom-board/total-page", {
                     method: "POST",
@@ -103,6 +116,13 @@
                 let keywords = []
 
                 let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+    
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
                     return c.column
                 })
 
@@ -135,6 +155,10 @@
 
                 return false
             },
+            search() {
+                this.page.current = 1
+                this.getData()
+            }
         }
     })
 </script>

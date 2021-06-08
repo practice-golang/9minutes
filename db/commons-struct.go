@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/practice-golang/9minutes/models"
 
@@ -166,7 +165,7 @@ func SelectContentsCount(search interface{}) (uint, error) {
 			}
 		}
 	}
-	log.Println(reflect.TypeOf(search))
+	// log.Println("Select count search type: ", reflect.TypeOf(search))
 	ds := dbms.From(table).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 	ds = ds.Where(goqu.Or(exps...))
 

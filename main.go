@@ -252,7 +252,7 @@ func setupServer() *echo.Echo {
 	cb.POST("/contents-list", contents.GetContentsListCustomBoard)
 	cb.PUT("/contents-list", contents.AddContentsListCustomBoard)
 	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)
-	cb.POST("/total-page", contents.GetContentsTotalPage)
+	cb.POST("/total-page", contents.GetContentsTotalPageMAP)
 
 	return e
 }

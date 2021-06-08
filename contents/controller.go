@@ -110,6 +110,7 @@ func GetContentsTotalPage(c echo.Context) error {
 	}
 
 	pages := uint(math.Ceil(float64(data) / float64(countPerPage)))
+	log.Println("search: ", search.Keywords, data, pages)
 
 	result := map[string]uint{"total-page": pages}
 
@@ -168,6 +169,26 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
 	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+// GetContentsTotalPageMAP - Get total page of custom board
+func GetContentsTotalPageMAP(c echo.Context) error {
+	search, _ := ioutil.ReadAll(c.Request().Body)
+
+	data, count, err := db.SelectContentsCountMAP(search)
+	if err != nil {
+		log.Fatal("SelectCount: ", err)
+	}
+
+	// countPerPage := uint(1)
+	countPerPage := count
+
+	pages := uint(math.Ceil(float64(data) / float64(countPerPage)))
+	log.Println("search: ", string(search), data, pages)
+
+	result := map[string]uint{"total-page": pages}
 
 	return c.JSON(http.StatusOK, result)
 }

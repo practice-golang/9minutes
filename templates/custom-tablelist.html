@@ -17,6 +17,7 @@
     <div id="app">
         <h1>Custom tablelist</h1>
         <a href="/admin/board">Admin</a>
+        <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
         <table>
             <thead>
                 <tr>
@@ -74,6 +75,7 @@
             columns: '##__COLUMNS__##',
             table: "'##__TABLE_NAME__##'",
             contents: [],
+            searchKeyword: "",
             contentsAdd: {},
             contentsEdit: {},
             contentsEditIDX: -1,
@@ -84,6 +86,17 @@
         methods: {
             async getTotalPage() {
                 let keywords = []
+
+                let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
+                    return c.column
+                })
 
                 let response = await fetch(this.restURI + "/api/custom-board/total-page", {
                     method: "POST",
@@ -110,6 +123,13 @@
                 let keywords = []
 
                 let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
                     return c.column
                 })
 
@@ -199,6 +219,10 @@
 
                 return false
             },
+            search() {
+                this.page.current = 1
+                this.getData()
+            }
         }
     })
 </script>

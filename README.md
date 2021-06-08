@@ -3,6 +3,8 @@
 ```
 An expreimental 9minutes or GUBUN board for personal use
 
+Using struct or map, mostly map
+
 WIP
 ```
 
@@ -35,7 +37,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 
 
 ## Todo
-- [ ] Search
+- [x] Search
 - [ ] Comment
 - [ ] User auth
 - [ ] Other DB except sqlite

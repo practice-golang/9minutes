@@ -7,7 +7,6 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/practice-golang/9minutes/models"
 	"github.com/tidwall/gjson"
 
 	"github.com/doug-martin/goqu/v9"
@@ -80,18 +79,18 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-
 	exps := []goqu.Expression{}
 
 	keywords := jsonBody["keywords"].([]interface{})
 	for _, keywordOBJ := range keywords {
 		ex := goqu.Ex{}
 		for k, d := range keywordOBJ.(map[string]interface{}) {
-			ex[k] = d
+			val := fmt.Sprintf("%s%s%s", "%", d, "%")
+			ex[k] = goqu.Op{"like": val}
 		}
 		exps = append(exps, ex.Expression())
 	}
-	log.Println("kworkds", keywords)
+	// log.Println("kworkds", keywords)
 
 	ds := dbms.From(jsonBody["table"].(string)).Select(colNames...)
 	ds = ds.Where(goqu.Or(exps...))
@@ -214,41 +213,82 @@ func UpdateContentsMAP(data interface{}) (sql.Result, error) {
 }
 
 // SelectContentsCountMAP - data count -> pages = (data count) / (count per page)
-func SelectContentsCountMAP(search interface{}) (uint, error) {
-	var cnt uint
+func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
+	var result uint
+
+	offset := uint(0)
+	count := listCount
 
 	dbType, err := getDialect()
 	if err != nil {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	// log.Println(string(search.([]byte)))
+	jsonBody, ok := gjson.Parse(string(search.([]byte))).Value().(map[string]interface{})
+	if !ok {
+		log.Println("Cannot parse jsonBody")
+	}
+
+	log.Println("contentsMAP search body: ", jsonBody)
+	log.Println("contentsMAP: ", jsonBody["columns"])
+
 	dbms := goqu.New(dbType, Dbo)
 	exps := []goqu.Expression{}
-	table := ""
 
-	switch search := search.(type) {
-	case models.ContentSearch:
-		table = search.Table.String
-		keywords := search.Keywords
-		for _, k := range keywords {
-			ex := PrepareWhere(k)
-			if !ex.IsEmpty() {
-				for c, v := range ex {
-					val := fmt.Sprintf("%s%s%s", "%", v, "%")
-					ex[c] = goqu.Op{"like": val}
-				}
-				exps = append(exps, ex.Expression())
-			}
+	keywords := jsonBody["keywords"].([]interface{})
+	for _, keywordOBJ := range keywords {
+		ex := goqu.Ex{}
+		for k, d := range keywordOBJ.(map[string]interface{}) {
+			val := fmt.Sprintf("%s%s%s", "%", d, "%")
+			ex[k] = goqu.Op{"like": val}
 		}
+		exps = append(exps, ex.Expression())
 	}
-	// log.Println(reflect.TypeOf(search))
-	ds := dbms.From(table).Select(goqu.COUNT("*").As("PAGE_COUNT"))
+	log.Println("kworkds", keywords)
+
+	ds := dbms.From(jsonBody["table"].(string)).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 	ds = ds.Where(goqu.Or(exps...))
+
+	orderDirection := goqu.C(OrderScope).Asc()
+	options := jsonBody["options"].(map[string]interface{})
+	if opt, ok := options["order"]; ok && opt == "desc" {
+		orderDirection = goqu.C(OrderScope).Desc()
+	}
+	ds = ds.Order(orderDirection)
+
+	cnt := uint(count)
+	if optCount, ok := options["count"]; ok {
+		var optcntINT int
+		switch val := optCount.(type) {
+		case string:
+			optcntINT, _ = (strconv.Atoi(val))
+		case float64:
+			optcntINT = int(val)
+		}
+
+		cnt = uint(optcntINT)
+	}
+	ds = ds.Limit(cnt)
+
+	// 페이징
+	if page, ok := options["page"]; ok {
+		var pageINT int
+		switch val := page.(type) {
+		case string:
+			pageINT, _ = (strconv.Atoi(val))
+		case float64:
+			pageINT = int(val)
+		}
+
+		offset = uint(pageINT)
+	}
+	ds = ds.Offset(offset * cnt)
 
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
-	ds.ScanVal(&cnt)
+	ds.ScanVal(&result)
 
-	return cnt, nil
+	return result, cnt, nil
 }
