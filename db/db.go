@@ -33,7 +33,7 @@ type DBI interface {
 var (
 	Dbi          DBI    // DB Object Interface
 	Dsn          string // Data Source Name
-	DatabaseName = "floating-shelf"
+	DatabaseName = "9minutes"
 	TableName    = "BOARDS"
 	Dbo          *sql.DB
 	DBType       int

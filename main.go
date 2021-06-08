@@ -261,12 +261,12 @@ func main() {
 	var err error
 	listenAddress := "127.0.0.1"
 	listenPort := "2510"
-	cfg, err := ini.Load("floating-shelf.ini")
+	cfg, err := ini.Load("9minutes.ini")
 
 	if err != nil {
 		log.Print("Fail to read ini. ")
 
-		f, err := os.Create("floating-shelf.ini")
+		f, err := os.Create("9minutes.ini")
 		if err != nil {
 			log.Fatal("Create INI: ", err)
 		}
@@ -277,7 +277,7 @@ func main() {
 			log.Fatal("Create INI: ", err)
 		}
 
-		log.Println("floating-shelf.ini is created")
+		log.Println("9minutes.ini is created")
 	}
 
 	// Rewrite path regexp check

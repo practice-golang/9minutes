@@ -27,7 +27,7 @@ var (
 // 		Port:     13306,
 // 		User:     "root",
 // 		Password: "",
-// 		Database: "floating-shelf",
+// 		Database: "9minutes",
 // 	}
 // )
 
@@ -39,7 +39,7 @@ var (
 // 		Port:     1433,
 // 		User:     "sa",
 // 		Password: "mssql",
-// 		Database: "floating-shelf",
+// 		Database: "9minutes",
 // 	}
 // )
 
@@ -52,6 +52,6 @@ var (
 // 		User:     "root",
 // 		Password: "pgsql",
 // 		Database: "postgres",
-// 		Schema:   "floating-shelf",
+// 		Schema:   "9minutes",
 // 	}
 // )
