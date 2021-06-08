@@ -23,7 +23,7 @@ Escape a vaporware
 
 See `requests-admin.http` and `requests-contents.http` on `vscode` with `rest-client` extension
 
-* Read - `GET`, `POST`
+* Read, List - `GET`, `POST`
 * Write - `PUT`
 * Edit - `PATCH`
 * DELETE - `DELETE`
