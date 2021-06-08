@@ -7,7 +7,6 @@
 
     <!-- <script src="js/vue.min.js"></script> -->
     <script src="/assets/js/vue.js"></script>
-    <script src="/assets/js/vue-i18n.js"></script>
     <script src="/assets/js/sweetalert2.all.min.js"></script>
     
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
@@ -22,37 +21,14 @@
 </body>
 
 <script>
-    const messages = {
-        en: {
-            menu:{
-                admin: "Admin",
-            },
-        },
-        ko: {
-            menu: {
-                admin: "Admin",
-            },
-        }
-    }
-
-    const i18n = new VueI18n({
-        locale: 'en',
-        messages,
-    })
-
     const vm = new Vue({
-        i18n,
         el: "#app",
         data: {
             // restURI: "http://localhost:2918",
             restURI: window.location.protocol + "//" + window.location.host + window.location.pathname,
         },
         mounted() {},
-        methods: {
-            setLocale(lang) {
-                i18n.locale = lang
-            },
-        }
+        methods: {}
     })
 </script>
 
