@@ -31,7 +31,7 @@ See `requests-admin.http` and `requests-contents.http` on `vscode` with `rest-cl
 
 ## HTML
 
-See `html` files in `/static` and `/templates`
+See `html` files in `/static` as pages and `/templates` as templates
 
 
 ## Todo
