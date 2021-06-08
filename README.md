@@ -3,7 +3,7 @@
 ```
 An expreimental 9minutes or GUBUN board for personal use
 
-Using struct or map, mostly map
+Using struct or map, mainly map
 
 WIP
 ```
