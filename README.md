@@ -25,6 +25,8 @@ Escape a vaporware
 
 See `requests-admin.http` and `requests-contents.http` on `vscode` with `rest-client` extension
 
+`GET` and `POST` make me confused so, APIs are not `RESTful`
+
 * Read, List - `GET`, `POST`
 * Write - `PUT`
 * Edit - `PATCH`
