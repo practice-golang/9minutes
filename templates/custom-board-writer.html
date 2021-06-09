@@ -102,7 +102,7 @@
                 // this.contents.content = await tinymce.activeEditor.getContent()
 
                 let data = {}
-                this.columns.forEach(async (c, i) => {
+                await this.columns.forEach(async (c, i) => {
                     switch (true) {
                         case (c.column == "IDX"):
                             // Use only when edit
@@ -112,17 +112,13 @@
                             }
                             break
                         case (c.type == "editor"):
-                            data[c.column] = await tinymce.activeEditor.getContent()
-                            // data[c.column] = this.contents.content
+                            data[c.column] = await tinymce.get(c.column).getContent()
                             break
                         default:
                             data[c.column] = this.contents[c.column]
                             break
                     }
                 })
-
-                console.log(data)
-                console.log(await tinymce.activeEditor.getContent())
 
                 let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
                     method: requestMethod,
