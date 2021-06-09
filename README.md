@@ -10,7 +10,7 @@ WIP
 
 ## Goal
 
-Escape a vaporware
+Escape from a vaporware
 
 
 ## Getting started
