@@ -19,6 +19,8 @@ import (
 
 // AddBoards - Insert board(s) info
 func AddBoards(c echo.Context) error {
+	var err error
+
 	data, _ := ioutil.ReadAll(c.Request().Body)
 	boards, fields := prepareInsertData(data)
 
@@ -35,7 +37,11 @@ func AddBoards(c echo.Context) error {
 		}
 		switch b.Type.String {
 		case "basic-board":
-			err := db.Dbi.CreateBasicBoard(b, false)
+			err = db.Dbi.CreateBasicBoard(b, false)
+			if err != nil {
+				log.Println("Add Boards CreateBasicBoard", err)
+			}
+			err = db.Dbi.CreateComment(b, false)
 			if err != nil {
 				log.Println("Add Boards CreateBasicBoard", err)
 			}

@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -210,4 +211,109 @@ func SelectCount(search interface{}) (uint, error) {
 	ds.ScanVal(&cnt)
 
 	return cnt, nil
+}
+
+/* Comments */
+
+// SelectComments - cRud
+func SelectComments(search interface{}) (interface{}, error) {
+	var result interface{}
+	var err error
+
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	var searchBytes models.CommentSearch
+	err = json.Unmarshal(search.([]byte), &searchBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	var ds *goqu.SelectDataset
+	commentResult := []models.Comments{}
+	exps := []goqu.Expression{}
+
+	keywords := searchBytes.Keywords
+
+	table := searchBytes.Table.String + "_COMMENT"
+	if searchBytes.Options.Count.Int64 > 1 {
+		// Comment list
+		ds = dbms.From(table).Select(models.Comments{})
+	} else {
+		// Not allow getting all of list
+		if !searchBytes.Options.Count.Valid || searchBytes.Options.Count.Int64 < 1 {
+			searchBytes.Options.Count.SetValid(1)
+		}
+
+		// Comment
+		ds = dbms.From(table).Select(models.Comments{})
+	}
+
+	for _, k := range keywords {
+		ex := PrepareWhere(k)
+		if !ex.IsEmpty() {
+			for c, v := range ex {
+				val := fmt.Sprintf("%s%s%s", "%", v, "%")
+				ex[c] = goqu.Op{"like": val}
+			}
+			exps = append(exps, ex.Expression())
+		}
+	}
+
+	ds = ds.Where(goqu.Or(exps...))
+
+	orderDirection := goqu.C(OrderScope).Asc()
+	if searchBytes.Options.Order.String == "desc" {
+		orderDirection = goqu.C(OrderScope).Desc()
+	}
+	ds = ds.Order(orderDirection)
+
+	cnt := listCount
+	if searchBytes.Options.Count.Valid {
+		cnt = uint(searchBytes.Options.Count.Int64)
+	}
+	ds = ds.Limit(cnt)
+
+	offset := uint(0)
+	if searchBytes.Options.Page.Valid {
+		offset = uint(searchBytes.Options.Page.Int64)
+	}
+	ds = ds.Offset(offset * cnt)
+
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	err = ds.ScanStructs(&commentResult)
+	if err != nil {
+		log.Println("ds: ", err.Error())
+		return nil, err
+	}
+	if commentResult != nil {
+		result = commentResult
+	}
+
+	return result, nil
+}
+
+// InsertComment - Crud comment
+func InsertComment(data interface{}, table string) (sql.Result, error) {
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Insert(table).Rows(data)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

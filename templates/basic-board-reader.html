@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -11,6 +12,8 @@
 
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+
+    <script src="/assets/tinymce/tinymce.min.js"></script>
 </head>
 
 <body>
@@ -27,13 +30,41 @@
                 <td v-html="contents.content"></td>
             </tr>
         </table>
+
         <button @click="location.href='/board?code='+boardCode+'&mode=edit&id='+id">Edit</button>
         <button @click="location.href='/board?code='+boardCode">List</button>
-        <!-- <button @click="editPost()">Edit</button> -->
+        <hr />
+
+        <div v-for="c, i in comments">
+            {{c["writer-name"]}}:
+            <div v-html="c.content"></div>
+        </div>
+
+        <div>
+            <input v-model="commentAdd['writer-name']" placeholder="name" />
+            <input v-model="commentAdd['writer-password']" placeholder="password" />
+            <br />
+            <textarea id="editor" v-model="commentAdd.comment" class="editors"></textarea>
+            <br />
+            <button @click="writeComment()">Write comment</button>
+        </div>
     </div>
 </body>
 
 <script>
+    tinymce.init({
+        selector: "textarea.editors",
+        mode: "textareas",
+        theme: "silver",
+        height: "240",
+        force_p_newlines: false,
+        force_br_newlines: true,
+        // forced_root_block: false,
+        forced_root_block: '',
+        convert_newlines_to_brs: false,
+        remove_linebreaks: true,
+        // branding: false
+    })
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
@@ -48,6 +79,14 @@
                 "writer-idx": "-1",
                 "writer-name": "",
                 "writer-password": ""
+            },
+            comments: [],
+            commentAdd: {
+                bidx: "",
+                comment: "",
+                "writer-idx": "-1",
+                "writer-name": "",
+                "writer-password": "",
             }
         },
         mounted() {
@@ -55,6 +94,7 @@
             this.id = String(uri.searchParams.get("id"))
 
             this.getData()
+            this.getComments()
         },
         methods: {
             async getData() {
@@ -75,6 +115,48 @@
 
                 if (response.ok) {
                     this.contents = (await response.json())[0]
+                }
+            },
+            async getComments() {
+                const keywords = [{ bidx: this.id }]
+
+                let response = await fetch(this.restURI + "/api/comments", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: { count: 10 },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.comments = (await response.json())
+                }
+            },
+            async writeComment() {
+                let requestMethod = "PUT"
+                this.commentAdd.bidx = this.id
+                this.commentAdd.content = await tinymce.activeEditor.getContent()
+
+                let response = await fetch(this.restURI + "/api/comments", {
+                    method: requestMethod,
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: this.commentAdd,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    const result = await response.json()
+                    this.getComments()
                 }
             }
         }

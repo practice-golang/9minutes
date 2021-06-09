@@ -21,6 +21,7 @@ import (
 	_ "modernc.org/sqlite"
 
 	"github.com/practice-golang/9minutes/board"
+	"github.com/practice-golang/9minutes/comments"
 	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/contents"
 	"github.com/practice-golang/9minutes/db"
@@ -255,6 +256,10 @@ func setupServer() *echo.Echo {
 	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)
 	cb.DELETE("/contents-list", contents.DeleteContentsListCustomBoard)
 	cb.POST("/total-page", contents.GetContentsTotalPageMAP)
+
+	cm := e.Group("/api/comments")
+	cm.POST("", comments.GetComments)
+	cm.PUT("", comments.AddComments)
 
 	return e
 }

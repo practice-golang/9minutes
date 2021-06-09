@@ -111,3 +111,8 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 func (d *Sqlserver) DeleteBoard(tableName string) error {
 	return nil
 }
+
+// CreateComment - Create comment table
+func (d *Sqlserver) CreateComment(tableInfo models.Board, recreate bool) error {
+	return nil
+}

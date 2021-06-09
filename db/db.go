@@ -28,6 +28,7 @@ type DBI interface {
 	EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
 	EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
 	DeleteBoard(tableName string) error
+	CreateComment(tableInfo models.Board, recreate bool) error
 }
 
 var (

@@ -86,3 +86,8 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 func (d *Postgres) DeleteBoard(tableName string) error {
 	return nil
 }
+
+// CreateComment - Create comment table
+func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
+	return nil
+}

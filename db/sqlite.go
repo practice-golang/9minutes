@@ -306,3 +306,33 @@ func (d *Sqlite) DeleteBoard(tableName string) error {
 
 	return nil
 }
+
+// CreateComment - Create comment table
+func (d *Sqlite) CreateComment(tableInfo models.Board, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"				INTEGER,
+		"BOARD_IDX"			INTEGER,
+		"CONTENT"			TEXT,
+		"WRITER_IDX"		TEXT,
+		"WRITER_NAME"		TEXT,
+		"WRITER_PASSWORD"	TEXT,
+		"REG_DTTM"			TEXT,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT")
+
+	log.Println("Sqlite/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

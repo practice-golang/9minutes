@@ -145,6 +145,7 @@
                                 <option value="title">Title</option>
                                 <option value="author">Author</option>
                                 <option value="editor">Editor</option>
+                                <option value="comment">Comment</option>
                                 <option value="input">Input Field</option>
                             </template>
                             <template v-else>
@@ -419,7 +420,7 @@
                 }
 
                 for (let k in this.boardAdd) {
-                    console.log(k, this.boardAdd[k])
+                    // console.log(k, this.boardAdd[k])
                     if ((k != "idx" && k != "fields") && (this.boardAdd[k] == 0 || this.boardAdd[k].trim() == "" || !this.boardAdd[k])) {
                         swal.fire("Empty", "Fill all.", "warning")
                         return false
@@ -465,7 +466,7 @@
                 this.boardAdd = { idx: -1, name: "", code: "", type: "", table: "", fields: [] }
             },
             async updateData() {
-                console.log(this.boardEdit)
+                // console.log(this.boardEdit)
 
                 for (let k in this.boardEdit) {
                     if ((k != "idx") && (!this.boardEdit[k] == 0 && !this.boardEdit[k])) {
@@ -492,14 +493,14 @@
                     this.getData()
                     swal.fire("Success", "Updated successfully", "success")
                     r = await response.json()
-                    console.log(r)
+                    // console.log(r)
                     return false
                 }
 
                 const status = response.status + " " + response.statusText
                 const msg = await response.text()
                 swal.fire(status, msg, "error")
-                console.log(msg)
+                // console.log(msg)
             },
             async deleteData(idx) {
                 const confirm = await swal.fire({

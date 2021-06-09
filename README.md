@@ -38,12 +38,16 @@ See `requests-admin.http` and `requests-contents.http` on `vscode` with `rest-cl
 See `html` files in `/static` as pages and `/templates` as templates
 
 
+## DB
+...
+
 ## Todo
 - [x] Search
 - [x] Edit
 - [ ] Comment
 - [ ] User auth
 - [ ] Other DB except sqlite
+- [ ] Add reg/last modified datetime, read count
 - [ ] User defined template
 - [ ] Email
 - [ ] ~~Menu~~

@@ -88,3 +88,8 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 func (d *Mysql) DeleteBoard(tableName string) error {
 	return nil
 }
+
+// CreateComment - Create comment table
+func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
+	return nil
+}
