@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/db"
@@ -64,6 +65,45 @@ func AddContentsBasicBoard(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+// UpdateContentsBasicBoard - Update contents
+func UpdateContentsBasicBoard(c echo.Context) error {
+	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
+
+	var dataMap map[string]interface{}
+	var data models.ContentsBasicBoard
+
+	err := json.Unmarshal(dataBytes, &dataMap)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	dataJSON, _ := json.Marshal(dataMap["data"])
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	sqlResult, err := db.UpdateContents(data, dataMap["table"].(string))
+	if err != nil {
+		log.Println("InsertContents: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	if db.DBType == db.SQLITE && lastID == 0 {
+		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
+	}
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
 // DeleteContentsBasicBoard - Delete contents
 func DeleteContentsBasicBoard(c echo.Context) error {
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
@@ -110,7 +150,7 @@ func GetContentsTotalPage(c echo.Context) error {
 	}
 
 	pages := uint(math.Ceil(float64(data) / float64(countPerPage)))
-	log.Println("search: ", search.Keywords, data, pages)
+	// log.Println("search: ", search.Keywords, data, pages)
 
 	result := map[string]uint{"total-page": pages}
 
@@ -165,12 +205,31 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 	lastID, _ := sqlResult.LastInsertId()
 	affRows, _ := sqlResult.RowsAffected()
 
+	if db.DBType == db.SQLITE && lastID == 0 {
+		var allData map[string]interface{}
+		_ = json.Unmarshal(dataBytes, &allData)
+		lastID, _ = strconv.ParseInt(fmt.Sprint(allData["data"].(map[string]interface{})["IDX"]), 10, 64)
+	}
+
 	result := map[string]string{
 		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
 	}
 
 	return c.JSON(http.StatusOK, result)
+}
+
+// DeleteContentsListCustomBoard - Delete contents
+func DeleteContentsListCustomBoard(c echo.Context) error {
+	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
+
+	sqlResult, err := db.DeleteContentsMAP(dataBytes)
+	if err != nil {
+		log.Println("DeleteContents custom board: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, sqlResult)
 }
 
 // GetContentsTotalPageMAP - Get total page of custom board
@@ -186,7 +245,7 @@ func GetContentsTotalPageMAP(c echo.Context) error {
 	countPerPage := count
 
 	pages := uint(math.Ceil(float64(data) / float64(countPerPage)))
-	log.Println("search: ", string(search), data, pages)
+	// log.Println("search: ", string(search), data, pages)
 
 	result := map[string]uint{"total-page": pages}
 

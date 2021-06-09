@@ -19,11 +19,12 @@
 <body>
     <div id="app">
         <h1>Custom board</h1>
-        <div v-for="c, j in columns" v-if="c.column != 'IDX'">
-            {{c.name}}
-            <textarea v-if="c.type == 'editor'" :id="c.column" class="editors"></textarea>
-            <input v-else v-model="contents[c.column]" />
-        </div>
+        <template v-for="c, j in columns" v-if="c.column != 'IDX'">
+            <div v-if="c.type == 'editor'">
+                <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
+            </div>
+            <input v-else v-model="contents[c.column]" :placeholder="c.name" />
+        </template>
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
     </div>
@@ -57,9 +58,7 @@
         },
         mounted() {
             // Parameter test
-            const link = document.location.href
-            const uri = new URL(String(link))
-
+            const uri = new URL(String(document.location.href))
             this.mode = uri.searchParams.get("mode")
             this.id = uri.searchParams.get("id")
 
@@ -67,21 +66,54 @@
                 this.contents[c.column] = ""
                 // console.log(c.column)
             })
+
+            if (this.mode == "edit" && this.id != null) {
+                this.getData()
+            }
         },
         methods: {
+            async getData() {
+                const keywords = [{ IDX: this.id }]
+
+                let columns = this.columns.map((c) => {
+                    return c.column
+                })
+
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: { count: 1 },
+                        columns: columns,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.contents = (await response.json())[0]
+                }
+            },
             async writePost() {
+                let requestMethod = "PUT"
+                // this.contents.content = await tinymce.activeEditor.getContent()
+
                 let data = {}
                 this.columns.forEach(async (c, i) => {
                     switch (true) {
                         case (c.column == "IDX"):
                             // Use only when edit
-                            console.log(this.mode)
-                            if (this.mode == "edit") {
-                                console.log("EDIT only!!")
+                            if (this.mode == "edit" && this.id != null) {
+                                requestMethod = "PATCH"
+                                data[c.column] = this.id
                             }
                             break
                         case (c.type == "editor"):
                             data[c.column] = await tinymce.activeEditor.getContent()
+                            // data[c.column] = this.contents.content
                             break
                         default:
                             data[c.column] = this.contents[c.column]
@@ -90,9 +122,10 @@
                 })
 
                 console.log(data)
+                console.log(await tinymce.activeEditor.getContent())
 
                 let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
-                    method: "PUT",
+                    method: requestMethod,
                     headers: {
                         "Accept": "application/json",
                         "Content-Type": "application/json"

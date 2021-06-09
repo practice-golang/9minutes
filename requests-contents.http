@@ -54,6 +54,22 @@ content-type: application/json
     "table": "BOARD1"
 }
 
+### Edit a content
+PATCH {{uri}}/api/basic-board/contents HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "idx": "1",
+        "title": "Post title",
+        "content": "Post text lorem ipsum",
+        "writer-idx": "-1",
+        "writer-name": "ㅇㅇ",
+        "writer-password": "1234"
+    },
+    "table": "BOARD1"
+}
+
 ### Delete a content
 DELETE {{uri}}/api/basic-board/contents HTTP/1.1
 content-type: application/json

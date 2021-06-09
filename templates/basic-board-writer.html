@@ -30,7 +30,7 @@
             <tr>
                 <td>
                     <!-- <textarea id="editor" v-model="contents.content"></textarea> -->
-                    <textarea id="editor"></textarea>
+                    <textarea id="editor" v-model="contents.content" class="editors"></textarea>
                 </td>
             </tr>
         </table>
@@ -41,7 +41,7 @@
 
 <script>
     tinymce.init({
-        selector: "textarea#editor",
+        selector: "textarea.editors",
         mode: "textareas",
         theme: "silver",
         height: "480",
@@ -60,6 +60,8 @@
             restURI: window.location.protocol + "//" + window.location.host,
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
+            mode: "",
+            id: "",
             contents: {
                 title: "",
                 content: "",
@@ -68,13 +70,47 @@
                 "writer-password": ""
             }
         },
-        mounted() { },
+        mounted() {
+            const uri = new URL(String(document.location.href))
+            this.mode = String(uri.searchParams.get("mode"))
+            this.id = String(uri.searchParams.get("id"))
+
+            if (this.mode == "edit" && this.id != null) {
+                this.getData()
+            }
+        },
         methods: {
-            async writePost() {
-                this.contents.content = await tinymce.activeEditor.getContent()
+            async getData() {
+                const keywords = [{ idx: this.id }]
 
                 let response = await fetch(this.restURI + "/api/basic-board/contents", {
-                    method: "PUT",
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: { count: 1 },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    this.contents = (await response.json())[0]
+                }
+            },
+            async writePost() {
+                let requestMethod = "PUT"
+                this.contents.content = await tinymce.activeEditor.getContent()
+
+                if (this.mode == "edit" && this.id != null) {
+                    requestMethod = "PATCH"
+                    this.contents.idx = this.id
+                }
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                    method: requestMethod,
                     headers: {
                         "Accept": "application/json",
                         "Content-Type": "application/json"

@@ -40,7 +40,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 
 ## Todo
 - [x] Search
-- [ ] Edit
+- [x] Edit
 - [ ] Comment
 - [ ] User auth
 - [ ] Other DB except sqlite

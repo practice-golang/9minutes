@@ -24,6 +24,7 @@
                     <th v-for="f, k in columns" v-if="f.type != 'editor'">
                         <span>{{f.name}}</span>
                     </th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,6 +34,7 @@
                             {{ds[c.column]}}
                         </td>
                     </template>
+                    <td><button @click="deleteData(ds['IDX'])">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -118,7 +120,7 @@
                 let columns = this.columns.map((c) => {
                     if (this.searchKeyword != "" && c.column != "IDX") {
                         let keyword = {}
-    
+
                         keyword[c.column] = this.searchKeyword
                         keywords.push(keyword)
                     }
@@ -146,6 +148,37 @@
 
                 if (response.ok) {
                     this.contents = await response.json()
+                }
+            },
+            async deleteData(idx) {
+                const confirm = await swal.fire({
+                    title: "Confirm",
+                    text: "Are you sure?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel"
+                })
+
+                if (!confirm.isConfirmed) {
+                    return false
+                }
+
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "DELETE",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: { IDX: idx },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    swal.fire("Success", "Deleted successfully", "success")
+                    this.getData()
                 }
             },
             movePage(page) {

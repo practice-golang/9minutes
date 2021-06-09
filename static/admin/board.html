@@ -29,7 +29,7 @@
 
             <!-- <button @click="setLocale('en')">English</button>&nbsp;<button @click="setLocale('ko')">한국어</button> -->
             <span></span>
-            <span>{{ $t("elem.search") }}:</span><input v-model="searchKeyword" @keyup.enter="search()" />&nbsp;<button @click="search()">{{ $t("elem.find") }}</button>
+            <input v-model="searchKeyword" @keyup.enter="search()"  :placeholder="$t('elem.search')" />&nbsp;<button @click="search()">{{ $t("elem.find") }}</button>
             <hr />
         </div>
 

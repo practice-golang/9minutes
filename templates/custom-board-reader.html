@@ -17,9 +17,10 @@
     <div id="app">
         <h1>Custom board</h1>
         <div v-for="c, j in columns" v-if="c.column != 'IDX'">
-            {{contents[c.column]}}
+            <div v-html="contents[c.column]" v-if="c.type='editor'"></div>
+            <span v-else>{{contents[c.column]}}</span>
         </div>
-        <button>Edit</button>
+        <button @click="location.href='/board?code='+boardCode+'&mode=edit&id='+id">Edit</button>
         <button @click="location.href='/board?code='+boardCode">List</button>
     </div>
 </body>
@@ -47,7 +48,6 @@
         },
         methods: {
             async getData() {
-                console.log(this.id)
                 const keywords = [{ IDX: this.id }]
 
                 let columns = this.columns.map((c) => {

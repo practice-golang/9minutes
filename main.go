@@ -144,7 +144,7 @@ func boardTemplateHandler(c echo.Context) error {
 	switch boardType {
 	case "basic-board":
 		switch mode {
-		case "write":
+		case "write", "edit":
 			content, err = fs.ReadFile(s, "templates/basic-board-writer.html")
 		case "read":
 			content, err = fs.ReadFile(s, "templates/basic-board-reader.html")
@@ -155,7 +155,7 @@ func boardTemplateHandler(c echo.Context) error {
 		contents = string(content)
 	case "custom-board":
 		switch mode {
-		case "write":
+		case "write", "edit":
 			content, err = fs.ReadFile(s, "templates/custom-board-writer.html")
 		case "read":
 			content, err = fs.ReadFile(s, "templates/custom-board-reader.html")
@@ -245,6 +245,7 @@ func setupServer() *echo.Echo {
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)
 	bb.PUT("/contents", contents.AddContentsBasicBoard)
+	bb.PATCH("/contents", contents.UpdateContentsBasicBoard)
 	bb.DELETE("/contents", contents.DeleteContentsBasicBoard)
 	bb.POST("/total-page", contents.GetContentsTotalPage)
 
@@ -252,6 +253,7 @@ func setupServer() *echo.Echo {
 	cb.POST("/contents-list", contents.GetContentsListCustomBoard)
 	cb.PUT("/contents-list", contents.AddContentsListCustomBoard)
 	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)
+	cb.DELETE("/contents-list", contents.DeleteContentsListCustomBoard)
 	cb.POST("/total-page", contents.GetContentsTotalPageMAP)
 
 	return e

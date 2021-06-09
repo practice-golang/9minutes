@@ -35,6 +35,28 @@ func InsertContents(data interface{}, table string) (sql.Result, error) {
 	return result, nil
 }
 
+// UpdateContents - Crud contents / basic-board
+func UpdateContents(data interface{}, table string) (sql.Result, error) {
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	whereEXP := goqu.Ex{"idx": data.(models.ContentsBasicBoard).Idx}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Update(table).Set(data).Where(whereEXP)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // DeleteContents - cruD contents / basic-board
 func DeleteContents(data interface{}, table string) (sql.Result, error) {
 	dbType, err := getDialect()

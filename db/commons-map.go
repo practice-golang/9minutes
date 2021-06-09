@@ -212,6 +212,42 @@ func UpdateContentsMAP(data interface{}) (sql.Result, error) {
 	return result, nil
 }
 
+// DeleteContentsMAP - cruD contents / custom-board
+func DeleteContentsMAP(data interface{}) (sql.Result, error) {
+	var err error
+	var allData map[string]interface{}
+	whereEXP := goqu.Ex{}
+
+	_ = json.Unmarshal(data.([]byte), &allData)
+
+	rcd := goqu.Record{}
+	if allData["data"] != nil {
+		for k, d := range allData["data"].(map[string]interface{}) {
+			if k == "IDX" {
+				whereEXP["IDX"] = d
+			}
+			rcd[k] = d
+		}
+	}
+
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Delete(allData["table"]).Where(whereEXP)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // SelectContentsCountMAP - data count -> pages = (data count) / (count per page)
 func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 	var result uint

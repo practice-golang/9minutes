@@ -36,7 +36,10 @@
                 <tr v-for="ds, i in contents">
                     <template v-if="i !== contentsEditIDX">
                         <td v-for="c, j in columns">{{ds[c.column]}}</td>
-                        <td><button @click="contentsEdit=Object.assign({}, ds);contentsEditIDX = i">Edit</button></td>
+                        <td>
+                            <button @click="contentsEdit=Object.assign({}, ds);contentsEditIDX = i">Edit</button>
+                            <button @click="deleteData(ds['IDX'])">Delete</button>
+                        </td>
                     </template>
                     <template v-else>
                         <td v-for="c, j in columns">
@@ -210,6 +213,37 @@
                     this.contentsEditIDX = -1
                     swal.fire("Success", "Updated successfully", "success")
                     return false
+                }
+            },
+            async deleteData(idx) {
+                const confirm = await swal.fire({
+                    title: "Confirm",
+                    text: "Are you sure?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel"
+                })
+
+                if (!confirm.isConfirmed) {
+                    return false
+                }
+
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                    method: "DELETE",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: { IDX: idx },
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    swal.fire("Success", "Deleted successfully", "success")
+                    this.getData()
                 }
             },
             movePage(page) {
