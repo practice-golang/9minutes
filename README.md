@@ -44,7 +44,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 ## Todo
 - [x] Search
 - [x] Edit
-- [ ] Comment
+- [x] Comment
 - [ ] User auth
 - [ ] Other DB except sqlite
 - [ ] Add reg/last modified datetime, read count
