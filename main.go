@@ -259,6 +259,8 @@ func setupServer() *echo.Echo {
 	a.POST("/total-page", board.GetTotalPage)
 
 	a.GET("/users", user.GetUserFields)
+	a.PUT("/users", user.AddUserFields)
+	a.PATCH("/users", user.EditUserFields)
 
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)

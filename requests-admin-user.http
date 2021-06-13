@@ -2,43 +2,8 @@
 # @uri=http://enjoytools.net:2510
 
 
-### Select one
-GET {{uri}}/api/admin/users/1 HTTP/1.1
-
-
-### Select All - Limit 10
+### Select all fields
 GET {{uri}}/api/admin/users HTTP/1.1
-
-
-### Select Data No paging, no search. listCount of /db/db.go: 3
-POST {{uri}}/api/admin/users HTTP/1.1
-content-type: application/json
-
-
-### Total page
-POST {{uri}}/api/admin/total-page HTTP/1.1
-content-type: application/json
-
-{
-    "keywords": [],
-    "options": {
-        "count": 2
-    }
-}
-
-
-### Paging - Same as below search except keywords
-POST {{uri}}/api/admin/users HTTP/1.1
-content-type: application/json
-
-{
-    "keywords": [],
-    "options": {
-        "page": 0,
-        "count": 2,
-        "order": "asc"
-    }
-}
 
 
 ### Add user fields
@@ -47,34 +12,25 @@ content-type: application/json
 
 [
     {
-        "name": "Customers Information",
-        "code": "customers",
-        "type": "user",
-        "table": "USER_FIELDS",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "AGE",
-                "name": "Age",
-                "type": "text",
-                "json": "age",
-                "order": 1
-            }
-        ]
+        "name": "Gender",
+        "code": "gender",
+        "type": "text",
+        "column": "GENDER",
+        "order": 2
     }
 ]
 
-### Modify board
-PATCH {{uri}}/api/admin/board HTTP/1.1
+### Modify user fields
+PATCH {{uri}}/api/admin/users HTTP/1.1
 content-type: application/json
 
 {
-    "idx": "5",
-    "name": "My board 3",
-    "code": "board3",
-    "type": "custom-tablelist",
-    "table": "BOARD3",
-    "fields": []
+    "idx": 2,
+    "name": "Country",
+    "code": "country",
+    "type": "text",
+    "column": "COUNTRY",
+    "order": 3
 }
 
 ### DELETE board

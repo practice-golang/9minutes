@@ -37,23 +37,22 @@
             </thead>
 
             <tbody>
-                <!-- Add board -->
                 <tr>
                     <td>Add user field:</td>
-                    <td><input v-model="boardAdd.name" /></td>
-                    <td><input v-model="boardAdd.code" /></td>
+                    <td><input v-model="columnAdd.name" /></td>
+                    <td><input v-model="columnAdd.code" /></td>
                     <td>
-                        <select v-model="boardAdd.type" @change="boardAdd.fields=[]">
+                        <select v-model="columnAdd.type" @change="columnAdd.fields=[]">
                             <option value="text">Text</option>
                             <option value="number">Number</option>
                             <option value="real">Real</option>
                         </select>
                     </td>
-                    <td><input type="text" v-model="boardAdd.table" v-uppercase /></td>
+                    <td><input type="text" v-model="columnAdd.table" v-uppercase /></td>
                     <td>..</td>
                     <td>
                         <button @click="addData()">Append</button>
-                        <button @click="clearBoardAddData()">Clear</button>
+                        <button @click="clearcolumnAddData()">Clear</button>
                     </td>
                 </tr>
                 <tr v-for="(b, i) in defaultColumns">
@@ -67,7 +66,7 @@
                 </tr>
                 <template v-for="(b, i) in columns">
                     <!-- View mode -->
-                    <tr v-if="b.idx !== boardEdit.idx">
+                    <tr v-if="b.idx !== columnEdit.idx">
                         <td>{{b.idx}}</td>
                         <td>{{b.name}}</td>
                         <td>{{b.code}}</td>
@@ -75,26 +74,26 @@
                         <td>{{b.column}}</td>
                         <td>-</td>
                         <td>
-                            <button @click="boardEdit=Object.assign({}, b)">Edit</button>
+                            <button @click="columnEdit=Object.assign({}, b)">Edit</button>
                             <button @click.stop="deleteData(b.idx)">Delete</button>
                         </td>
                     </tr>
                     <!-- Edit mode -->
                     <tr @keyup.enter="updateData()" v-else>
                         <td>{{b.idx}}</td>
-                        <td><input v-model="boardEdit.name" /></td>
-                        <td><input v-model="boardEdit.code" /></td>
+                        <td><input v-model="columnEdit.name" /></td>
+                        <td><input v-model="columnEdit.code" /></td>
                         <td>
-                            <select v-model="boardEdit.type" disabled>
+                            <select v-model="columnEdit.type" disabled>
                                 <option value="text">Text</option>
                                 <option value="number">Number</option>
                                 <option value="real">Real</option>
                             </select>
                         </td>
-                        <td><input v-model="boardEdit.table" v-uppercase /></td>
-                        <td><button @click="toggleFieldModal(i, boardEdit)" :disabled="boardEdit.type == 'basic-board'">{{ $t("elem.open") }}</button></td>
+                        <td><input v-model="columnEdit.column" v-uppercase /></td>
+                        <td></td>
                         <td>
-                            <button @click="boardEdit={}">Cancel</button>
+                            <button @click="columnEdit={}">Cancel</button>
                             <button @click="updateData()">Save</button>
                         </td>
                     </tr>
@@ -114,8 +113,8 @@
         data: {
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
             columns: [],
-            boardAdd: { idx: -1, name: "", code: "", type: "", table: "", fields: [] },
-            boardEdit: {},
+            columnAdd: { idx: -1, name: "", code: "", type: "", table: "", fields: [] },
+            columnEdit: {},
             defaultColumns: [
                 {
                     name: "Idx",
