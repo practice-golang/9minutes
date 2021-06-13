@@ -56,14 +56,23 @@
                         <button @click="clearBoardAddData()">Clear</button>
                     </td>
                 </tr>
+                <tr v-for="(b, i) in defaultColumns">
+                    <td></td>
+                    <td>{{b.name}}</td>
+                    <td>{{b.code}}</td>
+                    <td>{{b.type}}</td>
+                    <td>{{b.column}}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
                 <template v-for="(b, i) in columns">
                     <!-- View mode -->
                     <tr v-if="b.idx !== boardEdit.idx">
                         <td>{{b.idx}}</td>
-                        <td @click="location.href='/board?code='+b.code" class="link">{{b.name}}</td>
+                        <td>{{b.name}}</td>
                         <td>{{b.code}}</td>
                         <td>{{b.type}}</td>
-                        <td>{{b.table}}</td>
+                        <td>{{b.column}}</td>
                         <td>-</td>
                         <td>
                             <button @click="boardEdit=Object.assign({}, b)">Edit</button>
@@ -107,6 +116,38 @@
             columns: [],
             boardAdd: { idx: -1, name: "", code: "", type: "", table: "", fields: [] },
             boardEdit: {},
+            defaultColumns: [
+                {
+                    name: "Idx",
+                    code: "idx",
+                    type: "number",
+                    column: "IDX"
+                },
+                {
+                    name: "Name",
+                    code: "name",
+                    type: "text",
+                    column: "NAME"
+                },
+                {
+                    name: "Password",
+                    code: "password",
+                    type: "text",
+                    column: "PASSWORD"
+                },
+                {
+                    name: "Email",
+                    code: "email",
+                    type: "text",
+                    column: "PASSWORD"
+                },
+                {
+                    name: "Admin",
+                    code: "admin",
+                    type: "text",
+                    column: "ADMIN"
+                },
+            ]
         },
         mounted() {
             this.initData()
