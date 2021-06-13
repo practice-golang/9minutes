@@ -157,3 +157,8 @@ func (d *Mysql) DeleteBoard(tableName string) error {
 func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
 	return nil
 }
+
+// EditUserTableFields - Edit user table schema
+func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+	return nil
+}

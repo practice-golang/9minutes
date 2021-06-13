@@ -419,3 +419,10 @@ func (d *Sqlite) DeleteComment(tableName string) error {
 
 	return nil
 }
+
+// EditUserTableFields - Edit user table schema
+func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+	log.Println("EditUserTableFields: ", fieldsInfoOld, fieldsInfoNew)
+
+	return nil
+}

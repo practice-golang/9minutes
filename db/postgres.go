@@ -145,3 +145,8 @@ func (d *Postgres) DeleteBoard(tableName string) error {
 func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
 	return nil
 }
+
+// EditUserTableFields - Edit user table schema
+func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+	return nil
+}

@@ -64,6 +64,11 @@ func EditUserFields(c echo.Context) error {
 		log.Println("AddUserFields: ", err)
 	}
 
+	previousFieldsINTF, _ := db.SelectUserFields(models.UserColumn{})
+	previousFields := previousFieldsINTF.([]models.UserColumn)
+
+	_ = db.Dbi.EditUserTableFields(previousFields, []models.UserColumn{data})
+
 	sqlResult, err := db.UpdateUserFields(data)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"msg": string(err.Error())})

@@ -31,6 +31,7 @@ type DBI interface {
 	EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
 	DeleteBoard(tableName string) error
 	CreateComment(tableInfo models.Board, recreate bool) error
+	EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error
 }
 
 var (

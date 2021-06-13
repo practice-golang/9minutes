@@ -46,18 +46,18 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.From(UserFieldTable).Select(search)
 
-	boardResult := []models.UserColumn{}
+	fieldsResult := []models.UserColumn{}
 
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
-	err = ds.ScanStructs(&boardResult)
+	err = ds.ScanStructs(&fieldsResult)
 	if err != nil {
 		log.Println("ds: ", err.Error())
 		return nil, err
 	}
-	if boardResult != nil {
-		result = boardResult
+	if fieldsResult != nil {
+		result = fieldsResult
 	}
 
 	return result, nil
