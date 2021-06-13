@@ -25,7 +25,7 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.From(UserFieldTable).Select(search)
 
-	boardResult := []models.UserField{}
+	boardResult := []models.UserColumn{}
 
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)

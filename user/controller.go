@@ -27,7 +27,7 @@ func AddUserFields(c echo.Context) error {
 func GetUserFields(c echo.Context) error {
 	var err error
 
-	dataINTF, err := db.SelectUserFields(models.UserField{})
+	dataINTF, err := db.SelectUserFields(models.UserColumn{})
 	if err != nil {
 		log.Println("SelectUserFields: ", err)
 	}
