@@ -1,0 +1,407 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <meta name="google" content="notranslate">
+
+    <!-- <script src="js/vue.min.js"></script> -->
+    <script src="/assets/js/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>User field</h1>
+
+            <select v-model="page.countPerPage" @change="page.current=1; getData()">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="40">40</option>
+                <option value="80">80</option>
+            </select>
+
+            <!-- <button @click="setLocale('en')">English</button>&nbsp;<button @click="setLocale('ko')">한국어</button> -->
+            <span></span>
+            <input v-model="searchKeyword" @keyup.enter="search()"  :placeholder="$t('elem.search')" />&nbsp;<button @click="search()">{{ $t("elem.find") }}</button>
+            <hr />
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <!-- <th @click="changeOrder()"><a href="javascript:">{{ $t("table.order") }}</a></th> -->
+                    <th @click="changeOrder()"><a href="javascript:">Idx</a></th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Field name</th>
+                    <th>Order</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <!-- Add board -->
+                <tr>
+                    <td>{{ $t("elem.addboard") }}:</td>
+                    <td><input v-model="boardAdd.name" /></td>
+                    <td><input v-model="boardAdd.code" /></td>
+                    <td>
+                        <select v-model="boardAdd.type" @change="boardAdd.fields=[]">
+                            <option value="basic-board">Basic board</option>
+                            <option value="custom-board">Custom board</option>
+                            <option value="custom-tablelist">Custom table list</option>
+                        </select>
+                    </td>
+                    <td><input type="text" v-model="boardAdd.table" v-uppercase /></td>
+                    <td><button @click="toggleFieldModal(undefined, boardAdd.fields)" :disabled="boardAdd.type == 'basic-board' || boardAdd.type == ''">{{ $t("elem.open") }}</button></td>
+                    <td>
+                        <button @click="addData()">{{ $t("elem.add") }}</button>
+                        <button @click="clearBoardAddData()">{{ $t("elem.clear") }}</button>
+                    </td>
+                </tr>
+                <template v-for="(b, i) in boards">
+                    <!-- View mode -->
+                    <tr v-if="b.idx !== boardEdit.idx">
+                        <td>{{b.idx}}</td>
+                        <td @click="location.href='/board?code='+b.code" class="link">{{b.name}}</td>
+                        <td>{{b.code}}</td>
+                        <td>{{b.type}}</td>
+                        <td>{{b.table}}</td>
+                        <td><button @click="copyToAddBoard(b)">{{ $t("elem.copytoadd") }}</button></td>
+                        <td>
+                            <button @click="boardEdit=Object.assign({}, b)">{{ $t("elem.edit") }}</button>
+                            <button @click.stop="deleteData(b.idx)">{{ $t("elem.delete") }}</button>
+                        </td>
+                    </tr>
+                    <!-- Edit mode -->
+                    <tr @keyup.enter="updateData()" v-else>
+                        <td>{{b.idx}}</td>
+                        <td><input v-model="boardEdit.name" /></td>
+                        <td><input v-model="boardEdit.code" /></td>
+                        <td>
+                            <select v-model="boardEdit.type" disabled>
+                                <option value="basic-board">Basic board</option>
+                                <option value="custom-board">Custom board</option>
+                                <option value="custom-tablelist">Custom table list</option>
+                            </select>
+                        </td>
+                        <td><input v-model="boardEdit.table" v-uppercase /></td>
+                        <td><button @click="toggleFieldModal(i, boardEdit)" :disabled="boardEdit.type == 'basic-board'">{{ $t("elem.open") }}</button></td>
+                        <td>
+                            <button @click="boardEdit={}">{{ $t("elem.cancel") }}</button>
+                            <button @click="updateData()">{{ $t("elem.save") }}</button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <template v-for="i in page.total">
+            <template v-if="i == page.current">
+                &nbsp;<span><b>{{i}}</b></span>&nbsp;
+            </template>
+            <template v-else>
+                &nbsp;<a href="javascript:" @click="movePage(i)">{{i}}</a>&nbsp;
+            </template>
+        </template>
+
+        <!-- Field Modal -->
+        <div v-if="fieldModalOpen" class="modal-mask"></div>
+        <div v-if="fieldModalOpen" class="modal">
+            <button @click="toggleFieldModal(boardEdit.idx, boardEdit)">Close</button>
+            <article v-if="!(boardEdit.idx > -1)">
+                IDX will be created automatically
+            </article>
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Idx</th>
+                    <th>Name</th>
+                    <th>Column</th>
+                    <th>JSON</th>
+                    <th>Type</th>
+                    <th>Order</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td>New field:</td>
+                    <td>{{nextFieldIdx}}</td>
+                    <td><input v-model="fieldAdd.name" /></td>
+                    <td><input v-model="fieldAdd.column" v-uppercase /></td>
+                    <td><input v-model="fieldAdd.json" /></td>
+                    <td>
+                        <select v-model="fieldAdd.type">
+                            <template v-if="isCustomBoard">
+                                <option value="title">Title</option>
+                                <option value="author">Author</option>
+                                <option value="editor">Editor</option>
+                                <option value="comment">Comment</option>
+                                <option value="input">Input Field</option>
+                            </template>
+                            <template v-else>
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="real">Real</option>
+                            </template>
+                        </select>
+                    </td>
+                    <!-- <td><input v-model="fieldAdd.fields" /></td> -->
+                    <td>{{nextFieldOrder}}</td>
+                    <td><button @click="addField()">Add field</button></td>
+                </tr>
+                <tr>
+                    <td>Cannot Edit</td>
+                    <td>-</td>
+                    <td>Idx</td>
+                    <td>IDX</td>
+                    <td>idx</td>
+                    <td>number</td>
+                    <td>1</td>
+                </tr>
+
+                <tr v-for="(f, k) in modalFields">
+                    <template v-if="k !== fieldEditIDX">
+                        <td></td>
+                        <td>{{f.idx}}</td>
+                        <td>{{f.name}}</td>
+                        <td>{{f.column}}</td>
+                        <td>{{f.json}}</td>
+                        <td>{{f.type}}</td>
+                        <td>{{f.order}}</td>
+                        <td>
+                            <button @click="fieldOrig=Object.assign({}, f);fieldEditIDX=k">Edit</button>
+                            <button @click="deleteField(k)">Delete</button>
+                            <button @click="moveUpField(k)">↑</button>
+                            <button @click="moveDownField(k)">↓</button>
+                        </td>
+                    </template>
+                    <template v-else>
+                        <td></td>
+                        <td>{{f.idx}}</td>
+                        <td><input v-model="f.name" /></td>
+                        <td><input v-model="f.column" v-uppercase /></td>
+                        <td><input v-model="f.json" /></td>
+                        <td>{{f.type}}</td>
+                        <td>{{f.order}}</td>
+                        <td>
+                            <button @click="boardEdit.fields[k]=Object.assign({}, fieldOrig);fieldOrig={};fieldEditIDX = -1">Cancel</button>
+                            <button @click="fieldEditIDX = -1">Save</button>
+                        </td>
+                    </template>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+<script>
+    const messages = {
+        en: {
+            table: {
+            },
+            elem: {
+                addboard: "Add board",
+                search: "Search",
+                find: "Find",
+                add: "Add",
+                edit: "Edit",
+                delete: "Delete",
+                cancel: "Cancel",
+                save: "Save",
+                open: "Open",
+                copytoadd: "Copy to add board",
+                clear: "Clear",
+            },
+            modal: {
+                close: "Close",
+            }
+        },
+        ko: {
+            table: {
+                order: "순번",
+                boardname: "게시판 이름",
+                boardcode: "게시판 코드",
+                boardtype: "게시판 유형",
+                tablename: "테이블 이름",
+                fields: "필드",
+                copy: "복사",
+            },
+            elem: {
+                addboard: "게시판 추가",
+                search: "검색",
+                find: "찾기",
+                add: "추가",
+                edit: "수정",
+                delete: "삭제",
+                cancel: "취소",
+                save: "저장",
+                open: "열기",
+                copytoadd: "게시판 추가에 복사",
+                clear: "비우기",
+            },
+            modal: {
+                close: "닫기",
+            }
+        }
+    }
+
+    const i18n = new VueI18n({
+        locale: 'en',
+        messages,
+    })
+
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        i18n,
+        el: "#app",
+        data: {
+            // restURI: "http://localhost:2918",
+            // restURI: window.location.protocol + "//" + window.location.host + window.location.pathname + "api/admin",
+            restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
+            page: {
+                current: 1,
+                total: 1,
+                countPerPage: 20,
+                order: "desc",
+            },
+            boards: [],
+            searchKeyword: "",
+            fieldModalOpen: false,
+            boardAdd: { idx: -1, name: "", code: "", type: "", table: "", fields: [] },
+            boardEdit: {},
+            modalFields: [],
+            fieldAdd: {},
+            // fieldAdd: { name: "", json: "", type: "", order: -1, },
+            fieldEditIDX: -1,
+            fieldOrig: {},
+        },
+        mounted() {
+            this.initData()
+        },
+        directives: {
+            uppercase: {
+                update: function (el) {
+                    el.value = el.value.toUpperCase()
+                    el.dispatchEvent(new Event('input'))
+                }
+            }
+        },
+        computed: {
+            nextFieldOrder() { return this.modalFields.length + 2 },
+            nextFieldIdx() {
+                if (this.modalFields.length > 0) {
+                    let fields = this.modalFields.slice()
+                    fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
+
+                    return fields[fields.length - 1].idx + 1
+                }
+
+                return 1
+            },
+            isCustomBoard() {
+                return (
+                    (this.fieldEditIDX > -1 && this.boardEdit.type == 'custom-board')
+                    || (this.fieldEditIDX == -1 && this.boardAdd.type == 'custom-board')
+                )
+            }
+        },
+        methods: {
+            setLocale(lang) { i18n.locale = lang },
+            initData() { this.getData() },
+            async getData() {
+                let keywords = []
+
+                let response = await fetch(this.restURI + "/user", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "keywords": keywords,
+                        "options": {
+                            "page": this.page.current - 1,
+                            "count": this.page.countPerPage,
+                            "order": this.page.order,
+                        }
+                    })
+                })
+                if (response.ok) {
+                    this.boards = await response.json()
+                }
+            },
+        }
+    })
+</script>
+
+<style>
+    * {
+        font-size: 0.9em;
+    }
+
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+
+    table {
+        table-layout: fixed;
+        text-align: unset;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td.link {
+        cursor: pointer;
+    }
+
+    td.link:hover {
+        text-decoration: underline;
+    }
+
+    tbody>tr:hover {
+        background: #FFD3D3;
+    }
+
+    .modal-mask {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        z-index: 200;
+        opacity: 0.7;
+    }
+
+    .modal {
+        position: absolute;
+        top: 10%;
+        left: 10%;
+        width: 80%;
+        /* max-width: 1300px; */
+        height: 80%;
+        background-color: snow;
+        z-index: 210;
+        overflow: auto;
+    }
+</style>
+
+</html>

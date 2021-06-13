@@ -25,6 +25,7 @@ import (
 	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/contents"
 	"github.com/practice-golang/9minutes/db"
+	"github.com/practice-golang/9minutes/user"
 )
 
 var (
@@ -49,7 +50,7 @@ func setupDB() error {
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/",
 			info.User, info.Password, info.Server, info.Port)
 		db.DatabaseName = info.Database
-		db.TableName = db.DatabaseName + "." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
 	case "postgres":
 		db.DBType = db.POSTGRES
 
@@ -72,13 +73,13 @@ func setupDB() error {
 			info.Server, info.Port, info.User, info.Password, info.Database)
 
 		db.DatabaseName = info.Schema
-		db.TableName = db.DatabaseName + "." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
 	case "sqlserver":
 		db.DBType = db.SQLSERVER
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 			info.User, info.Password, info.Server, info.Port, info.Database)
 		db.DatabaseName = info.Database
-		db.TableName = db.DatabaseName + ".dbo." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + ".dbo." + db.BoardManagerTable
 	default:
 		log.Fatal("nothing to support DB")
 	}
@@ -89,9 +90,17 @@ func setupDB() error {
 	}
 
 	recreate := false
-	err = db.Dbi.CreateTable(recreate)
+	err = db.Dbi.CreateBoardManagerTable(recreate)
 	if err != nil {
-		log.Fatal("CreateTable: ", err)
+		log.Fatal("Create Board manager Table: ", err)
+	}
+	err = db.Dbi.CreateUserFieldTable(recreate)
+	if err != nil {
+		log.Fatal("Create User manager Table: ", err)
+	}
+	err = db.Dbi.CreateUserTable(recreate)
+	if err != nil {
+		log.Fatal("Create User manager Table: ", err)
 	}
 
 	return err
@@ -227,9 +236,15 @@ func setupServer() *echo.Echo {
 			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): "/static/admin/$1.html",
 		},
 	})
+	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): "/static/users/$1.html",
+		},
+	})
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/static/$1"})
 
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
+	e.GET("/users/*", contentHandler, contentRewriteUsers)
 	e.GET("/*", contentHandler, contentRewrite)
 
 	e.GET("/board", boardTemplateHandler)
@@ -242,6 +257,8 @@ func setupServer() *echo.Echo {
 	a.PATCH("/board", board.EditBoard)
 	a.DELETE("/board/:idx", board.DeleteBoard)
 	a.POST("/total-page", board.GetTotalPage)
+
+	a.GET("/users", user.GetUserFields)
 
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)

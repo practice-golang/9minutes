@@ -43,7 +43,7 @@ func InsertData(data interface{}) (sql.Result, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(TableName).Rows(data)
+	ds := dbms.Insert(BoardManagerTable).Rows(data)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -66,7 +66,7 @@ func SelectData(search interface{}) (interface{}, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(TableName).Select(search)
+	ds := dbms.From(BoardManagerTable).Select(search)
 
 	boardResult := []models.Board{}
 
@@ -142,7 +142,7 @@ func UpdateData(data interface{}) (sql.Result, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(TableName).Set(data).Where(whereEXP)
+	ds := dbms.Update(BoardManagerTable).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -164,7 +164,7 @@ func DeleteData(target, value string) (sql.Result, error) {
 	whereEXP := goqu.Ex{target: value}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(TableName).Where(whereEXP)
+	ds := dbms.Delete(BoardManagerTable).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -186,7 +186,7 @@ func SelectCount(search interface{}) (uint, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(TableName).Select(goqu.COUNT("*").As("PAGE_COUNT"))
+	ds := dbms.From(BoardManagerTable).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 
 	switch search := search.(type) {
 	case models.BoardSearch:

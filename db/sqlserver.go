@@ -27,8 +27,8 @@ func (d *Sqlserver) CreateDB() error {
 	return nil
 }
 
-// CreateTable - Create table
-func (d *Sqlserver) CreateTable(recreate bool) error {
+// CreateBoardManagerTable - Create board manager table
+func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 	sql := `
 	USE master
 	-- GO
@@ -56,7 +56,7 @@ func (d *Sqlserver) CreateTable(recreate bool) error {
 		`
 
 		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
 
 		_, err := Dbo.Exec(sql)
 		if err != nil {
@@ -77,7 +77,94 @@ func (d *Sqlserver) CreateTable(recreate bool) error {
 	--GO`
 
 	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
+
+	_, err = Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserTable - Create user table
+func (d *Sqlserver) CreateUserTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"			INTEGER,
+		"NAME"			TEXT,
+		"CODE"			TEXT,
+		"TYPE"			TEXT,
+		"FIELD_NAME"	TEXT UNIQUE,
+		"ORDER"			INTEGER,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserFieldTable - Create user manager table
+func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
+	sql := `
+	USE master
+	-- GO
+
+	IF NOT EXISTS(
+		SELECT name
+		FROM sys.databases
+		WHERE name=N'#DATABASE'
+	)
+	CREATE DATABASE [#DATABASE]
+	-- GO
+	`
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	if recreate {
+		sql = `USE #DATABASE`
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE #TABLE_NAME
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE #DATABASE`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE #TABLE_NAME (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		NAME VARCHAR(128) NOT NULL,
+		PRICE DECIMAL(10,2) NOT NULL,
+		AUTHOR VARCHAR(128) NOT NULL,
+		ISBN VARCHAR(128) NOT NULL UNIQUE,
+	)
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
 
 	_, err = Dbo.Exec(sql)
 	if err != nil {

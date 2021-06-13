@@ -3,7 +3,7 @@
 
 
 ### Select one
-GET {{uri}}/api/admin/board/1 HTTP/1.1
+GET {{uri}}/api/admin/board/2 HTTP/1.1
 
 
 ### Select All - Limit 10

@@ -22,7 +22,9 @@ const (
 type DBI interface {
 	initDB() (*sql.DB, error)
 	CreateDB() error
-	CreateTable(bool) error
+	CreateBoardManagerTable(recreate bool) error
+	CreateUserFieldTable(recreate bool) error
+	CreateUserTable(recreate bool) error
 	CreateBasicBoard(tableInfo models.Board, recreate bool) error
 	CreateCustomBoard(tableInfo models.Board, fields []models.Field, recreate bool) error
 	EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
@@ -32,16 +34,18 @@ type DBI interface {
 }
 
 var (
-	Dbi          DBI    // DB Object Interface
-	Dsn          string // Data Source Name
-	DatabaseName = "9minutes"
-	TableName    = "BOARDS"
-	Dbo          *sql.DB
-	DBType       int
-	UpdateScope  []string     // UPDATE ... WHERE IDX=?
-	IgnoreScope  []string     // Ignore if nil or null
-	listCount    uint     = 3 // Default list count
-	OrderScope   string       // Default order column name
+	Dbi               DBI    // DB Object Interface
+	Dsn               string // Data Source Name
+	DatabaseName      = "9minutes"
+	BoardManagerTable = "BOARD_TABLES"
+	UserFieldTable    = "USER_FIELDS"
+	UserTable         = "USERS"
+	Dbo               *sql.DB
+	DBType            int
+	UpdateScope       []string     // UPDATE ... WHERE IDX=?
+	IgnoreScope       []string     // Ignore if nil or null
+	listCount         uint     = 3 // Default list count
+	OrderScope        string       // Default order column name
 )
 
 // InitDB - Prepare DB

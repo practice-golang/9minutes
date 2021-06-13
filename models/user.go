@@ -5,13 +5,14 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// User - (Minimal) User data
-type User struct {
-	Idx      null.String `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
-	UserID   null.String `json:"user-id" db:"USER_ID"`
-	Password null.String `json:"password" db:"PASSWORD"`
-	Name     null.String `json:"name" db:"NAME"`
-	Email    null.String `json:"email" db:"EMAIL"`
+// UserField - Fields for user table
+type UserField struct {
+	Idx        null.Int    `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
+	Name       null.String `json:"name" db:"NAME"`
+	Code       null.String `json:"code" db:"CODE"`
+	Type       null.String `json:"type" db:"TYPE"`
+	ColumnName null.String `json:"column" db:"FIELD_NAME"`
+	Order      null.Int    `json:"order" db:"ORDER"`
 }
 
 // Token - JWT token

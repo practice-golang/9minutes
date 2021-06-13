@@ -35,8 +35,35 @@ func (d *Postgres) CreateDB() error {
 	return nil
 }
 
-// CreateTable - Create table
-func (d *Postgres) CreateTable(recreate bool) error {
+// CreateUserTable - Create user table
+func (d *Postgres) CreateUserTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"			INTEGER,
+		"NAME"			TEXT,
+		"CODE"			TEXT,
+		"TYPE"			TEXT,
+		"FIELD_NAME"	TEXT UNIQUE,
+		"ORDER"			INTEGER,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateBoardManagerTable - Create board manager table
+func (d *Postgres) CreateBoardManagerTable(recreate bool) error {
 	sql := `CREATE SCHEMA IF NOT EXISTS #SCHEMA_NAME;`
 
 	if recreate {
@@ -52,7 +79,34 @@ func (d *Postgres) CreateTable(recreate bool) error {
 	);`
 
 	sql = strings.ReplaceAll(sql, "#SCHEMA_NAME", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserFieldTable - Create user manager table
+func (d *Postgres) CreateUserFieldTable(recreate bool) error {
+	sql := `CREATE SCHEMA IF NOT EXISTS #SCHEMA_NAME;`
+
+	if recreate {
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		"IDX" SERIAL PRIMARY KEY,
+		"NAME" VARCHAR(128) NULL DEFAULT NULL,
+		"PRICE" NUMERIC(10,2) NULL DEFAULT NULL,
+		"AUTHOR" VARCHAR(128) NULL DEFAULT NULL,
+		"ISBN" VARCHAR(13) UNIQUE NULL DEFAULT NULL
+	);`
+
+	sql = strings.ReplaceAll(sql, "#SCHEMA_NAME", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {

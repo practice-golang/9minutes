@@ -30,8 +30,8 @@ func (d *Sqlite) CreateDB() error {
 	return nil
 }
 
-// CreateTable - Create table
-func (d *Sqlite) CreateTable(recreate bool) error {
+// CreateBoardManagerTable - Create board manager table
+func (d *Sqlite) CreateBoardManagerTable(recreate bool) error {
 	sql := ""
 	if recreate {
 		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
@@ -47,7 +47,60 @@ func (d *Sqlite) CreateTable(recreate bool) error {
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserFieldTable - Create user manager table
+func (d *Sqlite) CreateUserFieldTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"			INTEGER,
+		"NAME"			TEXT,
+		"CODE"			TEXT,
+		"TYPE"			TEXT,
+		"FIELD_NAME"	TEXT UNIQUE,
+		"ORDER"			INTEGER,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserTable - Create user table
+func (d *Sqlite) CreateUserTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"				INTEGER,
+		"NAME"				TEXT UNIQUE,
+		"PASSWORD"			TEXT,
+		"EMAIL"				TEXT UNIQUE,
+		"ADMIN"				TEXT,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
