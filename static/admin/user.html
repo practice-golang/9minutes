@@ -224,7 +224,25 @@
                 this.columnAdd = {}
             },
             async updateColumn() {
-                console.log(this.columnEdit)
+                let response = await fetch(this.restURI + "/users", {
+                    method: "PATCH",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "idx": this.columnEdit.idx,
+                        "name": this.columnEdit.name,
+                        "code": this.columnEdit.code,
+                        "type": this.columnEdit.type,
+                        "column": this.columnEdit.column,
+                        "order": this.columnEdit.order,
+                    })
+                })
+                if (response.ok) {
+                    this.columnEdit = {}
+                    this.getColumns()
+                }
             },
             async deleteColumn(idx) {
                 let keywords = []

@@ -19,10 +19,10 @@ content-type: application/json
         "order": 6
     },
     {
-        "name": "Ages",
-        "code": "ages",
+        "name": "Age",
+        "code": "age",
         "type": "text",
-        "column": "AGES",
+        "column": "AGE",
         "order": 7
     },
     {
