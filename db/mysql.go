@@ -114,7 +114,7 @@ func (d *Mysql) CreateUserTable(recreate bool) error {
 		"NAME"			TEXT,
 		"CODE"			TEXT,
 		"TYPE"			TEXT,
-		"FIELD_NAME"	TEXT UNIQUE,
+		"COLUMN_NAME"	TEXT UNIQUE,
 		"ORDER"			INTEGER,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`

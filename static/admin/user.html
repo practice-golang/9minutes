@@ -48,8 +48,8 @@
                             <option value="real">Real</option>
                         </select>
                     </td>
-                    <td><input type="text" v-model="columnAdd.table" v-uppercase /></td>
-                    <td>..</td>
+                    <td><input type="text" v-model="columnAdd.column" v-uppercase /></td>
+                    <td>{{nextFieldIdx}}</td>
                     <td>
                         <button @click="addColumn()">Append</button>
                         <button @click="clearcolumnAddData()">Clear</button>
@@ -169,7 +169,20 @@
                 }
             }
         },
-        computed: {},
+        computed: {
+            nextFieldIdx() {
+                if (this.columns.length > 0) {
+                    let fields = this.columns.slice()
+                    fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
+
+                    console.log(fields[fields.length - 1], fields.length - 1)
+
+                    return fields[fields.length - 1].order + 1
+                }
+
+                return 6
+            },
+        },
         methods: {
             initData() { this.getColumns() },
             async getColumns() {
@@ -187,6 +200,8 @@
                 }
             },
             async addColumn() {
+                this.columnAdd.order = this.nextFieldIdx
+
                 let response = await fetch(this.restURI + "/users", {
                     method: "PUT",
                     headers: {
@@ -204,7 +219,7 @@
                     ])
                 })
                 if (response.ok) {
-                    this.columns = await response.json()
+                    this.getColumns()
                 }
             },
             async updateColumn() {

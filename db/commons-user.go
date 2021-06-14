@@ -47,7 +47,7 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(UserFieldTable).Select(models.UserColumn{})
+	ds := dbms.From(UserFieldTable).Select(search)
 
 	ex := PrepareWhere(search)
 	if !ex.IsEmpty() {
