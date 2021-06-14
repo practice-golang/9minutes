@@ -16,21 +16,21 @@ content-type: application/json
         "code": "gender",
         "type": "text",
         "column": "GENDER",
-        "order": 1
+        "order": 6
     },
     {
         "name": "Ages",
         "code": "ages",
         "type": "text",
         "column": "AGES",
-        "order": 2
+        "order": 7
     },
     {
         "name": "Blood",
         "code": "blood",
         "type": "text",
         "column": "BLOOD",
-        "order": 3
+        "order": 8
     }
 ]
 
@@ -44,7 +44,7 @@ content-type: application/json
         "code": "job",
         "type": "text",
         "column": "JOB",
-        "order": 6
+        "order": 9
     }
 ]
 
