@@ -160,7 +160,7 @@ func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
 }
 
 // EditUserTableFields - Edit user table schema
-func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
 	return nil
 }
 

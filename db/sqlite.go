@@ -3,12 +3,14 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/practice-golang/9minutes/models"
+	"github.com/thoas/go-funk"
 	// _ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
 )
 
@@ -439,7 +441,7 @@ func (d *Sqlite) AddUserTableFields(fields []models.UserColumn) error {
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
-	log.Println("Sqlite/EditUserTableFields: ", sql)
+	log.Println("Sqlite/AddUserTableFields: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
@@ -450,8 +452,7 @@ func (d *Sqlite) AddUserTableFields(fields []models.UserColumn) error {
 }
 
 // EditUserTableFields - Edit user table schema
-func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
-
+func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
 	add, remove, modify := diffUserTableFields(fieldsInfoOld, fieldsInfoNew)
 	log.Println("User fields Add: ", add)
 	log.Println("User fields Remove: ", remove)
@@ -461,7 +462,7 @@ func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsIn
 	if len(add) > 0 {
 		for _, a := range add {
 			sql += `ALTER TABLE "#TABLE_NAME" `
-			sql += ` ADD COLUMN ` + a.ColumnName.String + ` `
+			sql += ` ADD COLUMN "` + a.ColumnName.String + `" `
 			switch a.Type.String {
 			case "text":
 				sql += ` TEXT`
@@ -475,7 +476,7 @@ func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsIn
 		}
 	}
 
-	if len(remove) > 0 {
+	if len(remove) > 0 && !funk.Contains(notUse, "remove") {
 		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
 		for _, r := range remove {
 			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
@@ -487,26 +488,32 @@ func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsIn
 	}
 
 	if len(modify) > 0 {
-		sqlModify := `ALTER TABLE "#TABLE_NAME" `
+		sqlModify := ""
 		for _, nm := range modify {
 			for _, om := range fieldsInfoOld {
 				if nm.Idx.Int64 == om.Idx.Int64 {
 					if nm.ColumnName.String != om.ColumnName.String {
-						sqlModify += ` RENAME COLUMN ` + om.ColumnName.String + ` TO ` + nm.ColumnName.String + `, `
+						sqlModify += `ALTER TABLE "#TABLE_NAME" `
+						sqlModify += ` RENAME COLUMN "` + om.ColumnName.String + `" TO "` + nm.ColumnName.String + `"; `
 					}
 					break
 				}
 			}
 		}
-		if strings.Contains(sqlModify, "RENAME COLUMN") {
-			sqlModify = sqlModify[:len(sqlModify)-2]
-		}
-		sql += sqlModify + `; `
+		sql += sqlModify
 	}
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
 	log.Println("Sqlite/EditUserTableFields: ", sql)
+
+	if sql == "" {
+		if len(modify) > 0 {
+			return nil
+		} else {
+			return errors.New("nothing to change")
+		}
+	}
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
@@ -523,21 +530,21 @@ func diffUserTableFields(fieldsInfoOld, fieldsInfoNew []models.UserColumn) (add,
 	new := fieldsInfoNew
 
 	for i := 0; i < 2; i++ {
-		for _, fi1 := range old {
+		for _, s1 := range old {
 			found := false
-			for _, fi2 := range new {
-				if fi1.Idx == fi2.Idx {
-					if i == 0 && !cmp.Equal(fi1, fi2) {
-						modify = append(modify, fi2)
+			for _, s2 := range new {
+				if s1.Idx == s2.Idx {
+					if i == 0 && !cmp.Equal(s1, s2) {
+						modify = append(modify, s2)
 					}
-				}
 
-				found = true
-				break
+					found = true
+					break
+				}
 			}
 
 			if !found {
-				diff = append(diff, fi1)
+				diff = append(diff, s1)
 			}
 		}
 

@@ -148,7 +148,7 @@ func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
 }
 
 // EditUserTableFields - Edit user table schema
-func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
 	return nil
 }
 

@@ -60,7 +60,7 @@ func GetUserFields(c echo.Context) error {
 // EditUserFields - Modify user fields
 func EditUserFields(c echo.Context) error {
 	var err error
-	var data models.UserColumn
+	var data []models.UserColumn
 
 	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
 
@@ -72,7 +72,10 @@ func EditUserFields(c echo.Context) error {
 	previousFieldsINTF, _ := db.SelectUserFields(models.UserColumn{})
 	previousFields := previousFieldsINTF.([]models.UserColumn)
 
-	_ = db.Dbi.EditUserTableFields(previousFields, []models.UserColumn{data})
+	err = db.Dbi.EditUserTableFields(previousFields, data, []string{"remove"})
+	if err != nil {
+		return c.JSON(http.StatusOK, map[string]string{"msg": string(err.Error())})
+	}
 
 	sqlResult, err := db.UpdateUserFields(data)
 	if err != nil {

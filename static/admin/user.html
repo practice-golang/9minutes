@@ -69,6 +69,12 @@
                         <hr />
                     </td>
                 </tr>
+                <tr>
+                    <td colspan=6></td>
+                    <td>
+                        <button @click="updateOrder()">Update Order</button>
+                    </td>
+                </tr>
                 <template v-for="(b, i) in columns">
                     <!-- View mode -->
                     <tr v-if="b.idx !== columnEdit.idx">
@@ -81,6 +87,8 @@
                         <td>
                             <button @click="columnEdit=Object.assign({}, b)">Edit</button>
                             <button @click.stop="deleteColumn(b.idx)">Delete</button>
+                            <button @click="moveUpColumn(i)">↑</button>
+                            <button @click="moveDownColumn(i)">↓</button>
                         </td>
                     </tr>
                     <!-- Edit mode -->
@@ -173,7 +181,7 @@
             nextFieldIdx() {
                 if (this.columns.length > 0) {
                     let fields = this.columns.slice()
-                    fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
+                    fields.sort((first, second) => (first.order > second.order) ? 1 : ((second.order > first.order) ? -1 : 0))
 
                     return fields[fields.length - 1].order + 1
                 }
@@ -195,6 +203,7 @@
                 })
                 if (response.ok) {
                     this.columns = await response.json()
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
                 }
             },
             async addColumn() {
@@ -230,14 +239,16 @@
                         "Accept": "application/json",
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        "idx": this.columnEdit.idx,
-                        "name": this.columnEdit.name,
-                        "code": this.columnEdit.code,
-                        "type": this.columnEdit.type,
-                        "column": this.columnEdit.column,
-                        "order": this.columnEdit.order,
-                    })
+                    body: JSON.stringify([
+                        {
+                            "idx": this.columnEdit.idx,
+                            "name": this.columnEdit.name,
+                            "code": this.columnEdit.code,
+                            "type": this.columnEdit.type,
+                            "column": this.columnEdit.column,
+                            "order": this.columnEdit.order,
+                        }
+                    ])
                 })
                 if (response.ok) {
                     this.columnEdit = {}
@@ -250,6 +261,34 @@
                 let response = await fetch(this.restURI + "/users/" + idx, { method: "DELETE" })
                 if (response.ok) {
                     this.getColumns()
+                }
+            },
+            async updateOrder() {
+                let response = await fetch(this.restURI + "/users", {
+                    method: "PATCH",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(this.columns)
+                })
+                if (response.ok) {
+                    this.columnEdit = {}
+                    this.getColumns()
+                }
+            },
+            moveUpColumn(idx) {
+                if (idx > 0) {
+                    this.columns[idx].order -= 1
+                    this.columns[idx - 1].order += 1
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+                }
+            },
+            moveDownColumn(idx) {
+                if (idx < this.columns.length - 1) {
+                    this.columns[idx].order += 1
+                    this.columns[idx + 1].order -= 1
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
                 }
             },
         }

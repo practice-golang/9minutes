@@ -206,7 +206,7 @@ func (d *Sqlserver) CreateComment(tableInfo models.Board, recreate bool) error {
 }
 
 // EditUserTableFields - Edit user table schema
-func (d *Sqlserver) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+func (d *Sqlserver) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
 	return nil
 }
 

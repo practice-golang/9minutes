@@ -78,28 +78,33 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 
 // UpdateUserFields - crUd
 func UpdateUserFields(data interface{}) (sql.Result, error) {
+	var result sql.Result
+
 	dbType, err := getDialect()
 	if err != nil {
 		log.Println("ERR Select DBType: ", err)
 	}
 
-	log.Println("WTF??? ", data.(models.UserColumn))
-
-	whereEXP, err := CheckValidAndPrepareWhere(data)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("WTF??? ", whereEXP)
+	log.Println("WTF??????")
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(UserFieldTable).Set(data).Where(whereEXP)
-	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	// var ex goqu.Ex
+	for _, d := range data.([]models.UserColumn) {
+		ex, err := CheckValidAndPrepareWhere(d)
+		if err != nil {
+			log.Println("UpdateUserFields where: ", err)
+			return nil, err
+		}
 
-	result, err := Dbo.Exec(sql)
-	if err != nil {
-		return nil, err
+		ds := dbms.Update(UserFieldTable).Set(d).Where(ex)
+
+		sql, args, _ := ds.ToSQL()
+		log.Println(sql, args)
+
+		result, err = Dbo.Exec(sql)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return result, nil

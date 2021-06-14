@@ -52,14 +52,24 @@ content-type: application/json
 PATCH {{uri}}/api/admin/users HTTP/1.1
 content-type: application/json
 
-{
-    "idx": 23,
-    "name": "Hobby",
-    "code": "hobby",
-    "type": "text",
-    "column": "HOBBY",
-    "order": 5
-}
+[
+    {
+        "idx": 3,
+        "name": "Home",
+        "code": "home",
+        "type": "text",
+        "column": "HOME",
+        "order": 18
+    },
+    {
+        "idx": 4,
+        "name": "Hobby",
+        "code": "hobby",
+        "type": "text",
+        "column": "HOBBY",
+        "order": 19
+    }
+]
 
 ### DELETE board
 DELETE {{uri}}/api/admin/users/18 HTTP/1.1

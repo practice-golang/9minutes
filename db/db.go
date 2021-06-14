@@ -32,7 +32,7 @@ type DBI interface {
 	DeleteBoard(tableName string) error
 	CreateComment(tableInfo models.Board, recreate bool) error
 	AddUserTableFields(fields []models.UserColumn) error
-	EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error
+	EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error
 	DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error
 }
 
