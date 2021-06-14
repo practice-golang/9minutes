@@ -212,7 +212,7 @@ func (d *Sqlite) EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.B
 	return nil
 }
 
-func fieldListsDiff(old, new []map[string]interface{}) (add, remove, modify []map[string]interface{}) {
+func diffCustomBoardFields(old, new []map[string]interface{}) (add, remove, modify []map[string]interface{}) {
 	var diff []map[string]interface{}
 
 	for i := 0; i < 2; i++ {
@@ -263,7 +263,7 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 		oldFieldITF = append(oldFieldITF, oldF)
 	}
 
-	add, remove, modify := fieldListsDiff(oldFieldITF, newFieldITF)
+	add, remove, modify := diffCustomBoardFields(oldFieldITF, newFieldITF)
 	log.Println("Add: ", add)
 	log.Println("Remove: ", remove)
 	log.Println("Modify: ", modify)
@@ -422,7 +422,128 @@ func (d *Sqlite) DeleteComment(tableName string) error {
 
 // EditUserTableFields - Edit user table schema
 func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
-	log.Println("EditUserTableFields: ", fieldsInfoOld, fieldsInfoNew)
+
+	add, remove, modify := diffUserTableFields(fieldsInfoOld, fieldsInfoNew)
+	log.Println("User fields Add: ", add)
+	log.Println("User fields Remove: ", remove)
+	log.Println("User fields Modify: ", modify)
+
+	sql := ""
+	if len(add) > 0 {
+		for _, a := range add {
+			sql += `ALTER TABLE "#TABLE_NAME" `
+			sql += ` ADD COLUMN ` + a.ColumnName.String + ` `
+			switch a.Type.String {
+			case "text":
+				sql += ` TEXT`
+			case "number":
+				sql += ` INTEGER`
+			case "real":
+				sql += ` REAL`
+			}
+
+			sql += `; `
+		}
+	}
+
+	if len(remove) > 0 {
+		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
+		for _, r := range remove {
+			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
+		}
+		if strings.Contains(sqlRemove, "DROP COLUMN") {
+			sqlRemove = sqlRemove[:len(sqlRemove)-2]
+		}
+		sql += sqlRemove + `; `
+	}
+
+	if len(modify) > 0 {
+		sqlModify := `ALTER TABLE "#TABLE_NAME" `
+		for _, nm := range modify {
+			for _, om := range fieldsInfoOld {
+				if nm.Idx.Int64 == om.Idx.Int64 {
+					if nm.ColumnName.String != om.ColumnName.String {
+						sqlModify += ` RENAME COLUMN ` + om.ColumnName.String + ` TO ` + nm.ColumnName.String + `, `
+					}
+					break
+				}
+			}
+		}
+		if strings.Contains(sqlModify, "RENAME COLUMN") {
+			sqlModify = sqlModify[:len(sqlModify)-2]
+		}
+		sql += sqlModify + `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/EditUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func diffUserTableFields(fieldsInfoOld, fieldsInfoNew []models.UserColumn) (add, remove, modify []models.UserColumn) {
+	var diff []models.UserColumn
+
+	old := fieldsInfoOld
+	new := fieldsInfoNew
+
+	for i := 0; i < 2; i++ {
+		for _, fi1 := range old {
+			found := false
+			for _, fi2 := range new {
+				if fi1.Idx == fi2.Idx {
+					if i == 0 && !cmp.Equal(fi1, fi2) {
+						modify = append(modify, fi2)
+					}
+				}
+
+				found = true
+				break
+			}
+
+			if !found {
+				diff = append(diff, fi1)
+			}
+		}
+
+		if i == 0 {
+			remove = diff
+			old, new = new, old
+		} else {
+			add = diff
+		}
+
+		diff = []models.UserColumn{}
+	}
+
+	return
+}
+
+// DeleteUserTableFields - Delete user table field
+func (d *Sqlite) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error {
+	remove := fieldsInfoRemove
+	sql := ""
+
+	if len(remove) > 0 {
+		for _, r := range remove {
+			sql += `ALTER TABLE "#TABLE_NAME" DROP COLUMN ` + r.ColumnName.String + `;`
+		}
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/DeleteUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

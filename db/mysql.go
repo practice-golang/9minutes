@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 	"strings"
 
 	_ "github.com/doug-martin/goqu/v9/dialect/mysql"
@@ -160,5 +161,33 @@ func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
 
 // EditUserTableFields - Edit user table schema
 func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
+	return nil
+}
+
+// DeleteUserTableFields - Delete user table field
+func (d *Mysql) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error {
+	remove := fieldsInfoRemove
+	sql := ""
+
+	if len(remove) > 0 {
+		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
+		for _, r := range remove {
+			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
+		}
+		if strings.Contains(sqlRemove, "DROP COLUMN") {
+			sqlRemove = sqlRemove[:len(sqlRemove)-2]
+		}
+		sql += sqlRemove + `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/DeleteUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

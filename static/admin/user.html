@@ -51,7 +51,7 @@
                     <td><input type="text" v-model="columnAdd.table" v-uppercase /></td>
                     <td>..</td>
                     <td>
-                        <button @click="addData()">Append</button>
+                        <button @click="addColumn()">Append</button>
                         <button @click="clearcolumnAddData()">Clear</button>
                     </td>
                 </tr>
@@ -61,8 +61,13 @@
                     <td>{{b.code}}</td>
                     <td>{{b.type}}</td>
                     <td>{{b.column}}</td>
+                    <td>{{b.order}}</td>
                     <td></td>
-                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan=7>
+                        <hr />
+                    </td>
                 </tr>
                 <template v-for="(b, i) in columns">
                     <!-- View mode -->
@@ -72,7 +77,7 @@
                         <td>{{b.code}}</td>
                         <td>{{b.type}}</td>
                         <td>{{b.column}}</td>
-                        <td>-</td>
+                        <td>{{b.order}}</td>
                         <td>
                             <button @click="columnEdit=Object.assign({}, b)">Edit</button>
                             <button @click.stop="deleteData(b.idx)">Delete</button>
@@ -94,7 +99,7 @@
                         <td></td>
                         <td>
                             <button @click="columnEdit={}">Cancel</button>
-                            <button @click="updateData()">Save</button>
+                            <button @click="updateColumn()">Save</button>
                         </td>
                     </tr>
                 </template>
@@ -113,38 +118,43 @@
         data: {
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
             columns: [],
-            columnAdd: { idx: -1, name: "", code: "", type: "", table: "", fields: [] },
+            columnAdd: {},
             columnEdit: {},
             defaultColumns: [
                 {
                     name: "Idx",
                     code: "idx",
                     type: "number",
-                    column: "IDX"
+                    column: "IDX",
+                    order: 1
                 },
                 {
                     name: "Name",
                     code: "name",
                     type: "text",
-                    column: "NAME"
+                    column: "NAME",
+                    order: 2
                 },
                 {
                     name: "Password",
                     code: "password",
                     type: "text",
-                    column: "PASSWORD"
+                    column: "PASSWORD",
+                    order: 3
                 },
                 {
                     name: "Email",
                     code: "email",
                     type: "text",
-                    column: "PASSWORD"
+                    column: "EMAIL",
+                    order: 4
                 },
                 {
                     name: "Admin",
                     code: "admin",
                     type: "text",
-                    column: "ADMIN"
+                    column: "ADMIN",
+                    order: 5
                 },
             ]
         },
@@ -161,8 +171,8 @@
         },
         computed: {},
         methods: {
-            initData() { this.getData() },
-            async getData() {
+            initData() { this.getColumns() },
+            async getColumns() {
                 let keywords = []
 
                 let response = await fetch(this.restURI + "/users", {
@@ -176,6 +186,30 @@
                     this.columns = await response.json()
                 }
             },
+            async addColumn() {
+                let response = await fetch(this.restURI + "/users", {
+                    method: "PUT",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify([
+                        {
+                            "name": this.columnAdd.name,
+                            "code": this.columnAdd.code,
+                            "type": this.columnAdd.type,
+                            "column": this.columnAdd.column,
+                            "order": this.columnAdd.order,
+                        },
+                    ])
+                })
+                if (response.ok) {
+                    this.columns = await response.json()
+                }
+            },
+            async updateColumn() {
+                console.log(this.columnEdit)
+            }
         }
     })
 </script>

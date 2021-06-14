@@ -16,7 +16,35 @@ content-type: application/json
         "code": "gender",
         "type": "text",
         "column": "GENDER",
+        "order": 1
+    },
+    {
+        "name": "Ages",
+        "code": "ages",
+        "type": "text",
+        "column": "AGES",
         "order": 2
+    },
+    {
+        "name": "Blood",
+        "code": "blood",
+        "type": "text",
+        "column": "BLOOD",
+        "order": 3
+    }
+]
+
+### Add user fields #2
+PUT {{uri}}/api/admin/users HTTP/1.1
+content-type: application/json
+
+[
+    {
+        "name": "Job",
+        "code": "job",
+        "type": "text",
+        "column": "JOB",
+        "order": 6
     }
 ]
 
@@ -25,13 +53,13 @@ PATCH {{uri}}/api/admin/users HTTP/1.1
 content-type: application/json
 
 {
-    "idx": 2,
-    "name": "Country",
-    "code": "country",
+    "idx": 23,
+    "name": "Hobby",
+    "code": "hobby",
     "type": "text",
-    "column": "COUNTRY",
-    "order": 3
+    "column": "HOBBY",
+    "order": 5
 }
 
 ### DELETE board
-DELETE {{uri}}/api/admin/board/3 HTTP/1.1
+DELETE {{uri}}/api/admin/users/18 HTTP/1.1

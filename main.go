@@ -261,6 +261,7 @@ func setupServer() *echo.Echo {
 	a.GET("/users", user.GetUserFields)
 	a.PUT("/users", user.AddUserFields)
 	a.PATCH("/users", user.EditUserFields)
+	a.DELETE("/users/:idx", user.DeleteUserFields)
 
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)
