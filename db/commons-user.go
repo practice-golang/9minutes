@@ -52,8 +52,8 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	ex := PrepareWhere(search)
 	if !ex.IsEmpty() {
 		for c, v := range ex {
-			val := fmt.Sprintf("%s%d%s", "%", v, "%")
-			ex[c] = goqu.Op{"like": val}
+			val := fmt.Sprintf("%d", v)
+			ex[c] = goqu.Op{"eq": val}
 		}
 		exps = append(exps, ex.Expression())
 	}

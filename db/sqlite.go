@@ -420,6 +420,35 @@ func (d *Sqlite) DeleteComment(tableName string) error {
 	return nil
 }
 
+// AddUserTableFields - Add user column
+func (d *Sqlite) AddUserTableFields(fields []models.UserColumn) error {
+	sql := ""
+	for _, a := range fields {
+		sql += `ALTER TABLE "#TABLE_NAME" ADD COLUMN ` + a.ColumnName.String + ` `
+		switch a.Type.String {
+		case "text":
+			sql += ` TEXT`
+		case "number":
+			sql += ` INTEGER`
+		case "real":
+			sql += ` REAL`
+		}
+
+		sql += `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/EditUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // EditUserTableFields - Edit user table schema
 func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn) error {
 
@@ -532,7 +561,7 @@ func (d *Sqlite) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) err
 
 	if len(remove) > 0 {
 		for _, r := range remove {
-			sql += `ALTER TABLE "#TABLE_NAME" DROP COLUMN ` + r.ColumnName.String + `;`
+			sql += `ALTER TABLE "#TABLE_NAME" DROP COLUMN "` + r.ColumnName.String + `";`
 		}
 	}
 

@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -27,10 +26,7 @@ func AddUserFields(c echo.Context) error {
 		log.Println("AddUserFields: ", err)
 	}
 
-	previousFieldsINTF, _ := db.SelectUserFields(models.UserColumn{})
-	previousFields := previousFieldsINTF.([]models.UserColumn)
-
-	_ = db.Dbi.EditUserTableFields(previousFields, data)
+	_ = db.Dbi.AddUserTableFields(data)
 
 	sqlResult, err := db.InsertUserField(data)
 	if err != nil {
@@ -107,18 +103,13 @@ func DeleteUserFields(c echo.Context) error {
 	}
 
 	if len(data.([]models.UserColumn)) > 0 {
-		err = db.Dbi.DeleteUserTableFields(data.([]models.UserColumn))
-	} else {
-		err = errors.New("delete field failed")
-	}
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		db.Dbi.DeleteUserTableFields(data.([]models.UserColumn))
 	}
 
 	// Remove field info
 	sqlResult, err := db.DeleteUserFieldRow("IDX", fmt.Sprint(idx))
 	if err != nil {
+		log.Println("DeleteUserFieldRow: ", err)
 		result := map[string]string{
 			"msg":  err.Error(),
 			"desc": "If exist rest of fields rows, please remove manually",

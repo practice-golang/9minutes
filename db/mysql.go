@@ -191,3 +191,32 @@ func (d *Mysql) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) erro
 
 	return nil
 }
+
+// AddUserTableFields - Add user column
+func (d *Mysql) AddUserTableFields(fields []models.UserColumn) error {
+	sql := ""
+	for _, a := range fields {
+		sql += `ALTER TABLE "#TABLE_NAME" ADD COLUMN ` + a.ColumnName.String + ` `
+		switch a.Type.String {
+		case "text":
+			sql += ` TEXT`
+		case "number":
+			sql += ` INTEGER`
+		case "real":
+			sql += ` REAL`
+		}
+
+		sql += `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/EditUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

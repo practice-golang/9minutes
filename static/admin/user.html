@@ -52,7 +52,7 @@
                     <td>{{nextFieldIdx}}</td>
                     <td>
                         <button @click="addColumn()">Append</button>
-                        <button @click="clearcolumnAddData()">Clear</button>
+                        <button @click="clearColumnAdd()">Clear</button>
                     </td>
                 </tr>
                 <tr v-for="(b, i) in defaultColumns">
@@ -80,7 +80,7 @@
                         <td>{{b.order}}</td>
                         <td>
                             <button @click="columnEdit=Object.assign({}, b)">Edit</button>
-                            <button @click.stop="deleteData(b.idx)">Delete</button>
+                            <button @click.stop="deleteColumn(b.idx)">Delete</button>
                         </td>
                     </tr>
                     <!-- Edit mode -->
@@ -175,8 +175,6 @@
                     let fields = this.columns.slice()
                     fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
 
-                    console.log(fields[fields.length - 1], fields.length - 1)
-
                     return fields[fields.length - 1].order + 1
                 }
 
@@ -222,9 +220,20 @@
                     this.getColumns()
                 }
             },
+            clearColumnAdd() {
+                this.columnAdd = {}
+            },
             async updateColumn() {
                 console.log(this.columnEdit)
-            }
+            },
+            async deleteColumn(idx) {
+                let keywords = []
+
+                let response = await fetch(this.restURI + "/users/" + idx, { method: "DELETE" })
+                if (response.ok) {
+                    this.getColumns()
+                }
+            },
         }
     })
 </script>
