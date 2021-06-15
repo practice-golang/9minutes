@@ -3,11 +3,11 @@
 
 
 ### Select all fields
-GET {{uri}}/api/admin/users HTTP/1.1
+GET {{uri}}/api/admin/user-fields HTTP/1.1
 
 
 ### Add user fields
-PUT {{uri}}/api/admin/users HTTP/1.1
+PUT {{uri}}/api/admin/user-fields HTTP/1.1
 content-type: application/json
 
 [
@@ -35,7 +35,7 @@ content-type: application/json
 ]
 
 ### Add user fields #2
-PUT {{uri}}/api/admin/users HTTP/1.1
+PUT {{uri}}/api/admin/user-fields HTTP/1.1
 content-type: application/json
 
 [
@@ -49,7 +49,7 @@ content-type: application/json
 ]
 
 ### Modify user fields
-PATCH {{uri}}/api/admin/users HTTP/1.1
+PATCH {{uri}}/api/admin/user-fields HTTP/1.1
 content-type: application/json
 
 [
@@ -71,5 +71,31 @@ content-type: application/json
     }
 ]
 
-### DELETE board
-DELETE {{uri}}/api/admin/users/18 HTTP/1.1
+### DELETE user field by index
+DELETE {{uri}}/api/admin/user-fields/18 HTTP/1.1
+
+
+### Get columns of user table
+GET {{uri}}/api/admin/user-columns HTTP/1.1
+content-type: application/json
+
+
+### Select users
+POST {{uri}}/api/admin/users HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "order": "desc",
+        "count": "5"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "PASSWORD",
+        "EMAIL",
+        "ADMIN"
+    ],
+    "table": "USERS"
+}

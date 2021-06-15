@@ -6,10 +6,10 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <meta name="google" content="notranslate">
 
-    <!-- <script src="js/vue.min.js"></script> -->
-    <script src="/assets/js/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="/assets/js/vue-i18n.js"></script>
-    <script src="/assets/js/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
 
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
@@ -194,7 +194,7 @@
             async getColumns() {
                 let keywords = []
 
-                let response = await fetch(this.restURI + "/users", {
+                let response = await fetch(this.restURI + "/user-fields", {
                     method: "GET",
                     headers: {
                         "Accept": "application/json",
@@ -209,7 +209,7 @@
             async addColumn() {
                 this.columnAdd.order = this.nextFieldIdx
 
-                let response = await fetch(this.restURI + "/users", {
+                let response = await fetch(this.restURI + "/user-fields", {
                     method: "PUT",
                     headers: {
                         "Accept": "application/json",
@@ -233,7 +233,7 @@
                 this.columnAdd = {}
             },
             async updateColumn() {
-                let response = await fetch(this.restURI + "/users", {
+                let response = await fetch(this.restURI + "/user-fields", {
                     method: "PATCH",
                     headers: {
                         "Accept": "application/json",
@@ -258,13 +258,13 @@
             async deleteColumn(idx) {
                 let keywords = []
 
-                let response = await fetch(this.restURI + "/users/" + idx, { method: "DELETE" })
+                let response = await fetch(this.restURI + "/user-fields/" + idx, { method: "DELETE" })
                 if (response.ok) {
                     this.getColumns()
                 }
             },
             async updateOrder() {
-                let response = await fetch(this.restURI + "/users", {
+                let response = await fetch(this.restURI + "/user-fields", {
                     method: "PATCH",
                     headers: {
                         "Accept": "application/json",

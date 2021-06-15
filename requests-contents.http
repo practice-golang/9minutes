@@ -113,7 +113,7 @@ content-type: application/json
         "CONTENT",
         "CREATOR"
     ],
-    "table": "TABLELIST1"
+    "table": "BOARD0"
 }
 
 ### Read contents - custom board
@@ -129,8 +129,7 @@ content-type: application/json
     "columns": [
         "IDX",
         "NAME",
-        "AGENCY",
-        "DESC"
+        "AGENCY"
     ],
     "table": "CBOARD3"
 }
@@ -147,8 +146,7 @@ content-type: application/json
     "columns": [
         "IDX",
         "NAME",
-        "AGENCY",
-        "DESC"
+        "AGENCY"
     ],
     "table": "CBOARD3"
 }
@@ -159,9 +157,9 @@ content-type: application/json
 
 {
     "data": {
-        "name": "이름이믊",
-        "content": "내용 내용",
-        "creator": "ㅇㅇ"
+        "NAME": "이름이믊",
+        "CONTENT": "내용 내용",
+        "CREATOR": "ㅇㅇ"
     },
     "table": "BOARD0"
 }
@@ -173,8 +171,7 @@ content-type: application/json
 {
     "data":{
         "NAME": "김개동",
-        "AGENCY": "우리집",
-        "DESC": "ㅇ리ㅏ허이라ㅓ힌아ㅓ림나ㅓ을"
+        "AGENCY": "우리집"
     },
     "table":"CBOARD3"
 }
@@ -186,7 +183,7 @@ content-type: application/json
 
 {
     "data": {
-        "IDX": 8,
+        "IDX": 1,
         "NAME": "훈민정음",
         "CONTENT": "가나다라마바사아자차카타파하",
         "CREATOR": "세종대왕"

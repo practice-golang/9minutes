@@ -8,6 +8,7 @@ GET {{uri}}/api/admin/board/2 HTTP/1.1
 
 ### Select All - Limit 10
 GET {{uri}}/api/admin/boards HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJSZWZyZXNoVW50aWwiOjE2MjYzNDc0ODQsImV4cCI6MTYyMzc1NTU0NH0.Eg1Q_xfHd1Syfn0FFRiGOAZKDv8quw5-ImMOqBB46Yo
 
 
 ### Select Data No paging, no search. listCount of /db/db.go: 3

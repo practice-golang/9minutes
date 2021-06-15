@@ -583,3 +583,15 @@ func (d *Sqlite) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) err
 
 	return nil
 }
+
+// SelectColumnNames - Get column names of table
+func (d *Sqlite) SelectColumnNames(table string) (sql.Result, error) {
+	result, err := Dbo.Query("PRAGMA TABLE_INFO(" + table + ")")
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(result)
+
+	return nil, nil
+}

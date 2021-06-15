@@ -220,3 +220,13 @@ func (d *Mysql) AddUserTableFields(fields []models.UserColumn) error {
 
 	return nil
 }
+
+// SelectColumnNames - Get column names of table
+func (d *Mysql) SelectColumnNames(table string) (sql.Result, error) {
+	result, err := Dbo.Exec("PRAGMA TABLE_INFO(" + table + ")")
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

@@ -81,53 +81,56 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 	dbms := goqu.New(dbType, Dbo)
 	exps := []goqu.Expression{}
 
-	keywords := jsonBody["keywords"].([]interface{})
-	for _, keywordOBJ := range keywords {
-		ex := goqu.Ex{}
-		for k, d := range keywordOBJ.(map[string]interface{}) {
-			val := fmt.Sprintf("%s%s%s", "%", d, "%")
-			ex[k] = goqu.Op{"like": val}
-		}
-		exps = append(exps, ex.Expression())
+	keywords := jsonBody["keywords"].(map[string]interface{})
+	ex := goqu.Ex{}
+	for k, v := range keywords {
+		val := fmt.Sprintf("%s", v)
+		ex[k] = goqu.Op{"eq": val}
 	}
+	exps = append(exps, ex.Expression())
 	// log.Println("kworkds", keywords)
 
 	ds := dbms.From(jsonBody["table"].(string)).Select(colNames...)
 	ds = ds.Where(goqu.Or(exps...))
 
 	orderDirection := goqu.C(OrderScope).Asc()
-	options := jsonBody["options"].(map[string]interface{})
-	if opt, ok := options["order"]; ok && opt == "desc" {
-		orderDirection = goqu.C(OrderScope).Desc()
-	}
-	ds = ds.Order(orderDirection)
-
 	cnt := uint(count)
-	if optCount, ok := options["count"]; ok {
-		var optcntINT int
-		switch val := optCount.(type) {
-		case string:
-			optcntINT, _ = (strconv.Atoi(val))
-		case float64:
-			optcntINT = int(val)
+
+	if options, ok := jsonBody["options"].(map[string]interface{}); ok {
+		// Order direction
+		if opt, ok := options["order"]; ok && opt == "desc" {
+			orderDirection = goqu.C(OrderScope).Desc()
 		}
 
-		cnt = uint(optcntINT)
+		// Rows count
+		if optCount, ok := options["count"]; ok {
+			var optcntINT int
+			switch val := optCount.(type) {
+			case string:
+				optcntINT, _ = (strconv.Atoi(val))
+			case float64:
+				optcntINT = int(val)
+			}
+
+			cnt = uint(optcntINT)
+		}
+
+		// Paging
+		if page, ok := options["page"]; ok {
+			var pageINT int
+			switch val := page.(type) {
+			case string:
+				pageINT, _ = (strconv.Atoi(val))
+			case float64:
+				pageINT = int(val)
+			}
+
+			offset = uint(pageINT)
+		}
 	}
+
+	ds = ds.Order(orderDirection)
 	ds = ds.Limit(cnt)
-
-	// 페이징
-	if page, ok := options["page"]; ok {
-		var pageINT int
-		switch val := page.(type) {
-		case string:
-			pageINT, _ = (strconv.Atoi(val))
-		case float64:
-			pageINT = int(val)
-		}
-
-		offset = uint(pageINT)
-	}
 	ds = ds.Offset(offset * cnt)
 
 	sql, args, _ := ds.ToSQL()

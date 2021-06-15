@@ -34,6 +34,7 @@ type DBI interface {
 	AddUserTableFields(fields []models.UserColumn) error
 	EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error
 	DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error
+	SelectColumnNames(table string) (sql.Result, error)
 }
 
 var (

@@ -1,0 +1,31 @@
+@uri=http://localhost:2510
+# @uri=http://enjoytools.net:2510
+
+### Select users
+POST {{uri}}/api/user/login HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": {
+        "NAME": "bab2",
+        "PASSWORD": "1234"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "PASSWORD",
+        "EMAIL",
+        "ADMIN"
+    ],
+    "table": "USERS"
+}
+
+
+### Verify token
+POST {{uri}}/api/user/token HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU3NzQ3LCJleHAiOjE2MjM3NjU4MDd9.-q0G1poR61e1PZacCupUGn4XYbS4jFxdapAOjag8tmo
+
+
+### Reissue token
+GET {{uri}}/api/user/token HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM3NjQ1NzV9.uLbUUU67_1VusQ5mpaumSzNuUTQkUStD0RjJBhnnQCI

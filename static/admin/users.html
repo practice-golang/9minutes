@@ -1,0 +1,174 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <meta name="google" content="notranslate">
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>Users</h1>
+            <a href="/admin/board">Admin</a>
+            <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
+        </div>
+
+        <hr />
+
+        <table>
+            <thead>
+                <tr>
+                    <th v-for="c, i in columns">{{c.name}}</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="u, i in users">
+                    <td v-for="c, j in columns">{{u[c.column]}}</td>
+                    <td><button>Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+    </div>
+</body>
+
+<script>
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
+            users: [],
+            // columns: '##__COLUMNS__##',
+            columns: [],
+            table: "'##__TABLE_NAME__##'",
+            boardCode: "'##__BOARD_CODE__##'",
+            searchKeyword: "",
+        },
+        mounted() {
+            this.initData()
+        },
+        directives: {
+            uppercase: {
+                update: function (el) {
+                    el.value = el.value.toUpperCase()
+                    el.dispatchEvent(new Event('input'))
+                }
+            }
+        },
+        computed: {
+            nextFieldIdx() {
+                if (this.columns.length > 0) {
+                    let fields = this.columns.slice()
+                    fields.sort((first, second) => (first.order > second.order) ? 1 : ((second.order > first.order) ? -1 : 0))
+
+                    return fields[fields.length - 1].order + 1
+                }
+
+                // 1~5: default column indexes of user table
+                return 6
+            },
+        },
+        methods: {
+            async initData() {
+                await this.getColumnNames()
+                await this.getUsers()
+            },
+            async getColumnNames() {
+                let response = await fetch(this.restURI + "/user-columns", { method: "GET" })
+                if (response.ok) {
+                    this.columns = await response.json()
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+
+                    // this.columns = []
+                }
+            },
+            async getUsers() {
+                let keywords = []
+
+                let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
+                    return c.column
+                })
+
+                let response = await fetch(this.restURI + "/users", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        options: {
+                            order: "desc",
+                            count: "10"
+                        },
+                        columns: columns,
+                        table: "USERS"
+                    })
+                })
+                if (response.ok) {
+                    this.users = await response.json()
+                }
+            },
+        }
+    })
+</script>
+
+<style>
+    * {
+        font-size: 0.9em;
+    }
+
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+
+    table {
+        table-layout: fixed;
+        text-align: unset;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td.link {
+        cursor: pointer;
+    }
+
+    td.link:hover {
+        text-decoration: underline;
+    }
+
+    tbody>tr:hover {
+        background: #FFD3D3;
+    }
+</style>
+
+</html>
