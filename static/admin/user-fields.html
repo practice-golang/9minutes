@@ -1,0 +1,420 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <meta name="google" content="notranslate">
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>User field</h1>
+        </div>
+
+        <hr />
+
+        <table>
+            <thead>
+                <tr>
+                    <th @click="changeOrder()"><a href="javascript:">Idx</a></th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Column name</th>
+                    <th>Order</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Add user field:</td>
+                    <td><input v-model="columnAdd.name" /></td>
+                    <td><input v-model="columnAdd.code" /></td>
+                    <td>
+                        <select v-model="columnAdd.type" @change="columnAdd.fields=[]">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="real">Real</option>
+                        </select>
+                    </td>
+                    <td><input type="text" v-model="columnAdd.column" v-uppercase /></td>
+                    <td>{{nextFieldIdx}}</td>
+                    <td>
+                        <button @click="addColumn()">Append</button>
+                        <button @click="clearColumnAdd()">Clear</button>
+                    </td>
+                </tr>
+                <tr v-for="(b, i) in defaultColumns">
+                    <td></td>
+                    <td>{{b.name}}</td>
+                    <td>{{b.code}}</td>
+                    <td>{{b.type}}</td>
+                    <td>{{b.column}}</td>
+                    <td>{{b.order}}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan=7>
+                        <hr />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=6></td>
+                    <td>
+                        <button @click="updateOrder()">Update Order</button>
+                    </td>
+                </tr>
+                <template v-for="(b, i) in columns">
+                    <!-- View mode -->
+                    <tr v-if="b.idx !== columnEdit.idx">
+                        <td>{{b.idx}}</td>
+                        <td>{{b.name}}</td>
+                        <td>{{b.code}}</td>
+                        <td>{{b.type}}</td>
+                        <td>{{b.column}}</td>
+                        <td>{{b.order}}</td>
+                        <td>
+                            <button @click="columnEdit=Object.assign({}, b)">Edit</button>
+                            <button @click.stop="deleteColumn(b.idx)">Delete</button>
+                            <button @click="moveUpColumn(i)">↑</button>
+                            <button @click="moveDownColumn(i)">↓</button>
+                        </td>
+                    </tr>
+                    <!-- Edit mode -->
+                    <tr @keyup.enter="updateData()" v-else>
+                        <td>{{b.idx}}</td>
+                        <td><input v-model="columnEdit.name" /></td>
+                        <td><input v-model="columnEdit.code" /></td>
+                        <td>
+                            <select v-model="columnEdit.type" disabled>
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="real">Real</option>
+                            </select>
+                        </td>
+                        <td><input v-model="columnEdit.column" v-uppercase /></td>
+                        <td></td>
+                        <td>
+                            <button @click="columnEdit={}">Cancel</button>
+                            <button @click="updateColumn()">Save</button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+
+        <hr />
+
+    </div>
+</body>
+
+<script>
+    Vue.prototype.location = window.location
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
+            restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
+            columns: [],
+            columnAdd: {},
+            columnEdit: {},
+            defaultColumns: [
+                {
+                    name: "Idx",
+                    code: "idx",
+                    type: "number",
+                    column: "IDX",
+                    order: 1
+                },
+                {
+                    name: "Name",
+                    code: "name",
+                    type: "text",
+                    column: "NAME",
+                    order: 2
+                },
+                {
+                    name: "Password",
+                    code: "password",
+                    type: "text",
+                    column: "PASSWORD",
+                    order: 3
+                },
+                {
+                    name: "Email",
+                    code: "email",
+                    type: "text",
+                    column: "EMAIL",
+                    order: 4
+                },
+                {
+                    name: "Admin",
+                    code: "admin",
+                    type: "text",
+                    column: "ADMIN",
+                    order: 5
+                },
+            ]
+        },
+        mounted() {
+            this.initData()
+        },
+        directives: {
+            uppercase: {
+                update: function (el) {
+                    el.value = el.value.toUpperCase()
+                    el.dispatchEvent(new Event('input'))
+                }
+            }
+        },
+        computed: {
+            nextFieldIdx() {
+                if (this.columns.length > 0) {
+                    let fields = this.columns.slice()
+                    fields.sort((first, second) => (first.order > second.order) ? 1 : ((second.order > first.order) ? -1 : 0))
+
+                    return fields[fields.length - 1].order + 1
+                }
+
+                return 6
+            },
+        },
+        methods: {
+            async initData() {
+                await this.checkLogedIn()
+                await this.getColumns()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                }
+            },
+            async getColumns() {
+                let keywords = []
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields", {
+                    method: "GET",
+                    headers: headers
+                })
+                if (response.ok) {
+                    this.columns = await response.json()
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+                }
+            },
+            async addColumn() {
+                this.columnAdd.order = this.nextFieldIdx
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields", {
+                    method: "PUT",
+                    headers: headers,
+                    body: JSON.stringify([
+                        {
+                            "name": this.columnAdd.name,
+                            "code": this.columnAdd.code,
+                            "type": this.columnAdd.type,
+                            "column": this.columnAdd.column,
+                            "order": this.columnAdd.order,
+                        },
+                    ])
+                })
+                if (response.ok) {
+                    this.getColumns()
+                }
+            },
+            clearColumnAdd() {
+                this.columnAdd = {}
+            },
+            async updateColumn() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields", {
+                    method: "PATCH",
+                    headers: headers,
+                    body: JSON.stringify([
+                        {
+                            "idx": this.columnEdit.idx,
+                            "name": this.columnEdit.name,
+                            "code": this.columnEdit.code,
+                            "type": this.columnEdit.type,
+                            "column": this.columnEdit.column,
+                            "order": this.columnEdit.order,
+                        }
+                    ])
+                })
+                if (response.ok) {
+                    this.columnEdit = {}
+                    this.getColumns()
+                }
+            },
+            async deleteColumn(idx) {
+                let keywords = []
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields/" + idx, {
+                    method: "DELETE",
+                    headers: headers,
+                })
+                if (response.ok) {
+                    this.getColumns()
+                }
+            },
+            async updateOrder() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields", {
+                    method: "PATCH",
+                    headers: headers,
+                    body: JSON.stringify(this.columns)
+                })
+                if (response.ok) {
+                    this.columnEdit = {}
+                    this.getColumns()
+                }
+            },
+            moveUpColumn(idx) {
+                if (idx > 0) {
+                    this.columns[idx].order -= 1
+                    this.columns[idx - 1].order += 1
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+                }
+            },
+            moveDownColumn(idx) {
+                if (idx < this.columns.length - 1) {
+                    this.columns[idx].order += 1
+                    this.columns[idx + 1].order -= 1
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+                }
+            },
+        }
+    })
+</script>
+
+<style>
+    * {
+        font-size: 0.9em;
+    }
+
+    body {
+        margin: 0;
+        padding: 0.5em;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+
+    table {
+        table-layout: fixed;
+        text-align: unset;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td.link {
+        cursor: pointer;
+    }
+
+    td.link:hover {
+        text-decoration: underline;
+    }
+
+    tbody>tr:hover {
+        background: #FFD3D3;
+    }
+</style>
+
+</html>

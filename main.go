@@ -20,11 +20,13 @@ import (
 
 	_ "modernc.org/sqlite"
 
+	"github.com/practice-golang/9minutes/auth"
 	"github.com/practice-golang/9minutes/board"
 	"github.com/practice-golang/9minutes/comments"
 	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/contents"
 	"github.com/practice-golang/9minutes/db"
+	"github.com/practice-golang/9minutes/user"
 )
 
 var (
@@ -34,6 +36,8 @@ var (
 	templateHTML embed.FS
 	//go:embed samples/9minutes.ini
 	sampleINI string
+
+	jwtKey = []byte("9minutes")
 )
 
 func setupDB() error {
@@ -49,7 +53,7 @@ func setupDB() error {
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/",
 			info.User, info.Password, info.Server, info.Port)
 		db.DatabaseName = info.Database
-		db.TableName = db.DatabaseName + "." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
 	case "postgres":
 		db.DBType = db.POSTGRES
 
@@ -72,13 +76,13 @@ func setupDB() error {
 			info.Server, info.Port, info.User, info.Password, info.Database)
 
 		db.DatabaseName = info.Schema
-		db.TableName = db.DatabaseName + "." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
 	case "sqlserver":
 		db.DBType = db.SQLSERVER
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 			info.User, info.Password, info.Server, info.Port, info.Database)
 		db.DatabaseName = info.Database
-		db.TableName = db.DatabaseName + ".dbo." + db.TableName
+		db.BoardManagerTable = db.DatabaseName + ".dbo." + db.BoardManagerTable
 	default:
 		log.Fatal("nothing to support DB")
 	}
@@ -89,9 +93,17 @@ func setupDB() error {
 	}
 
 	recreate := false
-	err = db.Dbi.CreateTable(recreate)
+	err = db.Dbi.CreateBoardManagerTable(recreate)
 	if err != nil {
-		log.Fatal("CreateTable: ", err)
+		log.Fatal("Create Board manager Table: ", err)
+	}
+	err = db.Dbi.CreateUserFieldTable(recreate)
+	if err != nil {
+		log.Fatal("Create User manager Table: ", err)
+	}
+	err = db.Dbi.CreateUserTable(recreate)
+	if err != nil {
+		log.Fatal("Create User manager Table: ", err)
 	}
 
 	return err
@@ -227,14 +239,34 @@ func setupServer() *echo.Echo {
 			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): "/static/admin/$1.html",
 		},
 	})
+	// contentRewriteUsersFields := middleware.RewriteWithConfig(middleware.RewriteConfig{
+	// 	RegexRules: map[*regexp.Regexp]string{
+	// 		regexp.MustCompile(`^/user-fields/([^\?]+)(\?(.*)|)`): "/static/user-fields/$1.html",
+	// 	},
+	// })
+	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): "/static/users/$1.html",
+		},
+	})
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/static/$1"})
 
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
+	// e.GET("/user-fields/*", contentHandler, contentRewriteAdmin)
+	e.GET("/users/*", contentHandler, contentRewriteUsers)
 	e.GET("/*", contentHandler, contentRewrite)
 
 	e.GET("/board", boardTemplateHandler)
 
 	a := e.Group("/api/admin")
+	a.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}))
 	a.GET("/board/:idx", board.GetBoard)
 	a.GET("/boards", board.GetBoards)
 	a.POST("/boards", board.SearchBoards)
@@ -242,6 +274,28 @@ func setupServer() *echo.Echo {
 	a.PATCH("/board", board.EditBoard)
 	a.DELETE("/board/:idx", board.DeleteBoard)
 	a.POST("/total-page", board.GetTotalPage)
+
+	a.GET("/user-fields", user.GetUserFields)
+	a.PUT("/user-fields", user.AddUserFields)
+	a.PATCH("/user-fields", user.EditUserFields)
+	a.DELETE("/user-fields/:idx", user.DeleteUserFields)
+
+	a.GET("/user-columns", user.GetUserColumns)
+	a.POST("/users", user.GetUsers)
+
+	u := e.Group("/api/user")
+	u.POST("/login", user.Login)
+	u.GET("/token", user.ReissueToken)
+	ua := e.Group("/api/user")
+	ua.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}))
+	ua.POST("/token", user.VerifyToken)
 
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)
@@ -312,9 +366,9 @@ func main() {
 
 	var fileConnectionLog *os.File
 
-	// 조만간 삭제
-	db.UpdateScope = []string{"idx", "IDX"}      // UPDATE ... WHERE IDX=?
-	db.IgnoreScope = []string{"AUTHOR", "PRICE"} // Ignore if nil or null
+	// sql where target
+	db.UpdateScope = []string{"idx", "IDX"} // UPDATE ... WHERE IDX=?
+	db.IgnoreScope = []string{}             // Ignore if nil or null
 	db.OrderScope = "IDX"
 
 	err = setupDB()
@@ -322,6 +376,7 @@ func main() {
 		log.Fatal("Setup DB: ", err)
 	}
 
+	auth.JwtKey = jwtKey
 	e := setupServer()
 
 	fileConnectionLog, err = os.OpenFile(
@@ -334,21 +389,23 @@ func main() {
 	}
 	defer fileConnectionLog.Close()
 
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `${time_rfc3339} - remote_ip:${remote_ip}, host:${host}, ` +
-			`method:${method}, uri:${uri},status:${status}, error:${error}, ` +
-			`${header:Authorization}, query:${query:property}, form:${form}, ` + "\n",
-		Output: fileConnectionLog,
-	}))
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
-		AllowHeaders:     []string{"Authorization", "Content-Type"},
-		AllowCredentials: true,
-		AllowMethods: []string{
-			echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE,
-			echo.HEAD, echo.OPTIONS,
-		},
-	}))
+	e.Use(
+		middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: `${time_rfc3339} - remote_ip:${remote_ip}, host:${host}, ` +
+				`method:${method}, uri:${uri},status:${status}, error:${error}, ` +
+				`${header:Authorization}, query:${query:property}, form:${form}, ` + "\n",
+			Output: fileConnectionLog,
+		}),
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     []string{"*"},
+			AllowHeaders:     []string{"Authorization", "Content-Type"},
+			AllowCredentials: true,
+			AllowMethods: []string{
+				echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE,
+				echo.HEAD, echo.OPTIONS,
+			},
+		}),
+	)
 
 	e.Use(middleware.BodyDump(dumpHandler))
 

@@ -15,10 +15,14 @@
 
 <body>
     <div id="app">
-        <br /><a href="/admin/board">Admin - Board manager</a>
-        <br /><a href="/admin/user-fields">Admin - User fields</a>
-        <br /><a href="/users/login">Login</a>
-        <br /><a href="/board?code=board1">Board1</a>
+        <a href="/">Root</a>
+
+        <div @keyup.enter="loginUser()">
+            <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
+            <input v-model="password" class="input" type="password" placeholder="Password" />
+            <button @click="loginUser()">Login</button>
+            <button @click="logoutUser()">Logout</button>
+        </div>
     </div>
 </body>
 
@@ -26,22 +30,25 @@
     const vm = new Vue({
         el: "#app",
         data: {
-            // restURI: "http://localhost:2918",
             restURIdomain: window.location.protocol + "//" + window.location.host,
-            restURI: window.location.protocol + "//" + window.location.host + window.location.pathname,
+            restURI: window.location.protocol + "//" + window.location.host,
+            table: "USERS",
+            username: "",
+            password: "",
         },
-        mounted() { this.initData() },
+        mounted() {
+            this.checkLogedIn()
+        },
         methods: {
-            async initData() {
-                await this.checkLogedIn()
-            },
             async checkLogedIn() {
                 let result = false
                 let reissue = false
                 let response = ""
                 let r = ""
 
-                const token = localStorage.getItem('token')
+                let token = localStorage.getItem('token')
+
+                console.log(token)
 
                 if (token != null) {
                     response = await fetch(this.restURIdomain + "/api/user/token", {
@@ -75,11 +82,51 @@
                     }
                 }
 
-                if (!result) {
+                if (result) {
                     // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                    location.href = "/users/login"
+                    location.href = "/"
                 }
             },
+            async loginUser() {
+                if (this.username == '') {
+                    swal.fire('Login failed', 'Need username', 'error')
+                    return false
+                }
+                if (this.password == '') {
+                    swal.fire('Login failed', 'Need password', 'error')
+                    return false
+                }
+
+                const response = await fetch(this.restURI + "/api/user/login", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: { NAME: this.username, PASSWORD: this.password },
+                        columns: ["IDX", "NAME", "PASSWORD", "EMAIL", "ADMIN"],
+                        table: this.table
+                    })
+                })
+                if (response.ok) {
+                    // 204 - User info are not correct or not exist
+                    if (response.status != 200) {
+                        swal.fire("Login failed", "Check username of password", "error")
+                        return false
+                    }
+
+                    const result = await response.json()
+                    if (result.token != undefined) {
+                        localStorage.setItem("token", result.token)
+                        location.href = "/"
+                    }
+                }
+            },
+            async logoutUser() {
+                localStorage.removeItem("token")
+                swal.fire("Loged out", "", "success")
+            }
         }
     })
 </script>

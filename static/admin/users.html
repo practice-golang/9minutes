@@ -1,81 +1,93 @@
-<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <meta name="google" content="notranslate">
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="/assets/js/vue-i18n.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
 
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
-
-    <script src="/assets/tinymce/tinymce.min.js"></script>
 </head>
 
 <body>
     <div id="app">
-        <h1>Custom board</h1>
-        <template v-for="c, j in columns" v-if="c.column != 'IDX'">
-            <div v-if="c.type == 'editor'">
-                <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
-            </div>
-            <input v-else v-model="contents[c.column]" :placeholder="c.name" />
-        </template>
-        <button onclick="history.back()">Cancel</button>
-        <button @click="writePost()">Write</button>
+        <div class="header">
+            <h1>Users</h1>
+            <a href="/admin/board">Admin</a>
+            <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
+        </div>
+
+        <hr />
+
+        <table>
+            <thead>
+                <tr>
+                    <th v-for="c, i in columns">{{c.name}}</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="u, i in users">
+                    <td v-for="c, j in columns">{{u[c.column]}}</td>
+                    <td><button>Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
     </div>
 </body>
 
 <script>
-    tinymce.init({
-        selector: "textarea.editors",
-        mode: "textareas",
-        theme: "silver",
-        height: "480",
-        force_p_newlines: false,
-        force_br_newlines: true,
-        // forced_root_block: false,
-        forced_root_block: '',
-        convert_newlines_to_brs: false,
-        remove_linebreaks: true,
-        // branding: false
-    })
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
         data: {
             restURIdomain: window.location.protocol + "//" + window.location.host,
-            restURI: window.location.protocol + "//" + window.location.host,
+            restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
+            users: [],
+            // columns: '##__COLUMNS__##',
+            columns: [],
             table: "'##__TABLE_NAME__##'",
-            columns: '##__COLUMNS__##',
             boardCode: "'##__BOARD_CODE__##'",
-            mode: "",
-            id: "",
-            contents: {},
+            searchKeyword: "",
         },
         mounted() {
-            // Parameter test
-            const uri = new URL(String(document.location.href))
-            this.mode = uri.searchParams.get("mode")
-            this.id = uri.searchParams.get("id")
-
-            this.columns.forEach((c, i) => {
-                this.contents[c.column] = ""
-                // console.log(c.column)
-            })
-
             this.initData()
+        },
+        directives: {
+            uppercase: {
+                update: function (el) {
+                    el.value = el.value.toUpperCase()
+                    el.dispatchEvent(new Event('input'))
+                }
+            }
+        },
+        computed: {
+            nextFieldIdx() {
+                if (this.columns.length > 0) {
+                    let fields = this.columns.slice()
+                    fields.sort((first, second) => (first.order > second.order) ? 1 : ((second.order > first.order) ? -1 : 0))
+
+                    return fields[fields.length - 1].order + 1
+                }
+
+                // 1~5: default column indexes of user table
+                return 6
+            },
         },
         methods: {
             async initData() {
                 await this.checkLogedIn()
-                if (this.mode == "edit" && this.id != null) {
-                    await this.getData()
-                }
+                await this.getColumnNames()
+                await this.getUsers()
             },
             async checkLogedIn() {
                 let result = false
@@ -117,15 +129,43 @@
                     }
                 }
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                }
             },
-            async getData() {
-                const keywords = [{ IDX: this.id }]
+            async getColumnNames() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-columns", {
+                    method: "GET",
+                    headers: headers,
+                })
+                if (response.ok) {
+                    this.columns = await response.json()
+                    this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+
+                    // this.columns = []
+                }
+            },
+            async getUsers() {
+                let keywords = []
 
                 let columns = this.columns.map((c) => {
+                    if (this.searchKeyword != "" && c.column != "IDX") {
+                        let keyword = {}
+
+                        keyword[c.column] = this.searchKeyword
+                        keywords.push(keyword)
+                    }
+
                     return c.column
                 })
 
@@ -138,72 +178,32 @@
                     Object.assign(headers, { "Authorization": "Bearer " + this.token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                let response = await fetch(this.restURI + "/users", {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
-                        options: { count: 1 },
+                        options: {
+                            order: "desc",
+                            count: "10"
+                        },
                         columns: columns,
-                        table: this.table
+                        table: "USERS"
                     })
                 })
-
                 if (response.ok) {
-                    this.contents = (await response.json())[0]
+                    this.users = await response.json()
                 }
             },
-            async writePost() {
-                let requestMethod = "PUT"
-                // this.contents.content = await tinymce.activeEditor.getContent()
-
-                let data = {}
-                await this.columns.forEach(async (c, i) => {
-                    switch (true) {
-                        case (c.column == "IDX"):
-                            // Use only when edit
-                            if (this.mode == "edit" && this.id != null) {
-                                requestMethod = "PATCH"
-                                data[c.column] = this.id
-                            }
-                            break
-                        case (c.type == "editor"):
-                            data[c.column] = await tinymce.get(c.column).getContent()
-                            break
-                        default:
-                            data[c.column] = this.contents[c.column]
-                            break
-                    }
-                })
-
-                let headers = {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json",
-                }
-
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
-                }
-
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
-                    method: requestMethod,
-                    headers: headers,
-                    body: JSON.stringify({
-                        data: data,
-                        table: this.table
-                    })
-                })
-
-                if (response.ok) {
-                    const result = await response.json()
-                    location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
-                }
-            }
         }
     })
 </script>
 
 <style>
+    * {
+        font-size: 0.9em;
+    }
+
     body {
         margin: 0;
         padding: 0.5em;
@@ -212,6 +212,27 @@
 
     #app {
         width: 100%;
+    }
+
+    table {
+        table-layout: fixed;
+        text-align: unset;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    td.link {
+        cursor: pointer;
+    }
+
+    td.link:hover {
+        text-decoration: underline;
+    }
+
+    tbody>tr:hover {
+        background: #FFD3D3;
     }
 </style>
 

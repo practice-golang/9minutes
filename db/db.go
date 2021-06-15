@@ -22,26 +22,34 @@ const (
 type DBI interface {
 	initDB() (*sql.DB, error)
 	CreateDB() error
-	CreateTable(bool) error
+	CreateBoardManagerTable(recreate bool) error
+	CreateUserFieldTable(recreate bool) error
+	CreateUserTable(recreate bool) error
 	CreateBasicBoard(tableInfo models.Board, recreate bool) error
 	CreateCustomBoard(tableInfo models.Board, fields []models.Field, recreate bool) error
 	EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
 	EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error
 	DeleteBoard(tableName string) error
 	CreateComment(tableInfo models.Board, recreate bool) error
+	AddUserTableFields(fields []models.UserColumn) error
+	EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error
+	DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error
+	SelectColumnNames(table string) (sql.Result, error)
 }
 
 var (
-	Dbi          DBI    // DB Object Interface
-	Dsn          string // Data Source Name
-	DatabaseName = "9minutes"
-	TableName    = "BOARDS"
-	Dbo          *sql.DB
-	DBType       int
-	UpdateScope  []string     // UPDATE ... WHERE IDX=?
-	IgnoreScope  []string     // Ignore if nil or null
-	listCount    uint     = 3 // Default list count
-	OrderScope   string       // Default order column name
+	Dbi               DBI    // DB Object Interface
+	Dsn               string // Data Source Name
+	DatabaseName      = "9minutes"
+	BoardManagerTable = "BOARD_TABLES"
+	UserFieldTable    = "USER_FIELDS"
+	UserTable         = "USERS"
+	Dbo               *sql.DB
+	DBType            int
+	UpdateScope       []string     // UPDATE ... WHERE IDX=?
+	IgnoreScope       []string     // Ignore if nil or null
+	listCount         uint     = 3 // Default list count
+	OrderScope        string       // Default order column name
 )
 
 // InitDB - Prepare DB

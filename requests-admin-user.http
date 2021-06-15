@@ -1,0 +1,105 @@
+@uri=http://localhost:2510
+# @uri=http://enjoytools.net:2510
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM4NjE2OTd9.PtGye0cLiWqPjZB0AwXqSxH2ojGtja0_a8nT6WqUaQE
+
+
+### Select all fields
+GET {{uri}}/api/admin/user-fields HTTP/1.1
+Authorization: Bearer {{token}}
+
+
+### Add user fields
+PUT {{uri}}/api/admin/user-fields HTTP/1.1
+content-type: application/json
+
+[
+    {
+        "name": "Gender",
+        "code": "gender",
+        "type": "text",
+        "column": "GENDER",
+        "order": 6
+    },
+    {
+        "name": "Age",
+        "code": "age",
+        "type": "text",
+        "column": "AGE",
+        "order": 7
+    },
+    {
+        "name": "Blood",
+        "code": "blood",
+        "type": "text",
+        "column": "BLOOD",
+        "order": 8
+    }
+]
+
+### Add user fields #2
+PUT {{uri}}/api/admin/user-fields HTTP/1.1
+content-type: application/json
+
+[
+    {
+        "name": "Job",
+        "code": "job",
+        "type": "text",
+        "column": "JOB",
+        "order": 9
+    }
+]
+
+### Modify user fields
+PATCH {{uri}}/api/admin/user-fields HTTP/1.1
+content-type: application/json
+
+[
+    {
+        "idx": 3,
+        "name": "Home",
+        "code": "home",
+        "type": "text",
+        "column": "HOME",
+        "order": 18
+    },
+    {
+        "idx": 4,
+        "name": "Hobby",
+        "code": "hobby",
+        "type": "text",
+        "column": "HOBBY",
+        "order": 19
+    }
+]
+
+### DELETE user field by index
+DELETE {{uri}}/api/admin/user-fields/18 HTTP/1.1
+
+
+### Get columns of user table
+GET {{uri}}/api/admin/user-columns HTTP/1.1
+Authorization: Bearer {{token}}
+
+
+### Select users
+POST {{uri}}/api/admin/users HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "order": "desc",
+        "count": "5"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "PASSWORD",
+        "EMAIL",
+        "ADMIN"
+    ],
+    "table": "USERS"
+}

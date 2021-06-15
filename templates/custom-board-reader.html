@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
-    <!-- <script src="js/vue.min.js"></script> -->
-    <script src="/assets/js/vue.js"></script>
-    <script src="/assets/js/sweetalert2.all.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
 
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
@@ -61,6 +61,7 @@
     const vm = new Vue({
         el: "#app",
         data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             table: "'##__TABLE_NAME__##'",
             columns: '##__COLUMNS__##',
@@ -80,10 +81,59 @@
             const uri = new URL(String(document.location.href))
             this.id = uri.searchParams.get("id")
 
-            this.getData()
-            this.getComments()
+            this.initData()
         },
         methods: {
+            async initData() {
+                await this.checkLogedIn()
+                await this.getData()
+                await this.getComments()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                // if (!result) {
+                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                //     location.href = "/users/login"
+                // }
+            },
             async getData() {
                 const keywords = [{ IDX: this.id }]
 
@@ -91,12 +141,18 @@
                     return c.column
                 })
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: { count: 1 },
@@ -112,12 +168,18 @@
             async getComments() {
                 const keywords = [{ bidx: this.id }]
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/comments", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: { count: 10 },
@@ -134,12 +196,18 @@
                 this.commentAdd.bidx = this.id
                 this.commentAdd.content = await tinymce.activeEditor.getContent()
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/comments", {
                     method: requestMethod,
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         data: this.commentAdd,
                         table: this.table

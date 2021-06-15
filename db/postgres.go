@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 	"strings"
 
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
@@ -35,8 +36,35 @@ func (d *Postgres) CreateDB() error {
 	return nil
 }
 
-// CreateTable - Create table
-func (d *Postgres) CreateTable(recreate bool) error {
+// CreateUserTable - Create user table
+func (d *Postgres) CreateUserTable(recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+		"IDX"			INTEGER,
+		"NAME"			TEXT,
+		"CODE"			TEXT,
+		"TYPE"			TEXT,
+		"COLUMN_NAME"	TEXT UNIQUE,
+		"ORDER"			INTEGER,
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateBoardManagerTable - Create board manager table
+func (d *Postgres) CreateBoardManagerTable(recreate bool) error {
 	sql := `CREATE SCHEMA IF NOT EXISTS #SCHEMA_NAME;`
 
 	if recreate {
@@ -52,7 +80,34 @@ func (d *Postgres) CreateTable(recreate bool) error {
 	);`
 
 	sql = strings.ReplaceAll(sql, "#SCHEMA_NAME", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", TableName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserFieldTable - Create user manager table
+func (d *Postgres) CreateUserFieldTable(recreate bool) error {
+	sql := `CREATE SCHEMA IF NOT EXISTS #SCHEMA_NAME;`
+
+	if recreate {
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		"IDX" SERIAL PRIMARY KEY,
+		"NAME" VARCHAR(128) NULL DEFAULT NULL,
+		"PRICE" NUMERIC(10,2) NULL DEFAULT NULL,
+		"AUTHOR" VARCHAR(128) NULL DEFAULT NULL,
+		"ISBN" VARCHAR(13) UNIQUE NULL DEFAULT NULL
+	);`
+
+	sql = strings.ReplaceAll(sql, "#SCHEMA_NAME", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
@@ -90,4 +145,76 @@ func (d *Postgres) DeleteBoard(tableName string) error {
 // CreateComment - Create comment table
 func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
 	return nil
+}
+
+// EditUserTableFields - Edit user table schema
+func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
+	return nil
+}
+
+// DeleteUserTableFields - Delete user table field
+func (d *Postgres) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) error {
+	remove := fieldsInfoRemove
+	sql := ""
+
+	if len(remove) > 0 {
+		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
+		for _, r := range remove {
+			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
+		}
+		if strings.Contains(sqlRemove, "DROP COLUMN") {
+			sqlRemove = sqlRemove[:len(sqlRemove)-2]
+		}
+		sql += sqlRemove + `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/DeleteUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AddUserTableFields - Add user column
+func (d *Postgres) AddUserTableFields(fields []models.UserColumn) error {
+	sql := ""
+	for _, a := range fields {
+		sql += `ALTER TABLE "#TABLE_NAME" ADD COLUMN ` + a.ColumnName.String + ` `
+		switch a.Type.String {
+		case "text":
+			sql += ` TEXT`
+		case "number":
+			sql += ` INTEGER`
+		case "real":
+			sql += ` REAL`
+		}
+
+		sql += `; `
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("Sqlite/EditUserTableFields: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SelectColumnNames - Get column names of table
+func (d *Postgres) SelectColumnNames(table string) (sql.Result, error) {
+	result, err := Dbo.Exec("PRAGMA TABLE_INFO(" + table + ")")
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
