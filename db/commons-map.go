@@ -85,15 +85,25 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 	switch jsonBody["keywords"].(type) {
 	case ([]interface{}):
 		keywords := jsonBody["keywords"].([]interface{})
-		for k, v := range keywords {
-			val := fmt.Sprintf("%s", v)
-			ex[fmt.Sprint(k)] = goqu.Op{"eq": val}
+		for _, keywordOBJ := range keywords {
+			ex := goqu.Ex{}
+			for k, d := range keywordOBJ.(map[string]interface{}) {
+				val := ""
+				if k == "IDX" {
+					val = fmt.Sprintf("%s", d)
+					ex[k] = goqu.Op{"eq": val}
+				} else {
+					val = fmt.Sprintf("%s%s%s", "%", d, "%")
+					ex[k] = goqu.Op{"like": val}
+				}
+			}
+			exps = append(exps, ex.Expression())
 		}
 	case (map[string]interface{}):
 		keywords := jsonBody["keywords"].(map[string]interface{})
 		for k, v := range keywords {
 			val := fmt.Sprintf("%s", v)
-			ex[fmt.Sprint(k)] = goqu.Op{"eq": val}
+			ex[k] = goqu.Op{"eq": val}
 		}
 	}
 

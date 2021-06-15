@@ -138,7 +138,7 @@ POST {{uri}}/api/custom-board/contents-list HTTP/1.1
 content-type: application/json
 
 {
-    "keywords": [{"IDX": "2"}],
+    "keywords": [{"IDX": "1"}],
     "options": {
         "count": "1"
     },

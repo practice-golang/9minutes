@@ -139,7 +139,7 @@ func boardTemplateHandler(c echo.Context) error {
 	mode := c.QueryParam("mode") // write
 	s := fs.FS(templateHTML)
 
-	log.Println(mode)
+	log.Println("boardTemplateHandler mode: ", mode)
 
 	boardInfos := board.GetBoardByCode(code)
 	boardType := ""

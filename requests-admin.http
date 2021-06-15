@@ -72,6 +72,7 @@ content-type: application/json
 
 ### Add boards
 PUT {{uri}}/api/admin/boards HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 [
@@ -196,15 +197,41 @@ content-type: application/json
 
 ### Modify board
 PATCH {{uri}}/api/admin/board HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
-    "idx": "5",
-    "name": "My board 3",
-    "code": "board3",
+    "idx": "2",
+    "name": "My board 0",
+    "code": "board0",
     "type": "custom-tablelist",
-    "table": "BOARD3",
-    "fields": []
+    "table": "BOARD0",
+    "fields": [
+        {
+            "idx": 1,
+            "column": "NAME",
+            "name": "Name",
+            "type": "text",
+            "json": "name",
+            "order": 2
+        },
+        {
+            "idx": 2,
+            "column": "CONTENT",
+            "name": "Content",
+            "type": "text",
+            "json": "content",
+            "order": 3
+        },
+        {
+            "idx": 3,
+            "column": "CREATOR",
+            "name": "Creator",
+            "type": "text",
+            "json": "creator",
+            "order": 4
+        }
+    ]
 }
 
 ### DELETE board

@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
 
-    <script src="/assets/tinymce/tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.8.1/tinymce.min.js"></script>
 </head>
 
 <body>
@@ -87,7 +87,14 @@
             async initData() {
                 await this.checkLogedIn()
                 await this.getData()
-                await this.getComments()
+
+                let columns = this.columns.map((c) => {
+                    return c.type
+                })
+
+                if (columns.includes("comment")) {
+                    await this.getComments()
+                }
             },
             async checkLogedIn() {
                 let result = false
@@ -188,7 +195,7 @@
                 })
 
                 if (response.ok) {
-                    this.comments = (await response.json())
+                    this.comments = await response.json()
                 }
             },
             async writeComment() {
