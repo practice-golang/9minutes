@@ -45,8 +45,9 @@ See `html` files in `/static` as pages and `/templates` as templates
 - [x] Search
 - [x] Edit
 - [x] Comment
-- [ ] User auth
+- [x] User auth
 - [ ] Other DB except sqlite
+- [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] User defined template
 - [ ] Email
