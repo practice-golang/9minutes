@@ -1,7 +1,6 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-
 ### HTML contents
 GET {{uri}}/board?code=board0 HTTP/1.1
 

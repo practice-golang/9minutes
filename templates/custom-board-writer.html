@@ -48,6 +48,7 @@
     const vm = new Vue({
         el: "#app",
         data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             table: "'##__TABLE_NAME__##'",
             columns: '##__COLUMNS__##',
@@ -67,11 +68,60 @@
                 // console.log(c.column)
             })
 
-            if (this.mode == "edit" && this.id != null) {
-                this.getData()
-            }
+            this.initData()
         },
         methods: {
+            async initData() {
+                await this.checkLogedIn()
+                if (this.mode == "edit" && this.id != null) {
+                    await this.getData()
+                }
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                // if (!result) {
+                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                //     location.href = "/users/login"
+                // }
+            },
             async getData() {
                 const keywords = [{ IDX: this.id }]
 
@@ -79,12 +129,18 @@
                     return c.column
                 })
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: { count: 1 },
@@ -120,12 +176,18 @@
                     }
                 })
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
                     method: requestMethod,
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         data: data,
                         table: this.table

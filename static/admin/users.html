@@ -50,6 +50,7 @@
     const vm = new Vue({
         el: "#app",
         data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
             users: [],
             // columns: '##__COLUMNS__##',
@@ -84,11 +85,69 @@
         },
         methods: {
             async initData() {
+                await this.checkLogedIn()
                 await this.getColumnNames()
                 await this.getUsers()
             },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                }
+            },
             async getColumnNames() {
-                let response = await fetch(this.restURI + "/user-columns", { method: "GET" })
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-columns", {
+                    method: "GET",
+                    headers: headers,
+                })
                 if (response.ok) {
                     this.columns = await response.json()
                     this.columns.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
@@ -110,12 +169,18 @@
                     return c.column
                 })
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/users", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: {

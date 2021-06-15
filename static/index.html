@@ -8,17 +8,17 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
-    
+
     <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
 </head>
 
 <body>
     <div id="app">
-        <a href="/admin/board">Admin - Board manager</a>
-        <a href="/admin/user-fields">Admin - User fields</a>
-        <a href="/users/login">Login</a>
-        <a href="/board?code=board1">Board1</a>
+        <br /><a href="/admin/board">Admin - Board manager</a>
+        <br /><a href="/admin/user-fields">Admin - User fields</a>
+        <br /><a href="/users/login">Login</a>
+        <br /><a href="/board?code=board1">Board1</a>
     </div>
 </body>
 
@@ -27,10 +27,60 @@
         el: "#app",
         data: {
             // restURI: "http://localhost:2918",
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host + window.location.pathname,
         },
-        mounted() {},
-        methods: {}
+        mounted() { this.initData() },
+        methods: {
+            async initData() {
+                await this.checkLogedIn()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (!result) {
+                    // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                }
+            },
+        }
     })
 </script>
 

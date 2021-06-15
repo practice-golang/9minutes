@@ -1,23 +1,27 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM4NjE2OTd9.PtGye0cLiWqPjZB0AwXqSxH2ojGtja0_a8nT6WqUaQE
 
 ### Select one
 GET {{uri}}/api/admin/board/2 HTTP/1.1
+Authorization: Bearer {{token}}
 
 
 ### Select All - Limit 10
 GET {{uri}}/api/admin/boards HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJSZWZyZXNoVW50aWwiOjE2MjYzNDc0ODQsImV4cCI6MTYyMzc1NTU0NH0.Eg1Q_xfHd1Syfn0FFRiGOAZKDv8quw5-ImMOqBB46Yo
+Authorization: Bearer {{token}}
 
 
 ### Select Data No paging, no search. listCount of /db/db.go: 3
 POST {{uri}}/api/admin/boards HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 
 ### Total page
 POST {{uri}}/api/admin/total-page HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -30,6 +34,7 @@ content-type: application/json
 
 ### Paging - Same as below search except keywords
 POST {{uri}}/api/admin/boards HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -46,6 +51,7 @@ content-type: application/json
 ### keywords -> board{name and code and type and table ...} or book{name and code and table} ...
 ### Use and inside book, use or each boards
 POST {{uri}}/api/admin/boards HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {

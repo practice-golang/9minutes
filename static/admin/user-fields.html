@@ -124,6 +124,7 @@
     const vm = new Vue({
         el: "#app",
         data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
             columns: [],
             columnAdd: {},
@@ -190,16 +191,70 @@
             },
         },
         methods: {
-            initData() { this.getColumns() },
+            async initData() {
+                await this.checkLogedIn()
+                await this.getColumns()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                }
+            },
             async getColumns() {
                 let keywords = []
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/user-fields", {
                     method: "GET",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    }
+                    headers: headers
                 })
                 if (response.ok) {
                     this.columns = await response.json()
@@ -209,12 +264,18 @@
             async addColumn() {
                 this.columnAdd.order = this.nextFieldIdx
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/user-fields", {
                     method: "PUT",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify([
                         {
                             "name": this.columnAdd.name,
@@ -233,12 +294,18 @@
                 this.columnAdd = {}
             },
             async updateColumn() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/user-fields", {
                     method: "PATCH",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify([
                         {
                             "idx": this.columnEdit.idx,
@@ -258,18 +325,36 @@
             async deleteColumn(idx) {
                 let keywords = []
 
-                let response = await fetch(this.restURI + "/user-fields/" + idx, { method: "DELETE" })
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
+                let response = await fetch(this.restURI + "/user-fields/" + idx, {
+                    method: "DELETE",
+                    headers: headers,
+                })
                 if (response.ok) {
                     this.getColumns()
                 }
             },
             async updateOrder() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/user-fields", {
                     method: "PATCH",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify(this.columns)
                 })
                 if (response.ok) {

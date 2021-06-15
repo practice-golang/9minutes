@@ -60,6 +60,7 @@
         el: "#app",
         data: {
             // restURI: "http://localhost:2918",
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             page: {
                 current: 1,
@@ -72,10 +73,57 @@
             contents: [],
             searchKeyword: "",
         },
-        mounted() {
-            this.getData()
-        },
+        mounted() { this.initData() },
         methods: {
+            async initData() {
+                await this.checkLogedIn()
+                await this.getData()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                // if (!result) {
+                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                //     location.href = "/users/login"
+                // }
+            },
             async getTotalPage() {
                 let keywords = []
                 if (this.searchKeyword != "") {
@@ -86,12 +134,18 @@
                     )
                 }
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/basic-board/total-page", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: {
@@ -117,12 +171,18 @@
                     )
                 }
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/basic-board/contents", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         keywords: keywords,
                         options: {
@@ -152,12 +212,18 @@
                     return false
                 }
 
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                }
+
                 let response = await fetch(this.restURI + "/api/basic-board/contents", {
                     method: "DELETE",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         data: {
                             idx: idx

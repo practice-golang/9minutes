@@ -17,7 +17,7 @@
     <div id="app">
         <a href="/">Root</a>
 
-        <div>
+        <div @keyup.enter="loginUser()">
             <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
             <input v-model="password" class="input" type="password" placeholder="Password" />
             <button @click="loginUser()">Login</button>
@@ -30,6 +30,7 @@
     const vm = new Vue({
         el: "#app",
         data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             table: "USERS",
             username: "",
@@ -44,11 +45,13 @@
                 let reissue = false
                 let response = ""
                 let r = ""
-                
-                const token = localStorage.getItem('token')
+
+                let token = localStorage.getItem('token')
+
+                console.log(token)
 
                 if (token != null) {
-                    response = await fetch(this.restURI + "/api/user/token", {
+                    response = await fetch(this.restURIdomain + "/api/user/token", {
                         method: "POST",
                         headers: { "Authorization": "Bearer " + token }
                     })
@@ -63,7 +66,7 @@
                     }
 
                     if (!result && reissue) {
-                        response = await fetch(this.restURI + "/api/user/token", {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
                             method: "GET",
                             headers: { "Authorization": "Bearer " + token }
                         })
@@ -79,9 +82,9 @@
                     }
                 }
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                    location.href = "/users/login"
+                if (result) {
+                    // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/"
                 }
             },
             async loginUser() {

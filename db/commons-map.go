@@ -80,15 +80,24 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	exps := []goqu.Expression{}
-
-	keywords := jsonBody["keywords"].(map[string]interface{})
 	ex := goqu.Ex{}
-	for k, v := range keywords {
-		val := fmt.Sprintf("%s", v)
-		ex[k] = goqu.Op{"eq": val}
+
+	switch jsonBody["keywords"].(type) {
+	case ([]interface{}):
+		keywords := jsonBody["keywords"].([]interface{})
+		for k, v := range keywords {
+			val := fmt.Sprintf("%s", v)
+			ex[fmt.Sprint(k)] = goqu.Op{"eq": val}
+		}
+	case (map[string]interface{}):
+		keywords := jsonBody["keywords"].(map[string]interface{})
+		for k, v := range keywords {
+			val := fmt.Sprintf("%s", v)
+			ex[fmt.Sprint(k)] = goqu.Op{"eq": val}
+		}
 	}
+
 	exps = append(exps, ex.Expression())
-	// log.Println("kworkds", keywords)
 
 	ds := dbms.From(jsonBody["table"].(string)).Select(colNames...)
 	ds = ds.Where(goqu.Or(exps...))
