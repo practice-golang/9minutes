@@ -1,4 +1,4 @@
-const setInnerHTML = function (elm, html) {
+let setInnerHTML = async function (elm, html) {
     elm.innerHTML = html
     Array.from(elm.querySelectorAll("script")).forEach(oldScript => {
         const newScript = document.createElement("script")
@@ -73,7 +73,9 @@ async function getPageContents() {
 
     if (response.ok) {
         const r = await response.text()
-        setInnerHTML(document.querySelector('#body-cavity'), r)
+
+        await setInnerHTML(document.querySelector('#body-cavity'), r)
+        setInnerHTML = undefined
     }
 }
 
