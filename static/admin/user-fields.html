@@ -218,6 +218,20 @@
                     column: "ADMIN",
                     order: 5
                 },
+                {
+                    name: "Approval",
+                    code: "approval",
+                    type: "text",
+                    column: "APPROVAL",
+                    order: 6
+                },
+                {
+                    name: "Reg datetime",
+                    code: "reg-dttm",
+                    type: "text",
+                    column: "REG_DTTM",
+                    order: 7
+                },
             ]
         },
         mounted() {
@@ -240,7 +254,7 @@
                     return fields[fields.length - 1].order + 1
                 }
 
-                return 6
+                return 8
             },
         },
         methods: {

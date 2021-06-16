@@ -99,7 +99,23 @@ content-type: application/json
         "NAME",
         "PASSWORD",
         "EMAIL",
-        "ADMIN"
+        "ADMIN",
+        "APPROVAL",
+        "REG_DTTM",
     ],
     "table": "USERS"
+}
+
+
+### Add a user
+PUT {{uri}}/api/admin/users HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "NAME": "user1",
+    "PASSWORD": "user12",
+    "EMAIL": "user@a.com",
+    "ADMIN": "N",
+    "APPROVAL": "N"
 }

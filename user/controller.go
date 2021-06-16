@@ -18,7 +18,6 @@ import (
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/golang-jwt/jwt"
-	_ "github.com/golang-jwt/jwt"
 )
 
 // AddFields - Insert user(s) optional table fields
@@ -151,8 +150,19 @@ func GetUserColumns(c echo.Context) error {
 
 // AddUser - Add user
 func AddUser(c echo.Context) error {
+	var err error
+	var data interface{}
 
-	return c.JSON(http.StatusOK, "test")
+	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
+
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		log.Println("AddUser: ", err)
+	}
+
+	log.Println(data)
+
+	return c.JSON(http.StatusOK, data)
 }
 
 // GetUsers - Get a user fields

@@ -15,7 +15,9 @@ content-type: application/json
         "NAME",
         "PASSWORD",
         "EMAIL",
-        "ADMIN"
+        "ADMIN",
+        "APPROVAL",
+        "REG_DTTM",
     ],
     "table": "USERS"
 }

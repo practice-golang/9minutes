@@ -85,9 +85,19 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td v-for="c, j in columns">
+                        <span v-if="c.column=='IDX'">Add user:</span>
+                        <input v-else v-model="userAdd[c.column]" />
+                    </td>
+                    <td><button>Add</button></td>
+                </tr>
                 <tr v-for="u, i in users">
                     <td v-for="c, j in columns">{{u[c.column]}}</td>
-                    <td><button>Delete</button></td>
+                    <td>
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -105,6 +115,7 @@
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
             users: [],
+            userAdd: {},
             // columns: '##__COLUMNS__##',
             columns: [],
             table: "'##__TABLE_NAME__##'",
@@ -131,8 +142,8 @@
                     return fields[fields.length - 1].order + 1
                 }
 
-                // 1~6: default column indexes of user table
-                return 7
+                // 1~7: default column indexes of user table
+                return 8
             },
         },
         methods: {
@@ -248,6 +259,9 @@
                 if (response.ok) {
                     this.users = await response.json()
                 }
+            },
+            search() {
+                this.getUsers()
             },
         }
     })

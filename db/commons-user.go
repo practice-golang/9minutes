@@ -178,6 +178,22 @@ func SelectUserColumnNames() (interface{}, error) {
 			ColumnName: null.NewString("ADMIN", true),
 			Order:      null.NewInt(5, true),
 		},
+		{
+			Idx:        null.NewInt(-1, true),
+			Name:       null.NewString("Approval", true),
+			Code:       null.NewString("approval", true),
+			Type:       null.NewString("text", true),
+			ColumnName: null.NewString("APPROVAL", true),
+			Order:      null.NewInt(6, true),
+		},
+		{
+			Idx:        null.NewInt(-1, true),
+			Name:       null.NewString("Reg datetime", true),
+			Code:       null.NewString("reg-dttm", true),
+			Type:       null.NewString("text", true),
+			ColumnName: null.NewString("REG_DTTM", true),
+			Order:      null.NewInt(7, true),
+		},
 	}
 
 	dbType, err := getDialect()
@@ -202,4 +218,9 @@ func SelectUserColumnNames() (interface{}, error) {
 	result = colResult
 
 	return result, nil
+}
+
+// InsertUser - Crud
+func InsertUser() {
+
 }

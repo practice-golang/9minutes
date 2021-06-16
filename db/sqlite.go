@@ -102,6 +102,7 @@ func (d *Sqlite) CreateUserTable(recreate bool) error {
 		"EMAIL"			TEXT UNIQUE,
 		"ADMIN"			TEXT,
 		"APPROVAL"		TEXT,
+		"REG_DTTM"		TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 

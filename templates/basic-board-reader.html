@@ -84,7 +84,7 @@
             comments: [],
             commentAdd: {
                 bidx: "",
-                comment: "",
+                content: "",
                 "writer-idx": "-1",
                 "writer-name": "",
                 "writer-password": "",
@@ -224,6 +224,8 @@
 
                 if (response.ok) {
                     const result = await response.json()
+                    this.commentAdd = {}
+                    tinymce.activeEditor.setContent("")
                     this.getComments()
                 }
             }

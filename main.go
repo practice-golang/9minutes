@@ -276,6 +276,7 @@ func setupServer() *echo.Echo {
 
 	a.GET("/user-columns", user.GetUserColumns)
 	a.POST("/users", user.GetUsers)
+	a.PUT("/users", user.AddUser)
 
 	u := e.Group("/api/user")
 	u.POST("/login", user.Login)
