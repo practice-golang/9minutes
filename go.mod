@@ -6,7 +6,6 @@ replace github.com/practice-golang/ngjson => ./ngjson
 
 require (
 	github.com/denisenkom/go-mssqldb v0.10.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/doug-martin/goqu/v9 v9.12.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt v3.2.1+incompatible
