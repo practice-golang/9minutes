@@ -15,10 +15,14 @@
 
 <body>
     <div id="app">
-        <br /><a href="/admin/board">Admin - Board manager</a>
-        <br /><a href="/admin/user-fields">Admin - User fields</a>
-        <br /><a href="/users/login">Login</a>
-        <br /><a href="/board?code=board1">Board1</a>
+        <div class="header">
+            <br /><a href="/admin/board">Admin - Board manager</a>
+            <br /><a href="/admin/user-fields">Admin - User fields</a>
+            <br /><a href="/admin/users">Admin - User manager</a>
+            <br /><a href="/users/login">Login</a>|<a href="" @click.self.prevent="logoutUser()">Logout</a>
+            <br /><a href="/board?code=board1">Board1</a>
+        </div>
+
     </div>
 </body>
 
@@ -44,7 +48,7 @@
                 const token = localStorage.getItem('token')
 
                 if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                         method: "POST",
                         headers: { "Authorization": "Bearer " + token }
                     })
@@ -59,7 +63,7 @@
                     }
 
                     if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                             method: "GET",
                             headers: { "Authorization": "Bearer " + token }
                         })
@@ -75,16 +79,24 @@
                     }
                 }
 
-                if (!result) {
-                    // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                    location.href = "/users/login"
-                }
+                // if (!result) {
+                //     // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                //     location.href = "/users/login"
+                // }
             },
+            async logoutUser() {
+                localStorage.removeItem("token")
+                swal.fire("Loged out", "", "success")
+            }
         }
     })
 </script>
 
 <style>
+    * {
+        font-size: 0.95em;
+    }
+
     body {
         margin: 0;
         padding: 0;

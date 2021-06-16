@@ -101,7 +101,7 @@
                 const token = localStorage.getItem('token')
 
                 if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                         method: "POST",
                         headers: { "Authorization": "Bearer " + token }
                     })
@@ -116,7 +116,7 @@
                     }
 
                     if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                             method: "GET",
                             headers: { "Authorization": "Bearer " + token }
                         })

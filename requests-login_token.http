@@ -22,10 +22,10 @@ content-type: application/json
 
 
 ### Verify token
-POST {{uri}}/api/user/token HTTP/1.1
+POST {{uri}}/api/user/token/verify HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM4NjE2OTd9.PtGye0cLiWqPjZB0AwXqSxH2ojGtja0_a8nT6WqUaQE
 
 
 ### Reissue token
-GET {{uri}}/api/user/token HTTP/1.1
+GET {{uri}}/api/user/token/verify HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM4NjE2OTd9.PtGye0cLiWqPjZB0AwXqSxH2ojGtja0_a8nT6WqUaQE

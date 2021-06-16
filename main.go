@@ -239,11 +239,6 @@ func setupServer() *echo.Echo {
 			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): "/static/admin/$1.html",
 		},
 	})
-	// contentRewriteUsersFields := middleware.RewriteWithConfig(middleware.RewriteConfig{
-	// 	RegexRules: map[*regexp.Regexp]string{
-	// 		regexp.MustCompile(`^/user-fields/([^\?]+)(\?(.*)|)`): "/static/user-fields/$1.html",
-	// 	},
-	// })
 	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
 			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): "/static/users/$1.html",
@@ -252,7 +247,6 @@ func setupServer() *echo.Echo {
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/static/$1"})
 
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
-	// e.GET("/user-fields/*", contentHandler, contentRewriteAdmin)
 	e.GET("/users/*", contentHandler, contentRewriteUsers)
 	e.GET("/*", contentHandler, contentRewrite)
 
@@ -295,7 +289,7 @@ func setupServer() *echo.Echo {
 			return c.JSON(http.StatusUnauthorized, result)
 		},
 	}))
-	ua.POST("/token", user.VerifyToken)
+	ua.POST("/token/verify", user.VerifyToken)
 
 	bb := e.Group("/api/basic-board")
 	bb.POST("/contents", contents.GetContentsListBasicBoard)

@@ -81,6 +81,8 @@ content-type: application/json
         "code": "customers",
         "type": "custom-tablelist",
         "table": "Customers",
+        "grant-read": "user",
+        "grant-write": "user",
         "fields": [
             {
                 "idx": 1,
@@ -129,6 +131,8 @@ content-type: application/json
         "code": "board0",
         "type": "custom-tablelist",
         "table": "BOARD0",
+        "grant-read": "all",
+        "grant-write": "admin",
         "fields": [
             {
                 "idx": 1,
@@ -160,13 +164,17 @@ content-type: application/json
         "name": "My board 1",
         "code": "board1",
         "type": "basic-board",
-        "table": "BOARD1"
+        "table": "BOARD1",
+        "grant-read": "all",
+        "grant-write": "user"
     },
     {
         "name": "My board 2",
         "code": "board2",
         "type": "basic-board",
         "table": "BOARD2",
+        "grant-read": "user",
+        "grant-write": "admin",
         "fields": []
     },
     {
@@ -174,6 +182,8 @@ content-type: application/json
         "code": "cboard2",
         "type": "custom-board",
         "table": "CBOARD3",
+        "grant-read": "all",
+        "grant-write": "admin",
         "fields": [
             {
                 "idx": 1,

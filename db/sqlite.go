@@ -40,12 +40,14 @@ func (d *Sqlite) CreateBoardManagerTable(recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
-		"IDX"		INTEGER,
-		"NAME"		TEXT,
-		"CODE"		TEXT,
-		"TYPE"		TEXT,
-		"TABLE"		TEXT UNIQUE,
-		"FIELDS"	TEXT,
+		"IDX"				INTEGER,
+		"NAME"				TEXT,
+		"CODE"				TEXT,
+		"TYPE"				TEXT,
+		"TABLE"				TEXT UNIQUE,
+		"GRANT_READ"		TEXT,
+		"GRANT_WRITE"		TEXT,
+		"FIELDS"			TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
@@ -94,11 +96,12 @@ func (d *Sqlite) CreateUserTable(recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
-		"IDX"				INTEGER,
-		"NAME"				TEXT UNIQUE,
-		"PASSWORD"			TEXT,
-		"EMAIL"				TEXT UNIQUE,
-		"ADMIN"				TEXT,
+		"IDX"			INTEGER,
+		"NAME"			TEXT UNIQUE,
+		"PASSWORD"		TEXT,
+		"EMAIL"			TEXT UNIQUE,
+		"ADMIN"			TEXT,
+		"APPROVAL"		TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 

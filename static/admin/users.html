@@ -6,6 +6,58 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <meta name="google" content="notranslate">
 
+    <script>
+        const restURIdomain = window.location.protocol + "//" + window.location.host
+        async function checkLogedIn() {
+            let result = false
+            let reissue = false
+            let response = ""
+            let r = ""
+
+            let token = localStorage.getItem('token')
+
+            if (token != null) {
+                response = await fetch(restURIdomain + "/api/user/token/verify", {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer " + token }
+                })
+                if (response.ok) {
+                    r = await response.json()
+                    if (r.msg == "OK") { result = true }
+                } else {
+                    if (response.status != 200) {
+                        r = await response.json()
+                        if (r.msg == "Token is expired") { reissue = true }
+                    }
+                }
+
+                if (!result && reissue) {
+                    response = await fetch(restURIdomain + "/api/user/token/verify", {
+                        method: "GET",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+
+                    if (response.ok) {
+                        r = await response.json()
+                        localStorage.setItem("token", r.token)
+                        token = r.token
+                        result = true
+                    } else {
+                        localStorage.removeItem("token")
+                        result = false
+                    }
+                }
+            }
+
+            return result
+        }
+
+        const logedin = checkLogedIn()
+        if (!logedin) {
+            location.href = "/users/login"
+        }
+    </script>
+
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="/assets/js/vue-i18n.js"></script>
@@ -19,7 +71,7 @@
     <div id="app">
         <div class="header">
             <h1>Users</h1>
-            <a href="/admin/board">Admin</a>
+            <a href="/">Root</a>
             <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
         </div>
 
@@ -79,8 +131,8 @@
                     return fields[fields.length - 1].order + 1
                 }
 
-                // 1~5: default column indexes of user table
-                return 6
+                // 1~6: default column indexes of user table
+                return 7
             },
         },
         methods: {
@@ -98,7 +150,7 @@
                 const token = localStorage.getItem('token')
 
                 if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token", {
+                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                         method: "POST",
                         headers: { "Authorization": "Bearer " + token }
                     })
@@ -113,7 +165,7 @@
                     }
 
                     if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
                             method: "GET",
                             headers: { "Authorization": "Bearer " + token }
                         })
@@ -132,6 +184,8 @@
                 if (!result) {
                     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
                     location.href = "/users/login"
+                } else {
+                    this.token = token
                 }
             },
             async getColumnNames() {
@@ -201,7 +255,7 @@
 
 <style>
     * {
-        font-size: 0.9em;
+        font-size: 0.95em;
     }
 
     body {
