@@ -99,11 +99,11 @@ func setupDB() error {
 	}
 	err = db.Dbi.CreateUserFieldTable(recreate)
 	if err != nil {
-		log.Fatal("Create User manager Table: ", err)
+		log.Fatal("Create User field Table: ", err)
 	}
 	err = db.Dbi.CreateUserTable(recreate)
 	if err != nil {
-		log.Fatal("Create User manager Table: ", err)
+		log.Fatal("Create User Table: ", err)
 	}
 
 	return err
@@ -247,6 +247,24 @@ func setupServer() *echo.Echo {
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/static/$1"})
 
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
+
+	// Body include test
+	contentRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/body/([^\?]+)(\?(.*)|)`): "/static/admin/$1-body.html",
+		},
+	})
+	bd := e.Group("/body/*")
+	bd.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}))
+	bd.GET("/*", contentHandler, contentRewriteBody)
+
 	e.GET("/users/*", contentHandler, contentRewriteUsers)
 	e.GET("/*", contentHandler, contentRewrite)
 
@@ -277,6 +295,8 @@ func setupServer() *echo.Echo {
 	a.GET("/user-columns", user.GetUserColumns)
 	a.POST("/users", user.GetUsers)
 	a.PUT("/users", user.AddUser)
+	a.PATCH("/users", user.EditUser)
+	a.DELETE("/users/:idx", user.DeleteUser)
 
 	u := e.Group("/api/user")
 	u.POST("/login", user.Login)

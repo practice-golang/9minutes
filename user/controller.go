@@ -157,12 +157,84 @@ func AddUser(c echo.Context) error {
 
 	err = json.Unmarshal(dataJSON, &data)
 	if err != nil {
-		log.Println("AddUser: ", err)
+		log.Println("AddUser json: ", err)
 	}
 
-	log.Println(data)
+	sqlResult, err := db.InsertUser(data)
+	if err != nil {
+		log.Println("AddUser db: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
 
-	return c.JSON(http.StatusOK, data)
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+// EditUser - Edit user
+func EditUser(c echo.Context) error {
+	var err error
+	var data interface{}
+
+	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
+
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		log.Println("EditUser json: ", err)
+	}
+
+	sqlResult, err := db.UpdateUser(data)
+	if err != nil {
+		log.Println("EditUser db: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
+// DeleteUser - Delete user
+func DeleteUser(c echo.Context) error {
+	var err error
+	var data interface{}
+
+	idx := c.Param("idx")
+
+	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
+
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		log.Println("DeleteUser json: ", err)
+	}
+
+	sqlResult, err := db.DeleteUser(idx)
+	if err != nil {
+		log.Println("DeleteUser db: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 // GetUsers - Get a user fields

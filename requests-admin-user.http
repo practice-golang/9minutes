@@ -96,7 +96,7 @@ content-type: application/json
     },
     "columns": [
         "IDX",
-        "NAME",
+        "USERNAME",
         "PASSWORD",
         "EMAIL",
         "ADMIN",
@@ -113,9 +113,29 @@ Authorization: Bearer {{token}}
 content-type: application/json
 
 {
-    "NAME": "user1",
-    "PASSWORD": "user12",
+    "USERNAME": "user1",
+    "PASSWORD": "user1",
     "EMAIL": "user@a.com",
     "ADMIN": "N",
     "APPROVAL": "N"
 }
+
+### Edit a user
+PATCH {{uri}}/api/admin/users HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "IDX": 2,
+    "USERNAME": "user1",
+    "PASSWORD": "user1",
+    "EMAIL": "user@mymy.com",
+    "ADMIN": "N",
+    "APPROVAL": "Y"
+}
+
+### Delete user
+DELETE {{uri}}/api/admin/users/2 HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+

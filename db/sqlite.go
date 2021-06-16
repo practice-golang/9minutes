@@ -97,14 +97,19 @@ func (d *Sqlite) CreateUserTable(recreate bool) error {
 	sql += `
 	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
 		"IDX"			INTEGER,
-		"NAME"			TEXT UNIQUE,
+		"USERNAME"		TEXT UNIQUE,
 		"PASSWORD"		TEXT,
 		"EMAIL"			TEXT UNIQUE,
 		"ADMIN"			TEXT,
 		"APPROVAL"		TEXT,
-		"REG_DTTM"		TEXT,
+		"REG_DTTM"		INTEGER,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
+
+	// Add temp admin
+	sql += `
+	INSERT OR IGNORE INTO #TABLE_NAME (USERNAME, PASSWORD, EMAIL, ADMIN, APPROVAL)
+		VALUES ("admin", "admin", "admin@a.com", "Y", "Y")`
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 

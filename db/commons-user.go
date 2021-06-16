@@ -148,10 +148,10 @@ func SelectUserColumnNames() (interface{}, error) {
 		},
 		{
 			Idx:        null.NewInt(-1, true),
-			Name:       null.NewString("Name", true),
-			Code:       null.NewString("name", true),
+			Name:       null.NewString("User name", true),
+			Code:       null.NewString("username", true),
 			Type:       null.NewString("text", true),
-			ColumnName: null.NewString("NAME", true),
+			ColumnName: null.NewString("USERNAME", true),
 			Order:      null.NewInt(2, true),
 		},
 		{
@@ -221,6 +221,83 @@ func SelectUserColumnNames() (interface{}, error) {
 }
 
 // InsertUser - Crud
-func InsertUser() {
+func InsertUser(data interface{}) (sql.Result, error) {
+	rcds := []goqu.Record{}
 
+	if data != nil {
+		rcd := goqu.Record{}
+		for k, d := range data.(map[string]interface{}) {
+			rcd[k] = d
+		}
+		rcds = append(rcds, rcd)
+	}
+
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Insert(UserTable).Rows(rcds)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// UpdateUser - crUd
+func UpdateUser(data interface{}) (sql.Result, error) {
+	whereEXP := goqu.Ex{}
+
+	if data != nil {
+		for k, d := range data.(map[string]interface{}) {
+			if k == "IDX" {
+				whereEXP[k] = d
+			}
+		}
+	}
+
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Update(UserTable).Set(data).Where(whereEXP)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// DeleteUser - cruD
+func DeleteUser(idx string) (sql.Result, error) {
+	whereEXP := goqu.Ex{"IDX": idx}
+
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Delete(UserTable).Where(whereEXP)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

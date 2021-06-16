@@ -39,20 +39,24 @@ See `html` files in `/static` as pages and `/templates` as templates
 
 
 ## DB
-...
+
+Current, Sqlite only
+
 
 ## Todo
 - [x] Search
 - [x] Edit
 - [x] Comment
-- [ ] User auth, delete user
-- [ ] Other DB except sqlite
+- [x] User add, edit, delete
+- [ ] User auth
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] User defined template
+- [ ] Other DB except sqlite
 - [ ] Email
 - [ ] ~~Menu~~
 - [ ] Test
+
 
 ## License
 Copyright (c) Sungwook Shin

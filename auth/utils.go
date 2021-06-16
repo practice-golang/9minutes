@@ -13,7 +13,7 @@ var (
 
 // CustomClaims - jwt custom claim
 type CustomClaims struct {
-	Name         string `json:"name"`
+	UserName     string `json:"username"`
 	Email        string `json:"email"`
 	Admin        string `json:"admin"`
 	RefreshUntil int64  `json:"refresh-until"`
@@ -25,7 +25,7 @@ func PrepareToken(data interface{}) (string, error) {
 	d := data.(map[string]interface{})
 
 	claims := &CustomClaims{
-		fmt.Sprint(d["NAME"]),
+		fmt.Sprint(d["USERNAME"]),
 		fmt.Sprint(d["EMAIL"]),
 		fmt.Sprint(d["ADMIN"]),
 		time.Now().Add(time.Hour * 30 * 24).Unix(),
