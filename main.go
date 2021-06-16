@@ -251,7 +251,7 @@ func setupServer() *echo.Echo {
 	// Body include test
 	contentRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/body/([^\?]+)(\?(.*)|)`): "/static/admin/$1-body.html",
+			regexp.MustCompile(`^/body/([^\?]+)(\?(.*)|)`): "/static/admin/html-body/$1.html",
 		},
 	})
 	bd := e.Group("/body/*")
