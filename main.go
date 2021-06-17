@@ -233,28 +233,25 @@ func setupServer() *echo.Echo {
 		middleware.Recover(),
 	)
 
+	staticRoot := "/static"
+	// routeTargetFilename := "$1"
+	rewriteTargetFilename := "page-loader"
+
 	contentHandler := echo.WrapHandler(http.FileServer(http.FS(content)))
 	contentRewriteAdmin := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): "/static/admin/$1.html",
+			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): staticRoot + "/" + rewriteTargetFilename + ".html",
 		},
 	})
-	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
-		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): "/static/users/$1.html",
-		},
-	})
-	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/static/$1"})
 
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
 
-	// Body include test
 	contentRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/body/([^\?]+)(\?(.*)|)`): "/static/html-body/$1-body.html",
+			regexp.MustCompile(`^/contents-body/([^\?]+)(\?(.*)|)`): staticRoot + "/html-body/$1.html",
 		},
 	})
-	bd := e.Group("/body/*")
+	bd := e.Group("/contents-body/*")
 	bd.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey: jwtKey,
 		ErrorHandlerWithContext: func(e error, c echo.Context) error {
@@ -265,7 +262,21 @@ func setupServer() *echo.Echo {
 	}))
 	bd.GET("/*", contentHandler, contentRewriteBody)
 
+	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): staticRoot + "/users/$1.html",
+		},
+	})
 	e.GET("/users/*", contentHandler, contentRewriteUsers)
+
+	contentRewriteAssets := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/assets/([^\?]+)(\?(.*)|)`): staticRoot + "/assets/$1",
+		},
+	})
+	e.GET("/assets/*", contentHandler, contentRewriteAssets)
+
+	contentRewrite := middleware.Rewrite(map[string]string{"/*": staticRoot + "/"})
 	e.GET("/*", contentHandler, contentRewrite)
 
 	e.GET("/board", boardTemplateHandler)
@@ -313,6 +324,32 @@ func setupServer() *echo.Echo {
 	ua.POST("/token/verify", user.VerifyToken)
 
 	bb := e.Group("/api/basic-board")
+	bb.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		Skipper: func(c echo.Context) bool {
+			code := c.QueryParam("code")
+			mode := c.QueryParam("mode") // read, write
+
+			boardInfos := board.GetBoardByCode(code)
+			if len(boardInfos) == 0 {
+				return false
+			}
+
+			switch true {
+			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
+				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
+				return true
+			default:
+				return false
+			}
+		},
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}))
 	bb.POST("/contents", contents.GetContentsListBasicBoard)
 	bb.PUT("/contents", contents.AddContentsBasicBoard)
 	bb.PATCH("/contents", contents.UpdateContentsBasicBoard)
@@ -320,6 +357,32 @@ func setupServer() *echo.Echo {
 	bb.POST("/total-page", contents.GetContentsTotalPage)
 
 	cb := e.Group("/api/custom-board")
+	cb.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		Skipper: func(c echo.Context) bool {
+			code := c.QueryParam("code")
+			mode := c.QueryParam("mode") // read, write
+
+			boardInfos := board.GetBoardByCode(code)
+			if len(boardInfos) == 0 {
+				return false
+			}
+
+			switch true {
+			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
+				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
+				return true
+			default:
+				return false
+			}
+		},
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}))
 	cb.POST("/contents-list", contents.GetContentsListCustomBoard)
 	cb.PUT("/contents-list", contents.AddContentsListCustomBoard)
 	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)

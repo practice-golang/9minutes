@@ -11,13 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/auth"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
 	"gopkg.in/guregu/null.v4"
-
-	"github.com/golang-jwt/jwt"
 )
 
 // AddFields - Insert user(s) optional table fields

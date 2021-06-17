@@ -303,7 +303,7 @@ func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 		}
 		exps = append(exps, ex.Expression())
 	}
-	log.Println("kworkds", keywords)
+	log.Println("SelectContentsCountMAP keywords: ", keywords)
 
 	ds := dbms.From(jsonBody["table"].(string)).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 	ds = ds.Where(goqu.Or(exps...))

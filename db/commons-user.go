@@ -86,8 +86,6 @@ func UpdateUserFields(data interface{}) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
-	log.Println("WTF??????")
-
 	dbms := goqu.New(dbType, Dbo)
 	// var ex goqu.Ex
 	for _, d := range data.([]models.UserColumn) {

@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-show="isShow">
         <h1>{{table}}</h1>
         <a href="/admin/board">Admin</a>
         <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
@@ -55,6 +55,27 @@
 </body>
 
 <script>
+    function showError(status) {
+        switch (status) {
+            case 401:
+                swal.fire("Unauthorized", "need login", "error").then(() => {
+                    localStorage.removeItem("token")
+                    location.href = "/users/login"
+                })
+                break
+            case 403:
+                swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
+                    location.href = "/"
+                })
+                break
+            default:
+                swal.fire("Error occured", "", "error")
+                break
+        }
+
+        return false
+    }
+
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
@@ -62,6 +83,7 @@
             // restURI: "http://localhost:2918",
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
+            isShow: false,
             page: {
                 current: 1,
                 total: 1,
@@ -73,7 +95,12 @@
             contents: [],
             searchKeyword: "",
         },
-        mounted() { this.initData() },
+        mounted() {
+            // const uri = new URL(String(document.location.href))
+            // this.code = String(uri.searchParams.get("code"))
+
+            this.initData()
+        },
         methods: {
             async initData() {
                 await this.checkLogedIn()
@@ -139,11 +166,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/total-page", {
+                let response = await fetch(this.restURI + "/api/basic-board/total-page?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -157,7 +186,12 @@
                 if (response.ok) {
                     r = await response.json()
                     this.page.total = r["total-page"]
+
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             async getData() {
                 this.getTotalPage()
@@ -176,11 +210,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                let response = await fetch(this.restURI + "/api/basic-board/contents?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -196,7 +232,12 @@
 
                 if (response.ok) {
                     this.contents = await response.json()
+                    this.isShow = true
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             async deleteData(idx) {
                 const confirm = await swal.fire({
@@ -217,11 +258,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                let response = await fetch(this.restURI + "/api/basic-board/contents?code=" + this.boardCode, {
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
@@ -235,7 +278,11 @@
                 if (response.ok) {
                     swal.fire("Success", "Deleted successfully", "success")
                     this.getData()
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             movePage(page) {
                 // page 1 = idx 0

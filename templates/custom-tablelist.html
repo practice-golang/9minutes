@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-show="isShow">
         <h1>Custom tablelist</h1>
         <a href="/admin/board">Admin</a>
         <input v-model="searchKeyword" @keyup.enter="search()" placeholder="Search" />&nbsp;<button @click="search()">🍳</button>
@@ -67,11 +67,33 @@
 </body>
 
 <script>
+    function showError(status) {
+        switch (status) {
+            case 401:
+                swal.fire("Unauthorized", "need login", "error").then(() => {
+                    localStorage.removeItem("token")
+                    location.href = "/users/login"
+                })
+                break
+            case 403:
+                swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
+                    location.href = "/"
+                })
+                break
+            default:
+                swal.fire("Error occured", "", "error")
+                break
+        }
+
+        return false
+    }
+
     const vm = new Vue({
         el: "#app",
         data: {
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
+            isShow: false,
             page: {
                 current: 1,
                 total: 1,
@@ -80,6 +102,7 @@
             },
             columns: '##__COLUMNS__##',
             table: "'##__TABLE_NAME__##'",
+            boardCode: "'##__BOARD_CODE__##'",
             contents: [],
             searchKeyword: "",
             contentsAdd: {},
@@ -156,11 +179,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/total-page", {
+                let response = await fetch(this.restURI + "/api/custom-board/total-page?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -197,11 +222,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -218,7 +245,12 @@
 
                 if (response.ok) {
                     this.contents = await response.json()
+                    this.isShow = true
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             async addData() {
                 if (Object.keys(this.contentsAdd).length < 3) {
@@ -238,11 +270,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
                     method: "PUT",
                     headers: headers,
                     body: JSON.stringify({
@@ -258,7 +292,10 @@
                     return false
                 }
 
-                console.log(this.contentsAdd)
+                // console.log(this.contentsAdd)
+
+                showError(response.status)
+                return false
             },
             async updateData() {
                 let headers = {
@@ -266,11 +303,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
                     method: "PATCH",
                     headers: headers,
                     body: JSON.stringify({
@@ -306,11 +345,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list", {
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
@@ -322,7 +363,11 @@
                 if (response.ok) {
                     swal.fire("Success", "Deleted successfully", "success")
                     this.getData()
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             movePage(page) {
                 // page 1 = idx 0

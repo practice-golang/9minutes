@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-show="isShow">
         <h1>{{table}}</h1>
         <h2>{{contents.title}}</h2>
         <table>
@@ -52,6 +52,27 @@
 </body>
 
 <script>
+    function showError(status) {
+        switch (status) {
+            case 401:
+                swal.fire("Unauthorized", "need login", "error").then(() => {
+                    localStorage.removeItem("token")
+                    location.href = "/users/login"
+                })
+                break
+            case 403:
+                swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
+                    location.href = "/"
+                })
+                break
+            default:
+                swal.fire("Error occured", "", "error")
+                break
+        }
+
+        return false
+    }
+
     tinymce.init({
         selector: "textarea.editors",
         mode: "textareas",
@@ -71,6 +92,7 @@
         data: {
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
+            isShow: false,
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
             id: "",
@@ -155,11 +177,13 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                let response = await fetch(this.restURI + "/api/basic-board/contents?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -171,7 +195,12 @@
 
                 if (response.ok) {
                     this.contents = (await response.json())[0]
+                    this.isShow = true
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             async getComments() {
                 const keywords = [{ bidx: this.id }]
@@ -181,8 +210,10 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
                 let response = await fetch(this.restURI + "/api/comments", {
@@ -197,7 +228,11 @@
 
                 if (response.ok) {
                     this.comments = (await response.json())
+                    return false
                 }
+
+                showError(response.status)
+                return false
             },
             async writeComment() {
                 let requestMethod = "PUT"
@@ -209,8 +244,10 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
                 let response = await fetch(this.restURI + "/api/comments", {
@@ -226,8 +263,13 @@
                     const result = await response.json()
                     this.commentAdd = {}
                     tinymce.activeEditor.setContent("")
+
                     this.getComments()
+                    return false
                 }
+
+                showError(response.status)
+                return false
             }
         }
     })

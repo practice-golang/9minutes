@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-show="isShow">
         <h1>{{table}}</h1>
         <tr>
             <td><input v-model="contents['writer-name']" placeholder="name" /></td>
@@ -41,6 +41,27 @@
 </body>
 
 <script>
+    function showError(status) {
+        switch (status) {
+            case 401:
+                swal.fire("Unauthorized", "need login", "error").then(() => {
+                    localStorage.removeItem("token")
+                    location.href = "/users/login"
+                })
+                break
+            case 403:
+                swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
+                    location.href = "/"
+                })
+                break
+            default:
+                swal.fire("Error occured", "", "error")
+                break
+        }
+
+        return false
+    }
+
     tinymce.init({
         selector: "textarea.editors",
         mode: "textareas",
@@ -60,6 +81,8 @@
         data: {
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
+            // isShow: false,
+            isShow: true,
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
             mode: "",
@@ -139,8 +162,10 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
                 let response = await fetch(this.restURI + "/api/basic-board/contents", {
@@ -171,8 +196,10 @@
                     "Content-Type": "application/json",
                 }
 
-                if (this.token != undefined && this.token != null) {
-                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
                 let response = await fetch(this.restURI + "/api/basic-board/contents", {

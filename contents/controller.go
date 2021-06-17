@@ -10,12 +10,17 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/practice-golang/9minutes/auth"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
 )
 
 // GetContentsListBasicBoard - Get contents
 func GetContentsListBasicBoard(c echo.Context) error {
+	if !auth.CheckAuth(c) {
+		return c.JSON(http.StatusForbidden, "")
+	}
+
 	var data interface{}
 	var err error
 
@@ -159,6 +164,10 @@ func GetContentsTotalPage(c echo.Context) error {
 
 // GetContentsListCustomBoard - Get contents
 func GetContentsListCustomBoard(c echo.Context) error {
+	if !auth.CheckAuth(c) {
+		return c.JSON(http.StatusForbidden, "")
+	}
+
 	var data interface{}
 	var err error
 
@@ -234,6 +243,10 @@ func DeleteContentsListCustomBoard(c echo.Context) error {
 
 // GetContentsTotalPageMAP - Get total page of custom board
 func GetContentsTotalPageMAP(c echo.Context) error {
+	if !auth.CheckAuth(c) {
+		return c.JSON(http.StatusForbidden, "")
+	}
+
 	search, _ := ioutil.ReadAll(c.Request().Body)
 
 	data, count, err := db.SelectContentsCountMAP(search)

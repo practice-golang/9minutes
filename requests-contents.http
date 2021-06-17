@@ -1,6 +1,8 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBhLmNvbSIsImFkbWluIjoiWSIsInJlZnJlc2gtdW50aWwiOjE2MjY1MDIyNDcsImV4cCI6MTYyMzk5NjY0N30.ZAg_DFvwGWQcDXSSQx1niVlLxJ6_bSlBeyIFKnZUs1s
+
 ### HTML contents
 GET {{uri}}/board?code=board0 HTTP/1.1
 
@@ -12,6 +14,7 @@ GET {{uri}}/board?code=board1&mode=read&id=1 HTTP/1.1
 
 ### Read contents list
 POST {{uri}}/api/basic-board/contents HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -24,6 +27,7 @@ content-type: application/json
 
 ### Read Contents
 POST {{uri}}/api/basic-board/contents HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -40,6 +44,7 @@ content-type: application/json
 
 ### Write a content
 PUT {{uri}}/api/basic-board/contents HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -55,6 +60,7 @@ content-type: application/json
 
 ### Edit a content
 PATCH {{uri}}/api/basic-board/contents HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -71,6 +77,7 @@ content-type: application/json
 
 ### Delete a content
 DELETE {{uri}}/api/basic-board/contents HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -82,6 +89,7 @@ content-type: application/json
 
 ### Total page of content
 POST {{uri}}/api/basic-board/total-page HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -98,6 +106,7 @@ content-type: application/json
 
 ### Read contents - tablelist
 POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -117,6 +126,7 @@ content-type: application/json
 
 ### Read contents - custom board
 POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {

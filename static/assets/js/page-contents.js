@@ -7,6 +7,8 @@ let setInnerHTML = async function (elm, html) {
         newScript.appendChild(document.createTextNode(oldScript.innerHTML))
         oldScript.parentNode.replaceChild(newScript, oldScript)
     })
+
+    return true
 }
 const restURIdomain = window.location.protocol + "//" + window.location.host
 
@@ -66,7 +68,7 @@ async function getPageContents() {
         location.href = "/users/login"
     }
 
-    let response = await fetch(restURIdomain + "/body/users", {
+    let response = await fetch(restURIdomain + "/contents-body/" + routeTarget, {
         method: "GET",
         headers: { "Authorization": "Bearer " + grant.token }
     })
@@ -74,9 +76,13 @@ async function getPageContents() {
     if (response.ok) {
         const r = await response.text()
 
-        await setInnerHTML(document.querySelector('#body-cavity'), r)
-        setInnerHTML = undefined
+        let result = await setInnerHTML(document.querySelector('#body-cavity'), r)
+        if (result) {
+            setInnerHTML = undefined
+        }
     }
 }
 
-getPageContents()
+window.onload = () => {
+    getPageContents()
+}

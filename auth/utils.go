@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo/v4"
+	"github.com/practice-golang/9minutes/board"
 )
 
 var (
@@ -40,4 +42,50 @@ func PrepareToken(data interface{}) (string, error) {
 	}
 
 	return result, nil
+}
+
+// CheckAuth - Check role is valid with board setting
+func CheckAuth(c echo.Context) (isValid bool) {
+	code := c.QueryParam("code")
+	mode := c.QueryParam("mode") // read, write
+
+	boardInfos := board.GetBoardByCode(code)
+
+	if len(boardInfos) == 0 {
+		isValid = false
+		return
+	}
+
+	grantRead := boardInfos[0].GrantRead.String
+	grantWrite := boardInfos[0].GrantWrite.String
+
+	user := c.Get("user")
+
+	if user == nil {
+		switch true {
+		case (mode == "write" && grantWrite == "all") ||
+			(mode != "write" && grantRead == "all"):
+			isValid = true
+		default:
+			isValid = false
+		}
+	} else {
+		claims := user.(*jwt.Token).Claims.(*CustomClaims)
+		// log.Println("CheckAuth: ", claims)
+		// log.Println("CheckAuth: ", claims.Admin, code, mode, boardInfos[0].GrantWrite.String, boardInfos[0].GrantRead.String)
+
+		switch true {
+		case (mode == "write" && (grantWrite == "admin" && claims.Admin == "Y")) ||
+			(mode != "write" && (grantRead == "admin" && claims.Admin == "Y")) ||
+			(mode == "write" && grantWrite == "user") ||
+			(mode != "write" && grantRead == "user") ||
+			(mode == "write" && grantWrite == "all") ||
+			(mode != "write" && grantRead == "all"):
+			isValid = true
+		default:
+			isValid = false
+		}
+	}
+
+	return
 }

@@ -95,7 +95,7 @@ func GetBoards(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-// GetBoard - Get a board info
+// GetBoardByCode - Get a board info
 func GetBoardByCode(boardName string) []models.Board {
 	dataINTF, err := db.SelectData(models.Board{Code: null.NewString(boardName, true)})
 	if err != nil {
