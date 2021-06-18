@@ -31,9 +31,9 @@ import (
 
 var (
 	//go:embed static
-	content embed.FS
+	staticPATH embed.FS
 	//go:embed templates
-	templateHTML embed.FS
+	templatePATH embed.FS
 	//go:embed samples/9minutes.ini
 	sampleINI string
 
@@ -133,11 +133,41 @@ func dumpHandler(c echo.Context, reqBody, resBody []byte) {
 	}
 }
 
-// Choose html template
+// Admin page
+func adminTemplateHandler(c echo.Context) error {
+	if !auth.IsAdmin(c) {
+		return c.JSON(http.StatusForbidden, "")
+	}
+
+	status := http.StatusOK
+	sPath := fs.FS(staticPATH)
+
+	var content []byte
+	var err error
+	var contents string
+
+	filePath := c.Request().URL.RequestURI()
+	// Remove slash
+	if filePath[0] == '/' {
+		filePath = filePath[1:]
+	}
+
+	content, err = fs.ReadFile(sPath, filePath)
+	if err != nil {
+		return c.HTML(http.StatusNotFound, "Not found")
+	}
+
+	contents = string(content)
+
+	return c.HTML(status, contents)
+}
+
+// Choose board template
 func boardTemplateHandler(c echo.Context) error {
+	status := http.StatusOK
 	code := c.QueryParam("code")
 	mode := c.QueryParam("mode") // write
-	s := fs.FS(templateHTML)
+	tPath := fs.FS(templatePATH)
 
 	log.Println("boardTemplateHandler mode: ", mode)
 
@@ -154,26 +184,27 @@ func boardTemplateHandler(c echo.Context) error {
 	var content []byte
 	var err error
 	var contents string
+
 	switch boardType {
 	case "basic-board":
 		switch mode {
 		case "write", "edit":
-			content, err = fs.ReadFile(s, "templates/basic-board-writer.html")
+			content, err = fs.ReadFile(tPath, "templates/basic-board-writer.html")
 		case "read":
-			content, err = fs.ReadFile(s, "templates/basic-board-reader.html")
+			content, err = fs.ReadFile(tPath, "templates/basic-board-reader.html")
 		default:
-			content, err = fs.ReadFile(s, "templates/basic-board-list.html")
+			content, err = fs.ReadFile(tPath, "templates/basic-board-list.html")
 		}
 
 		contents = string(content)
 	case "custom-board":
 		switch mode {
 		case "write", "edit":
-			content, err = fs.ReadFile(s, "templates/custom-board-writer.html")
+			content, err = fs.ReadFile(tPath, "templates/custom-board-writer.html")
 		case "read":
-			content, err = fs.ReadFile(s, "templates/custom-board-reader.html")
+			content, err = fs.ReadFile(tPath, "templates/custom-board-reader.html")
 		default:
-			content, err = fs.ReadFile(s, "templates/custom-board-list.html")
+			content, err = fs.ReadFile(tPath, "templates/custom-board-list.html")
 		}
 
 		columnsInterface := []map[string]interface{}{
@@ -193,7 +224,7 @@ func boardTemplateHandler(c echo.Context) error {
 		columns, _ := json.Marshal(columnsInterface)
 		contents = strings.ReplaceAll(string(content), "'##__COLUMNS__##'", string(columns))
 	case "custom-tablelist":
-		content, err = fs.ReadFile(s, "templates/custom-tablelist.html")
+		content, err = fs.ReadFile(tPath, "templates/custom-tablelist.html")
 		columnsInterface := []map[string]interface{}{
 			{
 				"idx":    0,
@@ -221,7 +252,7 @@ func boardTemplateHandler(c echo.Context) error {
 		log.Println("template READ: ", boardType, err)
 	}
 
-	return c.HTML(http.StatusOK, contents)
+	return c.HTML(status, contents)
 }
 
 func setupServer() *echo.Echo {
@@ -237,7 +268,44 @@ func setupServer() *echo.Echo {
 	// routeTargetFilename := "$1"
 	rewriteTargetFilename := "page-loader"
 
-	contentHandler := echo.WrapHandler(http.FileServer(http.FS(content)))
+	jwtConfigRestricted := middleware.JWTConfig{
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}
+
+	jwtConfigBoard := middleware.JWTConfig{
+		Skipper: func(c echo.Context) bool {
+			code := c.QueryParam("code")
+			mode := c.QueryParam("mode") // read, write
+
+			boardInfos := board.GetBoardByCode(code)
+			if len(boardInfos) == 0 {
+				return false
+			}
+
+			switch true {
+			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
+				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
+				return true
+			default:
+				return false
+			}
+		},
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}
+
+	contentHandler := echo.WrapHandler(http.FileServer(http.FS(staticPATH)))
 	contentRewriteAdmin := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
 			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): staticRoot + "/" + rewriteTargetFilename + ".html",
@@ -248,19 +316,13 @@ func setupServer() *echo.Echo {
 
 	contentRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/contents-body/([^\?]+)(\?(.*)|)`): staticRoot + "/html-body/$1.html",
+			regexp.MustCompile(`^/page/([^\?]+)(\?(.*)|)`): staticRoot + "/pages/$1.html",
 		},
 	})
-	bd := e.Group("/contents-body/*")
-	bd.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey: jwtKey,
-		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			result := map[string]string{"msg": e.Error()}
-
-			return c.JSON(http.StatusUnauthorized, result)
-		},
-	}))
-	bd.GET("/*", contentHandler, contentRewriteBody)
+	bd := e.Group("/page")
+	bd.Use(middleware.JWTWithConfig(jwtConfigRestricted))
+	// bd.GET("/*", contentHandler, contentRewriteBody)
+	bd.GET("/*", adminTemplateHandler, contentRewriteBody)
 
 	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
@@ -282,14 +344,7 @@ func setupServer() *echo.Echo {
 	e.GET("/board", boardTemplateHandler)
 
 	a := e.Group("/api/admin")
-	a.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey: jwtKey,
-		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			result := map[string]string{"msg": e.Error()}
-
-			return c.JSON(http.StatusUnauthorized, result)
-		},
-	}))
+	a.Use(middleware.JWTWithConfig(jwtConfigRestricted))
 	a.GET("/board/:idx", board.GetBoard)
 	a.GET("/boards", board.GetBoards)
 	a.POST("/boards", board.SearchBoards)
@@ -312,44 +367,13 @@ func setupServer() *echo.Echo {
 	u := e.Group("/api/user")
 	u.POST("/login", user.Login)
 	u.GET("/token", user.ReissueToken)
-	ua := e.Group("/api/user")
-	ua.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey: jwtKey,
-		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			result := map[string]string{"msg": e.Error()}
 
-			return c.JSON(http.StatusUnauthorized, result)
-		},
-	}))
+	ua := e.Group("/api/user")
+	ua.Use(middleware.JWTWithConfig(jwtConfigRestricted))
 	ua.POST("/token/verify", user.VerifyToken)
 
 	bb := e.Group("/api/basic-board")
-	bb.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		Skipper: func(c echo.Context) bool {
-			code := c.QueryParam("code")
-			mode := c.QueryParam("mode") // read, write
-
-			boardInfos := board.GetBoardByCode(code)
-			if len(boardInfos) == 0 {
-				return false
-			}
-
-			switch true {
-			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
-				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
-				return true
-			default:
-				return false
-			}
-		},
-		Claims:     &auth.CustomClaims{},
-		SigningKey: jwtKey,
-		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			result := map[string]string{"msg": e.Error()}
-
-			return c.JSON(http.StatusUnauthorized, result)
-		},
-	}))
+	bb.Use(middleware.JWTWithConfig(jwtConfigBoard))
 	bb.POST("/contents", contents.GetContentsListBasicBoard)
 	bb.PUT("/contents", contents.AddContentsBasicBoard)
 	bb.PATCH("/contents", contents.UpdateContentsBasicBoard)
@@ -357,32 +381,7 @@ func setupServer() *echo.Echo {
 	bb.POST("/total-page", contents.GetContentsTotalPage)
 
 	cb := e.Group("/api/custom-board")
-	cb.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		Skipper: func(c echo.Context) bool {
-			code := c.QueryParam("code")
-			mode := c.QueryParam("mode") // read, write
-
-			boardInfos := board.GetBoardByCode(code)
-			if len(boardInfos) == 0 {
-				return false
-			}
-
-			switch true {
-			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
-				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
-				return true
-			default:
-				return false
-			}
-		},
-		Claims:     &auth.CustomClaims{},
-		SigningKey: jwtKey,
-		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			result := map[string]string{"msg": e.Error()}
-
-			return c.JSON(http.StatusUnauthorized, result)
-		},
-	}))
+	cb.Use(middleware.JWTWithConfig(jwtConfigBoard))
 	cb.POST("/contents-list", contents.GetContentsListCustomBoard)
 	cb.PUT("/contents-list", contents.AddContentsListCustomBoard)
 	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)

@@ -68,7 +68,7 @@ async function getPageContents() {
         location.href = "/users/login"
     }
 
-    let response = await fetch(restURIdomain + "/contents-body/" + routeTarget, {
+    let response = await fetch(restURIdomain + "/page" + routeTarget, {
         method: "GET",
         headers: { "Authorization": "Bearer " + grant.token }
     })

@@ -89,3 +89,17 @@ func CheckAuth(c echo.Context) (isValid bool) {
 
 	return
 }
+
+// IsAdmin - Check admin
+func IsAdmin(c echo.Context) (result bool) {
+	result = false
+
+	user := c.Get("user")
+	claims := user.(*jwt.Token).Claims.(*CustomClaims)
+
+	if claims.Admin == "Y" {
+		result = true
+	}
+
+	return
+}

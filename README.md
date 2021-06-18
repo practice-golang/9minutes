@@ -1,7 +1,7 @@
 # 9minutes board
 
 ```
-An expreimental 9minutes or GUBUN board for personal use
+An expreimental 9minutes or GUBUN board for own personal use
 
 Using struct or map, mainly map
 
@@ -19,6 +19,7 @@ Escape from a vaporware
 * Then stop and edit `9minutes.ini`
 * Then run again
 * Open `http://localhost:2510` in browser
+* Sign in with `admin` / `admin`
 
 
 ## REST API
@@ -53,11 +54,10 @@ Current, Sqlite only
 - [ ] Add reg/last modified datetime, read count
 - [ ] User defined template
 - [ ] Other DB except sqlite
-- [ ] Email
+- [ ] ~~Email~~
 - [ ] ~~Menu~~
-- [ ] Test
+- [ ] ~~Test~~
 
 
 ## License
-Copyright (c) Sungwook Shin
 [MIT License](http://www.opensource.org/licenses/MIT)
