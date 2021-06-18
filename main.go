@@ -268,6 +268,16 @@ func setupServer() *echo.Echo {
 	// routeTargetFilename := "$1"
 	rewriteTargetFilename := "page-loader"
 
+	jwtConfigNoResponse := middleware.JWTConfig{
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			_ = user.CheckPermission(c)
+
+			return c.String(http.StatusOK, "")
+		},
+	}
+
 	jwtConfigRestricted := middleware.JWTConfig{
 		Claims:     &auth.CustomClaims{},
 		SigningKey: jwtKey,
@@ -369,8 +379,9 @@ func setupServer() *echo.Echo {
 	u.GET("/token", user.ReissueToken)
 
 	ua := e.Group("/api/user")
-	ua.Use(middleware.JWTWithConfig(jwtConfigRestricted))
+	ua.Use(middleware.JWTWithConfig(jwtConfigNoResponse))
 	ua.POST("/token/verify", user.VerifyToken)
+	ua.GET("/permission", user.CheckPermission)
 
 	bb := e.Group("/api/basic-board")
 	bb.Use(middleware.JWTWithConfig(jwtConfigBoard))

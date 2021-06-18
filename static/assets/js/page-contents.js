@@ -76,11 +76,12 @@ async function getPageContents() {
     if (response.ok) {
         const r = await response.text()
 
-        let result = await setInnerHTML(document.querySelector('#body-cavity'), r)
-        if (result) {
-            setInnerHTML = undefined
-        }
+        await setInnerHTML(document.querySelector('#body-cavity'), r)
+    } else {
+        location.href = "/"
     }
+
+    setInnerHTML = undefined
 }
 
 window.onload = () => {

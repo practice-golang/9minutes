@@ -14,6 +14,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/auth"
+	"github.com/practice-golang/9minutes/board"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
 	"gopkg.in/guregu/null.v4"
@@ -284,6 +285,7 @@ func VerifyToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+// ReissueToken - Regenerate token
 func ReissueToken(c echo.Context) error {
 	var err error
 	var info *jwt.Token
@@ -336,4 +338,58 @@ func ReissueToken(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
+}
+
+// CheckPermission - Check permission and return
+func CheckPermission(c echo.Context) error {
+	var isValid bool
+	status := http.StatusForbidden
+	result := map[string]bool{"permission": false}
+
+	code := c.QueryParam("code")
+	mode := c.QueryParam("mode") // read, edit, write
+
+	boardInfos := board.GetBoardByCode(code)
+
+	if len(boardInfos) == 0 {
+		isValid = false
+
+		return c.JSON(status, result)
+	}
+
+	grantRead := boardInfos[0].GrantRead.String
+	grantWrite := boardInfos[0].GrantWrite.String
+
+	user := c.Get("user")
+
+	if user == nil {
+		switch true {
+		case (mode == "write" && grantWrite == "all") ||
+			(mode != "write" && grantRead == "all"):
+			status = http.StatusOK
+			isValid = true
+		default:
+			isValid = false
+		}
+	} else {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		// log.Println("CheckAuth: ", claims.Admin, code, mode, boardInfos[0].GrantWrite.String, boardInfos[0].GrantRead.String)
+
+		switch true {
+		case (mode == "write" && (grantWrite == "admin" && claims.Admin == "Y")) ||
+			(mode != "write" && (grantRead == "admin" && claims.Admin == "Y")) ||
+			(mode == "write" && grantWrite == "user") ||
+			(mode != "write" && grantRead == "user") ||
+			(mode == "write" && grantWrite == "all") ||
+			(mode != "write" && grantRead == "all"):
+			status = http.StatusOK
+			isValid = true
+		default:
+			isValid = false
+		}
+	}
+
+	result["permission"] = isValid
+
+	return c.JSON(status, result)
 }
