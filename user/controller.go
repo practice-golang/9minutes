@@ -340,11 +340,9 @@ func ReissueToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-// CheckPermission - Check permission and return
-func CheckPermission(c echo.Context) error {
+// CheckPermission - Check permission
+func CheckPermission(c echo.Context) bool {
 	var isValid bool
-	status := http.StatusForbidden
-	result := map[string]bool{"permission": false}
 
 	code := c.QueryParam("code")
 	mode := c.QueryParam("mode") // read, edit, write
@@ -354,7 +352,7 @@ func CheckPermission(c echo.Context) error {
 	if len(boardInfos) == 0 {
 		isValid = false
 
-		return c.JSON(status, result)
+		return isValid
 	}
 
 	grantRead := boardInfos[0].GrantRead.String
@@ -364,9 +362,8 @@ func CheckPermission(c echo.Context) error {
 
 	if user == nil {
 		switch true {
-		case (mode == "write" && grantWrite == "all") ||
-			(mode != "write" && grantRead == "all"):
-			status = http.StatusOK
+		case ((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false
@@ -376,20 +373,32 @@ func CheckPermission(c echo.Context) error {
 		// log.Println("CheckAuth: ", claims.Admin, code, mode, boardInfos[0].GrantWrite.String, boardInfos[0].GrantRead.String)
 
 		switch true {
-		case (mode == "write" && (grantWrite == "admin" && claims.Admin == "Y")) ||
-			(mode != "write" && (grantRead == "admin" && claims.Admin == "Y")) ||
-			(mode == "write" && grantWrite == "user") ||
-			(mode != "write" && grantRead == "user") ||
-			(mode == "write" && grantWrite == "all") ||
-			(mode != "write" && grantRead == "all"):
-			status = http.StatusOK
+		case ((mode == "write" || mode == "edit" || mode == "delete") && (grantWrite == "admin" && claims.Admin == "Y")) ||
+			((mode != "write" && mode != "edit" && mode != "delete") && (grantRead == "admin" && claims.Admin == "Y")) ||
+			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "user") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "user") ||
+			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false
 		}
 	}
 
-	result["permission"] = isValid
+	return isValid
+}
+
+// ResponsePermission - Return permission
+func ResponsePermission(c echo.Context) error {
+	status := http.StatusForbidden
+	result := map[string]bool{"permission": false}
+
+	isValid := CheckPermission(c)
+
+	if isValid {
+		status = http.StatusOK
+		result["permission"] = true
+	}
 
 	return c.JSON(status, result)
 }

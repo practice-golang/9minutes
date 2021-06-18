@@ -13,6 +13,7 @@ import (
 	"github.com/practice-golang/9minutes/auth"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
+	"github.com/practice-golang/9minutes/user"
 )
 
 // GetContentsListBasicBoard - Get contents
@@ -37,6 +38,12 @@ func GetContentsListBasicBoard(c echo.Context) error {
 
 // AddContentsBasicBoard - Add contents
 func AddContentsBasicBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	var dataMap map[string]interface{}
@@ -72,6 +79,12 @@ func AddContentsBasicBoard(c echo.Context) error {
 
 // UpdateContentsBasicBoard - Update contents
 func UpdateContentsBasicBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	var dataMap map[string]interface{}
@@ -111,6 +124,12 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 
 // DeleteContentsBasicBoard - Delete contents
 func DeleteContentsBasicBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	var dataMap map[string]interface{}
@@ -184,6 +203,12 @@ func GetContentsListCustomBoard(c echo.Context) error {
 
 // AddContentsListCustomBoard - Add contents
 func AddContentsListCustomBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	sqlResult, err := db.InsertContentsMAP(dataBytes)
@@ -204,6 +229,12 @@ func AddContentsListCustomBoard(c echo.Context) error {
 
 // UpdateContentsListCustomBoard - Update contents
 func UpdateContentsListCustomBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	sqlResult, err := db.UpdateContentsMAP(dataBytes)
@@ -230,6 +261,12 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 
 // DeleteContentsListCustomBoard - Delete contents
 func DeleteContentsListCustomBoard(c echo.Context) error {
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	sqlResult, err := db.DeleteContentsMAP(dataBytes)

@@ -67,7 +67,7 @@
 </body>
 
 <script>
-    function showError(status) {
+    function showError(status, isStay) {
         switch (status) {
             case 401:
                 swal.fire("Unauthorized", "need login", "error").then(() => {
@@ -77,7 +77,9 @@
                 break
             case 403:
                 swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
-                    location.href = "/"
+                    if (!isStay) {
+                        location.href = "/"
+                    }
                 })
                 break
             default:
@@ -228,7 +230,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=read"
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -276,7 +279,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=write"
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
                     method: "PUT",
                     headers: headers,
                     body: JSON.stringify({
@@ -285,16 +289,17 @@
                     })
                 })
 
+                this.contentsAdd = {}
+
                 if (response.ok) {
                     this.getData()
-                    this.contentsAdd = {}
                     swal.fire("Success", "Updated successfully", "success")
                     return false
                 }
 
                 // console.log(this.contentsAdd)
 
-                showError(response.status)
+                showError(response.status, true)
                 return false
             },
             async updateData() {
@@ -309,7 +314,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=edit"
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
                     method: "PATCH",
                     headers: headers,
                     body: JSON.stringify({
@@ -318,13 +324,17 @@
                     })
                 })
 
+                this.contentsEdit = {}
+                this.contentsEditIDX = -1
+
                 if (response.ok) {
                     this.getData()
-                    this.contentsEdit = {}
-                    this.contentsEditIDX = -1
                     swal.fire("Success", "Updated successfully", "success")
                     return false
                 }
+
+                showError(response.status, true)
+                return false
             },
             async deleteData(idx) {
                 const confirm = await swal.fire({
@@ -351,7 +361,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=delete"
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
@@ -366,7 +377,7 @@
                     return false
                 }
 
-                showError(response.status)
+                showError(response.status, true)
                 return false
             },
             movePage(page) {

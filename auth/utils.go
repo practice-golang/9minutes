@@ -63,8 +63,8 @@ func CheckAuth(c echo.Context) (isValid bool) {
 
 	if user == nil {
 		switch true {
-		case (mode == "write" && grantWrite == "all") ||
-			(mode != "write" && grantRead == "all"):
+		case ((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false
@@ -75,12 +75,12 @@ func CheckAuth(c echo.Context) (isValid bool) {
 		// log.Println("CheckAuth: ", claims.Admin, code, mode, boardInfos[0].GrantWrite.String, boardInfos[0].GrantRead.String)
 
 		switch true {
-		case (mode == "write" && (grantWrite == "admin" && claims.Admin == "Y")) ||
-			(mode != "write" && (grantRead == "admin" && claims.Admin == "Y")) ||
-			(mode == "write" && grantWrite == "user") ||
-			(mode != "write" && grantRead == "user") ||
-			(mode == "write" && grantWrite == "all") ||
-			(mode != "write" && grantRead == "all"):
+		case ((mode == "write" || mode == "edit" || mode == "delete") && (grantWrite == "admin" && claims.Admin == "Y")) ||
+			((mode != "write" && mode != "edit" && mode != "delete") && (grantRead == "admin" && claims.Admin == "Y")) ||
+			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "user") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "user") ||
+			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false

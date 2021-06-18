@@ -58,7 +58,7 @@
 </body>
 
 <script>
-    function showError(status) {
+    function showError(status, isStay) {
         switch (status) {
             case 401:
                 swal.fire("Unauthorized", "need login", "error").then(() => {
@@ -68,7 +68,9 @@
                 break
             case 403:
                 swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
-                    location.href = "/"
+                    if (!isStay) {
+                        location.href = "/"
+                    }
                 })
                 break
             default:
@@ -270,7 +272,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=delete"
+                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
@@ -286,8 +289,8 @@
                     return false
                 }
 
-                // showError(response.status)
-                // return false
+                showError(response.status, true)
+                return false
             },
             movePage(page) {
                 // page 1 = idx 0

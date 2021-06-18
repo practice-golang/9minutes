@@ -268,13 +268,20 @@ func setupServer() *echo.Echo {
 	// routeTargetFilename := "$1"
 	rewriteTargetFilename := "page-loader"
 
-	jwtConfigNoResponse := middleware.JWTConfig{
+	jwtConfigPermissionOnly := middleware.JWTConfig{
 		Claims:     &auth.CustomClaims{},
 		SigningKey: jwtKey,
 		ErrorHandlerWithContext: func(e error, c echo.Context) error {
-			_ = user.CheckPermission(c)
+			status := http.StatusForbidden
+			result := map[string]bool{"permission": false}
+			isValid := user.CheckPermission(c)
 
-			return c.String(http.StatusOK, "")
+			if isValid {
+				status = http.StatusOK
+				result["permission"] = true
+			}
+
+			return c.JSON(status, result)
 		},
 	}
 
@@ -299,8 +306,8 @@ func setupServer() *echo.Echo {
 			}
 
 			switch true {
-			case (mode == "write" && boardInfos[0].GrantWrite.String == "all") ||
-				(mode != "write" && boardInfos[0].GrantRead.String == "all"):
+			case ((mode == "write" || mode == "edit" || mode == "delete") && boardInfos[0].GrantWrite.String == "all") ||
+				((mode != "write" && mode != "edit" && mode != "delete") && boardInfos[0].GrantRead.String == "all"):
 				return true
 			default:
 				return false
@@ -379,9 +386,9 @@ func setupServer() *echo.Echo {
 	u.GET("/token", user.ReissueToken)
 
 	ua := e.Group("/api/user")
-	ua.Use(middleware.JWTWithConfig(jwtConfigNoResponse))
+	ua.Use(middleware.JWTWithConfig(jwtConfigPermissionOnly))
 	ua.POST("/token/verify", user.VerifyToken)
-	ua.GET("/permission", user.CheckPermission)
+	ua.GET("/permission", user.ResponsePermission)
 
 	bb := e.Group("/api/basic-board")
 	bb.Use(middleware.JWTWithConfig(jwtConfigBoard))

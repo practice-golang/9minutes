@@ -107,7 +107,7 @@
         },
         methods: {
             async initData() {
-                await this.checkLogedIn()
+                await this.checkPermission()
                 await this.getData()
 
                 let columns = this.columns.map((c) => {
@@ -118,50 +118,32 @@
                     await this.getComments()
                 }
             },
-            async checkLogedIn() {
-                let result = false
-                let reissue = false
-                let response = ""
-                let r = ""
+            async checkPermission() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
 
                 const token = localStorage.getItem('token')
 
-                if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                        method: "POST",
-                        headers: { "Authorization": "Bearer " + token }
-                    })
-                    if (response.ok) {
-                        r = await response.json()
-                        if (r.msg == "OK") { result = true }
-                    } else {
-                        if (response.status != 200) {
-                            r = await response.json()
-                            if (r.msg == "Token is expired") { reissue = true }
-                        }
-                    }
-
-                    if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                            method: "GET",
-                            headers: { "Authorization": "Bearer " + token }
-                        })
-
-                        if (response.ok) {
-                            r = await response.json()
-                            localStorage.setItem("token", r.token)
-                            result = true
-                        } else {
-                            localStorage.removeItem("token")
-                            result = false
-                        }
-                    }
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                const params = "?code=" + this.boardCode + "&mode=" + this.mode
+                let response = await fetch(this.restURI + "/api/user/permission" + params, {
+                    method: "GET",
+                    headers: headers,
+                })
+
+                if (response.ok) {
+                    this.contents = await response.json()
+                    this.isShow = true
+                    return false
+                }
+
+                showError(response.status)
+                return false
             },
             async getData() {
                 const keywords = [{ IDX: this.id }]
