@@ -20,8 +20,12 @@
     <div id="app" v-show="isShow">
         <h1>{{table}}</h1>
         <tr>
-            <td><input v-model="contents['writer-name']" placeholder="name" /></td>
-            <td><input v-model="contents['writer-password']" placeholder="password" /></td>
+            <td>
+                <input v-model="contents['writer-name']" placeholder="name" />
+            </td>
+            <td>
+                <input v-model="contents['writer-password']" placeholder="password" />
+            </td>
         </tr>
         <table>
             <tr>
@@ -149,7 +153,9 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                const params = "?code=" + this.boardCode + "&mode=edit"
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents" + params, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -183,7 +189,9 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/basic-board/contents", {
+                const params = "?code=" + this.boardCode + "&mode=write"
+
+                let response = await fetch(this.restURI + "/api/basic-board/contents" + params, {
                     method: requestMethod,
                     headers: headers,
                     body: JSON.stringify({

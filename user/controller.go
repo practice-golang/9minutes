@@ -276,6 +276,13 @@ func Login(c echo.Context) error {
 		log.Println("GetUsers token: ", err)
 	}
 
+	// Not use cookie
+	// cookie := new(http.Cookie)
+	// cookie.Name = "token"
+	// cookie.Value = result["token"]
+	// cookie.Expires = time.Now().Add(24 * time.Hour)
+	// c.SetCookie(cookie)
+
 	return c.JSON(http.StatusOK, result)
 }
 

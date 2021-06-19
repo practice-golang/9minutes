@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-show="isShow">
         <a href="/">Root</a>
 
         <div @keyup.enter="loginUser()">
@@ -32,6 +32,7 @@
         data: {
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
+            isShow: false,
             table: "USERS",
             username: "",
             password: "",
@@ -85,6 +86,8 @@
                 if (result) {
                     // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
                     location.href = "/"
+                } else {
+                    this.isShow = true
                 }
             },
             async loginUser() {
