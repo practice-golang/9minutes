@@ -53,8 +53,13 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	ex := PrepareWhere(search)
 	if !ex.IsEmpty() {
 		for c, v := range ex {
-			val := fmt.Sprintf("%d", v)
-			ex[c] = goqu.Op{"eq": val}
+			if c == "IDX" {
+				val := fmt.Sprintf("%s", v)
+				ex[c] = goqu.Op{"eq": val}
+			} else {
+				val := fmt.Sprintf("%s%s%s", "%", v, "%")
+				ex[c] = goqu.Op{"like": val}
+			}
 		}
 		exps = append(exps, ex.Expression())
 	}

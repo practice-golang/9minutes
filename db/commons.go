@@ -87,8 +87,13 @@ func SelectData(search interface{}) (interface{}, error) {
 			ex := PrepareWhere(k)
 			if !ex.IsEmpty() {
 				for c, v := range ex {
-					val := fmt.Sprintf("%s%s%s", "%", v, "%")
-					ex[c] = goqu.Op{"like": val}
+					if c == "IDX" {
+						val := fmt.Sprintf("%s", v)
+						ex[c] = goqu.Op{"eq": val}
+					} else {
+						val := fmt.Sprintf("%s%s%s", "%", v, "%")
+						ex[c] = goqu.Op{"like": val}
+					}
 				}
 				exps = append(exps, ex.Expression())
 			}
@@ -196,8 +201,13 @@ func SelectCount(search interface{}) (uint, error) {
 			ex := PrepareWhere(k)
 			if !ex.IsEmpty() {
 				for c, v := range ex {
-					val := fmt.Sprintf("%s%s%s", "%", v, "%")
-					ex[c] = goqu.Op{"like": val}
+					if c == "IDX" {
+						val := fmt.Sprintf("%s", v)
+						ex[c] = goqu.Op{"eq": val}
+					} else {
+						val := fmt.Sprintf("%s%s%s", "%", v, "%")
+						ex[c] = goqu.Op{"like": val}
+					}
 				}
 				exps = append(exps, ex.Expression())
 			}
@@ -256,8 +266,13 @@ func SelectComments(search interface{}) (interface{}, error) {
 		ex := PrepareWhere(k)
 		if !ex.IsEmpty() {
 			for c, v := range ex {
-				val := fmt.Sprintf("%s%s%s", "%", v, "%")
-				ex[c] = goqu.Op{"like": val}
+				if c == "IDX" {
+					val := fmt.Sprintf("%s", v)
+					ex[c] = goqu.Op{"eq": val}
+				} else {
+					val := fmt.Sprintf("%s%s%s", "%", v, "%")
+					ex[c] = goqu.Op{"like": val}
+				}
 			}
 			exps = append(exps, ex.Expression())
 		}

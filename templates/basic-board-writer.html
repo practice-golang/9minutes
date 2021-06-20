@@ -19,20 +19,24 @@
 <body>
     <div id="app" v-show="isShow">
         <h1>{{table}}</h1>
-        <tr>
-            <td>
-                <input v-model="contents['writer-name']" placeholder="name" />
-            </td>
-            <td>
-                <input v-model="contents['writer-password']" placeholder="password" />
-            </td>
-        </tr>
         <table>
+            <!-- <tr v-if="!Object.values(contents).includes('writer-name')"> -->
+            <tr v-if="contents['writer-name'] == ''">
+                <td>
+                    <input v-model="contents['writer-name']" placeholder="name" />
+                </td>
+                <td>
+                    <input v-model="contents['writer-password']" placeholder="password" />
+                </td>
+            </tr>
+            <tr v-else>
+                <td>{{contents['writer-name']}}</td>
+            </tr>
             <tr>
                 <td><input v-model="contents.title" placeholder="Title" /></td>
             </tr>
             <tr>
-                <td>
+                <td colspan="2">
                     <!-- <textarea id="editor" v-model="contents.content"></textarea> -->
                     <textarea id="editor" v-model="contents.content" class="editors"></textarea>
                 </td>
@@ -93,7 +97,6 @@
             contents: {
                 title: "",
                 content: "",
-                "writer-idx": "-1",
                 "writer-name": "",
                 "writer-password": ""
             }
@@ -131,12 +134,46 @@
                 })
 
                 if (response.ok) {
-                    this.contents = await response.json()
-                    this.isShow = true
+                    const contents = await response.json()
+                    await this.getUserInfo()
+                    if (this.mode != "edit") {
+                        this.isShow = true
+                    }
                     return false
                 }
 
                 showError(response.status)
+                return false
+            },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+    
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        this.contents["writer-idx"] = userInfo.idx
+                        this.contents["writer-name"] = userInfo.username
+                        return false
+                    }
+                }
+
+                console.log(this.contents)
+
+                if (token != null) {
+                    showError(response.status)
+                }
                 return false
             },
             async getData() {
@@ -166,8 +203,23 @@
                 })
 
                 if (response.ok) {
-                    this.contents = (await response.json())[0]
+                    contents = (await response.json())[0]
+                    if (token != null && this.contents["writer-name"] != contents["writer-name"]) {
+                        swal.fire("Forbidden", "You can not edit", "error").then(() => {
+                            window.history.back()
+                        })
+                        return false
+                    }
+
+                    this.contents = contents
+                    await tinymce.activeEditor.setContent(this.contents.content)
+
+                    if (this.mode == "edit") {
+                        this.isShow = true
+                    }
                 }
+
+                return false
             },
             async writePost() {
                 let requestMethod = "PUT"
@@ -203,7 +255,17 @@
                 if (response.ok) {
                     const result = await response.json()
                     location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                    return false
                 }
+
+                if (response.status == 400) {
+                    const result = await response.json()
+                    swal.fire("Bad Request", "Bad request", "error").then(() => {
+                        window.history.back()
+                    })
+                }
+
+                return false
             }
         }
     })

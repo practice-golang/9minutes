@@ -15,6 +15,7 @@ var (
 
 // CustomClaims - jwt custom claim
 type CustomClaims struct {
+	Idx          string `json:"idx"`
 	UserName     string `json:"username"`
 	Email        string `json:"email"`
 	Admin        string `json:"admin"`
@@ -27,6 +28,7 @@ func PrepareToken(data interface{}) (string, error) {
 	d := data.(map[string]interface{})
 
 	claims := &CustomClaims{
+		fmt.Sprint(d["IDX"]),
 		fmt.Sprint(d["USERNAME"]),
 		fmt.Sprint(d["EMAIL"]),
 		fmt.Sprint(d["ADMIN"]),

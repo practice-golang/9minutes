@@ -409,3 +409,18 @@ func ResponsePermission(c echo.Context) error {
 
 	return c.JSON(status, result)
 }
+
+// GetUserInfo - Get username
+func GetUserInfo(c echo.Context) error {
+	result := map[string]string{}
+	user := c.Get("user")
+
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		log.Println("GetUserInfo claims: ", claims, claims.Idx)
+		result["idx"] = claims.Idx
+		result["username"] = claims.UserName
+	}
+
+	return c.JSON(http.StatusOK, result)
+}

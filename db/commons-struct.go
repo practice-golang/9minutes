@@ -42,7 +42,10 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
-	whereEXP := goqu.Ex{"idx": data.(models.ContentsBasicBoard).Idx}
+	whereEXP := goqu.Ex{
+		"IDX":         data.(models.ContentsBasicBoard).Idx,
+		"WRITER_NAME": data.(models.ContentsBasicBoard).WriterName,
+	}
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Update(table).Set(data).Where(whereEXP)
@@ -118,8 +121,13 @@ func SelectContents(search interface{}) (interface{}, error) {
 		ex := PrepareWhere(k)
 		if !ex.IsEmpty() {
 			for c, v := range ex {
-				val := fmt.Sprintf("%s%s%s", "%", v, "%")
-				ex[c] = goqu.Op{"like": val}
+				if c == "IDX" {
+					val := fmt.Sprintf("%s", v)
+					ex[c] = goqu.Op{"eq": val}
+				} else {
+					val := fmt.Sprintf("%s%s%s", "%", v, "%")
+					ex[c] = goqu.Op{"like": val}
+				}
 			}
 			exps = append(exps, ex.Expression())
 		}
@@ -180,8 +188,13 @@ func SelectContentsCount(search interface{}) (uint, error) {
 			ex := PrepareWhere(k)
 			if !ex.IsEmpty() {
 				for c, v := range ex {
-					val := fmt.Sprintf("%s%s%s", "%", v, "%")
-					ex[c] = goqu.Op{"like": val}
+					if c == "IDX" {
+						val := fmt.Sprintf("%s", v)
+						ex[c] = goqu.Op{"eq": val}
+					} else {
+						val := fmt.Sprintf("%s%s%s", "%", v, "%")
+						ex[c] = goqu.Op{"like": val}
+					}
 				}
 				exps = append(exps, ex.Expression())
 			}

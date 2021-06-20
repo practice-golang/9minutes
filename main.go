@@ -255,6 +255,37 @@ func boardTemplateHandler(c echo.Context) error {
 	return c.HTML(status, contents)
 }
 
+type jwtExtractor func(echo.Context) (string, error)
+
+// Errors
+var (
+	ErrJWTMissing = echo.NewHTTPError(http.StatusBadRequest, "missing or malformed jwt")
+	ErrJWTInvalid = echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired jwt")
+)
+
+// jwtFromQuery returns a `jwtExtractor` that extracts token from the query string.
+func jwtFromQuery(param string) jwtExtractor {
+	return func(c echo.Context) (string, error) {
+		token := c.QueryParam(param)
+		if token == "" {
+			return "", ErrJWTMissing
+		}
+		return token, nil
+	}
+}
+
+// jwtFromHeader returns a `jwtExtractor` that extracts token from the request header.
+func jwtFromHeader(header string, authScheme string) jwtExtractor {
+	return func(c echo.Context) (string, error) {
+		auth := c.Request().Header.Get(header)
+		l := len(authScheme)
+		if len(auth) > l+1 && auth[:l] == authScheme {
+			return auth[l+1:], nil
+		}
+		return "", ErrJWTMissing
+	}
+}
+
 func setupServer() *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
@@ -308,6 +339,32 @@ func setupServer() *echo.Echo {
 			switch true {
 			case ((mode == "write" || mode == "edit" || mode == "delete") && boardInfos[0].GrantWrite.String == "all") ||
 				((mode != "write" && mode != "edit" && mode != "delete") && boardInfos[0].GrantRead.String == "all"):
+				sources := strings.Split("header:Authorization", ",")
+				var extractors []jwtExtractor
+				for _, source := range sources {
+					parts := strings.Split(source, ":")
+
+					switch parts[0] {
+					case "header":
+						extractors = append(extractors, jwtFromHeader(parts[1], "Bearer"))
+					}
+				}
+
+				var auth string
+				var err error
+				for _, extractor := range extractors {
+					// Extract token from extractor, if it's not fail break the loop and
+					// set auth
+					auth, err = extractor(c)
+					if err == nil {
+						break
+					}
+				}
+
+				log.Println("WTF: ", len(auth))
+				if len(auth) > 0 {
+					return false
+				}
 				return true
 			default:
 				return false
@@ -389,6 +446,7 @@ func setupServer() *echo.Echo {
 	ua.Use(middleware.JWTWithConfig(jwtConfigPermissionOnly))
 	ua.POST("/token/verify", user.VerifyToken)
 	ua.GET("/permission", user.ResponsePermission)
+	ua.GET("/info", user.GetUserInfo)
 
 	bb := e.Group("/api/basic-board")
 	bb.Use(middleware.JWTWithConfig(jwtConfigBoard))

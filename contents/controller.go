@@ -2,6 +2,7 @@ package contents
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/auth"
 	"github.com/practice-golang/9minutes/db"
@@ -99,6 +101,15 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 	err = json.Unmarshal(dataJSON, &data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		if data.WriterName.String != claims.UserName ||
+			data.WriterIdx.String != claims.Idx {
+			return c.JSON(http.StatusBadRequest, errors.New("you can not edit"))
+		}
 	}
 
 	sqlResult, err := db.UpdateContents(data, dataMap["table"].(string))
