@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBhLmNvbSIsImFkbWluIjoiWSIsInJlZnJlc2gtdW50aWwiOjE2MjY3MDg2MTUsImV4cCI6MTYyNDIwMzAxNX0.pkivC2kHHbKQba6yWAEghK2jE-asPDs6vT0OmaduJRM
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2Nzk4NTEzLCJleHAiOjE2MjQyOTI5MTN9.ubIAP6aEgYKvMglmoJeBMZnkHXVaxMR8Dw1HhN3zueY
 
 ### Select one
 GET {{uri}}/api/admin/board/2 HTTP/1.1
@@ -83,6 +83,7 @@ content-type: application/json
         "table": "CUSTOMLIST1",
         "grant-read": "all",
         "grant-write": "all",
+        "grant-comment": "all",
         "fields": [
             {
                 "idx": 1,
@@ -117,6 +118,7 @@ content-type: application/json
         "table": "CUSTOMLIST2",
         "grant-read": "all",
         "grant-write": "user",
+        "grant-comment": "user",
         "fields": [
             {
                 "idx": 1,
@@ -151,6 +153,7 @@ content-type: application/json
         "table": "CUSTOMLIST3",
         "grant-read": "user",
         "grant-write": "user",
+        "grant-comment": "user",
         "fields": [
             {
                 "idx": 1,
@@ -185,6 +188,7 @@ content-type: application/json
         "table": "CUSTOMLIST4",
         "grant-read": "user",
         "grant-write": "admin",
+        "grant-comment": "admin",
         "fields": [
             {
                 "idx": 1,
@@ -219,6 +223,7 @@ content-type: application/json
         "table": "CUSTOMLIST5",
         "grant-read": "admin",
         "grant-write": "admin",
+        "grant-comment": "admin",
         "fields": [
             {
                 "idx": 1,
@@ -252,7 +257,8 @@ content-type: application/json
         "type": "basic-board",
         "table": "BOARD1",
         "grant-read": "all",
-        "grant-write": "all"
+        "grant-write": "all",
+        "grant-comment": "all"
     },
     {
         "name": "Basic board #2",
@@ -260,7 +266,8 @@ content-type: application/json
         "type": "basic-board",
         "table": "BOARD2",
         "grant-read": "all",
-        "grant-write": "user"
+        "grant-write": "user",
+        "grant-comment": "user"
     },
     {
         "name": "Basic board #3",
@@ -268,7 +275,8 @@ content-type: application/json
         "type": "basic-board",
         "table": "BOARD3",
         "grant-read": "user",
-        "grant-write": "user"
+        "grant-write": "user",
+        "grant-comment": "user"
     },
     {
         "name": "Basic board #4",
@@ -276,7 +284,8 @@ content-type: application/json
         "type": "basic-board",
         "table": "BOARD4",
         "grant-read": "user",
-        "grant-write": "admin"
+        "grant-write": "admin",
+        "grant-comment": "user"
     },
     {
         "name": "Basic board #5",
@@ -284,7 +293,8 @@ content-type: application/json
         "type": "basic-board",
         "table": "BOARD5",
         "grant-read": "admin",
-        "grant-write": "admin"
+        "grant-write": "admin",
+        "grant-comment": "admin"
     },
     {
         "name": "Custom board #1",
@@ -293,6 +303,7 @@ content-type: application/json
         "table": "CBOARD1",
         "grant-read": "all",
         "grant-write": "all",
+        "grant-comment": "all",
         "fields": [
             {
                 "idx": 1,
@@ -319,6 +330,7 @@ content-type: application/json
         "table": "CBOARD2",
         "grant-read": "all",
         "grant-write": "user",
+        "grant-comment": "user",
         "fields": [
             {
                 "idx": 1,
@@ -345,6 +357,7 @@ content-type: application/json
         "table": "CBOARD3",
         "grant-read": "user",
         "grant-write": "user",
+        "grant-comment": "user",
         "fields": [
             {
                 "idx": 1,
@@ -371,6 +384,7 @@ content-type: application/json
         "table": "CBOARD4",
         "grant-read": "user",
         "grant-write": "admin",
+        "grant-comment": "user",
         "fields": [
             {
                 "idx": 1,
@@ -397,6 +411,7 @@ content-type: application/json
         "table": "CBOARD5",
         "grant-read": "admin",
         "grant-write": "admin",
+        "grant-comment": "admin",
         "fields": [
             {
                 "idx": 1,
@@ -415,7 +430,7 @@ content-type: application/json
                 "order": 2
             }
         ]
-    },
+    }
 ]
 
 ### Modify board

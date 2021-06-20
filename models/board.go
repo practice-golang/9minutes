@@ -6,14 +6,15 @@ import (
 
 // Board - Board data
 type Board struct {
-	Idx        null.String `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
-	Name       null.String `json:"name" db:"NAME"`
-	Code       null.String `json:"code" db:"CODE"`
-	Type       null.String `json:"type" db:"TYPE"`
-	Table      null.String `json:"table" db:"TABLE"`
-	GrantRead  null.String `json:"grant-read" db:"GRANT_READ"`
-	GrantWrite null.String `json:"grant-write" db:"GRANT_WRITE"`
-	Fields     interface{} `json:"fields" db:"FIELDS"`
+	Idx          null.String `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
+	Name         null.String `json:"name" db:"NAME"`
+	Code         null.String `json:"code" db:"CODE"`
+	Type         null.String `json:"type" db:"TYPE"`
+	Table        null.String `json:"table" db:"TABLE"`
+	GrantRead    null.String `json:"grant-read" db:"GRANT_READ"`
+	GrantWrite   null.String `json:"grant-write" db:"GRANT_WRITE"`
+	GrantComment null.String `json:"grant-comment" db:"GRANT_COMMENT"`
+	Fields       interface{} `json:"fields" db:"FIELDS"`
 	// Fields []Field `json:"fields" db:"FIELDS"`
 }
 
