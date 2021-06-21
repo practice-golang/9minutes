@@ -1,0 +1,77 @@
+@uri=http://localhost:2510
+
+
+### List of contents
+POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "count": 10
+    },
+    "table": "BOARD1"
+}
+
+### Read Content
+POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [{ "idx": "1" }, { "writer-password": "1" }],
+    "options": { "count": 10 },
+    "table": "BOARD1"
+}
+
+### Write a content
+PUT {{uri}}/api/basic-board/contents?code=board1&mode=write HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "title": "my title",
+        "content": "my contents texts",
+        "writer-name": "anonymous1",
+        "writer-password": "1234"
+    },
+    "table": "BOARD1"
+}
+
+### Edit a content
+PATCH {{uri}}/api/basic-board/contents?code=board1&mode=edit HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "idx": "1",
+        "title": "Post title",
+        "content": "Post text lorem ipsum",
+        "writer-name": "anonymous1",
+        "writer-password": "1234"
+    },
+    "table": "BOARD1"
+}
+
+### Delete a content
+DELETE {{uri}}/api/basic-board/contents?code=board1&mode=delete HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "idx": "1",
+        "writer-password": "1234"
+    },
+    "table": "BOARD1"
+}
+
+### Total pages of contents
+POST {{uri}}/api/basic-board/total-page?code=board1 HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "count": 5
+    },
+    "table": "BOARD1"
+}

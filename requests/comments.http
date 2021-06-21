@@ -25,9 +25,9 @@ content-type: application/json
 {
     "data": {
         "bidx": "1",
-        "content": "댓글 내용",
+        "content": "comment text ^-^",
         "writer-idx": "-1",
-        "writer-name": "ㅇㅇ",
+        "writer-name": "abcd",
         "writer-password": "1234"
     },
     "table": "DOOLYFAM"

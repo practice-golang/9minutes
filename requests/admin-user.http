@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYmFiMiIsImVtYWlsIjoiZWRwMTA5NkBuYXZlci5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2MzU2NTE1LCJleHAiOjE2MjM4NjE2OTd9.PtGye0cLiWqPjZB0AwXqSxH2ojGtja0_a8nT6WqUaQE
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2Nzk4NTEzLCJleHAiOjE2MjQyOTI5MTN9.ubIAP6aEgYKvMglmoJeBMZnkHXVaxMR8Dw1HhN3zueY
 
 
 ### Select all fields
@@ -11,6 +11,7 @@ Authorization: Bearer {{token}}
 
 ### Add user fields
 PUT {{uri}}/api/admin/user-fields HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 [
@@ -39,6 +40,7 @@ content-type: application/json
 
 ### Add user fields #2
 PUT {{uri}}/api/admin/user-fields HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 [
@@ -53,6 +55,7 @@ content-type: application/json
 
 ### Modify user fields
 PATCH {{uri}}/api/admin/user-fields HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 [
@@ -76,6 +79,7 @@ content-type: application/json
 
 ### DELETE user field by index
 DELETE {{uri}}/api/admin/user-fields/18 HTTP/1.1
+Authorization: Bearer {{token}}
 
 
 ### Get columns of user table

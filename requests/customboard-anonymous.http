@@ -1,0 +1,95 @@
+@uri=http://localhost:2510
+
+
+### Read contents
+POST {{uri}}/api/custom-board/contents?code=cboard1 HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "order": "desc",
+        "count": "5"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "AGENCY"
+    ],
+    "table": "CBOARD1"
+}
+
+### Read a content
+POST {{uri}}/api/custom-board/contents?code=cboard1 HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [{"IDX": "1"}],
+    "options": {
+        "count": "1"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "AGENCY"
+    ],
+    "table": "CBOARD1"
+}
+
+
+### Write a content - custom-board
+PUT {{uri}}/api/custom-board/contents?code=cboard1&mode=write HTTP/1.1
+content-type: application/json
+
+{
+    "data":{
+        "NAME": "John Doe",
+        "AGENCY": "My home office"
+    },
+    "table":"CBOARD1"
+}
+
+### Edit content
+PATCH {{uri}}/api/custom-board/contents HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "IDX": 1,
+        "CONTENT": "Lorem ipsum fox",
+        "AGENCY": "Jane Waldo"
+    },
+    "table": "CBOARD1"
+}
+
+### Total page of content
+POST {{uri}}/api/custom-board/total-page HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "count": 5
+    },
+    "table": "CBOARD1"
+}
+
+### Paging - Same as below search except keywords
+POST {{uri}}/api/custom-board/contents HTTP/1.1
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {
+        "page": 0,
+        "count": 3,
+        "order": "desc"
+    },
+    "columns": [
+        "IDX",
+        "NAME",
+        "CONTENT",
+        "CREATOR"
+    ],
+    "table": "BOARD0"
+}

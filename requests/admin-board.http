@@ -4,7 +4,7 @@
 @token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2Nzk4NTEzLCJleHAiOjE2MjQyOTI5MTN9.ubIAP6aEgYKvMglmoJeBMZnkHXVaxMR8Dw1HhN3zueY
 
 ### Select one
-GET {{uri}}/api/admin/board/2 HTTP/1.1
+GET {{uri}}/api/admin/board/1 HTTP/1.1
 Authorization: Bearer {{token}}
 
 
@@ -77,181 +77,6 @@ content-type: application/json
 
 [
     {
-        "name": "Custom table list #1",
-        "code": "customlist1",
-        "type": "custom-tablelist",
-        "table": "CUSTOMLIST1",
-        "grant-read": "all",
-        "grant-write": "all",
-        "grant-comment": "all",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "NAME",
-                "name": "Name",
-                "type": "text",
-                "json": "name",
-                "order": 2
-            },
-            {
-                "idx": 2,
-                "column": "AGE",
-                "name": "Age",
-                "type": "number",
-                "json": "age",
-                "order": 3
-            },
-            {
-                "idx": 3,
-                "column": "PHONE",
-                "name": "Phone",
-                "type": "text",
-                "json": "phone",
-                "order": 4
-            }
-        ]
-    },
-    {
-        "name": "Custom table list #2",
-        "code": "customlist2",
-        "type": "custom-tablelist",
-        "table": "CUSTOMLIST2",
-        "grant-read": "all",
-        "grant-write": "user",
-        "grant-comment": "user",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "NAME",
-                "name": "Name",
-                "type": "text",
-                "json": "name",
-                "order": 2
-            },
-            {
-                "idx": 2,
-                "column": "AGE",
-                "name": "Age",
-                "type": "number",
-                "json": "age",
-                "order": 3
-            },
-            {
-                "idx": 3,
-                "column": "PHONE",
-                "name": "Phone",
-                "type": "text",
-                "json": "phone",
-                "order": 4
-            }
-        ]
-    },
-    {
-        "name": "Custom table list #3",
-        "code": "customlist3",
-        "type": "custom-tablelist",
-        "table": "CUSTOMLIST3",
-        "grant-read": "user",
-        "grant-write": "user",
-        "grant-comment": "user",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "NAME",
-                "name": "Name",
-                "type": "text",
-                "json": "name",
-                "order": 2
-            },
-            {
-                "idx": 2,
-                "column": "AGE",
-                "name": "Age",
-                "type": "number",
-                "json": "age",
-                "order": 3
-            },
-            {
-                "idx": 3,
-                "column": "PHONE",
-                "name": "Phone",
-                "type": "text",
-                "json": "phone",
-                "order": 4
-            }
-        ]
-    },
-    {
-        "name": "Custom table list #4",
-        "code": "customlist4",
-        "type": "custom-tablelist",
-        "table": "CUSTOMLIST4",
-        "grant-read": "user",
-        "grant-write": "admin",
-        "grant-comment": "admin",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "NAME",
-                "name": "Name",
-                "type": "text",
-                "json": "name",
-                "order": 2
-            },
-            {
-                "idx": 2,
-                "column": "AGE",
-                "name": "Age",
-                "type": "number",
-                "json": "age",
-                "order": 3
-            },
-            {
-                "idx": 3,
-                "column": "PHONE",
-                "name": "Phone",
-                "type": "text",
-                "json": "phone",
-                "order": 4
-            }
-        ]
-    },
-    {
-        "name": "Custom table list #5",
-        "code": "customlist5",
-        "type": "custom-tablelist",
-        "table": "CUSTOMLIST5",
-        "grant-read": "admin",
-        "grant-write": "admin",
-        "grant-comment": "admin",
-        "fields": [
-            {
-                "idx": 1,
-                "column": "NAME",
-                "name": "Name",
-                "type": "text",
-                "json": "name",
-                "order": 2
-            },
-            {
-                "idx": 2,
-                "column": "AGE",
-                "name": "Age",
-                "type": "number",
-                "json": "age",
-                "order": 3
-            },
-            {
-                "idx": 3,
-                "column": "PHONE",
-                "name": "Phone",
-                "type": "text",
-                "json": "phone",
-                "order": 4
-            }
-        ]
-    },
-    {
         "name": "Basic board #1",
         "code": "board1",
         "type": "basic-board",
@@ -311,7 +136,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 1
+                "order": 7
             },
             {
                 "idx": 2,
@@ -319,7 +144,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 2
+                "order": 8
             }
         ]
     },
@@ -338,7 +163,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 1
+                "order": 7
             },
             {
                 "idx": 2,
@@ -346,7 +171,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 2
+                "order": 8
             }
         ]
     },
@@ -365,7 +190,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 1
+                "order": 7
             },
             {
                 "idx": 2,
@@ -373,7 +198,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 2
+                "order": 8
             }
         ]
     },
@@ -392,7 +217,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 1
+                "order": 7
             },
             {
                 "idx": 2,
@@ -400,7 +225,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 2
+                "order": 8
             }
         ]
     },
@@ -419,7 +244,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 1
+                "order": 7
             },
             {
                 "idx": 2,
@@ -427,7 +252,182 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 2
+                "order": 8
+            }
+        ]
+    },
+        {
+        "name": "Custom table list #1",
+        "code": "customlist1",
+        "type": "custom-tablelist",
+        "table": "CUSTOMLIST1",
+        "grant-read": "all",
+        "grant-write": "all",
+        "grant-comment": "all",
+        "fields": [
+            {
+                "idx": 1,
+                "column": "NAME",
+                "name": "Name",
+                "type": "text",
+                "json": "name",
+                "order": 7
+            },
+            {
+                "idx": 2,
+                "column": "AGE",
+                "name": "Age",
+                "type": "number",
+                "json": "age",
+                "order": 8
+            },
+            {
+                "idx": 3,
+                "column": "PHONE",
+                "name": "Phone",
+                "type": "text",
+                "json": "phone",
+                "order": 9
+            }
+        ]
+    },
+    {
+        "name": "Custom table list #2",
+        "code": "customlist2",
+        "type": "custom-tablelist",
+        "table": "CUSTOMLIST2",
+        "grant-read": "all",
+        "grant-write": "user",
+        "grant-comment": "user",
+        "fields": [
+            {
+                "idx": 1,
+                "column": "NAME",
+                "name": "Name",
+                "type": "text",
+                "json": "name",
+                "order": 7
+            },
+            {
+                "idx": 2,
+                "column": "AGE",
+                "name": "Age",
+                "type": "number",
+                "json": "age",
+                "order": 8
+            },
+            {
+                "idx": 3,
+                "column": "PHONE",
+                "name": "Phone",
+                "type": "text",
+                "json": "phone",
+                "order": 9
+            }
+        ]
+    },
+    {
+        "name": "Custom table list #3",
+        "code": "customlist3",
+        "type": "custom-tablelist",
+        "table": "CUSTOMLIST3",
+        "grant-read": "user",
+        "grant-write": "user",
+        "grant-comment": "user",
+        "fields": [
+            {
+                "idx": 1,
+                "column": "NAME",
+                "name": "Name",
+                "type": "text",
+                "json": "name",
+                "order": 7
+            },
+            {
+                "idx": 2,
+                "column": "AGE",
+                "name": "Age",
+                "type": "number",
+                "json": "age",
+                "order": 8
+            },
+            {
+                "idx": 3,
+                "column": "PHONE",
+                "name": "Phone",
+                "type": "text",
+                "json": "phone",
+                "order": 9
+            }
+        ]
+    },
+    {
+        "name": "Custom table list #4",
+        "code": "customlist4",
+        "type": "custom-tablelist",
+        "table": "CUSTOMLIST4",
+        "grant-read": "user",
+        "grant-write": "admin",
+        "grant-comment": "admin",
+        "fields": [
+            {
+                "idx": 1,
+                "column": "NAME",
+                "name": "Name",
+                "type": "text",
+                "json": "name",
+                "order": 7
+            },
+            {
+                "idx": 2,
+                "column": "AGE",
+                "name": "Age",
+                "type": "number",
+                "json": "age",
+                "order": 8
+            },
+            {
+                "idx": 3,
+                "column": "PHONE",
+                "name": "Phone",
+                "type": "text",
+                "json": "phone",
+                "order": 9
+            }
+        ]
+    },
+    {
+        "name": "Custom table list #5",
+        "code": "customlist5",
+        "type": "custom-tablelist",
+        "table": "CUSTOMLIST5",
+        "grant-read": "admin",
+        "grant-write": "admin",
+        "grant-comment": "admin",
+        "fields": [
+            {
+                "idx": 1,
+                "column": "NAME",
+                "name": "Name",
+                "type": "text",
+                "json": "name",
+                "order": 7
+            },
+            {
+                "idx": 2,
+                "column": "AGE",
+                "name": "Age",
+                "type": "number",
+                "json": "age",
+                "order": 8
+            },
+            {
+                "idx": 3,
+                "column": "PHONE",
+                "name": "Phone",
+                "type": "text",
+                "json": "phone",
+                "order": 9
             }
         ]
     }
@@ -453,7 +453,7 @@ content-type: application/json
             "name": "Name",
             "type": "text",
             "json": "name",
-            "order": 2
+            "order": 7
         },
         {
             "idx": 2,
@@ -461,7 +461,7 @@ content-type: application/json
             "name": "Content",
             "type": "text",
             "json": "content",
-            "order": 3
+            "order": 8
         },
         {
             "idx": 3,
@@ -469,7 +469,7 @@ content-type: application/json
             "name": "Creator",
             "type": "text",
             "json": "creator",
-            "order": 4
+            "order": 9
         }
     ]
 }

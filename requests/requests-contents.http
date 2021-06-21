@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBhLmNvbSIsImFkbWluIjoiWSIsInJlZnJlc2gtdW50aWwiOjE2MjY1MDIyNDcsImV4cCI6MTYyMzk5NjY0N30.ZAg_DFvwGWQcDXSSQx1niVlLxJ6_bSlBeyIFKnZUs1s
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2ODY0MzI4LCJleHAiOjE2MjQzNTg3Mjh9.FUplM08LPzvQRPfX7aq2q1LeojY-szVtvys04IDkoJ4
 
 ### HTML contents
 GET {{uri}}/board?code=board0 HTTP/1.1
@@ -33,7 +33,7 @@ content-type: application/json
 {
     "keywords": [
         {
-            "idx": "4"
+            "idx": "1"
         }
     ],
     "options": {
@@ -43,23 +43,20 @@ content-type: application/json
 }
 
 ### Write a content
-PUT {{uri}}/api/basic-board/contents HTTP/1.1
+PUT {{uri}}/api/basic-board/contents?code=board1&mode=write HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
 {
     "data": {
-        "title": "타이틀",
-        "content": "게시물 내용",
-        "writer-idx": "-1",
-        "writer-name": "ㅇㅇ",
-        "writer-password": "1234"
+        "title": "my title",
+        "content": "my contents texts"
     },
     "table": "BOARD1"
 }
 
 ### Edit a content
-PATCH {{uri}}/api/basic-board/contents HTTP/1.1
+PATCH {{uri}}/api/basic-board/contents?code=board1&mode=edit HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -69,14 +66,14 @@ content-type: application/json
         "title": "Post title",
         "content": "Post text lorem ipsum",
         "writer-idx": "-1",
-        "writer-name": "ㅇㅇ",
+        "writer-name": "user1",
         "writer-password": "1234"
     },
     "table": "BOARD1"
 }
 
 ### Delete a content
-DELETE {{uri}}/api/basic-board/contents HTTP/1.1
+DELETE {{uri}}/api/basic-board/contents?code=board1&mode=delete HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -105,7 +102,7 @@ content-type: application/json
 ## Custom board / tablelist
 
 ### Read contents - tablelist
-POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+POST {{uri}}/api/custom-board/contents HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -125,7 +122,7 @@ content-type: application/json
 }
 
 ### Read contents - custom board
-POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+POST {{uri}}/api/custom-board/contents HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -144,7 +141,7 @@ content-type: application/json
 }
 
 ### Read a content - custom board
-POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+POST {{uri}}/api/custom-board/contents HTTP/1.1
 content-type: application/json
 
 {
@@ -161,43 +158,42 @@ content-type: application/json
 }
 
 ### Write a content - custom-tablelist
-PUT {{uri}}/api/custom-board/contents-list HTTP/1.1
+PUT {{uri}}/api/custom-board/contents HTTP/1.1
 content-type: application/json
 
 {
     "data": {
-        "NAME": "이름이믊",
-        "CONTENT": "내용 내용",
-        "CREATOR": "ㅇㅇ"
+        "NAME": "My Title",
+        "AGE": "3000",
+        "PHONE": "12345678",
     },
-    "table": "BOARD0"
+    "table": "CUSTOMLIST1"
 }
 
 ### Write a content - custom-board
-PUT {{uri}}/api/custom-board/contents-list HTTP/1.1
+PUT {{uri}}/api/custom-board/contents HTTP/1.1
 content-type: application/json
 
 {
     "data":{
-        "NAME": "김개동",
-        "AGENCY": "우리집"
+        "NAME": "John Doe",
+        "AGENCY": "My home office"
     },
-    "table":"CBOARD3"
+    "table":"CBOARD1"
 }
 
 
 ### Edit a content
-PATCH {{uri}}/api/custom-board/contents-list HTTP/1.1
+PATCH {{uri}}/api/custom-board/contents HTTP/1.1
 content-type: application/json
 
 {
     "data": {
         "IDX": 1,
-        "NAME": "훈민정음",
-        "CONTENT": "가나다라마바사아자차카타파하",
-        "CREATOR": "세종대왕"
+        "CONTENT": "Lorem ipsum fox",
+        "AGENCY": "Jane Waldo"
     },
-    "table": "BOARD0"
+    "table": "CBOARD1"
 }
 
 
@@ -214,7 +210,7 @@ content-type: application/json
 }
 
 ### Paging - Same as below search except keywords
-POST {{uri}}/api/custom-board/contents-list HTTP/1.1
+POST {{uri}}/api/custom-board/contents HTTP/1.1
 content-type: application/json
 
 {
