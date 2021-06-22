@@ -369,8 +369,8 @@ func CheckPermission(c echo.Context) bool {
 
 	if user == nil {
 		switch true {
-		case ((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
-			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
+		case ((mode == "write" || mode == "edit" || mode == "delete" || mode == "comment") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete" && mode != "comment") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false
@@ -380,12 +380,12 @@ func CheckPermission(c echo.Context) bool {
 		// log.Println("CheckAuth: ", claims.Admin, code, mode, boardInfos[0].GrantWrite.String, boardInfos[0].GrantRead.String)
 
 		switch true {
-		case ((mode == "write" || mode == "edit" || mode == "delete") && (grantWrite == "admin" && claims.Admin == "Y")) ||
-			((mode != "write" && mode != "edit" && mode != "delete") && (grantRead == "admin" && claims.Admin == "Y")) ||
-			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "user") ||
-			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "user") ||
-			((mode == "write" || mode == "edit" || mode == "delete") && grantWrite == "all") ||
-			((mode != "write" && mode != "edit" && mode != "delete") && grantRead == "all"):
+		case ((mode == "write" || mode == "edit" || mode == "delete" || mode == "comment") && (grantWrite == "admin" && claims.Admin == "Y")) ||
+			((mode != "write" && mode != "edit" && mode != "delete" && mode != "comment") && (grantRead == "admin" && claims.Admin == "Y")) ||
+			((mode == "write" || mode == "edit" || mode == "delete" || mode == "comment") && grantWrite == "user") ||
+			((mode != "write" && mode != "edit" && mode != "delete" && mode != "comment") && grantRead == "user") ||
+			((mode == "write" || mode == "edit" || mode == "delete" || mode == "comment") && grantWrite == "all") ||
+			((mode != "write" && mode != "edit" && mode != "delete" && mode != "comment") && grantRead == "all"):
 			isValid = true
 		default:
 			isValid = false
@@ -397,6 +397,67 @@ func CheckPermission(c echo.Context) bool {
 
 // ResponsePermission - Return permission
 func ResponsePermission(c echo.Context) error {
+	status := http.StatusForbidden
+	result := map[string]bool{"permission": false, "write-comment": false}
+
+	isValid := CheckPermission(c)
+	isCommentValid := CheckCommentPermission(c)
+
+	if isValid {
+		status = http.StatusOK
+		result["permission"] = true
+
+		result["write-comment"] = false
+		if isCommentValid {
+			result["write-comment"] = true
+		}
+	}
+
+	return c.JSON(status, result)
+}
+
+// CheckCommentPermission - Check permission
+func CheckCommentPermission(c echo.Context) bool {
+	var isValid bool
+
+	code := c.QueryParam("code")
+	// mode := c.QueryParam("mode") // read, edit, write
+
+	boardInfos := board.GetBoardByCode(code)
+
+	if len(boardInfos) == 0 {
+		isValid = false
+
+		return isValid
+	}
+
+	grantComment := boardInfos[0].GrantComment.String
+
+	user := c.Get("user")
+
+	if user == nil {
+		switch true {
+		case grantComment == "all":
+			isValid = true
+		default:
+			isValid = false
+		}
+	} else {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+
+		switch true {
+		case (grantComment == "admin" && claims.Admin == "Y") || grantComment == "user" || grantComment == "all":
+			isValid = true
+		default:
+			isValid = false
+		}
+	}
+
+	return isValid
+}
+
+// ResponseCommentPermission - Return permission
+func ResponseCommentPermission(c echo.Context) error {
 	status := http.StatusForbidden
 	result := map[string]bool{"permission": false}
 
@@ -417,9 +478,10 @@ func GetUserInfo(c echo.Context) error {
 
 	if user != nil {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
-		log.Println("GetUserInfo claims: ", claims, claims.Idx)
-		result["idx"] = claims.Idx
+		// log.Println("GetUserInfo claims: ", claims, claims.Idx)
+		// result["idx"] = claims.Idx
 		result["username"] = claims.UserName
+		result["admin"] = claims.Admin
 	}
 
 	return c.JSON(http.StatusOK, result)

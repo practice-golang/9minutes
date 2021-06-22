@@ -89,7 +89,7 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 			ex := goqu.Ex{}
 			for k, d := range keywordOBJ.(map[string]interface{}) {
 				val := ""
-				if k == "IDX" {
+				if k == "IDX" || k == "BOARD_IDX" {
 					val = fmt.Sprintf("%s", d)
 					ex[k] = goqu.Op{"eq": val}
 				} else {
@@ -298,8 +298,13 @@ func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 	for _, keywordOBJ := range keywords {
 		ex := goqu.Ex{}
 		for k, d := range keywordOBJ.(map[string]interface{}) {
-			val := fmt.Sprintf("%s%s%s", "%", d, "%")
-			ex[k] = goqu.Op{"like": val}
+			if k == "IDX" || k == "BOARD_IDX" {
+				val := fmt.Sprintf("%s", d)
+				ex[k] = goqu.Op{"eq": val}
+			} else {
+				val := fmt.Sprintf("%s%s%s", "%", d, "%")
+				ex[k] = goqu.Op{"like": val}
+			}
 		}
 		exps = append(exps, ex.Expression())
 	}

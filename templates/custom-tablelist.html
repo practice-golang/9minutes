@@ -231,7 +231,7 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=read"
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
+                let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -280,7 +280,7 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=write"
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
+                let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: "PUT",
                     headers: headers,
                     body: JSON.stringify({
@@ -315,7 +315,7 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=edit"
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
+                let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: "PATCH",
                     headers: headers,
                     body: JSON.stringify({
@@ -362,7 +362,7 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=delete"
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list" + params, {
+                let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({

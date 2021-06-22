@@ -7,8 +7,8 @@ content-type: application/json
 
 {
     "keywords": {
-        "USERNAME": "admin",
-        "PASSWORD": "admin"
+        "USERNAME": "user1",
+        "PASSWORD": "user1"
     },
     "columns": [
         "IDX",

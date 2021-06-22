@@ -242,18 +242,7 @@
                 return false
             },
             async deleteData(idx) {
-                const confirm = await swal.fire({
-                    title: "Confirm",
-                    text: "Are you sure?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Delete",
-                    cancelButtonText: "Cancel"
-                })
-
-                if (!confirm.isConfirmed) {
-                    return false
-                }
+                const keywords = { idx: idx }
 
                 let headers = {
                     "Accept": "application/json",
@@ -261,6 +250,23 @@
                 }
 
                 const token = localStorage.getItem('token')
+
+                if (token == null) {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        return false
+                    }
+
+                    keywords["writer-password"] = confirm.value
+                }
 
                 if (token != undefined && token != null) {
                     Object.assign(headers, { "Authorization": "Bearer " + token })
@@ -271,16 +277,19 @@
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
-                        data: {
-                            idx: idx
-                        },
+                        data: keywords,
                         table: this.table
                     })
                 })
 
                 if (response.ok) {
-                    swal.fire("Success", "Deleted successfully", "success")
-                    this.getData()
+                    const results = await response.json()
+                    if (results["affected-rows"] > 0) {
+                        swal.fire("Success", "Deleted successfully", "success")
+                        this.getData()
+                    } else {
+                        swal.fire("Fail", "Delete failed", "error")
+                    }
                     return false
                 }
 

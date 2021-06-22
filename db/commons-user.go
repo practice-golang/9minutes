@@ -53,7 +53,7 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	ex := PrepareWhere(search)
 	if !ex.IsEmpty() {
 		for c, v := range ex {
-			if c == "IDX" {
+			if c == "IDX" || c == "BOARD_IDX" {
 				val := fmt.Sprintf("%s", v)
 				ex[c] = goqu.Op{"eq": val}
 			} else {

@@ -23,21 +23,21 @@
         </div>
 
         <div>
-            <br /><a href="/board?code=cboard5">Custom Board5 / admin / admin</a>
-            <br /><a href="/board?code=cboard4">Custom Board4 / user / admin</a>
-            <br /><a href="/board?code=cboard3">Custom Board3 / user / user</a>
-            <br /><a href="/board?code=cboard2">Custom Board2 / all / user</a>
-            <br /><a href="/board?code=cboard1">Custom Board1 / all / all</a>
-            <br /><a href="/board?code=board5">Board5 / admin / admin</a>
-            <br /><a href="/board?code=board4">Board4 / user / admin</a>
-            <br /><a href="/board?code=board3">Board3 / user / user</a>
-            <br /><a href="/board?code=board2">Board2 / all / user</a>
-            <br /><a href="/board?code=board1">Board1 / all / all</a>
-            <br /><a href="/board?code=customlist5">custom table list #5 / admin / admin</a>
-            <br /><a href="/board?code=customlist4">custom table list #4 / user / admin</a>
-            <br /><a href="/board?code=customlist3">custom table list #3 / user / user</a>
-            <br /><a href="/board?code=my-contents">My contents</a> or <a href="/board?code=customlist2">custom table list #2 / all / user</a>
-            <br /><a href="/board?code=customlist1">custom table list #1 / all / all</a>
+            <br /><a href="/board?code=customlist5">custom table list #5 / admin / admin / admin</a>
+            <br /><a href="/board?code=customlist4">custom table list #4 / user / admin / admin</a>
+            <br /><a href="/board?code=customlist3">custom table list #3 / user / user / user</a>
+            <br /><a href="/board?code=my-contents">My contents</a> or <a href="/board?code=customlist2">custom table list #2 / all / user / user</a>
+            <br /><a href="/board?code=customlist1">custom table list #1 / all / all / all</a>
+            <br /><a href="/board?code=cboard5">Custom Board5 / admin / admin / admin</a>
+            <br /><a href="/board?code=cboard4">Custom Board4 / user / admin / user</a>
+            <br /><a href="/board?code=cboard3">Custom Board3 / user / user / user</a>
+            <br /><a href="/board?code=cboard2">Custom Board2 / all / user / user</a>
+            <br /><a href="/board?code=cboard1">Custom Board1 / all / all / all</a>
+            <br /><a href="/board?code=board5">Board5 / admin / admin / admin</a>
+            <br /><a href="/board?code=board4">Board4 / user / admin / user</a>
+            <br /><a href="/board?code=board3">Board3 / user / user/ user</a>
+            <br /><a href="/board?code=board2">Board2 / all / user/ user</a>
+            <br /><a href="/board?code=board1">Board1 / all / all / all</a>
         </div>
 
     </div>
@@ -54,52 +54,35 @@
         mounted() { this.initData() },
         methods: {
             async initData() {
-                await this.checkLogedIn()
+                await this.checkPermission()
             },
-            async checkLogedIn() {
-                let result = false
-                let reissue = false
-                let response = ""
-                let r = ""
+            async checkPermission() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
 
                 const token = localStorage.getItem('token')
 
-                if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                        method: "POST",
-                        headers: { "Authorization": "Bearer " + token }
-                    })
-                    if (response.ok) {
-                        r = await response.json()
-                        if (r.msg == "OK") { result = true }
-                    } else {
-                        if (response.status != 200) {
-                            r = await response.json()
-                            if (r.msg == "Token is expired") { reissue = true }
-                        }
-                    }
-
-                    if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                            method: "GET",
-                            headers: { "Authorization": "Bearer " + token }
-                        })
-
-                        if (response.ok) {
-                            r = await response.json()
-                            localStorage.setItem("token", r.token)
-                            result = true
-                        } else {
-                            localStorage.removeItem("token")
-                            result = false
-                        }
-                    }
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                // if (!result) {
-                //     // swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                let response = await fetch(this.restURI + "/api/user/permission", {
+                    method: "GET",
+                    headers: headers,
+                })
+
+                if (response.ok) {
+                    const contents = await response.json()
+                    await this.getUserInfo()
+                    this.isShow = true
+                    
+                    return false
+                }
+
+                showError(response.status)
+                return false
             },
             async logoutUser() {
                 localStorage.removeItem("token")

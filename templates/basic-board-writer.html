@@ -21,16 +21,12 @@
         <h1>{{table}}</h1>
         <table>
             <!-- <tr v-if="!Object.values(contents).includes('writer-name')"> -->
-            <tr v-if="contents['writer-name'] == ''">
-                <td>
-                    <input v-model="contents['writer-name']" placeholder="name" />
-                </td>
-                <td>
-                    <input v-model="contents['writer-password']" placeholder="password" />
-                </td>
+            <tr v-if="contents['is-member'] == 'Y' || mode == 'edit'">
+                <td>{{contents['writer-name']}}</td>
             </tr>
             <tr v-else>
-                <td>{{contents['writer-name']}}</td>
+                <td><input v-model="contents['writer-name']" placeholder="name" /></td>
+                <td><input v-model="contents['writer-password']" placeholder="password" /></td>
             </tr>
             <tr>
                 <td><input v-model="contents.title" placeholder="Title" /></td>
@@ -51,6 +47,12 @@
 <script>
     function showError(status) {
         switch (status) {
+            case 400:
+                swal.fire("Bad request", "Bad request", "error").then(() => {
+                    localStorage.removeItem("token")
+                    location.href = "/users/login"
+                })
+                break
             case 401:
                 swal.fire("Unauthorized", "need login", "error").then(() => {
                     localStorage.removeItem("token")
@@ -94,9 +96,12 @@
             boardCode: "'##__BOARD_CODE__##'",
             mode: "write",
             id: "",
+            isAdmin: false,
+            paramIsMember: "",
             contents: {
                 title: "",
                 content: "",
+                "is-member": "N",
                 "writer-name": "",
                 "writer-password": ""
             }
@@ -105,6 +110,7 @@
             const uri = new URL(String(document.location.href))
             this.mode = String(uri.searchParams.get("mode"))
             this.id = String(uri.searchParams.get("id"))
+            this.paramIsMember = String(uri.searchParams.get("member"))
 
             this.initData()
         },
@@ -160,24 +166,26 @@
                         method: "GET",
                         headers: headers,
                     })
-    
+
                     if (response.ok) {
                         const userInfo = await response.json()
-                        this.contents["writer-idx"] = userInfo.idx
-                        this.contents["writer-name"] = userInfo.username
+                        if (this.paramIsMember != "n") {
+                            this.contents["writer-name"] = userInfo.username
+                            this.contents["is-member"] = "Y"
+                            if (userInfo.admin == "Y") {
+                                this.isAdmin = true
+                            }
+                        }
                         return false
                     }
-                }
 
-                console.log(this.contents)
-
-                if (token != null) {
                     showError(response.status)
                 }
+
                 return false
             },
             async getData() {
-                const keywords = [{ idx: this.id }]
+                let keywords = [{ idx: this.id }]
 
                 let headers = {
                     "Accept": "application/json",
@@ -185,6 +193,25 @@
                 }
 
                 const token = localStorage.getItem('token')
+
+                // if (token == null || this.paramIsMember == "n") {
+                if (this.paramIsMember == "n") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        history.back()
+                        return false
+                    }
+
+                    keywords.push({ "writer-password": confirm.value })
+                }
 
                 if (token != undefined && token != null) {
                     Object.assign(headers, { "Authorization": "Bearer " + token })
@@ -203,13 +230,15 @@
                 })
 
                 if (response.ok) {
-                    contents = (await response.json())[0]
-                    if (token != null && this.contents["writer-name"] != contents["writer-name"]) {
+                    const data = await response.json()
+                    if (data.length == 0) {
                         swal.fire("Forbidden", "You can not edit", "error").then(() => {
-                            window.history.back()
+                            history.back()
                         })
                         return false
                     }
+
+                    let contents = data[0]
 
                     this.contents = contents
                     await tinymce.activeEditor.setContent(this.contents.content)
@@ -258,13 +287,7 @@
                     return false
                 }
 
-                if (response.status == 400) {
-                    const result = await response.json()
-                    swal.fire("Bad Request", "Bad request", "error").then(() => {
-                        window.history.back()
-                    })
-                }
-
+                showError(response.status)
                 return false
             }
         }

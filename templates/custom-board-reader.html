@@ -163,7 +163,7 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents-list?code=" + this.boardCode, {
+                let response = await fetch(this.restURI + "/api/custom-board/contents?code=" + this.boardCode, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({

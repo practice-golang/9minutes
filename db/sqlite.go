@@ -133,6 +133,7 @@ func (d *Sqlite) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
 		"IDX"				INTEGER,
 		"TITLE"				TEXT,
 		"CONTENT"			TEXT,
+		"IS_MEMBER"			TEXT,
 		"WRITER_IDX"		TEXT,
 		"WRITER_NAME"		TEXT,
 		"WRITER_PASSWORD"	TEXT,
@@ -160,7 +161,12 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
-		"IDX"		INTEGER,
+		"IDX"				INTEGER,
+		"IS_MEMBER"			TEXT,
+		"WRITER_IDX"		TEXT,
+		"WRITER_NAME"		TEXT,
+		"WRITER_PASSWORD"	TEXT,
+		"REG_DTTM"			TEXT,
 	`
 
 	if len(fields) > 0 {
@@ -398,6 +404,7 @@ func (d *Sqlite) CreateComment(tableInfo models.Board, recreate bool) error {
 		"IDX"				INTEGER,
 		"BOARD_IDX"			INTEGER,
 		"CONTENT"			TEXT,
+		"IS_MEMBER"			TEXT,
 		"WRITER_IDX"		TEXT,
 		"WRITER_NAME"		TEXT,
 		"WRITER_PASSWORD"	TEXT,

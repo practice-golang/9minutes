@@ -37,7 +37,7 @@ content-type: application/json
 }
 
 
-### Write a content - custom-board
+### Write a content
 PUT {{uri}}/api/custom-board/contents?code=cboard1&mode=write HTTP/1.1
 content-type: application/json
 
@@ -50,20 +50,20 @@ content-type: application/json
 }
 
 ### Edit content
-PATCH {{uri}}/api/custom-board/contents HTTP/1.1
+PATCH {{uri}}/api/custom-board/contents?code=cboard1&mode=edit HTTP/1.1
 content-type: application/json
 
 {
     "data": {
         "IDX": 1,
-        "CONTENT": "Lorem ipsum fox",
+        "NAME": "Lorem ipsum fox",
         "AGENCY": "Jane Waldo"
     },
     "table": "CBOARD1"
 }
 
 ### Total page of content
-POST {{uri}}/api/custom-board/total-page HTTP/1.1
+POST {{uri}}/api/custom-board/total-page?code=cboard1&mode=read HTTP/1.1
 content-type: application/json
 
 {
@@ -75,7 +75,7 @@ content-type: application/json
 }
 
 ### Paging - Same as below search except keywords
-POST {{uri}}/api/custom-board/contents HTTP/1.1
+POST {{uri}}/api/custom-board/contents?code=cboard1&mode=read HTTP/1.1
 content-type: application/json
 
 {
@@ -88,8 +88,7 @@ content-type: application/json
     "columns": [
         "IDX",
         "NAME",
-        "CONTENT",
-        "CREATOR"
+        "AGENCY"
     ],
-    "table": "BOARD0"
+    "table": "CBOARD1"
 }

@@ -2,7 +2,6 @@ package contents
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,18 +15,57 @@ import (
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
 	"github.com/practice-golang/9minutes/user"
+	"gopkg.in/guregu/null.v4"
 )
 
 // GetContentsListBasicBoard - Get contents
 func GetContentsListBasicBoard(c echo.Context) error {
-	if !auth.CheckAuth(c) {
-		return c.JSON(http.StatusForbidden, "")
-	}
-
 	var data interface{}
 	var err error
 
 	search, _ := ioutil.ReadAll(c.Request().Body)
+
+	if !user.CheckPermission(c) {
+		return c.JSON(http.StatusForbidden, "")
+	}
+
+	user := c.Get("user")
+	isAdmin := "N"
+	username := ""
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		isAdmin = claims.Admin
+		username = claims.UserName
+	}
+
+	mode := c.QueryParam("mode")
+
+	if mode == "edit" && isAdmin != "Y" {
+		var searchModel models.ContentSearch
+		err = json.Unmarshal(search, &searchModel)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// password for anonymous post
+		password := false
+		for _, s := range searchModel.Keywords {
+			if s.WriterPassword.Valid {
+				password = true
+				break
+			}
+		}
+
+		if !password {
+			searchModel.Keywords = append(searchModel.Keywords, models.ContentsBasicBoardSET{
+				WriterName: null.NewString(username, true),
+			})
+			search, err = json.Marshal(searchModel)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err)
+			}
+		}
+	}
 
 	data, err = db.SelectContents(search)
 	if err != nil {
@@ -40,16 +78,10 @@ func GetContentsListBasicBoard(c echo.Context) error {
 
 // AddContentsBasicBoard - Add contents
 func AddContentsBasicBoard(c echo.Context) error {
-	isValid := user.CheckPermission(c)
-
-	if !isValid {
-		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
-	}
-
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	var dataMap map[string]interface{}
-	var data models.ContentsBasicBoard
+	var data models.ContentsBasicBoardSET
 
 	err := json.Unmarshal(dataBytes, &dataMap)
 	if err != nil {
@@ -60,6 +92,23 @@ func AddContentsBasicBoard(c echo.Context) error {
 	err = json.Unmarshal(dataJSON, &data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	isValid := user.CheckPermission(c)
+
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		data.WriterIdx = null.NewString(claims.Idx, true)
+		data.WriterName = null.NewString(claims.UserName, true)
+		data.IsMember = null.NewString("Y", true)
+	} else {
+		data.WriterIdx = null.NewString("-1", true)
+		data.IsMember = null.NewString("N", true)
 	}
 
 	sqlResult, err := db.InsertContents(data, dataMap["table"].(string))
@@ -81,40 +130,46 @@ func AddContentsBasicBoard(c echo.Context) error {
 
 // UpdateContentsBasicBoard - Update contents
 func UpdateContentsBasicBoard(c echo.Context) error {
+	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
+
+	var dataMap map[string]interface{}
+	var data models.ContentsBasicBoardSET
+
+	err := json.Unmarshal(dataBytes, &dataMap)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	dataJSON, _ := json.Marshal(dataMap["data"])
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
 	isValid := user.CheckPermission(c)
 
 	if !isValid {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
-	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
-
-	var dataMap map[string]interface{}
-	var data models.ContentsBasicBoard
-
-	err := json.Unmarshal(dataBytes, &dataMap)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
-	dataJSON, _ := json.Marshal(dataMap["data"])
-	err = json.Unmarshal(dataJSON, &data)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
 	user := c.Get("user")
 	if user != nil {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
-		if data.WriterName.String != claims.UserName ||
-			data.WriterIdx.String != claims.Idx {
-			return c.JSON(http.StatusBadRequest, errors.New("you can not edit"))
+		if data.IsMember.String == "Y" {
+			if data.WriterName.String == claims.UserName {
+				data.WriterIdx = null.NewString(claims.Idx, true)
+				data.WriterName = null.NewString(claims.UserName, true)
+			}
+		} else if !data.WriterPassword.Valid {
+			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 		}
+	} else if !data.WriterPassword.Valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 	}
 
 	sqlResult, err := db.UpdateContents(data, dataMap["table"].(string))
 	if err != nil {
-		log.Println("InsertContents: ", err)
+		log.Println("UpdateContents: ", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}
 
@@ -135,16 +190,16 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 
 // DeleteContentsBasicBoard - Delete contents
 func DeleteContentsBasicBoard(c echo.Context) error {
-	isValid := user.CheckPermission(c)
+	havePermission := user.CheckPermission(c)
 
-	if !isValid {
+	if !havePermission {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	var dataMap map[string]interface{}
-	var data models.ContentsBasicBoard
+	var data models.ContentsBasicBoardSET
 
 	err := json.Unmarshal(dataBytes, &dataMap)
 	if err != nil {
@@ -157,13 +212,34 @@ func DeleteContentsBasicBoard(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		if data.WriterName.String != claims.UserName ||
+			data.WriterIdx.String != claims.Idx {
+			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit"})
+		}
+	}
+
 	sqlResult, err := db.DeleteContents(data, dataMap["table"].(string))
 	if err != nil {
-		log.Println("InsertContents: ", err)
+		log.Println("DeleteContents: ", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, sqlResult)
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	if db.DBType == db.SQLITE && lastID == 0 {
+		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
+	}
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 // GetContentsTotalPage - Get total page of basic board
@@ -214,13 +290,13 @@ func GetContentsListCustomBoard(c echo.Context) error {
 
 // AddContentsListCustomBoard - Add contents
 func AddContentsListCustomBoard(c echo.Context) error {
+	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
+
 	isValid := user.CheckPermission(c)
 
 	if !isValid {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
-
-	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
 	sqlResult, err := db.InsertContentsMAP(dataBytes)
 	if err != nil {

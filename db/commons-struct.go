@@ -13,6 +13,7 @@ import (
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 	_ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
 	_ "github.com/doug-martin/goqu/v9/dialect/sqlserver"
+	"github.com/doug-martin/goqu/v9/exp"
 )
 
 // InsertContents - Crud contents / basic-board
@@ -43,8 +44,13 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 	}
 
 	whereEXP := goqu.Ex{
-		"IDX":         data.(models.ContentsBasicBoard).Idx,
-		"WRITER_NAME": data.(models.ContentsBasicBoard).WriterName,
+		"IDX": data.(models.ContentsBasicBoardSET).Idx,
+	}
+	if data.(models.ContentsBasicBoardSET).WriterName.Valid {
+		whereEXP["WRITER_NAME"] = data.(models.ContentsBasicBoardSET).WriterName
+	}
+	if data.(models.ContentsBasicBoardSET).WriterPassword.Valid {
+		whereEXP["WRITER_PASSWORD"] = data.(models.ContentsBasicBoardSET).WriterPassword
 	}
 
 	dbms := goqu.New(dbType, Dbo)
@@ -67,7 +73,10 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
-	whereEXP := goqu.Ex{"idx": data.(models.ContentsBasicBoard).Idx}
+	whereEXP := goqu.Ex{
+		"IDX":             data.(models.ContentsBasicBoardSET).Idx,
+		"WRITER_PASSWORD": data.(models.ContentsBasicBoardSET).WriterPassword,
+	}
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Delete(table).Where(whereEXP)
@@ -100,13 +109,14 @@ func SelectContents(search interface{}) (interface{}, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	var ds *goqu.SelectDataset
-	contentResult := []models.ContentsBasicBoard{}
+	contentResult := []models.ContentsBasicBoardGET{}
 	exps := []goqu.Expression{}
+	expsAND := []goqu.Expression{}
 
 	keywords := searchBytes.Keywords
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Content list
-		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsListBasicBoard{})
+		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsBasicBoardList{})
 	} else {
 		// Not allow getting all of list
 		if !searchBytes.Options.Count.Valid || searchBytes.Options.Count.Int64 < 1 {
@@ -114,25 +124,37 @@ func SelectContents(search interface{}) (interface{}, error) {
 		}
 
 		// Contents
-		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsBasicBoard{})
+		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsBasicBoardGET{})
 	}
 
 	for _, k := range keywords {
 		ex := PrepareWhere(k)
+		exAND := exp.Ex{}
 		if !ex.IsEmpty() {
 			for c, v := range ex {
-				if c == "IDX" {
+				if c == "IDX" || c == "BOARD_IDX" {
 					val := fmt.Sprintf("%s", v)
-					ex[c] = goqu.Op{"eq": val}
+					exAND[c] = goqu.Op{"eq": val}
+					delete(ex, c)
+				} else if c == "WRITER_PASSWORD" {
+					val := fmt.Sprintf("%s", v)
+					exAND[c] = goqu.Op{"eq": val}
+					delete(ex, c)
+				} else if c == "WRITER_NAME" {
+					val := fmt.Sprintf("%s", v)
+					exAND[c] = goqu.Op{"eq": val}
+					delete(ex, c)
 				} else {
 					val := fmt.Sprintf("%s%s%s", "%", v, "%")
 					ex[c] = goqu.Op{"like": val}
 				}
 			}
 			exps = append(exps, ex.Expression())
+			expsAND = append(expsAND, exAND.Expression())
 		}
 	}
 	ds = ds.Where(goqu.Or(exps...))
+	ds = ds.Where(goqu.And(expsAND...))
 
 	orderDirection := goqu.C(OrderScope).Asc()
 	if searchBytes.Options.Order.String == "desc" {
@@ -188,7 +210,7 @@ func SelectContentsCount(search interface{}) (uint, error) {
 			ex := PrepareWhere(k)
 			if !ex.IsEmpty() {
 				for c, v := range ex {
-					if c == "IDX" {
+					if c == "IDX" || c == "BOARD_IDX" {
 						val := fmt.Sprintf("%s", v)
 						ex[c] = goqu.Op{"eq": val}
 					} else {

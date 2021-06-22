@@ -31,7 +31,7 @@
             </tr>
         </table>
 
-        <button @click="location.href='/board?code='+boardCode+'&mode=edit&id='+id">Edit</button>
+        <button @click="enterEdit()">Edit</button>
         <button @click="location.href='/board?code='+boardCode">List</button>
         <hr />
 
@@ -40,9 +40,14 @@
             <div v-html="c.content"></div>
         </div>
 
-        <div>
-            <input v-model="commentAdd['writer-name']" placeholder="name" />
-            <input v-model="commentAdd['writer-password']" placeholder="password" />
+        <div v-if="commentPermission">
+            <template v-if="!commentAdd.isMember">
+                <input v-model="commentAdd['writer-name']" placeholder="name" />
+                <input v-model="commentAdd['writer-password']" placeholder="password" />
+            </template>
+            <template v-else>
+                {{commentAdd['writer-name']}}
+            </template>
             <br />
             <textarea id="editor" v-model="commentAdd.comment" class="editors"></textarea>
             <br />
@@ -75,19 +80,22 @@
         return false
     }
 
-    tinymce.init({
-        selector: "textarea.editors",
-        mode: "textareas",
-        theme: "silver",
-        height: "240",
-        force_p_newlines: false,
-        force_br_newlines: true,
-        // forced_root_block: false,
-        forced_root_block: '',
-        convert_newlines_to_brs: false,
-        remove_linebreaks: true,
-        // branding: false
-    })
+    function initTinyMCE() {
+        tinymce.init({
+            selector: "textarea.editors",
+            mode: "textareas",
+            theme: "silver",
+            height: "240",
+            force_p_newlines: false,
+            force_br_newlines: true,
+            // forced_root_block: false,
+            forced_root_block: '',
+            convert_newlines_to_brs: false,
+            remove_linebreaks: true,
+            // branding: false
+        })
+    }
+    
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
@@ -101,15 +109,14 @@
             contents: {
                 title: "",
                 content: "",
-                "writer-idx": "-1",
-                "writer-name": "",
-                "writer-password": ""
+                "writer-name": ""
             },
+            commentPermission: false,
             comments: [],
             commentAdd: {
                 bidx: "",
                 content: "",
-                "writer-idx": "-1",
+                isMember: false,
                 "writer-name": "",
                 "writer-password": "",
             }
@@ -117,59 +124,81 @@
         mounted() {
             const uri = new URL(String(document.location.href))
             this.id = String(uri.searchParams.get("id"))
+            this.mode = String(uri.searchParams.get("mode"))
 
             this.initData()
         },
         methods: {
             async initData() {
-                await this.checkLogedIn()
+                await this.checkPermission()
                 await this.getData()
                 await this.getComments()
+
+                initTinyMCE()
             },
-            async checkLogedIn() {
-                let result = false
-                let reissue = false
-                let response = ""
-                let r = ""
+            async checkPermission() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
 
                 const token = localStorage.getItem('token')
 
-                if (token != null) {
-                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                        method: "POST",
-                        headers: { "Authorization": "Bearer " + token }
-                    })
-                    if (response.ok) {
-                        r = await response.json()
-                        if (r.msg == "OK") { result = true }
-                    } else {
-                        if (response.status != 200) {
-                            r = await response.json()
-                            if (r.msg == "Token is expired") { reissue = true }
-                        }
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+                }
+
+                let params = "?code=" + this.boardCode + "&mode=" + this.mode
+                let response = await fetch(this.restURI + "/api/user/permission" + params, {
+                    method: "GET",
+                    headers: headers,
+                })
+
+                if (response.ok) {
+                    const permissions = await response.json()
+                    if (permissions["write-comment"]) {
+                        this.commentPermission = true
                     }
+                    await this.getUserInfo()
+                    this.isShow = true
 
-                    if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
-                            method: "GET",
-                            headers: { "Authorization": "Bearer " + token }
-                        })
+                    return false
+                }
 
-                        if (response.ok) {
-                            r = await response.json()
-                            localStorage.setItem("token", r.token)
-                            result = true
-                        } else {
-                            localStorage.removeItem("token")
-                            result = false
-                        }
+                showError(response.status)
+                return false
+            },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        this.commentAdd.isMember = true
+                        this.commentAdd["writer-name"] = userInfo.username
+                        return false
                     }
                 }
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                if (token != null) {
+                    showError(response.status)
+                }
+
+                this.commentAdd.isMember = false
+
+                return false
             },
             async getData() {
                 const keywords = [{ idx: this.id }]
@@ -205,6 +234,13 @@
                 showError(response.status)
                 return false
             },
+            enterEdit() {
+                let isMember = ""
+                if (this.contents["is-member"] != "Y") {
+                    isMember = "&member=n"
+                }
+                location.href = '/board?code=' + this.boardCode + '&mode=edit&id=' + this.id + isMember
+            },
             async getComments() {
                 const keywords = [{ bidx: this.id }]
 
@@ -219,7 +255,9 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/comments", {
+                const params = "?code=" + this.boardCode + "&mode=read"
+
+                let response = await fetch(this.restURI + "/api/comments" + params, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -253,7 +291,9 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/comments", {
+                const params = "?code=" + this.boardCode + "&mode=write"
+
+                let response = await fetch(this.restURI + "/api/comments" + params, {
                     method: requestMethod,
                     headers: headers,
                     body: JSON.stringify({
@@ -264,7 +304,7 @@
 
                 if (response.ok) {
                     const result = await response.json()
-                    this.commentAdd = {}
+                    this.commentAdd.content = ""
                     tinymce.activeEditor.setContent("")
 
                     this.getComments()

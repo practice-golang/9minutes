@@ -263,17 +263,6 @@ var (
 	ErrJWTInvalid = echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired jwt")
 )
 
-// jwtFromQuery returns a `jwtExtractor` that extracts token from the query string.
-func jwtFromQuery(param string) jwtExtractor {
-	return func(c echo.Context) (string, error) {
-		token := c.QueryParam(param)
-		if token == "" {
-			return "", ErrJWTMissing
-		}
-		return token, nil
-	}
-}
-
 // jwtFromHeader returns a `jwtExtractor` that extracts token from the request header.
 func jwtFromHeader(header string, authScheme string) jwtExtractor {
 	return func(c echo.Context) (string, error) {
@@ -304,12 +293,18 @@ func setupServer() *echo.Echo {
 		SigningKey: jwtKey,
 		ErrorHandlerWithContext: func(e error, c echo.Context) error {
 			status := http.StatusForbidden
-			result := map[string]bool{"permission": false}
+			result := map[string]bool{"permission": false, "write-comment": false}
 			isValid := user.CheckPermission(c)
+			isCommentValid := user.CheckCommentPermission(c)
 
 			if isValid {
 				status = http.StatusOK
 				result["permission"] = true
+
+				result["write-comment"] = false
+				if isCommentValid {
+					result["write-comment"] = true
+				}
 			}
 
 			return c.JSON(status, result)
@@ -361,7 +356,58 @@ func setupServer() *echo.Echo {
 					}
 				}
 
-				log.Println("WTF: ", len(auth))
+				if len(auth) > 0 {
+					return false
+				}
+				return true
+			default:
+				return false
+			}
+		},
+		Claims:     &auth.CustomClaims{},
+		SigningKey: jwtKey,
+		ErrorHandlerWithContext: func(e error, c echo.Context) error {
+			result := map[string]string{"msg": e.Error()}
+
+			return c.JSON(http.StatusUnauthorized, result)
+		},
+	}
+
+	jwtConfigComment := middleware.JWTConfig{
+		Skipper: func(c echo.Context) bool {
+			code := c.QueryParam("code")
+			mode := c.QueryParam("mode") // read, write
+
+			boardInfos := board.GetBoardByCode(code)
+			if len(boardInfos) == 0 {
+				return false
+			}
+
+			switch true {
+			case ((mode == "write" || mode == "edit" || mode == "delete") && boardInfos[0].GrantComment.String == "all") ||
+				boardInfos[0].GrantRead.String == "all":
+				sources := strings.Split("header:Authorization", ",")
+				var extractors []jwtExtractor
+				for _, source := range sources {
+					parts := strings.Split(source, ":")
+
+					switch parts[0] {
+					case "header":
+						extractors = append(extractors, jwtFromHeader(parts[1], "Bearer"))
+					}
+				}
+
+				var auth string
+				var err error
+				for _, extractor := range extractors {
+					// Extract token from extractor, if it's not fail break the loop and
+					// set auth
+					auth, err = extractor(c)
+					if err == nil {
+						break
+					}
+				}
+
 				if len(auth) > 0 {
 					return false
 				}
@@ -446,6 +492,7 @@ func setupServer() *echo.Echo {
 	ua.Use(middleware.JWTWithConfig(jwtConfigPermissionOnly))
 	ua.POST("/token/verify", user.VerifyToken)
 	ua.GET("/permission", user.ResponsePermission)
+	ua.GET("/permission-comment", user.ResponseCommentPermission)
 	ua.GET("/info", user.GetUserInfo)
 
 	bb := e.Group("/api/basic-board")
@@ -458,13 +505,14 @@ func setupServer() *echo.Echo {
 
 	cb := e.Group("/api/custom-board")
 	cb.Use(middleware.JWTWithConfig(jwtConfigBoard))
-	cb.POST("/contents-list", contents.GetContentsListCustomBoard)
-	cb.PUT("/contents-list", contents.AddContentsListCustomBoard)
-	cb.PATCH("/contents-list", contents.UpdateContentsListCustomBoard)
-	cb.DELETE("/contents-list", contents.DeleteContentsListCustomBoard)
+	cb.POST("/contents", contents.GetContentsListCustomBoard)
+	cb.PUT("/contents", contents.AddContentsListCustomBoard)
+	cb.PATCH("/contents", contents.UpdateContentsListCustomBoard)
+	cb.DELETE("/contents", contents.DeleteContentsListCustomBoard)
 	cb.POST("/total-page", contents.GetContentsTotalPageMAP)
 
 	cm := e.Group("/api/comments")
+	cm.Use(middleware.JWTWithConfig(jwtConfigComment))
 	cm.POST("", comments.GetComments)
 	cm.PUT("", comments.AddComments)
 

@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
+	"github.com/practice-golang/9minutes/user"
 )
 
 // GetComments - Get comments
@@ -45,6 +46,11 @@ func AddComments(c echo.Context) error {
 	err = json.Unmarshal(dataJSON, &data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	isValid := user.CheckPermission(c)
+	if !isValid {
+		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
 	sqlResult, err := db.InsertComment(data, dataMap["table"].(string)+"_COMMENT")

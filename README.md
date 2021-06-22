@@ -50,6 +50,7 @@ Current, Sqlite only
 - [x] Comment
 - [x] User add, edit, delete
 - [ ] User auth
+- [ ] Comment paging
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] User defined template

@@ -1,8 +1,10 @@
 @uri=http://localhost:2510
 
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIzNiIsInVzZXJuYW1lIjoidXNlcjEiLCJlbWFpbCI6InVzZXJAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI2ODkxMzE1LCJleHAiOjE2MjQzODU3MTV9.ydN1bE9nNjRMFz5S0rE2pf7pilxwiLaO-SH1a2mRopA
 
 ### List of contents
 POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -15,30 +17,34 @@ content-type: application/json
 
 ### Read Content
 POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
-    "keywords": [{ "idx": "3" }],
+    "keywords": [{ "idx": "2" }],
     "options": { "count": 10 },
     "table": "BOARD1"
 }
 
 ### Write a content
 PUT {{uri}}/api/basic-board/contents?code=board1&mode=write HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
     "data": {
-        "title": "my title",
-        "content": "my contents texts",
-        "writer-name": "anonymous1",
-        "writer-password": "1234"
+        "title": "my title user1",
+        "content": "my contents texts user1",
+        "is-member": "Y",
+        "writer-name": "anonymous1_no_effect",
+        "writer-password": "1234_no_effect"
     },
     "table": "BOARD1"
 }
 
 ### Edit a content
 PATCH {{uri}}/api/basic-board/contents?code=board1&mode=edit HTTP/1.1
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -46,8 +52,22 @@ content-type: application/json
         "idx": "6",
         "title": "Post title",
         "content": "Post text lorem ipsum",
-        "writer-name": "anonymous1",
-        "writer-password": "1234"
+        "writer-name": "user1"
+    },
+    "table": "BOARD1"
+}
+
+### Edit a content - anonymous post
+PATCH {{uri}}/api/basic-board/contents?code=board1&mode=edit HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "data": {
+        "idx": "2",
+        "title": "Post title",
+        "content": "Post text lorem ipsum",
+        "writer-name": "dd"
     },
     "table": "BOARD1"
 }

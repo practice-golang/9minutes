@@ -191,14 +191,15 @@
                 <td>{{nextFieldOrder}}</td>
                 <td><button @click="addField()">Add field</button></td>
             </tr>
-            <tr>
-                <td>Cannot Edit</td>
-                <td>-</td>
-                <td>Idx</td>
-                <td>IDX</td>
-                <td>idx</td>
-                <td>number</td>
-                <td>1</td>
+            <tr v-for="(f, k) in defaultFields">
+                <td>{{f.desc}}</td>
+                <td>{{f.idx}}</td>
+                <td>{{f.name}}</td>
+                <td>{{f.column}}</td>
+                <td>{{f.json}}</td>
+                <td>{{f.type}}</td>
+                <td>{{f.order}}</td>
+                <td></td>
             </tr>
 
             <tr v-for="(f, k) in modalFields">
@@ -308,6 +309,14 @@
             // restURI: window.location.protocol + "//" + window.location.host + window.location.pathname + "api/admin",
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host + "/api/admin",
+            defaultFields: [
+                { desc: "Cannot edit", idx: "-", name: "Idx", column: "IDX", json: "idx", type: "number", order: 1 },
+                { desc: "Cannot edit", idx: "-", name: "Is member", column: "IS_MEMBER", json: "is-member", type: "text", order: 2 },
+                { desc: "Cannot edit", idx: "-", name: "Writer idx", column: "WRITER_IDX", json: "writer-idx", type: "text", order: 3 },
+                { desc: "Cannot edit", idx: "-", name: "Writer name", column: "WRITER_NAME", json: "writer-name", type: "text", order: 4 },
+                { desc: "Cannot edit", idx: "-", name: "Writer password", column: "WRITER_PASSWORD", json: "writer-password", type: "text", order: 5 },
+                { desc: "Cannot edit", idx: "-", name: "Reg date", column: "REG_DTTM", json: "reg-dttm", type: "text", order: 6 },
+            ],
             page: {
                 current: 1,
                 total: 1,
@@ -351,11 +360,20 @@
             }
         },
         computed: {
-            nextFieldOrder() { return this.modalFields.length + 2 },
+            nextFieldOrder() {
+                if (this.modalFields.length > 0) {
+                    let fields = this.modalFields.slice()
+                    fields.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+
+                    return fields[fields.length - 1].order + 1
+                }
+
+                return 7
+            },
             nextFieldIdx() {
                 if (this.modalFields.length > 0) {
                     let fields = this.modalFields.slice()
-                    fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
+                    fields.sort((a, b) => (a.idx > b.idx) ? 1 : ((b.idx > a.idx) ? -1 : 0))
 
                     return fields[fields.length - 1].idx + 1
                 }
