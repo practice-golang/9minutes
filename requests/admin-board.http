@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2Nzk4NTEzLCJleHAiOjE2MjQyOTI5MTN9.ubIAP6aEgYKvMglmoJeBMZnkHXVaxMR8Dw1HhN3zueY
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2OTU3NzIyLCJleHAiOjE2MjQ0NTIxMjJ9.1yqhaL4vBwz7SMAnygmIWNO5DzRrXz3sK9MwXZXqL5A
 
 ### Select one
 GET {{uri}}/api/admin/board/1 HTTP/1.1

@@ -44,7 +44,8 @@ content-type: application/json
 {
     "data":{
         "NAME": "John Doe",
-        "AGENCY": "My home office"
+        "AGENCY": "My home office",
+        "WRITER_PASSWORD": "1234"
     },
     "table":"CBOARD1"
 }

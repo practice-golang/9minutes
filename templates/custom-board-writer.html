@@ -19,11 +19,15 @@
 <body>
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
+        <div>
+            <input v-model="contents['writer-name']" placeholder="name" type="hidden" />
+            <input v-model="contents['writer-password']" placeholder="password" />
+        </div>
         <template v-for="c, j in columns" v-if="c.column != 'IDX'">
             <div v-if="c.type == 'editor'">
                 <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
             </div>
-            <input v-else v-model="contents[c.column]" :placeholder="c.name" />
+            <input v-else-if="c.type != 'comment'" v-model="contents[c.column]" :placeholder="c.name" />
         </template>
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -95,6 +99,8 @@
         methods: {
             async initData() {
                 await this.checkPermission()
+                this.columns.push("WRITER_NAME")
+                this.columns.push("WRITER_PASSWORD")
                 if (this.mode == "edit" && this.id != null) {
                     await this.getData()
                 }
