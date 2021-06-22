@@ -227,7 +227,7 @@
                     <td>{{f.type}}</td>
                     <td>{{f.order}}</td>
                     <td>
-                        <button @click="boardEdit.fields[k]=Object.assign({}, fieldOrig);fieldOrig={};fieldEditIDX = -1">Cancel</button>
+                        <button @click="cancelFieldModalEdit(k)">Cancel</button>
                         <button @click="fieldEditIDX = -1">Save</button>
                     </td>
                 </template>
@@ -382,7 +382,7 @@
             },
             isCustomBoard() {
                 return (
-                    (this.fieldEditIDX > -1 && this.boardEdit.type == 'custom-board')
+                    ((this.boardEdit.idx > -1 || this.fieldEditIDX > -1) && this.boardEdit.type == 'custom-board')
                     || (this.fieldEditIDX == -1 && this.boardAdd.type == 'custom-board')
                 )
             }
@@ -757,6 +757,13 @@
                         this.fieldAdd = {}
                         break
                 }
+            },
+            cancelFieldModalEdit(idx) {
+                if (this.boardEdit.fields != undefined) {
+                    this.boardEdit.fields[idx] = Object.assign({}, fieldOrig)
+                }
+                this.fieldOrig = {}
+                this.fieldEditIDX = -1
             },
             copyToAddBoard(b) {
                 this.boardAdd = Object.assign({}, b)
