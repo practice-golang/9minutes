@@ -19,15 +19,20 @@
 <body>
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
-        <div>
-            <input v-model="contents['writer-name']" placeholder="name" type="hidden" />
-            <input v-model="contents['writer-password']" placeholder="password" />
+        <div v-if="contents['IS_MEMBER'] == 'Y' || mode == 'edit'">
+            <td>{{contents['WRITER_NAME']}}</td>
         </div>
-        <template v-for="c, j in columns" v-if="c.column != 'IDX'">
-            <div v-if="c.type == 'editor'">
-                <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
-            </div>
-            <input v-else-if="c.type != 'comment'" v-model="contents[c.column]" :placeholder="c.name" />
+        <div v-else>
+            <input v-model="contents['WRITER_NAME']" placeholder="name" />
+            <input v-model="contents['WRITER_PASSWORD']" placeholder="password" />
+        </div>
+        <template v-for="c, j in columns">
+            <template v-if="isBaseColumn(c)">
+                <div v-if="c.type == 'editor'">
+                    <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
+                </div>
+                <input v-else-if="c.type != 'comment'" v-model="contents[c.column]" :placeholder="c.name" />
+            </template>
         </template>
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -78,6 +83,11 @@
             isShow: false,
             table: "'##__TABLE_NAME__##'",
             columns: '##__COLUMNS__##',
+            baseColumns: [
+                { column: "IS_MEMBER", json: "is-member", name: "IsMember", order: 0, type: "text" },
+                { column: "WRITER_NAME", json: "writer-name", name: "WriterName", order: 0, type: "text" },
+                { column: "WRITER_PASSWORD", json: "writer-password", name: "WriterPassword", order: 0, type: "text" },
+            ],
             boardCode: "'##__BOARD_CODE__##'",
             mode: "",
             id: "",
@@ -88,19 +98,21 @@
             const uri = new URL(String(document.location.href))
             this.mode = uri.searchParams.get("mode")
             this.id = uri.searchParams.get("id")
+            this.columns = this.baseColumns.concat(this.columns)
 
             this.columns.forEach((c, i) => {
                 this.contents[c.column] = ""
-                // console.log(c.column)
             })
 
             this.initData()
         },
+        computed: {},
         methods: {
+            isBaseColumn(c) {
+                return !this.baseColumns.includes(c) && c.column != "IDX"
+            },
             async initData() {
                 await this.checkPermission()
-                this.columns.push("WRITER_NAME")
-                this.columns.push("WRITER_PASSWORD")
                 if (this.mode == "edit" && this.id != null) {
                     await this.getData()
                 }
@@ -125,6 +137,10 @@
 
                 if (response.ok) {
                     this.contents = await response.json()
+                    await this.getUserInfo()
+                    if (this.mode != "edit") {
+                        this.isShow = true
+                    }
                     this.isShow = true
                     return false
                 }
@@ -132,7 +148,41 @@
                 showError(response.status)
                 return false
             },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        if (this.paramIsMember != "n") {
+                            this.contents["WRITER_NAME"] = userInfo.username
+                            this.contents["IS_MEMBER"] = "Y"
+                            if (userInfo.admin == "Y") {
+                                this.isAdmin = true
+                            }
+                        }
+                        return false
+                    }
+
+                    showError(response.status)
+                }
+
+                return false
+            },
             async getData() {
+
                 const keywords = [{ IDX: this.id }]
 
                 let columns = this.columns.map((c) => {
@@ -199,6 +249,7 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=" + this.mode
+
                 let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: requestMethod,
                     headers: headers,
@@ -211,7 +262,11 @@
                 if (response.ok) {
                     const result = await response.json()
                     location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                    return false
                 }
+
+                showError(response.status)
+                return false
             }
         }
     })
