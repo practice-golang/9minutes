@@ -20,23 +20,23 @@
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
         <div v-for="c, j in columns" v-if="c.column != 'IDX'">
-            <div v-html="contents[c.column]" v-if="c.type=='editor'"></div>
-            <template v-if="c.type=='comment'">
-                <div v-for="cmt, i in comments">
-                    {{cmt["writer-name"]}}:
-                    <div v-html="cmt.content"></div>
-                </div>
-
-                <div>
-                    <input v-model="commentAdd['writer-name']" placeholder="name" />
-                    <input v-model="commentAdd['writer-password']" placeholder="password" />
-                    <br />
-                    <textarea v-model="commentAdd.comment" class="editors"></textarea>
-                    <br />
-                    <button @click="writeComment()">Write comment</button>
-                </div>
+            {{contents[c.column]}}
+        </div>
+        <div v-for="cmt, i in comments">
+            {{cmt["writer-name"]}}: <div v-html="cmt.content"></div>
+        </div>
+        <div v-if="commentPermission">
+            <template v-if="!commentAdd.isMember">
+                <input v-model="commentAdd['writer-name']" placeholder="name" />
+                <input v-model="commentAdd['writer-password']" placeholder="password" />
             </template>
-            <span v-else>{{contents[c.column]}}</span>
+            <template v-else>
+                {{commentAdd['writer-name']}}
+            </template>
+            <br />
+            <textarea id="c.column" v-model="commentAdd.comment" class="editors"></textarea>
+            <br />
+            <button @click="writeComment()">Write comment</button>
         </div>
         <button @click="location.href='/board?code='+boardCode+'&mode=edit&id='+id">Edit</button>
         <button @click="location.href='/board?code='+boardCode">List</button>
@@ -65,19 +65,22 @@
         return false
     }
 
-    tinymce.init({
-        selector: "textarea.editors",
-        mode: "textareas",
-        theme: "silver",
-        height: "240",
-        force_p_newlines: false,
-        force_br_newlines: true,
-        // forced_root_block: false,
-        forced_root_block: '',
-        convert_newlines_to_brs: false,
-        remove_linebreaks: true,
-        // branding: false
-    })
+    function initTinyMCE() {
+        tinymce.init({
+            selector: "textarea.editors",
+            mode: "textareas",
+            theme: "silver",
+            height: "240",
+            force_p_newlines: false,
+            force_br_newlines: true,
+            // forced_root_block: false,
+            forced_root_block: '',
+            convert_newlines_to_brs: false,
+            remove_linebreaks: true,
+            // branding: false
+        })
+    }
+
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
@@ -90,6 +93,7 @@
             boardCode: "'##__BOARD_CODE__##'",
             id: "",
             contents: {},
+            commentPermission: false,
             comments: [],
             commentAdd: {
                 bidx: "",
@@ -116,7 +120,11 @@
 
                 if (columns.includes("comment")) {
                     await this.getComments()
+                    initTinyMCE()
+                } else {
+                    this.commentPermission = false
                 }
+
             },
             async checkPermission() {
                 let headers = {
@@ -137,12 +145,51 @@
                 })
 
                 if (response.ok) {
-                    this.contents = await response.json()
+                    // this.contents = await response.json()
+                    const permissions = await response.json()
+                    if (permissions["write-comment"]) {
+
+                        this.commentPermission = true
+                    }
+                    console.log(permissions)
+                    await this.getUserInfo()
                     this.isShow = true
                     return false
                 }
 
                 showError(response.status)
+                return false
+            },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        this.commentAdd.isMember = true
+                        this.commentAdd["writer-name"] = userInfo.username
+                        return false
+                    }
+                }
+
+                if (token != null) {
+                    showError(response.status)
+                }
+
+                this.commentAdd.isMember = false
+
                 return false
             },
             async getData() {
@@ -233,7 +280,9 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/comments", {
+                const params = "?code=" + this.boardCode + "&mode=write"
+
+                let response = await fetch(this.restURI + "/api/comments" + params, {
                     method: requestMethod,
                     headers: headers,
                     body: JSON.stringify({

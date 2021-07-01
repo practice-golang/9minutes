@@ -47,7 +47,7 @@ Current, Sqlite only
 ## Todo
 - [x] Search
 - [x] Edit
-- [x] Comment
+- [ ] Comment - edit, delete
 - [x] User add, edit, delete
 - [ ] User auth
 - [ ] Comment paging
