@@ -20,7 +20,7 @@
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
         <div v-if="contents['IS_MEMBER'] == 'Y' || mode == 'edit'">
-            <td>{{contents['WRITER_NAME']}}</td>
+            <span>{{contents['WRITER_NAME']}}</span>
         </div>
         <div v-else>
             <input v-model="contents['WRITER_NAME']" placeholder="name" />

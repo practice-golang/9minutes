@@ -398,14 +398,20 @@ func CheckPermission(c echo.Context) bool {
 // ResponsePermission - Return permission
 func ResponsePermission(c echo.Context) error {
 	status := http.StatusForbidden
-	result := map[string]bool{"permission": false, "write-comment": false}
+	result := map[string]bool{"permission": false, "write": false, "write-comment": false}
 
 	isValid := CheckPermission(c)
+	isWriteValid := CheckWritePermission(c)
 	isCommentValid := CheckCommentPermission(c)
 
 	if isValid {
 		status = http.StatusOK
 		result["permission"] = true
+
+		result["write"] = false
+		if isWriteValid {
+			result["write"] = true
+		}
 
 		result["write-comment"] = false
 		if isCommentValid {
@@ -414,6 +420,46 @@ func ResponsePermission(c echo.Context) error {
 	}
 
 	return c.JSON(status, result)
+}
+
+// CheckWritePermission - Check permission write / edit
+func CheckWritePermission(c echo.Context) bool {
+	var isValid bool
+
+	code := c.QueryParam("code")
+	// mode := c.QueryParam("mode") // read, edit, write
+
+	boardInfos := board.GetBoardByCode(code)
+
+	if len(boardInfos) == 0 {
+		isValid = false
+
+		return isValid
+	}
+
+	grantWrite := boardInfos[0].GrantWrite.String
+
+	user := c.Get("user")
+
+	if user == nil {
+		switch true {
+		case grantWrite == "all":
+			isValid = true
+		default:
+			isValid = false
+		}
+	} else {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+
+		switch true {
+		case (grantWrite == "admin" && claims.Admin == "Y") || grantWrite == "user" || grantWrite == "all":
+			isValid = true
+		default:
+			isValid = false
+		}
+	}
+
+	return isValid
 }
 
 // CheckCommentPermission - Check permission

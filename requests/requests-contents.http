@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2ODY0MzI4LCJleHAiOjE2MjQzNTg3Mjh9.FUplM08LPzvQRPfX7aq2q1LeojY-szVtvys04IDkoJ4
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIyIiwidXNlcm5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI3ODMwNDY3LCJleHAiOjE2MjUzMjQ4Njd9.Gxa5B6_FhMsRmk9YU7qkRYb5y78E0cy-fY-uOjku690
 
 ### HTML contents
 GET {{uri}}/board?code=board0 HTTP/1.1
@@ -13,7 +13,7 @@ GET {{uri}}/board?code=board1&mode=read&id=1 HTTP/1.1
 ## Basic board
 
 ### Read contents list
-POST {{uri}}/api/basic-board/contents HTTP/1.1
+POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -26,7 +26,7 @@ content-type: application/json
 }
 
 ### Read Contents
-POST {{uri}}/api/basic-board/contents HTTP/1.1
+POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -122,7 +122,7 @@ content-type: application/json
 }
 
 ### Read contents - custom board
-POST {{uri}}/api/custom-board/contents HTTP/1.1
+POST {{uri}}/api/custom-board/contents?code=cboard1 HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -137,7 +137,7 @@ content-type: application/json
         "NAME",
         "AGENCY"
     ],
-    "table": "CBOARD3"
+    "table": "CBOARD1"
 }
 
 ### Read a content - custom board

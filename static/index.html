@@ -26,7 +26,7 @@
             <br /><a href="/board?code=customlist5">custom table list #5 / admin / admin / admin</a>
             <br /><a href="/board?code=customlist4">custom table list #4 / user / admin / admin</a>
             <br /><a href="/board?code=customlist3">custom table list #3 / user / user / user</a>
-            <br /><a href="/board?code=my-contents">My contents</a> or <a href="/board?code=customlist2">custom table list #2 / all / user / user</a>
+            <br /><a href="/board?code=customlist2">custom table list #2 / all / user / user</a>
             <br /><a href="/board?code=customlist1">custom table list #1 / all / all / all</a>
             <br /><a href="/board?code=cboard5">Custom Board5 / admin / admin / admin</a>
             <br /><a href="/board?code=cboard4">Custom Board4 / user / admin / user</a>
@@ -74,10 +74,7 @@
                 })
 
                 if (response.ok) {
-                    const contents = await response.json()
-                    await this.getUserInfo()
                     this.isShow = true
-                    
                     return false
                 }
 

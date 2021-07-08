@@ -21,21 +21,42 @@
         <table>
             <thead>
                 <tr>
-                    <th v-for="f, k in columns">{{f.name}}</th>
+                    <th v-for="f, k in columns">
+                        <template v-if="isBaseColumn(f)">
+                            {{f.name}}
+                        </template>
+                    </th>
+                    <th>Writer</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 <tr @keyup.enter="addData()">
                     <td v-for="f, k in columns">
-                        <input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" />
+                        <template v-if="isBaseColumn(f)">
+                            <input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" />
+                        </template>
+                    </td>
+                    <td>
+                        <template v-if="isLogedIn">
+                            <span>{{contentsAdd['WRITER_NAME']}}</span>
+                        </template>
+                        <template v-else>
+                            <input v-model="contentsAdd['WRITER_NAME']" placeholder="name" />
+                            <input v-model="contentsAdd['WRITER_PASSWORD']" placeholder="password" />
+                        </template>
                     </td>
                     <td><button @click="addData()">Add</button></td>
                 </tr>
 
                 <tr v-for="ds, i in contents">
                     <template v-if="i !== contentsEditIDX">
-                        <td v-for="c, j in columns">{{ds[c.column]}}</td>
+                        <td v-for="c, j in columns">
+                            <template v-if="isBaseColumn(c)">
+                                {{ds[c.column]}}
+                            </template>
+                        </td>
+                        <td>{{ds["WRITER_NAME"]}}</td>
                         <td>
                             <button @click="contentsEdit=Object.assign({}, ds);contentsEditIDX = i">Edit</button>
                             <button @click="deleteData(ds['IDX'])">Delete</button>
@@ -43,8 +64,14 @@
                     </template>
                     <template v-else>
                         <td v-for="c, j in columns">
-                            <span v-if="c.json == 'idx'">{{contentsEdit[c.column]}}</span>
-                            <input v-else v-model="contentsEdit[c.column]" />
+                            <template v-if="isBaseColumn(c)">
+                                <span v-if="c.json == 'idx'">{{contentsEdit[c.column]}}</span>
+                                <input v-else v-model="contentsEdit[c.column]" />
+                            </template>
+                        </td>
+                        <td>
+                            <input v-model="contentsEdit['WRITER_NAME']" placeholder="name" />
+                            <input v-model="contentsEdit['WRITER_PASSWORD']" placeholder="password" />
                         </td>
                         <td>
                             <button @click="contentsEdit={};contentsEditIDX = -1">Cancel</button>
@@ -96,6 +123,7 @@
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             isShow: false,
+            isLogedIn: false,
             page: {
                 current: 1,
                 total: 1,
@@ -105,16 +133,32 @@
             columns: '##__COLUMNS__##',
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
+            baseColumns: [
+                { column: "IS_MEMBER", json: "is-member", name: "IsMember", order: 0, type: "text" },
+                { column: "WRITER_NAME", json: "writer-name", name: "WriterName", order: 0, type: "text" },
+                // { column: "WRITER_PASSWORD", json: "writer-password", name: "WriterPassword", order: 0, type: "text" },
+            ],
             contents: [],
             searchKeyword: "",
             contentsAdd: {},
             contentsEdit: {},
             contentsEditIDX: -1,
         },
-        mounted() { this.initData() },
+        mounted() {
+            this.columns = this.baseColumns.concat(this.columns)
+            this.columns.forEach((c, i) => {
+                this.contents[c.column] = ""
+            })
+
+            this.initData()
+        },
         methods: {
+            isBaseColumn(c) {
+                return !this.baseColumns.includes(c)
+            },
             async initData() {
-                await this.checkLogedIn()
+                // await this.checkLogedIn()
+                await this.checkPermission()
                 await this.getData()
             },
             async checkLogedIn() {
@@ -157,10 +201,73 @@
                     }
                 }
 
+                this.isLogedIn = result
+
                 // if (!result) {
                 //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
                 //     location.href = "/users/login"
                 // }
+            },
+            async checkPermission() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+                }
+
+                // const params = "?code=" + this.boardCode + "&mode=write"
+                const params = "?code=" + this.boardCode + "&mode=read"
+                let response = await fetch(this.restURI + "/api/user/permission" + params, {
+                    method: "GET",
+                    headers: headers,
+                })
+
+                if (response.ok) {
+                    const contents = await response.json()
+                    await this.getUserInfo()
+                    return false
+                }
+
+                showError(response.status)
+                return false
+            },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        if (this.paramIsMember != "n") {
+                            this.contentsAdd["WRITER_NAME"] = userInfo.username
+                            if (userInfo.admin == "Y") {
+                                this.isAdmin = true
+                            }
+                            this.isLogedIn = true
+                        }
+                        return false
+                    }
+
+                    showError(response.status)
+                }
+
+                return false
             },
             async getTotalPage() {
                 let keywords = []
