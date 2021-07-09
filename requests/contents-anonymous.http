@@ -91,7 +91,7 @@ content-type: application/json
 ## Custom board / tablelist
 
 ### Read contents - tablelist
-POST {{uri}}/api/custom-board/contents HTTP/1.1
+POST {{uri}}/api/custom-board/contents?code=customlist1 HTTP/1.1
 content-type: application/json
 
 {
@@ -101,12 +101,14 @@ content-type: application/json
         "count": "5"
     },
     "columns": [
+        "IS_MEMBER",
+        "WRITER_NAME",
         "IDX",
         "NAME",
-        "CONTENT",
-        "CREATOR"
+        "AGE",
+        "PHONE"
     ],
-    "table": "BOARD0"
+    "table": "CUSTOMLIST1"
 }
 
 ### Read contents - custom board

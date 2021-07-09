@@ -326,8 +326,6 @@ func setupServer() *echo.Echo {
 			code := c.QueryParam("code")
 			mode := c.QueryParam("mode") // read, write
 
-			log.Println("????")
-
 			boardInfos := board.GetBoardByCode(code)
 			if len(boardInfos) == 0 {
 				return false

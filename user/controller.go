@@ -352,7 +352,11 @@ func CheckPermission(c echo.Context) bool {
 	var isValid bool
 
 	code := c.QueryParam("code")
-	mode := c.QueryParam("mode") // read, edit, write
+	mode := c.QueryParam("mode") // read, write, edit, delete
+	switch c.Request().Method {
+	case "DELETE":
+		mode = "delete"
+	}
 
 	boardInfos := board.GetBoardByCode(code)
 

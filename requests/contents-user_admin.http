@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIyIiwidXNlcm5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI3ODMwNDY3LCJleHAiOjE2MjUzMjQ4Njd9.Gxa5B6_FhMsRmk9YU7qkRYb5y78E0cy-fY-uOjku690
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIyIiwidXNlcm5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI4NDM1OTE4LCJleHAiOjE2MjU5MzAzMTh9.7cRXa1zHUCdDUQivd7SaUhHqk93Qp4PhfITLfm9msuc
 
 ### HTML contents
 GET {{uri}}/board?code=board0 HTTP/1.1
@@ -102,7 +102,7 @@ content-type: application/json
 ## Custom board / tablelist
 
 ### Read contents - tablelist
-POST {{uri}}/api/custom-board/contents HTTP/1.1
+POST {{uri}}/api/custom-board/contents?code=customlist1 HTTP/1.1
 Authorization: Bearer {{token}}
 content-type: application/json
 
@@ -113,12 +113,14 @@ content-type: application/json
         "count": "5"
     },
     "columns": [
+        "IS_MEMBER",
+        "WRITER_NAME",
         "IDX",
         "NAME",
-        "CONTENT",
-        "CREATOR"
+        "AGE",
+        "PHONE"
     ],
-    "table": "BOARD0"
+    "table": "CUSTOMLIST1"
 }
 
 ### Read contents - custom board
