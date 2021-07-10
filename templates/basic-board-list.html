@@ -32,7 +32,7 @@
                     <td>{{d.idx}}</td>
                     <td class="content-title" @click="location.href=restURI+'/board?code='+boardCode+'&mode=read&id='+d.idx">{{d.title}}</td>
                     <td>{{d["writer-name"]}}</td>
-                    <td><button @click="deleteData(d.idx)">Delete</button></td>
+                    <td><button @click="deleteData(d.idx, d['is-member'])">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -240,7 +240,7 @@
                 showError(response.status)
                 return false
             },
-            async deleteData(idx) {
+            async deleteData(idx, isMember) {
                 const keywords = { idx: idx }
 
                 let headers = {
@@ -250,7 +250,7 @@
 
                 const token = localStorage.getItem('token')
 
-                if (token == null) {
+                if (token == null || isMember == "N") {
                     const confirm = await swal.fire({
                         title: "Password",
                         input: "password",

@@ -4,7 +4,7 @@
 
 ### List of contents
 POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
-Authorization: Bearer {{token}}
+# Authorization: Bearer {{token}}
 content-type: application/json
 
 {
@@ -17,7 +17,7 @@ content-type: application/json
 
 ### Read Content
 POST {{uri}}/api/basic-board/contents?code=board1 HTTP/1.1
-Authorization: Bearer {{token}}
+# Authorization: Bearer {{token}}
 content-type: application/json
 
 {

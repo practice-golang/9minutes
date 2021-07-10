@@ -217,6 +217,7 @@ func DeleteContentsBasicBoard(c echo.Context) error {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
 		if data.WriterName.String != claims.UserName ||
 			data.WriterIdx.String != claims.Idx {
+			log.Println(data)
 			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit"})
 		}
 	}

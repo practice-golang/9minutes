@@ -212,7 +212,18 @@ func UpdateContentsMAP(data interface{}) (sql.Result, error) {
 			if k == "IDX" {
 				whereEXP["IDX"] = d
 			}
+			if k == "WRITER_NAME" {
+				whereEXP["WRITER_NAME"] = d
+			}
+			if k == "WRITER_PASSWORD" {
+				whereEXP["WRITER_PASSWORD"] = d
+			}
+
 			rcd[k] = d
+		}
+
+		if _, ok := whereEXP["WRITER_PASSWORD"]; !ok {
+			whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
 		}
 	}
 
@@ -247,6 +258,9 @@ func DeleteContentsMAP(data interface{}) (sql.Result, error) {
 		for k, d := range allData["data"].(map[string]interface{}) {
 			if k == "IDX" {
 				whereEXP["IDX"] = d
+			}
+			if k == "WRITER_PASSWORD" {
+				whereEXP["WRITER_PASSWORD"] = d
 			}
 			rcd[k] = d
 		}

@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIyIiwidXNlcm5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI4NDM1OTE4LCJleHAiOjE2MjU5MzAzMTh9.7cRXa1zHUCdDUQivd7SaUhHqk93Qp4PhfITLfm9msuc
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIyIiwidXNlcm5hbWUiOiJ1c2VyMSIsImVtYWlsIjoidXNlcjFAYS5jb20iLCJhZG1pbiI6Ik4iLCJyZWZyZXNoLXVudGlsIjoxNjI4NTIzMjE0LCJleHAiOjE2MjYwMTc2MTR9.KbqQXJ58kK-EJiTo8YIbkfFgmrzFi76vrxh2cmVqcwU
 
 
 ## Custom tablelist
@@ -45,14 +45,14 @@ content-type: application/json
 
 ### Edit a content
 PATCH {{uri}}/api/custom-board/contents?code=customlist2 HTTP/1.1
-# Authorization: Bearer {{token}}
+Authorization: Bearer {{token}}
 content-type: application/json
 
 {
     "data": {
-        "IDX": 1,
+        "IDX": 2,
         "WRITER_NAME": "user1",
-        "name": "User1111",
+        "name": "User12",
         "age": "99",
         "phone": "321321321"
     },
