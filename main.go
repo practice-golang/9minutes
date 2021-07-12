@@ -514,7 +514,8 @@ func setupServer() *echo.Echo {
 	cm := e.Group("/api/comments")
 	cm.Use(middleware.JWTWithConfig(jwtConfigComment))
 	cm.POST("", comments.GetComments)
-	cm.PUT("", comments.AddComments)
+	cm.PUT("", comments.AddComment)
+	cm.PATCH("", comments.EditComment)
 
 	return e
 }

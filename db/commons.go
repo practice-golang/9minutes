@@ -243,7 +243,7 @@ func SelectComments(search interface{}) (interface{}, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	var ds *goqu.SelectDataset
-	commentResult := []models.Comments{}
+	commentResult := []models.CommentList{}
 	exps := []goqu.Expression{}
 
 	keywords := searchBytes.Keywords
@@ -251,7 +251,7 @@ func SelectComments(search interface{}) (interface{}, error) {
 	table := searchBytes.Table.String + "_COMMENT"
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Comment list
-		ds = dbms.From(table).Select(models.Comments{})
+		ds = dbms.From(table).Select(models.CommentList{})
 	} else {
 		// Not allow getting all of list
 		if !searchBytes.Options.Count.Valid || searchBytes.Options.Count.Int64 < 1 {
@@ -259,7 +259,7 @@ func SelectComments(search interface{}) (interface{}, error) {
 		}
 
 		// Comment
-		ds = dbms.From(table).Select(models.Comments{})
+		ds = dbms.From(table).Select(models.CommentList{})
 	}
 
 	for _, k := range keywords {
@@ -322,6 +322,36 @@ func InsertComment(data interface{}, table string) (sql.Result, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Insert(table).Rows(data)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// UpdateComment - crUd comment
+func UpdateComment(data interface{}, table string) (sql.Result, error) {
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	whereEXP := goqu.Ex{
+		"IDX": data.(models.CommentSET).Idx,
+	}
+	if data.(models.CommentSET).WriterName.Valid {
+		whereEXP["WRITER_NAME"] = data.(models.CommentSET).WriterName
+	}
+	if data.(models.CommentSET).WriterPassword.Valid {
+		whereEXP["WRITER_PASSWORD"] = data.(models.CommentSET).WriterPassword
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Update(table).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 

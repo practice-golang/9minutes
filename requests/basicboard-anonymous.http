@@ -43,10 +43,10 @@ content-type: application/json
 
 {
     "data": {
-        "idx": "6",
-        "title": "Post title",
-        "content": "Post text lorem ipsum",
-        "writer-name": "anonymous1",
+        "idx": "2",
+        "title": "Writing test",
+        "content": "Hello world hahahahahaha",
+        "writer-name": "aa",
         "writer-password": "1234"
     },
     "table": "BOARD1"

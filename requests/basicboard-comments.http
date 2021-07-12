@@ -1,9 +1,8 @@
 @uri=http://localhost:2510
-# @uri=http://enjoytools.net:2510
 
 
 ### Read comments of one post
-POST {{uri}}/api/comments?code=cboard1&mode=read HTTP/1.1
+POST {{uri}}/api/comments?code=board1&mode=read HTTP/1.1
 content-type: application/json
 
 {
@@ -15,19 +14,34 @@ content-type: application/json
     "options": {
         "count": 10
     },
-    "table": "CBOARD1"
+    "table": "BOARD1"
 }
 
 ### Write a comment
-PUT {{uri}}/api/comments?code=cboard1&mode=write HTTP/1.1
+PUT {{uri}}/api/comments?code=board1&mode=write HTTP/1.1
 content-type: application/json
 
 {
     "data": {
         "bidx": "1",
-        "content": "commentaaa text ^-^",
-        "writer-name": "abcd",
+        "content": "This is comment",
+        "writer-name": "anonym",
         "writer-password": "1234"
     },
-    "table": "CBOARD1"
+    "table": "BOARD1"
+}
+
+### Edit a comment
+PATCH {{uri}}/api/comments?code=board1&mode=edit HTTP/1.1
+content-type: application/json
+
+{
+    "data": {
+        "idx": "2",
+        "bidx": "1",
+        "content": "commentaaa text :)",
+        "writer-name": "dd",
+        "writer-password": "1234"
+    },
+    "table": "BOARD1"
 }
