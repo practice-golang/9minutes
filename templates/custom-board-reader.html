@@ -19,9 +19,10 @@
 <body>
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
-        <div v-for="c, j in columns" v-if="c.column != 'IDX'">
+        <div v-for="c, j in columns" v-if="c.column != 'IDX' && c.column != 'IS_MEMBER'">
             {{contents[c.column]}}
         </div>
+        <hr />
         <div v-for="cmt, i in comments">
             {{cmt["writer-name"]}}: <div v-html="cmt.content"></div>
         </div>
@@ -90,6 +91,10 @@
             isShow: false,
             table: "'##__TABLE_NAME__##'",
             columns: '##__COLUMNS__##',
+            baseColumns: [
+                { column: "IS_MEMBER", json: "is-member", name: "IsMember", order: 0, type: "text" },
+                { column: "WRITER_NAME", json: "writer-name", name: "WriterName", order: 0, type: "text" },
+            ],
             boardCode: "'##__BOARD_CODE__##'",
             id: "",
             contents: {},
@@ -106,6 +111,11 @@
         mounted() {
             const uri = new URL(String(document.location.href))
             this.id = uri.searchParams.get("id")
+
+            this.columns = this.baseColumns.concat(this.columns)
+            this.columns.forEach((c, i) => {
+                this.contents[c.column] = ""
+            })
 
             this.initData()
         },

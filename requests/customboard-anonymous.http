@@ -24,11 +24,13 @@ POST {{uri}}/api/custom-board/contents?code=cboard1 HTTP/1.1
 content-type: application/json
 
 {
-    "keywords": [{"IDX": "1"}],
+    "keywords": [{"IDX": "6"}],
     "options": {
         "count": "1"
     },
     "columns": [
+        "WRITER_NAME",
+        "IS_MEMBER",
         "IDX",
         "NAME",
         "AGENCY"
@@ -56,7 +58,8 @@ content-type: application/json
 
 {
     "data": {
-        "IDX": 1,
+        "WRITER_NAME": "user3",
+        "IDX": 5,
         "NAME": "Lorem ipsum fox",
         "AGENCY": "Jane Waldo"
     },

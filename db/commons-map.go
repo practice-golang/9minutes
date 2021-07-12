@@ -75,7 +75,9 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 	colNames := []interface{}{}
 	log.Println("contentsMAP: ", jsonBody["columns"])
 	for _, c := range jsonBody["columns"].([]interface{}) {
-		colNames = append(colNames, c.(string))
+		if c.(string) != "WRITER_PASSWORD" {
+			colNames = append(colNames, c.(string))
+		}
 	}
 
 	dbms := goqu.New(dbType, Dbo)
@@ -199,7 +201,7 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 }
 
 // UpdateContentsMAP - crUd / custom-board
-func UpdateContentsMAP(data interface{}) (sql.Result, error) {
+func UpdateContentsMAP(data interface{}, userName string) (sql.Result, error) {
 	var err error
 	var allData map[string]interface{}
 	whereEXP := goqu.Ex{}
@@ -223,6 +225,7 @@ func UpdateContentsMAP(data interface{}) (sql.Result, error) {
 		}
 
 		if _, ok := whereEXP["WRITER_PASSWORD"]; !ok {
+			whereEXP["WRITER_NAME"] = userName
 			whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
 		}
 	}

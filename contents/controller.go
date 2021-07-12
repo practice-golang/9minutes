@@ -325,7 +325,13 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
-	sqlResult, err := db.UpdateContentsMAP(dataBytes)
+	userName := ""
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		userName = claims.UserName
+	}
+	sqlResult, err := db.UpdateContentsMAP(dataBytes, userName)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}

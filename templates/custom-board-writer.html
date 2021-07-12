@@ -21,6 +21,9 @@
         <h1>Custom board</h1>
         <div v-if="contents['IS_MEMBER'] == 'Y' || mode == 'edit'">
             <span>{{contents['WRITER_NAME']}}</span>
+            <template v-if="contents['IS_MEMBER'] != 'Y'">
+                <input v-model="contents['WRITER_PASSWORD']" placeholder="password" />
+            </template>
         </div>
         <div v-else>
             <input v-model="contents['WRITER_NAME']" placeholder="name" />
@@ -264,7 +267,9 @@
 
                 if (response.ok) {
                     const result = await response.json()
-                    location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                    if (result["affected-rows"] > 0) {
+                        location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                    }
                     return false
                 }
 

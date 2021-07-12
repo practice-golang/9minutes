@@ -397,6 +397,7 @@
                 })
 
                 this.contentsAdd = {}
+                this.getUserInfo()
 
                 if (response.ok) {
                     this.getData()
@@ -435,9 +436,13 @@
                 this.contentsEditIDX = -1
 
                 if (response.ok) {
-                    this.getData()
-                    swal.fire("Success", "Updated successfully", "success")
-                    return false
+                    const result = await response.json()
+
+                    if (result["affected-rows"] > 0) {
+                        this.getData()
+                        swal.fire("Success", "Updated successfully", "success")
+                        return false
+                    }
                 }
 
                 showError(response.status, true)
