@@ -50,7 +50,7 @@ content-type: application/json
 
 {
     "data": {
-        "IDX": 5,
+        "IDX": 1,
         "WRITER_NAME": "user2",
         "NAME": "John",
         "AGE": "22",
@@ -60,13 +60,13 @@ content-type: application/json
 }
 
 ### Delete a content
-DELETE {{uri}}/api/custom-board/contents?code=customlist2&mode=delete HTTP/1.1
-Authorization: Bearer {{token}}
+DELETE {{uri}}/api/custom-board/contents?code=customlist1&mode=delete HTTP/1.1
+# Authorization: Bearer {{token}}
 content-type: application/json
 
 {
-    "data": { "IDX": 5 },
-    "table": "CUSTOMLIST2"
+    "data": { "IDX": 1 },
+    "table": "CUSTOMLIST1"
 }
 
 ### Total page of content

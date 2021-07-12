@@ -33,9 +33,9 @@
             <tbody>
                 <tr @keyup.enter="addData()">
                     <td v-for="f, k in columns">
-                        <template v-if="isBaseColumn(f)">
-                            <input v-if="f.json != 'idx'" v-model="contentsAdd[f.json]" />
-                        </template>
+                        <!-- <template v-if="isBaseColumn(f)"> -->
+                            <input v-if="f.json != 'idx' && isBaseColumn(f)" v-model="contentsAdd[f.json]" />
+                        <!-- </template> -->
                     </td>
                     <td>
                         <template v-if="isLogedIn">
@@ -59,7 +59,7 @@
                         <td>{{ds["WRITER_NAME"]}}</td>
                         <td>
                             <button @click="contentsEdit=Object.assign({}, ds);contentsEditIDX = i">Edit</button>
-                            <button @click="deleteData(ds['IDX'])">Delete</button>
+                            <button @click="deleteData(ds['IDX'], ds['IS_MEMBER'])">Delete</button>
                         </td>
                     </template>
                     <template v-else>
@@ -70,8 +70,8 @@
                             </template>
                         </td>
                         <td>
-                            <input v-model="contentsEdit['WRITER_NAME']" placeholder="name" />
-                            <input v-model="contentsEdit['WRITER_PASSWORD']" placeholder="password" />
+                            {{contentsEdit['WRITER_NAME']}}
+                            <input v-if="contentsEdit['IS_MEMBER'] != 'Y'" v-model="contentsEdit['WRITER_PASSWORD']" placeholder="password" />
                         </td>
                         <td>
                             <button @click="contentsEdit={};contentsEditIDX = -1">Cancel</button>
@@ -256,6 +256,7 @@
                         const userInfo = await response.json()
                         if (this.paramIsMember != "n") {
                             this.contentsAdd["WRITER_NAME"] = userInfo.username
+                            this.contentsAdd["IS_MEMBER"] = "Y"
                             if (userInfo.admin == "Y") {
                                 this.isAdmin = true
                             }
@@ -448,18 +449,36 @@
                 showError(response.status, true)
                 return false
             },
-            async deleteData(idx) {
-                const confirm = await swal.fire({
-                    title: "Confirm",
-                    text: "Are you sure?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Delete",
-                    cancelButtonText: "Cancel"
-                })
+            async deleteData(idx, isMember) {
+                let data = { IDX: idx }
 
-                if (!confirm.isConfirmed) {
-                    return false
+                if (isMember != "Y") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    data["WRITER_PASSWORD"] = confirm.value
+                    if (data["WRITER_PASSWORD"] == undefined || data["WRITER_PASSWORD"].length == 0) {
+                        return false
+                    }
+                } else {
+                    const confirm = await swal.fire({
+                        title: "Confirm",
+                        text: "Are you sure?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        return false
+                    }
                 }
 
                 let headers = {
@@ -478,14 +497,20 @@
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
-                        data: { IDX: idx },
+                        data: data,
                         table: this.table
                     })
                 })
 
                 if (response.ok) {
-                    swal.fire("Success", "Deleted successfully", "success")
-                    this.getData()
+                    r = await response.json()
+                    if (r["affected-rows"] > 0) {
+                        swal.fire("Success", "Deleted successfully", "success")
+                        this.getData()
+                    } else {
+                        swal.fire("Fail", "Delete failed", "error")
+                    }
+
                     return false
                 }
 

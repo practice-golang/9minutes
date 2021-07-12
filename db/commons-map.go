@@ -249,7 +249,7 @@ func UpdateContentsMAP(data interface{}, userName string) (sql.Result, error) {
 }
 
 // DeleteContentsMAP - cruD contents / custom-board
-func DeleteContentsMAP(data interface{}) (sql.Result, error) {
+func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 	var err error
 	var allData map[string]interface{}
 	whereEXP := goqu.Ex{}
@@ -262,10 +262,18 @@ func DeleteContentsMAP(data interface{}) (sql.Result, error) {
 			if k == "IDX" {
 				whereEXP["IDX"] = d
 			}
+			if k == "WRITER_NAME" {
+				whereEXP["WRITER_NAME"] = d
+			}
 			if k == "WRITER_PASSWORD" {
 				whereEXP["WRITER_PASSWORD"] = d
 			}
 			rcd[k] = d
+		}
+
+		if _, ok := whereEXP["WRITER_PASSWORD"]; !ok {
+			whereEXP["WRITER_NAME"] = userName
+			whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
 		}
 	}
 
@@ -276,13 +284,15 @@ func DeleteContentsMAP(data interface{}) (sql.Result, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Delete(allData["table"]).Where(whereEXP)
-	sql, args, _ := ds.ToSQL()
+	sql, args, _ := ds.Where(whereEXP).ToSQL()
 	log.Println(sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println(result.RowsAffected())
 
 	return result, nil
 }

@@ -21,7 +21,7 @@
         <table>
             <thead>
                 <tr>
-                    <th v-for="f, k in columns" v-if="f.type != 'editor' && f.type != 'comment'">
+                    <th v-for="f, k in columns" v-if="f.type != 'editor' && f.type != 'comment' && isBaseColumn(f)">
                         <span>{{f.name}}</span>
                     </th>
                     <th>Action</th>
@@ -29,12 +29,12 @@
             </thead>
             <tbody>
                 <tr v-for="ds, i in contents">
-                    <template v-for="c, j in columns" v-if="c.type != 'editor' && c.type != 'comment'">
+                    <template v-for="c, j in columns" v-if="c.type != 'editor' && c.type != 'comment' && isBaseColumn(c)">
                         <td :class="(c.type == 'title') ? 'content-title' : ''" @click="location.href=restURI+'/board?code='+boardCode+'&mode=read&id='+ds['IDX']">
                             {{ds[c.column]}}
                         </td>
                     </template>
-                    <td><button @click="deleteData(ds['IDX'])">Delete</button></td>
+                    <td><button @click="deleteData(ds['IDX'], ds['IS_MEMBER'])">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -97,13 +97,26 @@
             columns: '##__COLUMNS__##',
             table: "'##__TABLE_NAME__##'",
             boardCode: "'##__BOARD_CODE__##'",
+            baseColumns: [
+                { column: "IS_MEMBER", json: "is-member", name: "IsMember", order: 0, type: "text" },
+                { column: "WRITER_NAME", json: "writer-name", name: "WriterName", order: 0, type: "text" },
+                // { column: "WRITER_PASSWORD", json: "writer-password", name: "WriterPassword", order: 0, type: "text" },
+            ],
             contents: [],
             searchKeyword: "",
         },
         mounted() {
+            this.columns = this.baseColumns.concat(this.columns)
+            this.columns.forEach((c, i) => {
+                this.contents[c.column] = ""
+            })
+
             this.initData()
         },
         methods: {
+            isBaseColumn(c) {
+                return !this.baseColumns.includes(c)
+            },
             async initData() {
                 await this.checkLogedIn()
                 await this.getData()
@@ -247,18 +260,36 @@
                 showError(response.status)
                 return false
             },
-            async deleteData(idx) {
-                const confirm = await swal.fire({
-                    title: "Confirm",
-                    text: "Are you sure?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Delete",
-                    cancelButtonText: "Cancel"
-                })
+            async deleteData(idx, isMember) {
+                let data = { IDX: idx }
 
-                if (!confirm.isConfirmed) {
-                    return false
+                if (isMember != "Y") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    data["WRITER_PASSWORD"] = confirm.value
+                    if (data["WRITER_PASSWORD"] == undefined || data["WRITER_PASSWORD"].length == 0) {
+                        return false
+                    }
+                } else {
+                    const confirm = await swal.fire({
+                        title: "Confirm",
+                        text: "Are you sure?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        return false
+                    }
                 }
 
                 let headers = {
@@ -277,14 +308,19 @@
                     method: "DELETE",
                     headers: headers,
                     body: JSON.stringify({
-                        data: { IDX: idx },
+                        data: data,
                         table: this.table
                     })
                 })
 
                 if (response.ok) {
-                    swal.fire("Success", "Deleted successfully", "success")
-                    this.getData()
+                    r = await response.json()
+                    if (r["affected-rows"] > 0) {
+                        swal.fire("Success", "Deleted successfully", "success")
+                        this.getData()
+                    } else {
+                        swal.fire("Fail", "Delete failed", "error")
+                    }
 
                     return false
                 }

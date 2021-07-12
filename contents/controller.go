@@ -308,8 +308,8 @@ func AddContentsListCustomBoard(c echo.Context) error {
 	affRows, _ := sqlResult.RowsAffected()
 
 	result := map[string]string{
-		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
+		"last-id":       fmt.Sprint(lastID),
 	}
 
 	return c.JSON(http.StatusOK, result)
@@ -346,8 +346,8 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 	}
 
 	result := map[string]string{
-		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
+		"last-id":       fmt.Sprint(lastID),
 	}
 
 	return c.JSON(http.StatusOK, result)
@@ -363,13 +363,27 @@ func DeleteContentsListCustomBoard(c echo.Context) error {
 
 	dataBytes, _ := ioutil.ReadAll(c.Request().Body)
 
-	sqlResult, err := db.DeleteContentsMAP(dataBytes)
+	userName := ""
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		userName = claims.UserName
+	}
+	sqlResult, err := db.DeleteContentsMAP(dataBytes, userName)
 	if err != nil {
 		log.Println("DeleteContents custom board: ", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, sqlResult)
+	lastID, _ := sqlResult.LastInsertId()
+	affected, _ := sqlResult.RowsAffected()
+
+	result := map[string]string{
+		"affected-rows": fmt.Sprint(affected),
+		"last-id":       fmt.Sprint(lastID),
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 // GetContentsTotalPageMAP - Get total page of custom board

@@ -47,12 +47,11 @@ Current, Sqlite only
 ## Todo
 - [x] Search
 - [x] Edit
-- [ ] Comment - edit, delete
 - [x] User add, edit, delete
-- [ ] User auth
-    - [ ] Separate permission output
-- [ ] Signin
+- [ ] Comment - edit, delete
 - [ ] Comment paging
+- [ ] Prevent edit, delete
+- [ ] Signin
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] User defined template
