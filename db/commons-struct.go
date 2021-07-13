@@ -74,8 +74,13 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 	}
 
 	whereEXP := goqu.Ex{
-		"IDX":             data.(models.ContentsBasicBoardSET).Idx,
-		"WRITER_PASSWORD": data.(models.ContentsBasicBoardSET).WriterPassword,
+		"IDX": data.(models.ContentsBasicBoardSET).Idx,
+	}
+	if data.(models.ContentsBasicBoardSET).WriterName.Valid {
+		whereEXP["WRITER_NAME"] = data.(models.ContentsBasicBoardSET).WriterName
+		whereEXP["WRITER_PASSWORD"] = nil
+	} else {
+		whereEXP["WRITER_PASSWORD"] = data.(models.ContentsBasicBoardSET).WriterPassword
 	}
 
 	dbms := goqu.New(dbType, Dbo)

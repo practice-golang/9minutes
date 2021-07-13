@@ -34,7 +34,7 @@
                             {{ds[c.column]}}
                         </td>
                     </template>
-                    <td><button @click="deleteData(ds['IDX'], ds['IS_MEMBER'])">Delete</button></td>
+                    <td><button @click="deleteData(ds)">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -260,10 +260,10 @@
                 showError(response.status)
                 return false
             },
-            async deleteData(idx, isMember) {
-                let data = { IDX: idx }
+            async deleteData(content) {
+                let data = content
 
-                if (isMember != "Y") {
+                if (content["IS_MEMBER"] != "Y") {
                     const confirm = await swal.fire({
                         title: "Password",
                         input: "password",

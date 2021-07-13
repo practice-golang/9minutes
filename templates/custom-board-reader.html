@@ -24,7 +24,11 @@
         </div>
         <hr />
         <div v-for="cmt, i in comments">
-            {{cmt["writer-name"]}}: <div v-html="cmt.content"></div>
+            {{cmt["writer-name"]}}:
+            <template v-if="showCommentButtons(cmt)">
+                <button @click="deleteComment(cmt)">Delete</button>
+            </template>
+            <div v-html="cmt.content"></div>
         </div>
         <div v-if="commentPermission">
             <template v-if="!commentAdd.isMember">
@@ -45,7 +49,7 @@
 </body>
 
 <script>
-    function showError(status) {
+    function showError(status, isStay) {
         switch (status) {
             case 401:
                 swal.fire("Unauthorized", "need login", "error").then(() => {
@@ -55,7 +59,9 @@
                 break
             case 403:
                 swal.fire("Forbidden", "You don't have permission to access", "error").then(() => {
-                    location.href = "/"
+                    if (!isStay) {
+                        location.href = "/"
+                    }
                 })
                 break
             default:
@@ -134,7 +140,6 @@
                 } else {
                     this.commentPermission = false
                 }
-
             },
             async checkPermission() {
                 let headers = {
@@ -240,6 +245,9 @@
                 showError(response.status)
                 return false
             },
+            showCommentButtons(comment) {
+                return ((comment["is-member"] && (comment["writer-name"] == this.commentAdd["writer-name"])) || comment["is-member"] != "Y")
+            },
             async getComments() {
                 const keywords = [{ bidx: this.id }]
 
@@ -309,6 +317,75 @@
                 }
 
                 showError(response.status)
+                return false
+            },
+            async deleteComment(comment) {
+                let requestMethod = "DELETE"
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (comment["is-member"] != "Y") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    comment["writer-password"] = confirm.value
+                    if (comment["writer-password"] == undefined || comment["writer-password"].length == 0) {
+                        return false
+                    }
+                } else {
+                    const confirm = await swal.fire({
+                        title: "Confirm",
+                        text: "Are you sure?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        return false
+                    }
+                }
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+                }
+
+                const params = "?code=" + this.boardCode + "&mode=delete"
+
+                let response = await fetch(this.restURI + "/api/comments" + params, {
+                    method: requestMethod,
+                    headers: headers,
+                    body: JSON.stringify({
+                        data: comment,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    const result = await response.json()
+                    if (result["affected-rows"] > 0) {
+                        swal.fire("Success", "Deleted successfully", "success")
+                        this.getComments()
+                    } else {
+                        swal.fire("Fail", "Delete failed", "error")
+                    }
+
+                    return false
+                }
+
+                showError(response.status, true)
                 return false
             }
         }

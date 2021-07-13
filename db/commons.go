@@ -346,12 +346,43 @@ func UpdateComment(data interface{}, table string) (sql.Result, error) {
 	if data.(models.CommentSET).WriterName.Valid {
 		whereEXP["WRITER_NAME"] = data.(models.CommentSET).WriterName
 	}
+	whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
 	if data.(models.CommentSET).WriterPassword.Valid {
 		whereEXP["WRITER_PASSWORD"] = data.(models.CommentSET).WriterPassword
 	}
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Update(table).Set(data).Where(whereEXP)
+	sql, args, _ := ds.ToSQL()
+	log.Println(sql, args)
+
+	result, err := Dbo.Exec(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// DeleteComment - cruD comment
+func DeleteComment(data interface{}, table string) (sql.Result, error) {
+	dbType, err := getDialect()
+	if err != nil {
+		log.Println("ERR Select DBType: ", err)
+	}
+
+	whereEXP := goqu.Ex{
+		"IDX": data.(models.CommentSET).Idx,
+	}
+	if data.(models.CommentSET).WriterName.Valid {
+		whereEXP["WRITER_NAME"] = data.(models.CommentSET).WriterName
+		whereEXP["WRITER_PASSWORD"] = nil
+	} else {
+		whereEXP["WRITER_PASSWORD"] = data.(models.CommentSET).WriterPassword
+	}
+
+	dbms := goqu.New(dbType, Dbo)
+	ds := dbms.Delete(table).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 

@@ -274,6 +274,8 @@ func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 		if _, ok := whereEXP["WRITER_PASSWORD"]; !ok {
 			whereEXP["WRITER_NAME"] = userName
 			whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
+		} else {
+			delete(whereEXP, "WRITER_NAME")
 		}
 	}
 
@@ -283,7 +285,7 @@ func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(allData["table"]).Where(whereEXP)
+	ds := dbms.Delete(allData["table"])
 	sql, args, _ := ds.Where(whereEXP).ToSQL()
 	log.Println(sql, args)
 

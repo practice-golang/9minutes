@@ -32,7 +32,7 @@
                     <td>{{d.idx}}</td>
                     <td class="content-title" @click="location.href=restURI+'/board?code='+boardCode+'&mode=read&id='+d.idx">{{d.title}}</td>
                     <td>{{d["writer-name"]}}</td>
-                    <td><button @click="deleteData(d.idx, d['is-member'])">Delete</button></td>
+                    <td><button @click="deleteData(d, d['is-member'])">Delete</button></td>
                 </tr>
             </tbody>
         </table>
@@ -240,8 +240,8 @@
                 showError(response.status)
                 return false
             },
-            async deleteData(idx, isMember) {
-                const keywords = { idx: idx }
+            async deleteData(content, isMember) {
+                const keywords = content
 
                 let headers = {
                     "Accept": "application/json",
@@ -250,7 +250,7 @@
 
                 const token = localStorage.getItem('token')
 
-                if (token == null || isMember == "N") {
+                if (token == null || isMember != "Y") {
                     const confirm = await swal.fire({
                         title: "Password",
                         input: "password",
@@ -260,11 +260,23 @@
                         cancelButtonText: "Cancel"
                     })
 
+                    keywords["writer-password"] = confirm.value
+                    if (keywords["writer-password"] == undefined || keywords["writer-password"].length == 0) {
+                        return false
+                    }
+                } else {
+                    const confirm = await swal.fire({
+                        title: "Confirm",
+                        text: "Are you sure?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel"
+                    })
+
                     if (!confirm.isConfirmed) {
                         return false
                     }
-
-                    keywords["writer-password"] = confirm.value
                 }
 
                 if (token != undefined && token != null) {

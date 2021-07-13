@@ -48,14 +48,15 @@ Current, Sqlite only
 - [x] Search
 - [x] Edit
 - [x] User add, edit, delete
-- [ ] Comment - edit, delete
-- [ ] Comment paging
-- [ ] Prevent edit, delete
+- [ ] Comment
+    - [x] delete
+    - [ ] paging
+    - [ ] Nested Comment - 1 depth
 - [ ] Signin
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
-- [ ] User defined template
 - [ ] Other DB except sqlite
+- [ ] User defined template
 - [ ] ~~Email~~
 - [ ] ~~Menu~~
 - [ ] ~~Test~~

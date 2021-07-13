@@ -37,6 +37,9 @@
 
         <div v-for="c, i in comments">
             {{c["writer-name"]}}:
+            <template v-if="showCommentButtons(c)">
+                <button @click="deleteComment(c)">Delete</button>
+            </template>
             <div v-html="c.content"></div>
         </div>
 
@@ -95,7 +98,7 @@
             // branding: false
         })
     }
-    
+
     Vue.prototype.location = window.location
     const vm = new Vue({
         el: "#app",
@@ -241,6 +244,9 @@
                 }
                 location.href = '/board?code=' + this.boardCode + '&mode=edit&id=' + this.id + isMember
             },
+            showCommentButtons(comment) {
+                return ((comment["is-member"] && (comment["writer-name"] == this.commentAdd["writer-name"])) || comment["is-member"] != "Y")
+            },
             async getComments() {
                 const keywords = [{ bidx: this.id }]
 
@@ -312,6 +318,75 @@
                 }
 
                 showError(response.status)
+                return false
+            },
+            async deleteComment(comment) {
+                let requestMethod = "DELETE"
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (comment["is-member"] != "Y") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    comment["writer-password"] = confirm.value
+                    if (comment["writer-password"] == undefined || comment["writer-password"].length == 0) {
+                        return false
+                    }
+                } else {
+                    const confirm = await swal.fire({
+                        title: "Confirm",
+                        text: "Are you sure?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Delete",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        return false
+                    }
+                }
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+                }
+
+                const params = "?code=" + this.boardCode + "&mode=delete"
+
+                let response = await fetch(this.restURI + "/api/comments" + params, {
+                    method: requestMethod,
+                    headers: headers,
+                    body: JSON.stringify({
+                        data: comment,
+                        table: this.table
+                    })
+                })
+
+                if (response.ok) {
+                    const result = await response.json()
+                    if (result["affected-rows"] > 0) {
+                        swal.fire("Success", "Deleted successfully", "success")
+                        this.getComments()
+                    } else {
+                        swal.fire("Fail", "Delete failed", "error")
+                    }
+
+                    return false
+                }
+
+                showError(response.status, true)
                 return false
             }
         }

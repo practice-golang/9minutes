@@ -516,6 +516,7 @@ func setupServer() *echo.Echo {
 	cm.POST("", comments.GetComments)
 	cm.PUT("", comments.AddComment)
 	cm.PATCH("", comments.EditComment)
+	cm.DELETE("", comments.DeleteComment)
 
 	return e
 }

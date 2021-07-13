@@ -10,6 +10,7 @@ type CommentSET struct {
 	Idx            null.String `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
 	BIdx           null.String `json:"bidx" db:"BOARD_IDX" goqu:"skipupdate"`
 	Content        null.String `json:"content" db:"CONTENT"`
+	IsMember       null.String `json:"is-member" db:"IS_MEMBER" goqu:"skipupdate"`
 	WriterName     null.String `json:"writer-name" db:"WRITER_NAME" goqu:"skipupdate"`
 	WriterPassword null.String `json:"writer-password" db:"WRITER_PASSWORD" goqu:"skipupdate"`
 	RegDTTM        null.String `json:"reg-dttm" db:"REG_DTTM" goqu:"skipinsert,skipupdate"`
@@ -21,6 +22,7 @@ type CommentList struct {
 	Idx        null.String `json:"idx" db:"IDX" goqu:"skipinsert,skipupdate"`
 	BIdx       null.String `json:"bidx" db:"BOARD_IDX" goqu:"skipupdate"`
 	Content    null.String `json:"content" db:"CONTENT"`
+	IsMember   null.String `json:"is-member" db:"IS_MEMBER" goqu:"skipupdate"`
 	WriterName null.String `json:"writer-name" db:"WRITER_NAME"`
 	RegDTTM    null.String `json:"reg-dttm" db:"REG_DTTM" goqu:"skipinsert,skipupdate"`
 }
