@@ -48,10 +48,8 @@ Current, Sqlite only
 - [x] Search
 - [x] Edit
 - [x] User add, edit, delete
-- [ ] Comment
-    - [x] delete
-    - [ ] paging
-    - [ ] Nested Comment - 1 depth
+- [x] Comment
+- [ ] File upload
 - [ ] Signin
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
