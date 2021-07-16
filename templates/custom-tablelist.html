@@ -157,7 +157,7 @@
                 return !this.baseColumns.includes(c)
             },
             async initData() {
-                // await this.checkLogedIn()
+                await this.checkLogedIn()
                 await this.checkPermission()
                 await this.getData()
             },
@@ -203,10 +203,12 @@
 
                 this.isLogedIn = result
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                } else {
+                    this.token = token
+                }
             },
             async checkPermission() {
                 let headers = {

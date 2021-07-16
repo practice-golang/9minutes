@@ -104,8 +104,10 @@
         },
         methods: {
             async initData() {
-                await this.checkLogedIn()
-                await this.getData()
+                const logedIN = await this.checkLogedIn()
+                if (logedIN) {
+                    await this.getData()
+                }
             },
             async checkLogedIn() {
                 let result = false
@@ -147,10 +149,16 @@
                     }
                 }
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                if (!result) {
+                    console.log(result, reissue)
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() =>{
+                        location.href = "/users/login"
+                    })
+                } else {
+                    this.token = token
+                }
+
+                return result
             },
             async getTotalPage() {
                 let keywords = []

@@ -32,9 +32,10 @@ func PrepareToken(data interface{}) (string, error) {
 		fmt.Sprint(d["USERNAME"]),
 		fmt.Sprint(d["EMAIL"]),
 		fmt.Sprint(d["ADMIN"]),
-		time.Now().Add(time.Hour * 30 * 24).Unix(),
-		jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Hour * 1 * 24).Unix()},
-		// jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Second * 1 * 60).Unix()},
+		time.Now().Add(time.Hour * 24 * 30).Unix(),
+		// jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Second * 60 * 1).Unix()},
+		// jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Hour * 24 * 1).Unix()},
+		jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 1).Unix()},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

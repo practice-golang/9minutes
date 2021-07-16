@@ -161,10 +161,12 @@
                     }
                 }
 
-                // if (!result) {
-                //     swal.fire("Authorization failed", "Token is not exist or invalid", "error")
-                //     location.href = "/users/login"
-                // }
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                } else {
+                    this.token = token
+                }
             },
             async getTotalPage() {
                 let keywords = []

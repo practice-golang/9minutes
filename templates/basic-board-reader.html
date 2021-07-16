@@ -133,11 +133,59 @@
         },
         methods: {
             async initData() {
+                await this.checkLogedIn()
                 await this.checkPermission()
                 await this.getData()
                 await this.getComments()
 
                 initTinyMCE()
+            },
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                const token = localStorage.getItem('token')
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    if (response.ok) {
+                        r = await response.json()
+                        if (r.msg == "OK") { result = true }
+                    } else {
+                        if (response.status != 200) {
+                            r = await response.json()
+                            if (r.msg == "Token is expired") { reissue = true }
+                        }
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (!result) {
+                    swal.fire("Authorization failed", "Token is not exist or invalid", "error")
+                    location.href = "/users/login"
+                } else {
+                    this.token = token
+                }
             },
             async checkPermission() {
                 let headers = {

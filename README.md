@@ -49,6 +49,7 @@ Current, Sqlite only
 - [x] Edit
 - [x] User add, edit, delete
 - [x] Comment
+- [ ] Au
 - [ ] File upload
 - [ ] Signin
 - [ ] Code cleaning
