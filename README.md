@@ -49,9 +49,8 @@ Current, Sqlite only
 - [x] Edit
 - [x] User add, edit, delete
 - [x] Comment
-- [ ] Au
+- [x] Auth - token reissuing
 - [ ] File upload
-- [ ] Signin
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] Other DB except sqlite

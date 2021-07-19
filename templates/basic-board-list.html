@@ -122,18 +122,15 @@
                         method: "POST",
                         headers: { "Authorization": "Bearer " + token }
                     })
+                    r = await response.json()
                     if (response.ok) {
-                        r = await response.json()
                         if (r.msg == "OK") { result = true }
-                    } else {
-                        if (response.status != 200) {
-                            r = await response.json()
-                            if (r.msg == "Token is expired") { reissue = true }
-                        }
+                    } else if (r.expired) {
+                        reissue = true
                     }
 
                     if (!result && reissue) {
-                        response = await fetch(this.restURIdomain + "/api/user/token/verify", {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
                             method: "GET",
                             headers: { "Authorization": "Bearer " + token }
                         })
@@ -150,7 +147,6 @@
                 }
 
                 if (!result) {
-                    console.log(result, reissue)
                     swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() =>{
                         location.href = "/users/login"
                     })

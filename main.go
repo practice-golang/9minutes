@@ -293,19 +293,25 @@ func setupServer() *echo.Echo {
 		SigningKey: jwtKey,
 		ErrorHandlerWithContext: func(e error, c echo.Context) error {
 			status := http.StatusForbidden
-			result := map[string]bool{"permission": false, "write-comment": false}
-			isValid := user.CheckPermission(c)
-			isCommentValid := user.CheckCommentPermission(c)
+			result := map[string]bool{"permission": false, "write-comment": false, "expired": false}
 
-			if isValid {
-				status = http.StatusOK
-				result["permission"] = true
-
-				result["write-comment"] = false
-				if isCommentValid {
-					result["write-comment"] = true
-				}
+			if strings.Contains(e.Error(), "token is expired by") {
+				result["expired"] = true
+				return c.JSON(status, result)
 			}
+
+			// isValid := user.CheckPermission(c)
+			// isCommentValid := user.CheckCommentPermission(c)
+
+			// if isValid {
+			// 	status = http.StatusOK
+			// 	result["permission"] = true
+
+			// 	result["write-comment"] = false
+			// 	if isCommentValid {
+			// 		result["write-comment"] = true
+			// 	}
+			// }
 
 			return c.JSON(status, result)
 		},
