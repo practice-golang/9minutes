@@ -39,9 +39,12 @@
             </tr>
         </table>
 
-        <div id="drop_zone" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
-            <p>Drag one or more files to this Drop Zone ...</p>
+        <input type="file" name="input-file" multiple @input="inputHandler" />
+        <div id="drop-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+            <p>Drag files to here</p>
         </div>
+        <!-- <button onclick="uploadFINISH()">업로드 마무리</button> -->
+        <div id="msg"></div>
 
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -76,36 +79,6 @@
         return false
     }
 
-    function dropHandler(ev) {
-        console.log('File(s) dropped');
-
-        // Prevent default behavior (Prevent file from being opened)
-        ev.preventDefault();
-
-        if (ev.dataTransfer.items) {
-            // Use DataTransferItemList interface to access the file(s)
-            for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-                // If dropped items aren't files, reject them
-                if (ev.dataTransfer.items[i].kind === 'file') {
-                    var file = ev.dataTransfer.items[i].getAsFile();
-                    console.log('... file[' + i + '].name = ' + file.name);
-                }
-            }
-        } else {
-            // Use DataTransfer interface to access the file(s)
-            for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-                console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
-            }
-        }
-    }
-
-    function dragOverHandler(ev) {
-        console.log('File(s) in drop zone');
-
-        // Prevent default behavior (Prevent file from being opened)
-        ev.preventDefault();
-    }
-
     tinymce.init({
         selector: "textarea.editors",
         mode: "textareas",
@@ -138,7 +111,16 @@
                 "is-member": "N",
                 "writer-name": "",
                 "writer-password": ""
-            }
+            },
+            formData: new FormData(),
+            uploadTmpPath: "data_tmp",
+            uriUploadTMP: "/api/upload/tmp",
+            uriUploadFINISH: "/api/upload/finish",
+            uploadHeaderJSON: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            uploadOrderCount: 0,
         },
         mounted() {
             const uri = new URL(String(document.location.href))
@@ -369,6 +351,234 @@
 
                 showError(response.status)
                 return false
+            },
+            readFile(file) {
+                return new Promise((resolve, reject) => {
+                    let fr = new FileReader()
+                    fr.onload = x => resolve(fr.result)
+                    // fr.readAsText(file)
+                    fr.readAsBinaryString(file)
+                })
+            },
+            futch(url, opts = {}, onProgress) {
+                return new Promise((res, rej) => {
+                    var xhr = new XMLHttpRequest()
+                    xhr.open(opts.method || 'get', url)
+                    for (var k in opts.headers || {}) {
+                        xhr.setRequestHeader(k, opts.headers[k])
+                    }
+                    xhr.onload = e => res(e.target.responseText)
+                    xhr.onerror = rej
+                    if (xhr.upload && onProgress) {
+                        // event.loaded / event.total * 100 ; //event.lengthComputable
+                        xhr.upload.onprogress = onProgress
+                    }
+                    xhr.send(opts.body)
+                })
+            },
+            async uploadTMP(name, type, content, ord) {
+                const data = {
+                    name: name,
+                    type: type,
+                    content: content,
+                }
+
+                const response = await this.futch(this.uriUploadTMP, {
+                    method: "POST",
+                    headers: this.uploadHeaderJSON,
+                    body: JSON.stringify(data),
+                }, (e) => {
+                    let pct = ((e.loaded / e.total) * 100).toFixed(2)
+
+                    console.log("file" + ord, pct)
+
+                    document.getElementById("progress-bar" + ord).value = pct
+                    document.getElementById("progress-bar" + ord).setAttribute("data-label", pct + "%")
+                }).catch((error) => { })
+
+                let success = false
+                if (response != undefined) {
+                    success = true
+
+                    const responseJSON = JSON.parse(response)
+                    if (responseJSON.msg == "You cannot upload") {
+                        success = false
+                    }
+                }
+
+                if (success) {
+                    const obj = JSON.parse(response)
+
+                    this.formData.append("file" + ord, response)
+                    this.showRemoteObject(obj, ord)
+                } else {
+                    swal.fire("Upload failed", "", "error")
+                    this.formData.delete("file" + ord)
+                    const cavity = document.getElementById("file-cavity" + ord)
+                    cavity.remove()
+                }
+            },
+            async readFormData(files) {
+                console.log("Begin Count: ", this.uploadOrderCount)
+
+                let ord = 0
+
+                for (let i = 0; i < files.length; i++) {
+                    const fcontent = btoa(await this.readFile(files[i]))
+                    const fname = files[i].name
+                    const ftype = files[i].type
+
+                    this.uploadTMP(fname, ftype, fcontent, (this.uploadOrderCount + i).toString())
+
+                    ord = this.uploadOrderCount + i
+                }
+
+                this.uploadOrderCount = ord + 1
+            },
+            dropHandler(ev) {
+                // console.log('File(s) dropped')
+                ev.preventDefault()
+
+                const files = new Array()
+
+                for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                    const cavity = document.createElement("div")
+                    cavity.setAttribute("id", "file-cavity" + (this.uploadOrderCount + i))
+                    cavity.setAttribute("class", "file-cavity")
+
+                    const progress = document.createElement("progress")
+                    progress.setAttribute("id", "progress-bar" + (this.uploadOrderCount + i))
+                    progress.setAttribute("value", "0")
+                    progress.setAttribute("max", "100")
+                    cavity.appendChild(progress)
+
+                    msg.appendChild(cavity)
+
+                    files.push(ev.dataTransfer.files[i])
+                }
+                this.readFormData(files)
+            },
+            dragOverHandler(ev) {
+                console.log('File(s) in drop zone')
+
+                ev.preventDefault()
+            },
+            async inputHandler(event) {
+                const input = event.target
+
+                if (input.files.length == 0) {
+                    return false // Empty
+                }
+
+                for (var i = 0; i < input.files.length; i++) {
+                    const cavity = document.createElement("div")
+                    cavity.setAttribute("id", "file-cavity" + (this.uploadOrderCount + i))
+                    cavity.setAttribute("class", "file-cavity")
+
+                    const progress = document.createElement("progress")
+                    progress.setAttribute("id", "progress-bar" + (this.uploadOrderCount + i))
+                    progress.setAttribute("value", "0")
+                    progress.setAttribute("max", "100")
+                    cavity.appendChild(progress)
+
+                    msg.appendChild(cavity)
+                }
+
+                await this.readFormData(input.files)
+
+                document.getElementsByName("input-file")[0].value = ""
+            },
+            showRemoteObject(obj, ord) {
+                const cavity = document.getElementById("file-cavity" + ord)
+
+                switch (obj.type) {
+                    case "image/jpeg":
+                    case "image/png":
+                        const img = document.createElement("img")
+                        img.setAttribute("id", "img" + ord)
+                        img.setAttribute("src", this.uploadTmpPath + "/" + obj.tmp_name)
+                        img.setAttribute("width", "100")
+                        cavity.appendChild(img)
+
+                        const iname = document.createElement("span")
+                        iname.setAttribute("id", "imgname" + ord)
+                        iname.innerText = obj.name
+                        cavity.appendChild(iname)
+
+                        const idel = document.createElement("button")
+                        idel.setAttribute("id", "del-img" + ord)
+                        idel.onclick = () => this.deleteEntry(ord)
+                        idel.innerText = "X"
+                        cavity.appendChild(idel)
+
+                        break
+                    default:
+                        const fimg = document.createElement("img")
+                        fimg.setAttribute("id", "img" + ord)
+                        fimg.setAttribute("src", "file.svg")
+                        fimg.setAttribute("width", "100")
+                        cavity.appendChild(fimg)
+
+                        const fname = document.createElement("span")
+                        fname.setAttribute("id", "filename" + ord)
+                        fname.innerText = obj.name
+                        cavity.appendChild(fname)
+
+                        const fdel = document.createElement("button")
+                        fdel.setAttribute("id", "del-file" + ord)
+                        fdel.onclick = () => this.deleteEntry(ord)
+                        fdel.innerText = "X"
+                        cavity.appendChild(fdel)
+
+                        break
+                }
+
+                return false
+            },
+            async deleteEntry(ord) {
+                const obj = JSON.parse(this.formData.get("file" + ord))
+                const data = {
+                    name: obj.name,
+                    tmp_name: obj.tmp_name,
+                    type: obj.type
+                }
+                const response = await fetch(this.uriUploadTMP, {
+                    method: "DELETE",
+                    headers: this.uploadHeaderJSON,
+                    body: JSON.stringify(data)
+                })
+
+                this.formData.delete("file" + ord)
+
+                const cavity = document.getElementById("file-cavity" + ord)
+                cavity.remove()
+            },
+            async uploadFINISH() {
+                let data = new Array()
+                this.formData.forEach(function (value, key) {
+                    data.push(JSON.parse(value))
+                })
+
+                const response = await fetch(this.uriUploadFINISH, {
+                    method: "POST",
+                    headers: this.uploadHeaderJSON,
+                    body: JSON.stringify(data)
+                })
+
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const resultJSON = await response.json()
+                    console.log(resultJSON)
+                } else {
+                    const resultTEXT = await response.text()
+                    console.log(resultTEXT)
+                }
+
+                swal.fire("Done", "", "success").then(() => {
+                    while (msg.firstChild) {
+                        msg.removeChild(msg.lastChild)
+                    }
+                })
             }
         }
     })
@@ -385,10 +595,63 @@
         width: 100%;
     }
 
-    #drop_zone {
+    #drop-area {
         border: 5px solid blue;
         width: 200px;
         height: 100px;
+    }
+
+    #msg {
+        display: flex;
+    }
+
+    /*
+    Progress bar
+    https: //stackoverflow.com/questions/41429906/how-to-display-data-label-inside-html5-progress-bar-cross-browser
+    https: //stackoverflow.com/questions/65612948/change-the-color-of-webkit-progress-value-from-javascript
+    */
+
+    .file-cavity {
+        position: relative;
+        width: 170px;
+        height: 120px;
+    }
+
+    progress::-webkit-progress-value {
+        background-color: cadetblue;
+    }
+
+    progress {
+        text-align: center;
+        border: none;
+        color: white;
+        opacity: .5;
+        position: relative;
+
+        top: 60px;
+        z-index: 100;
+    }
+
+    progress:before {
+        content: attr(data-label);
+        font-size: 0.8em;
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
+
+    .file-cavity>* {
+        position: absolute;
+        left: 0px;
+    }
+
+    .file-cavity>span {
+        font-size: 0.8em;
+        top: 90px;
+    }
+
+    .file-cavity>button {
+        left: 130px;
     }
 </style>
 

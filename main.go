@@ -26,6 +26,7 @@ import (
 	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/contents"
 	"github.com/practice-golang/9minutes/db"
+	"github.com/practice-golang/9minutes/uploader"
 	"github.com/practice-golang/9minutes/user"
 )
 
@@ -523,6 +524,13 @@ func setupServer() *echo.Echo {
 	cm.PUT("", comments.AddComment)
 	cm.PATCH("", comments.EditComment)
 	cm.DELETE("", comments.DeleteComment)
+
+	up := e.Group("/api/upload")
+	up.POST("/tmp", uploader.UploadTMP)
+	up.DELETE("/tmp", uploader.DeleteTMP)
+	up.POST("/finish", uploader.UploadFINISH)
+
+	e.Static("/data_tmp", "../data_tmp")
 
 	return e
 }

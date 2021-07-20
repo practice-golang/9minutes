@@ -11,6 +11,7 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/labstack/echo/v4 v4.3.0
 	github.com/lib/pq v1.10.2
+	github.com/oklog/ulid/v2 v2.0.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/thoas/go-funk v0.8.0
 	github.com/tidwall/gjson v1.8.0
