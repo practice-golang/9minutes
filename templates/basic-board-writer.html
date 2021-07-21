@@ -39,12 +39,14 @@
             </tr>
         </table>
 
-        <input type="file" name="input-file" multiple @input="inputHandler" />
-        <div id="drop-area" @drop="dropHandler" @dragover="dragOverHandler">
-            <p>Drag files to here</p>
-        </div>
-        <!-- <button onclick="uploadFINISH()">업로드 마무리</button> -->
-        <div id="msg"></div>
+        <template v-if="useFileUpload">
+            <input type="file" name="input-file" multiple @input="inputHandler" />
+            <div id="drop-area" @drop="dropHandler" @dragover="dragOverHandler">
+                <p>Drag files to here</p>
+            </div>
+            <!-- <button onclick="uploadFINISH()">업로드 마무리</button> -->
+            <div id="msg"></div>
+        </template>
 
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -113,6 +115,7 @@
                 "writer-password": ""
             },
             formData: new FormData(),
+            useFileUpload: false,
             uploadTmpPath: "data_tmp",
             uriUploadTMP: "/api/upload/tmp",
             uriUploadFINISH: "/api/upload/finish",
@@ -203,7 +206,13 @@
 
                 if (response.ok) {
                     const contents = await response.json()
+
+                    if (contents["file-upload"]) {
+                        this.useFileUpload = true
+                    }
+
                     await this.getUserInfo()
+
                     if (this.mode != "edit") {
                         this.isShow = true
                     }
@@ -318,7 +327,9 @@
                     files.push(JSON.parse(value))
                 })
 
-                this.uploadFINISH()
+                if (this.useFileUpload) {
+                    this.uploadFINISH()
+                }
 
                 let requestMethod = "PUT"
                 this.contents.content = await tinymce.activeEditor.getContent()
