@@ -138,6 +138,7 @@ func (d *Sqlite) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
 		"WRITER_IDX"		TEXT,
 		"WRITER_NAME"		TEXT,
 		"WRITER_PASSWORD"	TEXT,
+		"FILES"				TEXT,
 		"REG_DTTM"			TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`

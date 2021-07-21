@@ -407,6 +407,7 @@ func ResponsePermission(c echo.Context) error {
 	isValid := CheckPermission(c)
 	isWriteValid := CheckWritePermission(c)
 	isCommentValid := CheckCommentPermission(c)
+	isFileUpload := board.CheckUpload(c)
 
 	if isValid {
 		status = http.StatusOK
@@ -420,6 +421,11 @@ func ResponsePermission(c echo.Context) error {
 		result["write-comment"] = false
 		if isCommentValid {
 			result["write-comment"] = true
+		}
+
+		result["file-upload"] = false
+		if isFileUpload {
+			result["file-upload"] = true
 		}
 	}
 

@@ -13,6 +13,7 @@ type ContentsBasicBoardSET struct {
 	WriterIdx      null.String `json:"writer-idx" db:"WRITER_IDX" goqu:"skipupdate"`
 	WriterName     null.String `json:"writer-name" db:"WRITER_NAME" goqu:"skipupdate"`
 	WriterPassword null.String `json:"writer-password" db:"WRITER_PASSWORD" goqu:"skipupdate"`
+	Files          null.String `json:"files" db:"FILES"`
 	RegDTTM        null.String `json:"reg-dttm" db:"REG_DTTM" goqu:"skipinsert,skipupdate"`
 }
 
@@ -23,6 +24,7 @@ type ContentsBasicBoardGET struct {
 	Content    null.String `json:"content" db:"CONTENT"`
 	IsMember   null.String `json:"is-member" db:"IS_MEMBER"`
 	WriterName null.String `json:"writer-name" db:"WRITER_NAME"`
+	Files      null.String `json:"files" db:"FILES"`
 	RegDTTM    null.String `json:"reg-dttm" db:"REG_DTTM" goqu:"skipinsert,skipupdate"`
 }
 

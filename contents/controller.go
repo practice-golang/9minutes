@@ -12,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/auth"
+	"github.com/practice-golang/9minutes/board"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
 	"github.com/practice-golang/9minutes/user"
@@ -98,6 +99,14 @@ func AddContentsBasicBoard(c echo.Context) error {
 
 	if !isValid {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
+	}
+
+	isFileUpload := board.CheckUpload(c)
+	if isFileUpload {
+		filesJSON, _ := json.Marshal(dataMap["files"])
+		data.Files = null.NewString(string(filesJSON), true)
+	} else {
+		data.Files = null.NewString("", false)
 	}
 
 	user := c.Get("user")

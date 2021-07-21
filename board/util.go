@@ -4,6 +4,7 @@ import (
 	"log"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/labstack/echo/v4"
 	"github.com/practice-golang/9minutes/models"
 )
 
@@ -81,4 +82,25 @@ func prepareSelectData(data interface{}) []models.Board {
 	}
 
 	return result
+}
+
+// CheckPermission - Check permission
+func CheckUpload(c echo.Context) bool {
+	var isFileUpload bool
+
+	code := c.QueryParam("code")
+	boardInfos := GetBoardByCode(code)
+
+	if len(boardInfos) == 0 {
+		return false
+	}
+
+	fileUploadSET := boardInfos[0].FileUpload.String
+
+	isFileUpload = false
+	if fileUploadSET == "Y" {
+		isFileUpload = true
+	}
+
+	return isFileUpload
 }
