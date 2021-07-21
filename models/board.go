@@ -14,6 +14,7 @@ type Board struct {
 	GrantRead    null.String `json:"grant-read" db:"GRANT_READ"`
 	GrantWrite   null.String `json:"grant-write" db:"GRANT_WRITE"`
 	GrantComment null.String `json:"grant-comment" db:"GRANT_COMMENT"`
+	FileUpload   null.String `json:"file-upload" db:"FILE_UPLOAD"`
 	Fields       interface{} `json:"fields" db:"FIELDS"`
 	// Fields []Field `json:"fields" db:"FIELDS"`
 }

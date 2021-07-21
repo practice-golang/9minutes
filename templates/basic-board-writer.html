@@ -40,7 +40,7 @@
         </table>
 
         <input type="file" name="input-file" multiple @input="inputHandler" />
-        <div id="drop-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+        <div id="drop-area" @drop="dropHandler" @dragover="dragOverHandler">
             <p>Drag files to here</p>
         </div>
         <!-- <button onclick="uploadFINISH()">업로드 마무리</button> -->
@@ -313,6 +313,13 @@
                 return false
             },
             async writePost() {
+                let files = new Array()
+                this.formData.forEach(function (value, key) {
+                    files.push(JSON.parse(value))
+                })
+
+                this.uploadFINISH()
+
                 let requestMethod = "PUT"
                 this.contents.content = await tinymce.activeEditor.getContent()
 
@@ -339,6 +346,7 @@
                     headers: headers,
                     body: JSON.stringify({
                         data: this.contents,
+                        files: files,
                         table: this.table
                     })
                 })
@@ -437,6 +445,7 @@
             },
             dropHandler(ev) {
                 // console.log('File(s) dropped')
+
                 ev.preventDefault()
 
                 const files = new Array()
@@ -459,7 +468,7 @@
                 this.readFormData(files)
             },
             dragOverHandler(ev) {
-                console.log('File(s) in drop zone')
+                // console.log('File(s) in drop zone')
 
                 ev.preventDefault()
             },

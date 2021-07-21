@@ -51,6 +51,7 @@ Current, Sqlite only
 - [x] Comment
 - [x] Auth - token reissuing
 - [ ] File upload
+- [ ] Sign in
 - [ ] Code cleaning
 - [ ] Add reg/last modified datetime, read count
 - [ ] Other DB except sqlite

@@ -38,11 +38,12 @@
             </template>
         </template>
 
-
-        <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-            <p>Drag one or more files to this Drop Zone ...</p>
+        <!-- <input type="file" name="input-file" multiple @input="inputHandler" />
+        <div id="drop-area" @drop="dropHandler" @dragover="dragOverHandler">
+            <p>Drag files to here</p>
         </div>
-
+        <button onclick="uploadFINISH()">업로드 마무리</button>
+        <div id="msg"></div> -->
 
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -69,36 +70,6 @@
         }
 
         return false
-    }
-
-    function dropHandler(ev) {
-        console.log('File(s) dropped');
-
-        // Prevent default behavior (Prevent file from being opened)
-        ev.preventDefault();
-
-        if (ev.dataTransfer.items) {
-            // Use DataTransferItemList interface to access the file(s)
-            for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-                // If dropped items aren't files, reject them
-                if (ev.dataTransfer.items[i].kind === 'file') {
-                    var file = ev.dataTransfer.items[i].getAsFile();
-                    console.log('... file[' + i + '].name = ' + file.name);
-                }
-            }
-        } else {
-            // Use DataTransfer interface to access the file(s)
-            for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-                console.log('... file[' + i + '].name = ' + ev.dataTransfer.files[i].name);
-            }
-        }
-    }
-
-    function dragOverHandler(ev) {
-        console.log('File(s) in drop zone');
-
-        // Prevent default behavior (Prevent file from being opened)
-        ev.preventDefault();
     }
 
     tinymce.init({

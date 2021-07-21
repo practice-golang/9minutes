@@ -105,6 +105,7 @@ func AddContentsBasicBoard(c echo.Context) error {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
 		data.WriterIdx = null.NewString(claims.Idx, true)
 		data.WriterName = null.NewString(claims.UserName, true)
+		data.WriterPassword = null.NewString("", false)
 		data.IsMember = null.NewString("Y", true)
 	} else {
 		data.WriterIdx = null.NewString("-1", true)

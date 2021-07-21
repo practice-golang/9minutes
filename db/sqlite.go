@@ -48,6 +48,7 @@ func (d *Sqlite) CreateBoardManagerTable(recreate bool) error {
 		"GRANT_READ"		TEXT,
 		"GRANT_WRITE"		TEXT,
 		"GRANT_COMMENT"		TEXT,
+		"FILE_UPLOAD"		TEXT,
 		"FIELDS"			TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`

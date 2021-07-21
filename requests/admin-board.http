@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI2OTU3NzIyLCJleHAiOjE2MjQ0NTIxMjJ9.1yqhaL4vBwz7SMAnygmIWNO5DzRrXz3sK9MwXZXqL5A
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI5NDcxNDYwLCJleHAiOjE2MjY4Nzk1MjB9.-THnQqGycUVnyjluBBXf7wZtc5G5LFaE9wHUTODZOj8
 
 ### Select one
 GET {{uri}}/api/admin/board/1 HTTP/1.1
@@ -83,7 +83,8 @@ content-type: application/json
         "table": "BOARD1",
         "grant-read": "all",
         "grant-write": "all",
-        "grant-comment": "all"
+        "grant-comment": "all",
+        "file-upload": "Y"
     },
     {
         "name": "Basic board #2",
@@ -92,7 +93,8 @@ content-type: application/json
         "table": "BOARD2",
         "grant-read": "all",
         "grant-write": "user",
-        "grant-comment": "user"
+        "grant-comment": "user",
+        "file-upload": "Y"
     },
     {
         "name": "Basic board #3",
@@ -101,7 +103,8 @@ content-type: application/json
         "table": "BOARD3",
         "grant-read": "user",
         "grant-write": "user",
-        "grant-comment": "user"
+        "grant-comment": "user",
+        "file-upload": "N"
     },
     {
         "name": "Basic board #4",
@@ -110,7 +113,8 @@ content-type: application/json
         "table": "BOARD4",
         "grant-read": "user",
         "grant-write": "admin",
-        "grant-comment": "user"
+        "grant-comment": "user",
+        "file-upload": "N"
     },
     {
         "name": "Basic board #5",
@@ -119,7 +123,8 @@ content-type: application/json
         "table": "BOARD5",
         "grant-read": "admin",
         "grant-write": "admin",
-        "grant-comment": "admin"
+        "grant-comment": "admin",
+        "file-upload": "N"
     },
     {
         "name": "Custom board #1",
@@ -129,6 +134,7 @@ content-type: application/json
         "grant-read": "all",
         "grant-write": "all",
         "grant-comment": "all",
+        "file-upload": "Y",
         "fields": [
             {
                 "idx": 1,
@@ -156,6 +162,7 @@ content-type: application/json
         "grant-read": "all",
         "grant-write": "user",
         "grant-comment": "user",
+        "file-upload": "Y",
         "fields": [
             {
                 "idx": 1,
@@ -183,6 +190,7 @@ content-type: application/json
         "grant-read": "user",
         "grant-write": "user",
         "grant-comment": "user",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -210,6 +218,7 @@ content-type: application/json
         "grant-read": "user",
         "grant-write": "admin",
         "grant-comment": "user",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -237,6 +246,7 @@ content-type: application/json
         "grant-read": "admin",
         "grant-write": "admin",
         "grant-comment": "admin",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -264,6 +274,7 @@ content-type: application/json
         "grant-read": "all",
         "grant-write": "all",
         "grant-comment": "all",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -299,6 +310,7 @@ content-type: application/json
         "grant-read": "all",
         "grant-write": "user",
         "grant-comment": "user",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -334,6 +346,7 @@ content-type: application/json
         "grant-read": "user",
         "grant-write": "user",
         "grant-comment": "user",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -369,6 +382,7 @@ content-type: application/json
         "grant-read": "user",
         "grant-write": "admin",
         "grant-comment": "admin",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -404,6 +418,7 @@ content-type: application/json
         "grant-read": "admin",
         "grant-write": "admin",
         "grant-comment": "admin",
+        "file-upload": "N",
         "fields": [
             {
                 "idx": 1,
@@ -446,6 +461,7 @@ content-type: application/json
     "table": "MY_CONTENTS",
     "grant-read": "all",
     "grant-write": "user",
+    "file-upload": "Y"
     "fields": [
         {
             "idx": 1,

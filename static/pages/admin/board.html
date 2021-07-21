@@ -29,6 +29,7 @@
                 <th>Access Read</th>
                 <th>Access Write/Edit</th>
                 <th>Write/Edit Comment</th>
+                <th>Use file upload</th>
                 <th>{{ $t("table.fields") }} / {{ $t("table.copy") }}</th>
                 <th></th>
             </tr>
@@ -64,9 +65,16 @@
                 </td>
                 <td>
                     <select v-model="boardAdd['grant-comment']">
+                        <option value="not-use">Not use</option>
                         <option value="all">All allowed</option>
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
+                    </select>
+                </td>
+                <td>
+                    <select v-model="boardAdd['file-upload']">
+                        <option value="N">Not use</option>
+                        <option value="Y">Use</option>
                     </select>
                 </td>
                 <td><button @click="toggleFieldModal(undefined, boardAdd.fields)" :disabled="boardAdd.type == 'basic-board' || boardAdd.type == ''">{{ $t("elem.open") }}</button></td>
@@ -85,7 +93,8 @@
                     <td>{{b.table}}</td>
                     <td>{{b['grant-read']}}</td>
                     <td>{{b['grant-write']}}</td>
-                    <td>{{b['grant-comment']}}</td>
+                    <td>{{(b['grant-comment'] == null) ? "Not use" : b['grant-comment']}}</td>
+                    <td>{{(b['file-upload'] == "Y") ? "Use" : "Not Use"}}</td>
                     <td><button @click="copyToAddBoard(b)">{{ $t("elem.copytoadd") }}</button></td>
                     <td>
                         <button @click="boardEdit=Object.assign({}, b)">Edit</button>
@@ -124,6 +133,12 @@
                             <option value="all">All allowed</option>
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select v-model="boardEdit['file-upload']">
+                            <option value="N">Not use</option>
+                            <option value="Y">Use</option>
                         </select>
                     </td>
                     <td><button @click="toggleFieldModal(i, boardEdit)" :disabled="boardEdit.type == 'basic-board'">{{ $t("elem.open") }}</button></td>
@@ -530,7 +545,7 @@
 
                 // this.boardEdit = this.boardAdd
 
-                if (Object.keys(this.boardAdd).length < 4) {
+                if (Object.keys(this.boardAdd).length < 10) {
                     swal.fire("Empty", "Fill all.", "warning")
                     return false
                 }
@@ -567,6 +582,7 @@
                             "table": this.boardAdd.table,
                             "grant-read": this.boardAdd["grant-read"],
                             "grant-write": this.boardAdd["grant-write"],
+                            "file-upload": this.boardAdd["file-upload"],
                             "fields": this.boardAdd.fields,
                         },
                     ])
