@@ -168,6 +168,7 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 		"WRITER_IDX"		TEXT,
 		"WRITER_NAME"		TEXT,
 		"WRITER_PASSWORD"	TEXT,
+		"FILES"				TEXT,
 		"REG_DTTM"			TEXT,
 	`
 

@@ -330,7 +330,8 @@
                 { desc: "Cannot edit", idx: "-", name: "Writer idx", column: "WRITER_IDX", json: "writer-idx", type: "text", order: 3 },
                 { desc: "Cannot edit", idx: "-", name: "Writer name", column: "WRITER_NAME", json: "writer-name", type: "text", order: 4 },
                 { desc: "Cannot edit", idx: "-", name: "Writer password", column: "WRITER_PASSWORD", json: "writer-password", type: "text", order: 5 },
-                { desc: "Cannot edit", idx: "-", name: "Reg date", column: "REG_DTTM", json: "reg-dttm", type: "text", order: 6 },
+                { desc: "Cannot edit", idx: "-", name: "Files", column: "FILES", json: "files", type: "text", order: 6 },
+                { desc: "Cannot edit", idx: "-", name: "Reg date", column: "REG_DTTM", json: "reg-dttm", type: "text", order: 7 },
             ],
             page: {
                 current: 1,
@@ -383,7 +384,7 @@
                     return fields[fields.length - 1].order + 1
                 }
 
-                return 7
+                return 8
             },
             nextFieldIdx() {
                 if (this.modalFields.length > 0) {
