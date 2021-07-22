@@ -222,6 +222,18 @@ func boardTemplateHandler(c echo.Context) error {
 			columnsInterface = append(columnsInterface, f.(map[string]interface{}))
 		}
 
+		isFileUpload := board.CheckUpload(c)
+		if isFileUpload {
+			columnsInterface = append(columnsInterface, map[string]interface{}{
+				"idx":    len(columnsInterface),
+				"name":   "Files",
+				"column": "FILES",
+				"json":   "files",
+				"type":   "text",
+				"order":  2,
+			})
+		}
+
 		columns, _ := json.Marshal(columnsInterface)
 		contents = strings.ReplaceAll(string(content), "'##__COLUMNS__##'", string(columns))
 	case "custom-tablelist":

@@ -315,9 +315,16 @@ func AddContentsListCustomBoard(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
+	userName := ""
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		userName = claims.UserName
+	}
+
 	isFileUpload := board.CheckUpload(c)
 
-	sqlResult, err := db.InsertContentsMAP(dataBytes, isFileUpload)
+	sqlResult, err := db.InsertContentsMAP(dataBytes, userName, isFileUpload)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}
@@ -349,7 +356,10 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
 		userName = claims.UserName
 	}
-	sqlResult, err := db.UpdateContentsMAP(dataBytes, userName)
+
+	isFileUpload := board.CheckUpload(c)
+
+	sqlResult, err := db.UpdateContentsMAP(dataBytes, userName, isFileUpload)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}

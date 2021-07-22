@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/tidwall/gjson"
+	"gopkg.in/guregu/null.v4"
 
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/mysql"
@@ -17,7 +18,7 @@ import (
 )
 
 // InsertContentsMAP - Crud / custom-board
-func InsertContentsMAP(data interface{}, isFileUpload bool) (sql.Result, error) {
+func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sql.Result, error) {
 	rcds := []goqu.Record{}
 	var allData map[string]interface{}
 
@@ -29,8 +30,11 @@ func InsertContentsMAP(data interface{}, isFileUpload bool) (sql.Result, error) 
 	if data != nil {
 		rcd := goqu.Record{}
 		for k, d := range allData["data"].(map[string]interface{}) {
-			log.Println(k, d)
 			rcd[k] = d
+
+			if k == "WRITER_PASSWORD" && userName != "" {
+				rcd["WRITER_PASSWORD"] = null.NewString("", false)
+			}
 		}
 
 		if isFileUpload {
@@ -209,7 +213,7 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 }
 
 // UpdateContentsMAP - crUd / custom-board
-func UpdateContentsMAP(data interface{}, userName string) (sql.Result, error) {
+func UpdateContentsMAP(data interface{}, userName string, isFileUpload bool) (sql.Result, error) {
 	var err error
 	var allData map[string]interface{}
 	whereEXP := goqu.Ex{}
@@ -235,6 +239,16 @@ func UpdateContentsMAP(data interface{}, userName string) (sql.Result, error) {
 		if _, ok := whereEXP["WRITER_PASSWORD"]; !ok {
 			whereEXP["WRITER_NAME"] = userName
 			whereEXP["WRITER_PASSWORD"] = goqu.Op{"eq": nil}
+		}
+	}
+
+	if isFileUpload {
+		// filesJSON, _ := json.Marshal(allData["files"])
+		// if filesJSON != nil {
+		// 	rcd["FILES"] = string(filesJSON)
+		// }
+		if allData["files"] != nil {
+			rcd["FILES"] = allData["files"]
 		}
 	}
 

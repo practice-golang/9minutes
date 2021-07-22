@@ -21,7 +21,7 @@
         <table>
             <thead>
                 <tr>
-                    <th v-for="f, k in columns" v-if="f.type != 'editor' && f.type != 'comment' && isBaseColumn(f)">
+                    <th v-for="f, k in columns" v-if="f.type != 'editor' && f.type != 'comment' && isBaseColumn(f) && f.column != 'FILES'">
                         <span>{{f.name}}</span>
                     </th>
                     <th>Action</th>
@@ -29,7 +29,7 @@
             </thead>
             <tbody>
                 <tr v-for="ds, i in contents">
-                    <template v-for="c, j in columns" v-if="c.type != 'editor' && c.type != 'comment' && isBaseColumn(c)">
+                    <template v-for="c, j in columns" v-if="c.type != 'editor' && c.type != 'comment' && isBaseColumn(c) && c.column != 'FILES'">
                         <td :class="(c.type == 'title') ? 'content-title' : ''" @click="location.href=restURI+'/board?code='+boardCode+'&mode=read&id='+ds['IDX']">
                             {{ds[c.column]}}
                         </td>

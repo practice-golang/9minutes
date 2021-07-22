@@ -19,9 +19,14 @@
 <body>
     <div id="app" v-show="isShow">
         <h1>Custom board</h1>
-        <div v-for="c, j in columns" v-if="c.column != 'IDX' && c.column != 'IS_MEMBER'">
+        <div v-for="c, j in columns" v-if="c.column != 'IDX' && c.column != 'IS_MEMBER' && c.column != 'FILES'">
             {{contents[c.column]}}
         </div>
+
+        <div v-if="useFileUpload" v-for="o, i in files">
+            <a :href="uriFiles+'/'+o['tmp_name']" target="_blank">{{o.name}}</a><br />
+        </div>
+
         <hr />
         <div v-for="cmt, i in comments">
             {{cmt["writer-name"]}}:
@@ -30,6 +35,7 @@
             </template>
             <div v-html="cmt.content"></div>
         </div>
+
         <div v-if="commentPermission">
             <template v-if="!commentAdd.isMember">
                 <input v-model="commentAdd['writer-name']" placeholder="name" />
@@ -104,6 +110,13 @@
             boardCode: "'##__BOARD_CODE__##'",
             id: "",
             contents: {},
+            useFileUpload: false,
+            uriFiles: "/data",
+            uploadHeaderJSON: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            files: {},
             commentPermission: false,
             comments: [],
             commentAdd: {
@@ -209,10 +222,12 @@
                     // this.contents = await response.json()
                     const permissions = await response.json()
                     if (permissions["write-comment"]) {
-
                         this.commentPermission = true
                     }
-                    console.log(permissions)
+                    if (permissions["file-upload"]) {
+                        this.useFileUpload = true
+                    }
+                    
                     await this.getUserInfo()
                     this.isShow = true
                     return false
@@ -284,7 +299,10 @@
 
                 if (response.ok) {
                     this.contents = (await response.json())[0]
+
+                    this.files = JSON.parse(this.contents["FILES"])
                     this.isShow = true
+                    
                     return false
                 }
 

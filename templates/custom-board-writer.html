@@ -34,7 +34,7 @@
                 <div v-if="c.type == 'editor'">
                     <textarea :id="c.column" v-model="contents[c.column]" class="editors"></textarea>
                 </div>
-                <input v-else-if="c.type != 'comment'" v-model="contents[c.column]" :placeholder="c.name" />
+                <input v-else-if="c.type != 'comment' && c.column != 'FILES'" v-model="contents[c.column]" :placeholder="c.name" />
             </template>
         </template>
 
@@ -46,6 +46,12 @@
             <!-- <button onclick="uploadFINISH()">업로드 마무리</button> -->
             <div id="msg"></div>
         </template>
+
+        <div v-if="useFileUpload" v-for="o, i in files">
+            <a :href="filesPath+'/'+o['tmp_name']" target="_blank">{{o.name}}</a>
+            <button @click="deleteFile(i)">X</button>
+            <br />
+        </div>
 
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
@@ -108,6 +114,8 @@
             formData: new FormData(),
             useFileUpload: false,
             uploadTmpPath: "data_tmp",
+            filesPath: "/data",
+            uriUpload: "/api/upload/file",
             uriUploadTMP: "/api/upload/tmp",
             uriUploadFINISH: "/api/upload/finish",
             uploadHeaderJSON: {
@@ -115,6 +123,7 @@
                 "Content-Type": "application/json",
             },
             uploadOrderCount: 0,
+            files: {},
         },
         mounted() {
             // Parameter test
@@ -208,8 +217,6 @@
                     // this.contents = await response.json()
                     const contents = await response.json()
 
-                    console.log(contents)
-
                     if (contents["file-upload"]) {
                         this.useFileUpload = true
                     }
@@ -292,13 +299,25 @@
 
                 if (response.ok) {
                     this.contents = (await response.json())[0]
-                    console.log(this.contents)
                     // await tinymce.activeEditor.setContent(this.contents.content)
+
+                    if (this.mode == "edit") {
+                        this.files = JSON.parse(this.contents["FILES"])
+                        this.isShow = true
+                    }
                 }
             },
             async writePost() {
                 let files = new Array()
+                
+                if (this.files.length > 0) {
+                    this.files.forEach(function (value, key) {
+                        files.push(value)
+                    })
+                }
+
                 this.formData.forEach(function (value, key) {
+                    // const val = JSON.stringify(JSON.parse(value))
                     files.push(JSON.parse(value))
                 })
 
@@ -345,7 +364,7 @@
                     headers: headers,
                     body: JSON.stringify({
                         data: data,
-                        files: files,
+                        files: JSON.stringify(files),
                         table: this.table
                     })
                 })
@@ -563,6 +582,34 @@
 
                 const cavity = document.getElementById("file-cavity" + ord)
                 cavity.remove()
+            },
+            async deleteFile(ord) {
+                const confirm = await swal.fire({
+                    title: "Confirm",
+                    text: "Are you sure? Server will delete file immediately",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel"
+                })
+
+                if (!confirm.isConfirmed) {
+                    return false
+                }
+
+                const obj = this.files[ord]
+                const data = {
+                    name: obj.name,
+                    tmp_name: obj.tmp_name,
+                    type: obj.type
+                }
+                const response = await fetch(this.uriUpload, {
+                    method: "DELETE",
+                    headers: this.uploadHeaderJSON,
+                    body: JSON.stringify(data)
+                })
+
+                this.files.splice(ord, 1)
             },
             async uploadFINISH() {
                 let data = new Array()
