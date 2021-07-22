@@ -307,7 +307,9 @@ func AddContentsListCustomBoard(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
-	sqlResult, err := db.InsertContentsMAP(dataBytes)
+	isFileUpload := board.CheckUpload(c)
+
+	sqlResult, err := db.InsertContentsMAP(dataBytes, isFileUpload)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}

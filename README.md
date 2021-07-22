@@ -51,12 +51,12 @@ Current, Sqlite only
 - [x] Comment
 - [x] Auth - token reissuing
 - [ ] File upload
-- [ ] Sign in
-- [ ] Code cleaning
+- [ ] Sign up
 - [ ] Add reg/last modified datetime, read count
 - [ ] Other DB except sqlite
 - [ ] User defined template
-- [ ] ~~Email~~
+- [ ] Code cleaning
+- [ ] ~~Email sending~~
 - [ ] ~~Menu~~
 - [ ] ~~Test~~
 

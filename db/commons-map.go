@@ -17,7 +17,7 @@ import (
 )
 
 // InsertContentsMAP - Crud / custom-board
-func InsertContentsMAP(data interface{}) (sql.Result, error) {
+func InsertContentsMAP(data interface{}, isFileUpload bool) (sql.Result, error) {
 	rcds := []goqu.Record{}
 	var allData map[string]interface{}
 
@@ -32,6 +32,14 @@ func InsertContentsMAP(data interface{}) (sql.Result, error) {
 			log.Println(k, d)
 			rcd[k] = d
 		}
+
+		if isFileUpload {
+			filesJSON, _ := json.Marshal(allData["files"].([]interface{}))
+			if filesJSON != nil {
+				rcd["FILES"] = string(filesJSON)
+			}
+		}
+
 		rcds = append(rcds, rcd)
 	}
 
