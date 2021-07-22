@@ -531,6 +531,7 @@ func setupServer() *echo.Echo {
 	up.POST("/finish", uploader.UploadFINISH)
 
 	e.Static("/data_tmp", "../data_tmp")
+	e.Static("/data", "../data")
 
 	return e
 }

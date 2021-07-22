@@ -109,15 +109,15 @@ func UploadFINISH(c echo.Context) (err error) {
 	}
 
 	for i, f := range files {
-		fName := strings.TrimSuffix(f.Name.String, filepath.Ext(f.Name.String))
-		fExt := filepath.Ext(f.Name.String)
+		// fName := strings.TrimSuffix(f.Name.String, filepath.Ext(f.Name.String))
+		// fExt := filepath.Ext(f.Name.String)
 
-		dbName := fName + "_" + UniqueID() + fExt
-
-		err := os.Rename(dataPathTMP+f.TmpName.String, finPath+dbName)
+		// dbName := fName + "_" + UniqueID() + fExt
+		// err := os.Rename(dataPathTMP+f.TmpName.String, finPath+dbName)
+		err := os.Rename(dataPathTMP+f.TmpName.String, finPath+f.TmpName.String)
 
 		files[i].Success = null.NewString("success", true)
-		files[i].DbName = null.NewString(dbName, true)
+		files[i].DbName = null.NewString(f.TmpName.String, true)
 		if err != nil {
 			files[i].Success = null.NewString(err.Error(), true)
 		}

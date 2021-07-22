@@ -30,6 +30,9 @@
                 <td v-html="contents.content"></td>
             </tr>
         </table>
+        <div v-if="useFileUpload" v-for="o, i in files">
+            <a :href="uriFiles+'/'+o['tmp_name']" target="_blank">{{o.name}}</a><br />
+        </div>
 
         <button @click="enterEdit()">Edit</button>
         <button @click="location.href='/board?code='+boardCode">List</button>
@@ -114,6 +117,13 @@
                 content: "",
                 "writer-name": ""
             },
+            useFileUpload: false,
+            uriFiles: "/data",
+            uploadHeaderJSON: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            files: {},
             commentPermission: false,
             comments: [],
             commentAdd: {
@@ -208,6 +218,10 @@
                     if (permissions["write-comment"]) {
                         this.commentPermission = true
                     }
+                    if (permissions["file-upload"]) {
+                        this.useFileUpload = true
+                    }
+
                     await this.getUserInfo()
                     this.isShow = true
 
@@ -276,6 +290,10 @@
 
                 if (response.ok) {
                     this.contents = (await response.json())[0]
+
+                    console.log(this.contents)
+                    this.files = JSON.parse(this.contents.files)
+
                     this.isShow = true
                     return false
                 }

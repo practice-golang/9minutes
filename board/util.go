@@ -95,6 +95,10 @@ func CheckUpload(c echo.Context) bool {
 		return false
 	}
 
+	if boardInfos[0].Type.String == "custom-tablelist" {
+		return false
+	}
+
 	fileUploadSET := boardInfos[0].FileUpload.String
 
 	isFileUpload = false
