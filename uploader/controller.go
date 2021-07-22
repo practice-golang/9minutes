@@ -162,3 +162,34 @@ func DeleteTMP(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, result)
 }
+
+// DeleteFILE - Delete uploaded file
+func DeleteFILE(c echo.Context) (err error) {
+	var file FileData
+
+	dataROOT, err := os.Getwd()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg1": err.Error()})
+	}
+	dataPath := dataROOT + "/../" + pathData + "/"
+
+	if err = c.Bind(&file); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg2": err.Error()})
+	}
+
+	tmpName := file.TmpName.String
+
+	err = os.Remove(dataPath + tmpName)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg3": err.Error()})
+	}
+
+	result := map[string]string{
+		"result":   "done",
+		"name":     file.Name.String,
+		"type":     file.Type.String,
+		"tmp_name": tmpName,
+	}
+
+	return c.JSON(http.StatusOK, result)
+}

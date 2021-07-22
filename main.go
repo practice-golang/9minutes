@@ -528,6 +528,7 @@ func setupServer() *echo.Echo {
 	up := e.Group("/api/upload")
 	up.POST("/tmp", uploader.UploadTMP)
 	up.DELETE("/tmp", uploader.DeleteTMP)
+	up.DELETE("/file", uploader.DeleteFILE)
 	up.POST("/finish", uploader.UploadFINISH)
 
 	e.Static("/data_tmp", "../data_tmp")

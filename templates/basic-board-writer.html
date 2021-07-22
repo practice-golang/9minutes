@@ -48,6 +48,12 @@
             <div id="msg"></div>
         </template>
 
+        <div v-if="useFileUpload" v-for="o, i in files">
+            <a :href="filesPath+'/'+o['tmp_name']" target="_blank">{{o.name}}</a>
+            <button @click="deleteFile(i)">X</button>
+            <br />
+        </div>
+
         <button onclick="history.back()">Cancel</button>
         <button @click="writePost()">Write</button>
     </div>
@@ -117,6 +123,8 @@
             formData: new FormData(),
             useFileUpload: false,
             uploadTmpPath: "data_tmp",
+            filesPath: "/data",
+            uriUpload: "/api/upload/file",
             uriUploadTMP: "/api/upload/tmp",
             uriUploadFINISH: "/api/upload/finish",
             uploadHeaderJSON: {
@@ -124,6 +132,7 @@
                 "Content-Type": "application/json",
             },
             uploadOrderCount: 0,
+            files: {},
         },
         mounted() {
             const uri = new URL(String(document.location.href))
@@ -315,14 +324,24 @@
                     await tinymce.activeEditor.setContent(this.contents.content)
 
                     if (this.mode == "edit") {
+                        this.files = JSON.parse(this.contents.files)
                         this.isShow = true
                     }
+                    return false
                 }
 
+                showError(response.status)
                 return false
             },
             async writePost() {
                 let files = new Array()
+                
+                if (this.files.length > 0) {
+                    this.files.forEach(function (value, key) {
+                        files.push(value)
+                    })
+                }
+
                 this.formData.forEach(function (value, key) {
                     files.push(JSON.parse(value))
                 })
@@ -574,8 +593,37 @@
                 const cavity = document.getElementById("file-cavity" + ord)
                 cavity.remove()
             },
+            async deleteFile(ord) {
+                const confirm = await swal.fire({
+                    title: "Confirm",
+                    text: "Are you sure? Server will delete file immediately",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    cancelButtonText: "Cancel"
+                })
+
+                if (!confirm.isConfirmed) {
+                    return false
+                }
+
+                const obj = this.files[ord]
+                const data = {
+                    name: obj.name,
+                    tmp_name: obj.tmp_name,
+                    type: obj.type
+                }
+                const response = await fetch(this.uriUpload, {
+                    method: "DELETE",
+                    headers: this.uploadHeaderJSON,
+                    body: JSON.stringify(data)
+                })
+
+                this.files.splice(ord, 1)
+            },
             async uploadFINISH() {
                 let data = new Array()
+
                 this.formData.forEach(function (value, key) {
                     data.push(JSON.parse(value))
                 })

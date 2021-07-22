@@ -291,7 +291,6 @@
                 if (response.ok) {
                     this.contents = (await response.json())[0]
 
-                    console.log(this.contents)
                     this.files = JSON.parse(this.contents.files)
 
                     this.isShow = true

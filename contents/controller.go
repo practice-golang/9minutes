@@ -162,6 +162,14 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, map[string]bool{"permission": false})
 	}
 
+	isFileUpload := board.CheckUpload(c)
+	if isFileUpload {
+		filesJSON, _ := json.Marshal(dataMap["files"])
+		data.Files = null.NewString(string(filesJSON), true)
+	} else {
+		data.Files = null.NewString("", false)
+	}
+
 	user := c.Get("user")
 	if user != nil {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
