@@ -104,10 +104,9 @@
         },
         methods: {
             async initData() {
-                const logedIN = await this.checkLogedIn()
-                if (logedIN) {
-                    await this.getData()
-                }
+                await this.checkLogedIn()
+                await this.checkPermission()
+                await this.getData()
             },
             async checkLogedIn() {
                 let result = false
@@ -146,15 +145,43 @@
                     }
                 }
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() =>{
-                        location.href = "/users/login"
-                    })
-                } else {
-                    this.token = token
+                return result
+            },
+            async checkPermission() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
                 }
 
-                return result
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+                }
+
+                let params = "?code=" + this.boardCode + "&mode=" + this.mode
+                let response = await fetch(this.restURI + "/api/user/permission" + params, {
+                    method: "GET",
+                    headers: headers,
+                })
+
+                if (response.ok) {
+                    const permissions = await response.json()
+                    if (permissions["write-comment"]) {
+                        this.commentPermission = true
+                    }
+                    if (permissions["file-upload"]) {
+                        this.useFileUpload = true
+                    }
+
+                    await this.getUserInfo()
+                    this.isShow = true
+
+                    return false
+                }
+
+                showError(response.status)
+                return false
             },
             async getTotalPage() {
                 let keywords = []
@@ -238,10 +265,10 @@
                 if (response.ok) {
                     this.contents = await response.json()
                     this.isShow = true
-                    return false
+                } else {
+                    showError(response.status)
                 }
-
-                showError(response.status)
+                
                 return false
             },
             async deleteData(content, isMember) {

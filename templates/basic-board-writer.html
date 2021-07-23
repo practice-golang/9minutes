@@ -187,13 +187,6 @@
                     }
                 }
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() => {
-                        location.href = "/users/login"
-                    })
-                } else {
-                    this.token = token
-                }
             },
             async checkPermission() {
                 let headers = {
@@ -416,6 +409,13 @@
                 })
             },
             async uploadTMP(name, type, content, ord) {
+                let header = Object.assign({}, this.uploadHeaderJSON)
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(header, { "Authorization": "Bearer " + token })
+                }
+
                 const data = {
                     name: name,
                     type: type,
@@ -424,7 +424,8 @@
 
                 const response = await this.futch(this.uriUploadTMP, {
                     method: "POST",
-                    headers: this.uploadHeaderJSON,
+                    // headers: this.uploadHeaderJSON,
+                    headers: header,
                     body: JSON.stringify(data),
                 }, (e) => {
                     let pct = ((e.loaded / e.total) * 100).toFixed(2)
@@ -624,13 +625,20 @@
             async uploadFINISH() {
                 let data = new Array()
 
+                let header = Object.assign({}, this.uploadHeaderJSON)
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(header, { "Authorization": "Bearer " + token })
+                }
+
                 this.formData.forEach(function (value, key) {
                     data.push(JSON.parse(value))
                 })
 
                 const response = await fetch(this.uriUploadFINISH, {
                     method: "POST",
-                    headers: this.uploadHeaderJSON,
+                    headers: header,
                     body: JSON.stringify(data)
                 })
 

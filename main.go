@@ -538,6 +538,7 @@ func setupServer() *echo.Echo {
 	cm.DELETE("", comments.DeleteComment)
 
 	up := e.Group("/api/upload")
+	up.Use(middleware.JWTWithConfig(jwtConfigBoard))
 	up.POST("/tmp", uploader.UploadTMP)
 	up.DELETE("/tmp", uploader.DeleteTMP)
 	up.DELETE("/file", uploader.DeleteFILE)

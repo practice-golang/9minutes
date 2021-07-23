@@ -348,8 +348,8 @@ func ReissueToken(c echo.Context) error {
 }
 
 // CheckPermission - Check permission
-func CheckPermission(c echo.Context) bool {
-	var isValid bool
+func CheckPermission(c echo.Context) (isValid bool) {
+	// var isValid bool
 
 	code := c.QueryParam("code")
 	mode := c.QueryParam("mode") // read, write, edit, delete
@@ -396,7 +396,8 @@ func CheckPermission(c echo.Context) bool {
 		}
 	}
 
-	return isValid
+	log.Println("permissionCHKKKK: ", isValid)
+	return
 }
 
 // ResponsePermission - Return permission
@@ -404,7 +405,9 @@ func ResponsePermission(c echo.Context) error {
 	status := http.StatusForbidden
 	result := map[string]bool{"permission": false, "write": false, "write-comment": false}
 
+	log.Println("WTF???")
 	isValid := CheckPermission(c)
+	log.Println("permission: ", isValid)
 	isWriteValid := CheckWritePermission(c)
 	isCommentValid := CheckCommentPermission(c)
 	isFileUpload := board.CheckUpload(c)
