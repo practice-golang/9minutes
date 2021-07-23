@@ -183,6 +183,39 @@
                 showError(response.status)
                 return false
             },
+            async getUserInfo() {
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/info", {
+                        method: "GET",
+                        headers: headers,
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        if (this.paramIsMember != "n") {
+                            this.contents["writer-name"] = userInfo.username
+                            this.contents["is-member"] = "Y"
+                            if (userInfo.admin == "Y") {
+                                this.isAdmin = true
+                            }
+                        }
+                        return false
+                    }
+
+                    showError(response.status)
+                }
+
+                return false
+            },
             async getTotalPage() {
                 let keywords = []
                 if (this.searchKeyword != "") {

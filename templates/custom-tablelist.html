@@ -200,13 +200,7 @@
 
                 this.isLogedIn = result
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() => {
-                        location.href = "/users/login"
-                    })
-                } else {
-                    this.token = token
-                }
+                return result
             },
             async checkPermission() {
                 let headers = {

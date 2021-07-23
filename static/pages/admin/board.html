@@ -28,7 +28,7 @@
                 <th>{{ $t("table.tablename") }}</th>
                 <th>Access Read</th>
                 <th>Access Write/Edit</th>
-                <th>Write/Edit Comment</th>
+                <th>Comment Write/Edit</th>
                 <th>Use file upload</th>
                 <th>{{ $t("table.fields") }} / {{ $t("table.copy") }}</th>
                 <th></th>
@@ -65,7 +65,6 @@
                 </td>
                 <td>
                     <select v-model="boardAdd['grant-comment']">
-                        <option value="not-use">Not use</option>
                         <option value="all">All allowed</option>
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
@@ -690,7 +689,7 @@
                         swal.fire("Empty", "Choose type", "warning")
                         break
                     default:
-                        this.fieldAdd.order = 2
+                        this.fieldAdd.order = 8
                         this.fieldAdd.idx = 1
                         if (this.modalFields.length > 0) {
                             this.fieldAdd.order = this.modalFields.length + 2

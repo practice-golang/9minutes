@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI5NTUzNTQ4LCJleHAiOjE2MjcwNDc5NDh9.5X0GCFb-4_0ynY2KLbWoMTCDACfnS6OOLwZowHIvFa4
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjI5NjQ5OTEyLCJleHAiOjE2MjcxNDQzMTJ9.Z79n9RkIK83dHWpolIF4kjJ8SHdtm0i3ULgKoamdSXs
 
 ### Select one
 GET {{uri}}/api/admin/board/1 HTTP/1.1
@@ -142,7 +142,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -150,7 +150,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 8
+                "order": 9
             }
         ]
     },
@@ -170,7 +170,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -178,7 +178,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 8
+                "order": 9
             }
         ]
     },
@@ -198,7 +198,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -206,7 +206,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 8
+                "order": 9
             }
         ]
     },
@@ -226,7 +226,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -234,7 +234,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 8
+                "order": 9
             }
         ]
     },
@@ -254,7 +254,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "title",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -262,7 +262,7 @@ content-type: application/json
                 "name": "Agency",
                 "type": "input",
                 "json": "agency",
-                "order": 8
+                "order": 9
             }
         ]
     },
@@ -282,7 +282,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "text",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -290,7 +290,7 @@ content-type: application/json
                 "name": "Age",
                 "type": "number",
                 "json": "age",
-                "order": 8
+                "order": 9
             },
             {
                 "idx": 3,
@@ -298,7 +298,7 @@ content-type: application/json
                 "name": "Phone",
                 "type": "text",
                 "json": "phone",
-                "order": 9
+                "order": 10
             }
         ]
     },
@@ -318,7 +318,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "text",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -326,7 +326,7 @@ content-type: application/json
                 "name": "Age",
                 "type": "number",
                 "json": "age",
-                "order": 8
+                "order": 9
             },
             {
                 "idx": 3,
@@ -334,7 +334,7 @@ content-type: application/json
                 "name": "Phone",
                 "type": "text",
                 "json": "phone",
-                "order": 9
+                "order": 10
             }
         ]
     },
@@ -354,7 +354,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "text",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -362,7 +362,7 @@ content-type: application/json
                 "name": "Age",
                 "type": "number",
                 "json": "age",
-                "order": 8
+                "order": 9
             },
             {
                 "idx": 3,
@@ -370,7 +370,7 @@ content-type: application/json
                 "name": "Phone",
                 "type": "text",
                 "json": "phone",
-                "order": 9
+                "order": 10
             }
         ]
     },
@@ -390,7 +390,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "text",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -398,7 +398,7 @@ content-type: application/json
                 "name": "Age",
                 "type": "number",
                 "json": "age",
-                "order": 8
+                "order": 9
             },
             {
                 "idx": 3,
@@ -406,7 +406,7 @@ content-type: application/json
                 "name": "Phone",
                 "type": "text",
                 "json": "phone",
-                "order": 9
+                "order": 10
             }
         ]
     },
@@ -426,7 +426,7 @@ content-type: application/json
                 "name": "Name",
                 "type": "text",
                 "json": "name",
-                "order": 7
+                "order": 8
             },
             {
                 "idx": 2,
@@ -434,7 +434,7 @@ content-type: application/json
                 "name": "Age",
                 "type": "number",
                 "json": "age",
-                "order": 8
+                "order": 9
             },
             {
                 "idx": 3,
@@ -442,7 +442,7 @@ content-type: application/json
                 "name": "Phone",
                 "type": "text",
                 "json": "phone",
-                "order": 9
+                "order": 10
             }
         ]
     }
@@ -469,7 +469,7 @@ content-type: application/json
             "name": "Name",
             "type": "text",
             "json": "name",
-            "order": 7
+            "order": 8
         },
         {
             "idx": 2,
@@ -477,7 +477,7 @@ content-type: application/json
             "name": "Content",
             "type": "text",
             "json": "content",
-            "order": 8
+            "order": 9
         },
         {
             "idx": 3,
@@ -485,7 +485,7 @@ content-type: application/json
             "name": "Creator",
             "type": "text",
             "json": "creator",
-            "order": 9
+            "order": 10
         }
     ]
 }

@@ -50,7 +50,7 @@ Current, Sqlite only
 - [x] User add, edit, delete
 - [x] Comment
 - [x] Auth - token reissuing
-- [ ] File upload
+- [x] File upload
 - [ ] Sign up
 - [ ] Add reg/last modified datetime, read count
 - [ ] Other DB except sqlite

@@ -182,6 +182,7 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 		}
 	} else if !data.WriterPassword.Valid {
+		log.Println("WTF?? ", data.WriterPassword)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 	}
 

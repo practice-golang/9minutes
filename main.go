@@ -255,7 +255,7 @@ func boardTemplateHandler(c echo.Context) error {
 		columns, _ := json.Marshal(columnsInterface)
 		contents = strings.ReplaceAll(string(content), "'##__COLUMNS__##'", string(columns))
 	default:
-		return c.HTML(http.StatusNotFound, "404 Not found")
+		return c.HTML(http.StatusNotFound, "404 Page not found")
 	}
 
 	contents = strings.ReplaceAll(contents, "'##__TABLE_NAME__##'", tableName)
@@ -313,18 +313,24 @@ func setupServer() *echo.Echo {
 				return c.JSON(status, result)
 			}
 
-			// isValid := user.CheckPermission(c)
-			// isCommentValid := user.CheckCommentPermission(c)
+			isValid := user.CheckPermission(c)
+			isCommentValid := user.CheckCommentPermission(c)
+			isFileUpload := board.CheckUpload(c)
 
-			// if isValid {
-			// 	status = http.StatusOK
-			// 	result["permission"] = true
+			if isValid {
+				status = http.StatusOK
+				result["permission"] = true
 
-			// 	result["write-comment"] = false
-			// 	if isCommentValid {
-			// 		result["write-comment"] = true
-			// 	}
-			// }
+				result["write-comment"] = false
+				if isCommentValid {
+					result["write-comment"] = true
+				}
+
+				result["file-upload"] = false
+				if isFileUpload {
+					result["file-upload"] = true
+				}
+			}
 
 			return c.JSON(status, result)
 		},

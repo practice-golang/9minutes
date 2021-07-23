@@ -291,7 +291,6 @@
                 }
 
                 const params = "?code=" + this.boardCode + "&mode=edit"
-
                 let response = await fetch(this.restURI + "/api/basic-board/contents" + params, {
                     method: "POST",
                     headers: headers,
@@ -315,8 +314,12 @@
 
                     this.contents = contents
                     await tinymce.activeEditor.setContent(this.contents.content)
-
+                    
                     if (this.mode == "edit") {
+                        console.log(keywords)
+                        if (keywords.length > 1) {
+                            this.contents["writer-password"] = keywords[1]["writer-password"]
+                        }
                         this.files = JSON.parse(this.contents.files)
                         this.isShow = true
                     }
@@ -328,7 +331,7 @@
             },
             async writePost() {
                 let files = new Array()
-                
+
                 if (this.files.length > 0) {
                     this.files.forEach(function (value, key) {
                         files.push(value)
@@ -362,7 +365,7 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                const params = "?code=" + this.boardCode + "&mode=write"
+                const params = "?code=" + this.boardCode + "&mode=" + this.mode
 
                 let response = await fetch(this.restURI + "/api/basic-board/contents" + params, {
                     method: requestMethod,
@@ -422,7 +425,8 @@
                     content: content,
                 }
 
-                const response = await this.futch(this.uriUploadTMP, {
+                const params = "?code=" + this.boardCode + "&mode=" + this.mode
+                const response = await this.futch(this.uriUploadTMP + params, {
                     method: "POST",
                     // headers: this.uploadHeaderJSON,
                     headers: header,
@@ -636,7 +640,11 @@
                     data.push(JSON.parse(value))
                 })
 
-                const response = await fetch(this.uriUploadFINISH, {
+                let params = "?code=" + this.boardCode + "&mode=" + this.mode
+                if (this.mode == "edit") {
+                    params += "&id=" + this.id
+                }
+                const response = await fetch(this.uriUploadFINISH + params, {
                     method: "POST",
                     headers: header,
                     body: JSON.stringify(data)

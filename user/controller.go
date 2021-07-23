@@ -396,7 +396,6 @@ func CheckPermission(c echo.Context) (isValid bool) {
 		}
 	}
 
-	log.Println("permissionCHKKKK: ", isValid)
 	return
 }
 
@@ -405,9 +404,7 @@ func ResponsePermission(c echo.Context) error {
 	status := http.StatusForbidden
 	result := map[string]bool{"permission": false, "write": false, "write-comment": false}
 
-	log.Println("WTF???")
 	isValid := CheckPermission(c)
-	log.Println("permission: ", isValid)
 	isWriteValid := CheckWritePermission(c)
 	isCommentValid := CheckCommentPermission(c)
 	isFileUpload := board.CheckUpload(c)

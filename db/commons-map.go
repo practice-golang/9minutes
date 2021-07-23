@@ -38,9 +38,10 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 		}
 
 		if isFileUpload {
-			filesJSON, _ := json.Marshal(allData["files"].([]interface{}))
+			filesJSON, _ := json.Marshal(allData["files"])
 			if filesJSON != nil {
-				rcd["FILES"] = string(filesJSON)
+				// rcd["FILES"] = filesJSON
+				rcd["FILES"] = allData["files"].(string)
 			}
 		}
 

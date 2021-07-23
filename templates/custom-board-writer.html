@@ -187,13 +187,6 @@
                     }
                 }
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() => {
-                        location.href = "/users/login"
-                    })
-                } else {
-                    this.token = token
-                }
             },
             async checkPermission() {
                 let headers = {
@@ -280,6 +273,24 @@
                 }
 
                 const token = localStorage.getItem('token')
+
+                if (this.paramIsMember == "n") {
+                    const confirm = await swal.fire({
+                        title: "Password",
+                        input: "password",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "OK",
+                        cancelButtonText: "Cancel"
+                    })
+
+                    if (!confirm.isConfirmed) {
+                        history.back()
+                        return false
+                    }
+
+                    keywords.push({ "writer-password": confirm.value })
+                }
 
                 if (token != undefined && token != null) {
                     Object.assign(headers, { "Authorization": "Bearer " + token })
@@ -412,7 +423,8 @@
                     content: content,
                 }
 
-                const response = await this.futch(this.uriUploadTMP, {
+                const params = "?code=" + this.boardCode + "&mode=" + this.mode
+                const response = await this.futch(this.uriUploadTMP + params, {
                     method: "POST",
                     headers: this.uploadHeaderJSON,
                     body: JSON.stringify(data),
@@ -617,7 +629,11 @@
                     data.push(JSON.parse(value))
                 })
 
-                const response = await fetch(this.uriUploadFINISH, {
+                let params = "?code=" + this.boardCode + "&mode=" + this.mode
+                if (this.mode == "edit") {
+                    params += "&id=" + this.id
+                }
+                const response = await fetch(this.uriUploadFINISH + params, {
                     method: "POST",
                     headers: this.uploadHeaderJSON,
                     body: JSON.stringify(data)

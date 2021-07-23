@@ -23,7 +23,7 @@
             {{contents[c.column]}}
         </div>
 
-        <div v-if="useFileUpload" v-for="o, i in files">
+        <div v-if="useFileUpload && files.length > 0" v-for="o, i in files">
             <a :href="uriFiles+'/'+o['tmp_name']" target="_blank">{{o.name}}</a><br />
         </div>
 
@@ -116,7 +116,7 @@
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             },
-            files: {},
+            files: [],
             commentPermission: false,
             comments: [],
             commentAdd: {
@@ -192,13 +192,6 @@
                     }
                 }
 
-                if (!result) {
-                    swal.fire("Authorization failed", "Token is not exist or invalid", "error").then(() => {
-                        location.href = "/users/login"
-                    })
-                } else {
-                    this.token = token
-                }
             },
             async checkPermission() {
                 let headers = {
@@ -286,7 +279,8 @@
                     Object.assign(headers, { "Authorization": "Bearer " + token })
                 }
 
-                let response = await fetch(this.restURI + "/api/custom-board/contents?code=" + this.boardCode, {
+                const params = "?code=" + this.boardCode + "&mode=read"
+                let response = await fetch(this.restURI + "/api/custom-board/contents" + params, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({
@@ -301,8 +295,8 @@
                     this.contents = (await response.json())[0]
 
                     this.files = JSON.parse(this.contents["FILES"])
+
                     this.isShow = true
-                    
                     return false
                 }
 
