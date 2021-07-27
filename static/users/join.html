@@ -16,6 +16,8 @@
 <body>
     <div id="app" v-show="isShow">
         <a href="/">Root</a>
+        <br />
+        <span>Sign in</span>
 
         <div @keyup.enter="loginUser()">
             <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
