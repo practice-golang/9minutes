@@ -1,0 +1,147 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.all.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/normalize.css" type="text/css">
+</head>
+
+<body>
+    <div id="app" v-show="isShow">
+        <a href="/">Root</a>
+        <br />
+        <span>Sign in</span>
+
+        <div @keyup.enter="loginUser()">
+            <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
+            <input v-model="password" class="input" type="password" placeholder="Password" />
+            <button @click="loginUser()">Login</button>
+            <button @click="logoutUser()">Logout</button>
+        </div>
+    </div>
+</body>
+
+<script>
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            restURIdomain: window.location.protocol + "//" + window.location.host,
+            restURI: window.location.protocol + "//" + window.location.host,
+            isShow: false,
+            table: "USERS",
+            username: "",
+            password: "",
+        },
+        mounted() {
+            this.checkLogedIn()
+        },
+        methods: {
+            async checkLogedIn() {
+                let result = false
+                let reissue = false
+                let response = ""
+                let r = ""
+
+                let token = localStorage.getItem('token')
+
+                console.log(token)
+
+                if (token != null) {
+                    response = await fetch(this.restURIdomain + "/api/user/token/verify", {
+                        method: "POST",
+                        headers: { "Authorization": "Bearer " + token }
+                    })
+                    r = await response.json()
+                    if (response.ok) {
+                        if (r.msg == "OK") { result = true }
+                    } else if (r.expired) {
+                        reissue = true
+                    }
+
+                    if (!result && reissue) {
+                        response = await fetch(this.restURIdomain + "/api/user/token", {
+                            method: "GET",
+                            headers: { "Authorization": "Bearer " + token }
+                        })
+
+                        if (response.ok) {
+                            r = await response.json()
+                            localStorage.setItem("token", r.token)
+                            result = true
+                        } else {
+                            localStorage.removeItem("token")
+                            result = false
+                        }
+                    }
+                }
+
+                if (result) {
+                    location.href = "/"
+                } else {
+                    this.isShow = true
+                }
+            },
+            async loginUser() {
+                if (this.username == '') {
+                    swal.fire('Login failed', 'Need username', 'error')
+                    return false
+                }
+                if (this.password == '') {
+                    swal.fire('Login failed', 'Need password', 'error')
+                    return false
+                }
+
+                const response = await fetch(this.restURI + "/api/user/login", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keywords: { USERNAME: this.username, PASSWORD: this.password },
+                        columns: ["IDX", "USERNAME", "PASSWORD", "EMAIL", "ADMIN"],
+                        table: this.table
+                    })
+                })
+                if (response.ok) {
+                    // 204 - User info are not correct or not exist
+                    if (response.status != 200) {
+                        swal.fire("Login failed", "Check username of password", "error")
+                        return false
+                    }
+
+                    const result = await response.json()
+                    if (result.token != undefined) {
+                        localStorage.setItem("token", result.token)
+                        location.href = "/"
+                    }
+                }
+            },
+            async logoutUser() {
+                localStorage.removeItem("token")
+                swal.fire("Loged out", "", "success")
+            }
+        }
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+    }
+
+    #app {
+        width: 100%;
+    }
+</style>
+
+</html>
