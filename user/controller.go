@@ -230,11 +230,13 @@ func EditUser(c echo.Context) error {
 	user := c.Get("user")
 	if user != nil {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
-		log.Println("CheckAuth: ", claims, claims.Admin, claims.Idx, ds["IDX"].(float64))
-
-		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "User token ok"})
+		dsIDX := fmt.Sprint(ds["IDX"].(float64))
+		claimsIDX := claims.Idx
+		if claims.Admin != "Y" && claimsIDX != dsIDX {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"msg": "Unauthorized"})
+		}
 	} else {
-		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "nil???"})
+		return c.JSON(http.StatusUnauthorized, map[string]string{"msg": "Unauthorized"})
 	}
 
 	sqlResult, err := db.UpdateUser(data)

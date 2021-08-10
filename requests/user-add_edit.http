@@ -13,9 +13,7 @@ content-type: application/json
     "PASSWORD": "user12",
     "EMAIL": "user12@a.com",
     "ADMIN": "N",
-    "APPROVAL": "Y",
-    "MOTHER": "mom",
-    "FATHER": "pa"
+    "APPROVAL": "Y"
 }
 
 ### Edit a user
@@ -24,7 +22,7 @@ Authorization: Bearer {{token}}
 content-type: application/json
 
 {
-    "IDX": 33,
+    "IDX": 13,
     "USERNAME": "user100",
     "PASSWORD": "user100",
     "EMAIL": "user100@mymy.com",
