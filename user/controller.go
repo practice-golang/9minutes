@@ -177,6 +177,42 @@ func AddUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+// JoinUser - Sign up user
+func JoinUser(c echo.Context) error {
+	var err error
+	var data interface{}
+
+	log.Println("WTF")
+
+	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
+
+	err = json.Unmarshal(dataJSON, &data)
+	if err != nil {
+		log.Println("AddUser json: ", err)
+	}
+
+	ds := data.(map[string]interface{})
+	ds["APPROVAL"] = "N"
+
+	log.Println("WTF?????: ", ds)
+
+	sqlResult, err := db.InsertUser(ds)
+	if err != nil {
+		log.Println("AddUser db: ", err)
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
+	}
+
+	lastID, _ := sqlResult.LastInsertId()
+	affRows, _ := sqlResult.RowsAffected()
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
 // EditUser - Edit user
 func EditUser(c echo.Context) error {
 	var err error
@@ -187,6 +223,18 @@ func EditUser(c echo.Context) error {
 	err = json.Unmarshal(dataJSON, &data)
 	if err != nil {
 		log.Println("EditUser json: ", err)
+	}
+
+	ds := data.(map[string]interface{})
+
+	user := c.Get("user")
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+		log.Println("CheckAuth: ", claims, claims.Admin, claims.Idx, ds["IDX"].(float64))
+
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "User token ok"})
+	} else {
+		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "nil???"})
 	}
 
 	sqlResult, err := db.UpdateUser(data)

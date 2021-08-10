@@ -1,0 +1,39 @@
+@uri=http://localhost:2510
+# @uri=http://enjoytools.net:2510
+
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjMxMTc4NzkzLCJleHAiOjE2Mjg2NzMxOTN9.jijrFkV9ZygNoDW47wArnEvtmvbvcZTfnFuuAsjbeN0
+
+
+### Join a user
+POST {{uri}}/api/user/join HTTP/1.1
+content-type: application/json
+
+{
+    "USERNAME": "user12",
+    "PASSWORD": "user12",
+    "EMAIL": "user12@a.com",
+    "ADMIN": "N",
+    "APPROVAL": "Y",
+    "MOTHER": "mom",
+    "FATHER": "pa"
+}
+
+### Edit a user
+POST {{uri}}/api/user/edit HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "IDX": 33,
+    "USERNAME": "user100",
+    "PASSWORD": "user100",
+    "EMAIL": "user100@mymy.com",
+    "ADMIN": "Y",
+    "APPROVAL": "N"
+}
+
+### Delete user
+DELETE {{uri}}/api/user/2 HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+

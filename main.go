@@ -512,6 +512,12 @@ func setupServer() *echo.Echo {
 	u := e.Group("/api/user")
 	u.POST("/login", user.Login)
 	u.GET("/token", user.ReissueToken)
+	u.POST("/join", user.JoinUser)
+	u.POST("/delete/:idx", user.DeleteUser)
+
+	um := e.Group("/api/user")
+	um.Use(middleware.JWTWithConfig(jwtConfigPermissionOnly))
+	um.POST("/edit", user.EditUser)
 
 	ua := e.Group("/api/user")
 	ua.Use(middleware.JWTWithConfig(jwtConfigPermissionOnly))
