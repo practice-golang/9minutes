@@ -513,6 +513,7 @@ func setupServer() *echo.Echo {
 	u.POST("/login", user.Login)
 	u.GET("/token", user.ReissueToken)
 	u.POST("/join", user.JoinUser)
+	u.GET("/columns", user.GetUserColumns)
 	u.POST("/delete/:idx", user.DeleteUser)
 
 	um := e.Group("/api/user")

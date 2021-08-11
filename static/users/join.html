@@ -17,13 +17,17 @@
     <div id="app" v-show="isShow">
         <a href="/">Root</a>
         <br />
-        <span>Sign in</span>
+        <span>Sign up</span>
 
         <div @keyup.enter="loginUser()">
-            <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
-            <input v-model="password" class="input" type="password" placeholder="Password" />
-            <button @click="loginUser()">Login</button>
-            <button @click="logoutUser()">Logout</button>
+            <table>
+                <tr v-for="c, i in columns">
+                    <td>{{c.name}}</td>
+                    <td><input v-model="data[c.column]" class="input" :type="setInputType(c.code)" /></td>
+                </tr>
+            </table>
+
+            <button @click="loginUser()">Register</button>
         </div>
     </div>
 </body>
@@ -35,14 +39,45 @@
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             isShow: false,
+            columns: [],
             table: "USERS",
+            data: {},
             username: "",
             password: "",
         },
         mounted() {
             this.checkLogedIn()
+
+            this.getColumns()
         },
         methods: {
+            // Type of input element
+            setInputType(code) {
+                let result = ""
+
+                switch (code) {
+                    case "password":
+                        result = "password"
+                        break
+                    case "email":
+                        result = "email"
+                        break
+                    default:
+                        result = "text"
+                        break
+                }
+
+                return result
+            },
+            async getColumns() {
+                const response = await fetch(this.restURIdomain + "/api/user/columns", {
+                    method: "GET",
+                    headers: {}
+                })
+
+                r = await response.json()
+                this.columns = r
+            },
             async checkLogedIn() {
                 let result = false
                 let reissue = false
@@ -50,8 +85,6 @@
                 let r = ""
 
                 let token = localStorage.getItem('token')
-
-                console.log(token)
 
                 if (token != null) {
                     response = await fetch(this.restURIdomain + "/api/user/token/verify", {
@@ -123,10 +156,6 @@
                         location.href = "/"
                     }
                 }
-            },
-            async logoutUser() {
-                localStorage.removeItem("token")
-                swal.fire("Loged out", "", "success")
             }
         }
     })
