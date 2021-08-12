@@ -17,6 +17,7 @@ import (
 	"github.com/practice-golang/9minutes/board"
 	"github.com/practice-golang/9minutes/db"
 	"github.com/practice-golang/9minutes/models"
+	"github.com/tidwall/sjson"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -304,9 +305,13 @@ func Login(c echo.Context) error {
 	var err error
 	var data interface{}
 
-	search, _ := ioutil.ReadAll(c.Request().Body)
+	// Do later to check approval, SelectUser instead of SelectContentMAP
+	// search, _ := ioutil.ReadAll(c.Request().Body)
 
-	data, err = db.SelectContentsMAP(search)
+	searchByte, _ := ioutil.ReadAll(c.Request().Body)
+	search, _ := sjson.Set(string(searchByte), "keywords.APPROVAL", "Y")
+
+	data, err = db.SelectContentsMAP([]byte(search))
 	if err != nil {
 		log.Println("GetUsers: ", err)
 	}

@@ -27,14 +27,14 @@
                 <td><button @click="addUser()">Add</button></td>
             </tr>
             <tr v-for="u, i in users">
-                <template v-if="userUpdate && Object.keys(userUpdate).length === 0 && userUpdate.constructor === Object">
+                <template v-if="userUpdate.IDX != u.IDX ">
                     <td v-for="c, j in columns">{{u[c.column]}}</td>
                     <td>
                         <button @click="userUpdate = u">Edit</button>
                         <button @click="deleteUser(u['IDX'])">Delete</button>
                     </td>
                 </template>
-                <template v-else>
+                <template v-else-if="userUpdate.IDX == u.IDX">
                     <td v-for="c, j in columns" @keyup.enter="updateUser()">
                         <span v-if="c.column == 'IDX'">{{u[c.column]}}</span>
                         <select v-else-if="c.column == 'ADMIN' || c.column == 'APPROVAL'" v-model="u[c.column]">
@@ -269,6 +269,15 @@
 
                 if (!confirm.isConfirmed) {
                     return false
+                }
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                if (this.token != undefined && this.token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + this.token })
                 }
 
                 let response = await fetch(this.restURI + "/users/" + idx, {

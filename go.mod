@@ -15,6 +15,7 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/thoas/go-funk v0.8.0
 	github.com/tidwall/gjson v1.8.0
+	github.com/tidwall/sjson v1.1.7
 	gopkg.in/guregu/null.v4 v4.0.0
 	gopkg.in/ini.v1 v1.62.0
 	modernc.org/sqlite v1.10.8
