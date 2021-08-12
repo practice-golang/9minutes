@@ -19,15 +19,21 @@
         <br />
         <span>Sign up</span>
 
-        <div @keyup.enter="loginUser()">
+        <div>
             <table>
-                <tr v-for="c, i in columns">
-                    <td>{{c.name}}</td>
-                    <td><input v-model="data[c.column]" class="input" :type="setInputType(c.code)" /></td>
-                </tr>
+                <template v-for="c, i in columns" v-if="c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval' && c.code != 'idx'">
+                    <tr>
+                        <td>{{c.name}}</td>
+                        <td><input v-model="data[c.column]" class="input" :type="setInputType(c.code)" /></td>
+                    </tr>
+                    <tr v-if="c.code == 'password'">
+                        <td>{{c.name}} Confirm</td>
+                        <td><input v-model="data['password-confirm']" class="input" :type="setInputType(c.code)" /></td>
+                    </tr>
+                </template>
             </table>
 
-            <button @click="loginUser()">Register</button>
+            <button @click="registerUser()">Register</button>
         </div>
     </div>
 </body>
@@ -121,40 +127,57 @@
                     this.isShow = true
                 }
             },
-            async loginUser() {
-                if (this.username == '') {
-                    swal.fire('Login failed', 'Need username', 'error')
-                    return false
-                }
-                if (this.password == '') {
-                    swal.fire('Login failed', 'Need password', 'error')
-                    return false
+            async registerUser() {
+                // console.log(this.data, this.columns)
+                let data = new Object()
+                for (let i=0; i < this.columns.length; i++) {
+                    const c = this.columns[i]
+                    if (c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval' && c.code != 'idx') {
+                        // console.log(this.data[c.column])
+                        if (c.code == "password") {
+                            if (this.data["password-confirm"] == undefined) {
+                                swal.fire("Register failed", "Need " + "password-confirm", "error")
+                                return false
+                            }
+                            if (this.data[c.column] != this.data["password-confirm"]) {
+                                swal.fire("Register failed", "Password are not same", "error")
+                                return false
+                            }
+                        }
+                        if (this.data[c.column] == undefined) {
+                            swal.fire("Register failed", "Need " + c.name, "error")
+                            return false
+                        }
+                        data[c.column] = this.data[c.column]
+                    }
                 }
 
-                const response = await fetch(this.restURI + "/api/user/login", {
+                const response = await fetch(this.restURI + "/api/user/join", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        keywords: { USERNAME: this.username, PASSWORD: this.password },
-                        columns: ["IDX", "USERNAME", "PASSWORD", "EMAIL", "ADMIN"],
-                        table: this.table
-                    })
+                    headers: {},
+                    body: JSON.stringify(data)
                 })
                 if (response.ok) {
                     // 204 - User info are not correct or not exist
                     if (response.status != 200) {
-                        swal.fire("Login failed", "Check username of password", "error")
+                        swal.fire("Register failed", "Check username of password", "error")
                         return false
                     }
 
                     const result = await response.json()
-                    if (result.token != undefined) {
-                        localStorage.setItem("token", result.token)
-                        location.href = "/"
+
+                    if (result["affected-rows"] == 1) {
+                        swal.fire("Register succeed", "", "success").then(() => {
+                            location.href = "/"
+                        })
+                    } else {
+                        console.log(result, data)
+                        swal.fire("Register failed", "Unknown error", "error")
                     }
+                } else {
+                    const result = await response.json()
+                    swal.fire("Register failed", result.msg, "error")
+                    return false
                 }
             }
         }

@@ -182,8 +182,6 @@ func JoinUser(c echo.Context) error {
 	var err error
 	var data interface{}
 
-	log.Println("WTF")
-
 	dataJSON, _ := ioutil.ReadAll(c.Request().Body)
 
 	err = json.Unmarshal(dataJSON, &data)
@@ -193,8 +191,6 @@ func JoinUser(c echo.Context) error {
 
 	ds := data.(map[string]interface{})
 	ds["APPROVAL"] = "N"
-
-	log.Println("WTF?????: ", ds)
 
 	sqlResult, err := db.InsertUser(ds)
 	if err != nil {

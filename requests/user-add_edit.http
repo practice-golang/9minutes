@@ -9,11 +9,10 @@ POST {{uri}}/api/user/join HTTP/1.1
 content-type: application/json
 
 {
-    "USERNAME": "user12",
-    "PASSWORD": "user12",
-    "EMAIL": "user12@a.com",
-    "ADMIN": "N",
-    "APPROVAL": "Y"
+    "USERNAME": "user13",
+    "PASSWORD": "user13",
+    "EMAIL": "user13@a.com",
+    "ADMIN": "N"
 }
 
 ### Edit a user
