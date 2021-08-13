@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJhZG1pbiI6IlkiLCJyZWZyZXNoLXVudGlsIjoxNjMxMTc4NzkzLCJleHAiOjE2Mjg2NzMxOTN9.jijrFkV9ZygNoDW47wArnEvtmvbvcZTfnFuuAsjbeN0
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxMzAiLCJ1c2VybmFtZSI6InVzZXIxIiwiZW1haWwiOiJ1c2VyMUBhLmNvbSIsImFkbWluIjoiXHUwMDNjbmlsXHUwMDNlIiwicmVmcmVzaC11bnRpbCI6MTYzMTQ1OTgwOSwiZXhwIjoxNjI4OTU0MjA5fQ.gyHBjnXvrSJcDbzGAxlM8WvFNAVRhokR79nKKKdjZqY
 
 
 ### Join a user
@@ -13,6 +13,26 @@ content-type: application/json
     "PASSWORD": "user13",
     "EMAIL": "user13@a.com",
     "ADMIN": "N"
+}
+
+### Get user info
+POST {{uri}}/api/user/data HTTP/1.1
+Authorization: Bearer {{token}}
+content-type: application/json
+
+{
+    "keywords": [],
+    "options": {},
+    "columns": [
+        "IDX",
+        "USERNAME",
+        "PASSWORD",
+        "EMAIL",
+        "ADMIN",
+        "APPROVAL",
+        "REG_DTTM",
+    ],
+    "table": "USERS"
 }
 
 ### Edit a user

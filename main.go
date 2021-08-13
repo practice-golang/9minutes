@@ -526,6 +526,7 @@ func setupServer() *echo.Echo {
 	ua.GET("/permission", user.ResponsePermission)
 	ua.GET("/permission-comment", user.ResponseCommentPermission)
 	ua.GET("/info", user.GetUserInfo)
+	ua.POST("/data", user.GetUserData)
 
 	bb := e.Group("/api/basic-board")
 	bb.Use(middleware.JWTWithConfig(jwtConfigBoard))

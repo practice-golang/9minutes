@@ -17,13 +17,24 @@
     <div id="app" v-show="isShow">
         <a href="/">Root</a>
         <br />
-        <span>Sign in</span>
+        <span>Edit user info</span>
 
-        <div @keyup.enter="loginUser()">
-            <input v-model="username" class="input" type="text" autocapitalize="off" placeholder="Username" />
-            <input v-model="password" class="input" type="password" placeholder="Password" />
-            <button @click="loginUser()">Login</button>
-            <button @click="logoutUser()">Logout</button>
+        <div>
+            <table>
+                <template v-for="c, i in columns" v-if="c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval' && c.code != 'idx'">
+                    <tr>
+                        <td>{{c.name}}</td>
+                        <td><input v-model="data[c.column]" class="input" :type="setInputType(c.code)" /></td>
+                    </tr>
+                    <tr v-if="c.code == 'password'">
+                        <td>{{c.name}} Confirm</td>
+                        <td><input v-model="data['password-confirm']" class="input" :type="setInputType(c.code)" /></td>
+                    </tr>
+                </template>
+            </table>
+
+            <button @click="logoutUser()">Update</button>
+            <button @click="loginUser()">Cancel</button>
         </div>
     </div>
 </body>
@@ -35,23 +46,53 @@
             restURIdomain: window.location.protocol + "//" + window.location.host,
             restURI: window.location.protocol + "//" + window.location.host,
             isShow: false,
+            columns: [],
             table: "USERS",
+            data: {},
             username: "",
             password: "",
         },
         mounted() {
-            this.checkLogedIn()
+            this.initData()
         },
         methods: {
+            async initData() {
+                await this.checkLogedIn()
+            },
+            // Type of input element
+            setInputType(code) {
+                let result = ""
+
+                switch (code) {
+                    case "password":
+                        result = "password"
+                        break
+                    case "email":
+                        result = "email"
+                        break
+                    default:
+                        result = "text"
+                        break
+                }
+
+                return result
+            },
+            async getColumns() {
+                const response = await fetch(this.restURIdomain + "/api/user/columns", {
+                    method: "GET",
+                    headers: {}
+                })
+
+                r = await response.json()
+                this.columns = r
+            },
             async checkLogedIn() {
                 let result = false
                 let reissue = false
                 let response = ""
                 let r = ""
 
-                let token = localStorage.getItem('token')
-
-                console.log(token)
+                const token = localStorage.getItem('token')
 
                 if (token != null) {
                     response = await fetch(this.restURIdomain + "/api/user/token/verify", {
@@ -60,7 +101,9 @@
                     })
                     r = await response.json()
                     if (response.ok) {
-                        if (r.msg == "OK") { result = true }
+                        if (r.msg == "OK") {
+                            result = true
+                        }
                     } else if (r.expired) {
                         reissue = true
                     }
@@ -82,11 +125,57 @@
                     }
                 }
 
-                if (result) {
+                if (!result) {
                     location.href = "/"
                 } else {
+                    await this.getColumns()
+                    await this.getUserData()
                     this.isShow = true
                 }
+            },
+            async getUserData() {
+                let data = new Array()
+                for (let i=0; i < this.columns.length; i++) {
+                    const c = this.columns[i]
+                    if (c.code != 'password' && c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval' && c.code != 'idx') {
+                        data.push(c.column)
+                    }
+                }
+
+                let keywords = []
+
+                let headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                }
+
+                const token = localStorage.getItem('token')
+
+                if (token != undefined && token != null) {
+                    Object.assign(headers, { "Authorization": "Bearer " + token })
+
+                    let response = await fetch(this.restURI + "/api/user/data", {
+                        method: "POST",
+                        headers: headers,
+                        body: JSON.stringify({
+                            keywords: keywords,
+                            options: {},
+                            columns: data,
+                            table: this.table
+                        })
+                    })
+
+                    if (response.ok) {
+                        const userInfo = await response.json()
+                        this.data = userInfo[0]
+
+                        return false
+                    }
+
+                    showError(response.status)
+                }
+
+                return false
             },
             async loginUser() {
                 if (this.username == '') {

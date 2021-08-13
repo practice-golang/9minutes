@@ -593,3 +593,27 @@ func GetUserInfo(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, result)
 }
+
+// GetUserData - Get user data
+func GetUserData(c echo.Context) error {
+	var err error
+	var data interface{}
+
+	user := c.Get("user")
+
+	if user != nil {
+		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
+
+		searchByte, _ := ioutil.ReadAll(c.Request().Body)
+		search, _ := sjson.Set(string(searchByte), "keywords", []map[string]string{{"IDX": claims.Idx}})
+
+		data, err = db.SelectContentsMAP([]byte(search))
+		if err != nil {
+			log.Println("GetUsers: ", err)
+		}
+
+		return c.JSON(http.StatusOK, data)
+	}
+
+	return c.JSON(http.StatusBadRequest, "You cannot get")
+}
