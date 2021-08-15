@@ -51,10 +51,10 @@ Current, Sqlite only
 - [x] Comment
 - [x] Auth - token reissuing
 - [x] File upload
-- [ ] Sign up
-- [ ] Add reg/last modified datetime, read count
+- [x] Sign up
 - [ ] Other DB except sqlite
 - [ ] User defined template
+- [ ] Add reg/last modified datetime, read count
 - [ ] Code cleaning
 - [ ] ~~Email sending~~
 - [ ] ~~Menu~~
