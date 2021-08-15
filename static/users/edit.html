@@ -33,8 +33,8 @@
                 </template>
             </table>
 
-            <button @click="logoutUser()">Update</button>
-            <button @click="loginUser()">Cancel</button>
+            <button @click="updateUser()">Update</button>
+            <button onclick="history.back()">Cancel</button>
         </div>
     </div>
 </body>
@@ -135,9 +135,9 @@
             },
             async getUserData() {
                 let data = new Array()
-                for (let i=0; i < this.columns.length; i++) {
+                for (let i = 0; i < this.columns.length; i++) {
                     const c = this.columns[i]
-                    if (c.code != 'password' && c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval' && c.code != 'idx') {
+                    if (c.code != 'password' && c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval') {
                         data.push(c.column)
                     }
                 }
@@ -177,46 +177,75 @@
 
                 return false
             },
-            async loginUser() {
-                if (this.username == '') {
-                    swal.fire('Login failed', 'Need username', 'error')
-                    return false
-                }
-                if (this.password == '') {
-                    swal.fire('Login failed', 'Need password', 'error')
-                    return false
+            async updateUser() {
+                // console.log(this.data, this.columns)
+                let data = new Object()
+                for (let i = 0; i < this.columns.length; i++) {
+                    const c = this.columns[i]
+                    if (c.code != 'reg-dttm' && c.code != 'admin' && c.code != 'approval') {
+                        // console.log(this.data[c.column])
+                        if (c.code == "password") {
+                            let pwContinue = true
+                            switch (true) {
+                                case (this.data[c.column] != undefined && this.data["password-confirm"] != undefined):
+                                    if (this.data[c.column].length == 0 && this.data["password-confirm"] == 0) {
+                                        pwContinue = true
+                                    } else if (this.data[c.column].length > 0 && this.data[c.column] == this.data["password-confirm"]) {
+                                        pwContinue = false
+                                    } else {
+                                        swal.fire("User edit failed", "Check password", "error")
+                                        return false
+                                    }
+                                    break
+                                case (this.data[c.column] == undefined && this.data["password-confirm"] == undefined):
+                                    pwContinue = true
+                                    break
+                                default:
+                                    swal.fire("User edit failed", "Should not display", "error")
+                                    return false
+                            }
+
+                            if (pwContinue) {
+                                continue
+                            }
+                        }
+                        if (this.data[c.column] == undefined) {
+                            swal.fire("User edit failed", "Need " + c.name, "error")
+                            return false
+                        }
+                        data[c.column] = this.data[c.column]
+                    }
                 }
 
-                const response = await fetch(this.restURI + "/api/user/login", {
+                const token = localStorage.getItem('token')
+                const response = await fetch(this.restURI + "/api/user/edit", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        keywords: { USERNAME: this.username, PASSWORD: this.password },
-                        columns: ["IDX", "USERNAME", "PASSWORD", "EMAIL", "ADMIN"],
-                        table: this.table
-                    })
+                    headers: { "Authorization": "Bearer " + token },
+                    body: JSON.stringify(data)
                 })
                 if (response.ok) {
                     // 204 - User info are not correct or not exist
                     if (response.status != 200) {
-                        swal.fire("Login failed", "Check username of password", "error")
+                        swal.fire("User edit failed", "Check username of password", "error")
                         return false
                     }
 
                     const result = await response.json()
-                    if (result.token != undefined) {
-                        localStorage.setItem("token", result.token)
-                        location.href = "/"
+
+                    if (result["affected-rows"] == 1) {
+                        swal.fire("User edit done successfully", "", "success").then(() => {
+                            location.href = "/"
+                        })
+                    } else {
+                        console.log(result, data)
+                        swal.fire("User edit failed", "Unknown error", "error")
                     }
+                } else {
+                    const result = await response.json()
+                    swal.fire("User edit failed", result.msg, "error")
+                    return false
                 }
             },
-            async logoutUser() {
-                localStorage.removeItem("token")
-                swal.fire("Loged out", "", "success")
-            }
         }
     })
 </script>

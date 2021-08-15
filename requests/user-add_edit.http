@@ -1,7 +1,7 @@
 @uri=http://localhost:2510
 # @uri=http://enjoytools.net:2510
 
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxMzAiLCJ1c2VybmFtZSI6InVzZXIxIiwiZW1haWwiOiJ1c2VyMUBhLmNvbSIsImFkbWluIjoiXHUwMDNjbmlsXHUwMDNlIiwicmVmcmVzaC11bnRpbCI6MTYzMTQ1OTgwOSwiZXhwIjoxNjI4OTU0MjA5fQ.gyHBjnXvrSJcDbzGAxlM8WvFNAVRhokR79nKKKdjZqY
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZHgiOiIxMyIsInVzZXJuYW1lIjoidXNlcjEiLCJlbWFpbCI6InVzZXIxQGEuY29tIiwiYWRtaW4iOiJOIiwicmVmcmVzaC11bnRpbCI6MTYzMTYyODgxMywiZXhwIjoxNjI5MTIzMjEzfQ.7gNm9DqLniQ66aVjLMREX4sE8umb16ksL2Flmsf_Iuk
 
 
 ### Join a user
@@ -42,11 +42,12 @@ content-type: application/json
 
 {
     "IDX": 13,
-    "USERNAME": "user100",
-    "PASSWORD": "user100",
-    "EMAIL": "user100@mymy.com",
-    "ADMIN": "Y",
-    "APPROVAL": "N"
+    "USERNAME": "user1",
+    "PASSWORD": "user1",
+    "EMAIL": "user1@mymy.com",
+    "ADMIN": "N",
+    "APPROVAL": "Y",
+    "COUNTRY": "KR"
 }
 
 ### Delete user
