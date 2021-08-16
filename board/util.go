@@ -1,6 +1,7 @@
 package board
 
 import (
+	"fmt"
 	"log"
 
 	jsoniter "github.com/json-iterator/go"
@@ -72,12 +73,28 @@ func prepareSelectData(data interface{}) []models.Board {
 
 	for i := range result {
 		var rawJson interface{}
-		if result[i].Fields != nil && result[i].Fields.(string) != "" {
-			err := json.Unmarshal([]byte(result[i].Fields.(string)), &rawJson)
-			if err != nil {
-				log.Println("GetData Unmarshal: ", err)
+		if result[i].Fields != nil {
+			switch fields := result[i].Fields.(type) {
+			case string:
+				if fields != "" {
+					err := json.Unmarshal([]byte(fields), &rawJson)
+					if err != nil {
+						log.Println("prepareSelectData Unmarshal: ", err)
+					}
+					result[i].Fields = rawJson
+				}
+			case []byte:
+				if string(fields) != "" {
+					err := json.Unmarshal(fields, &rawJson)
+					if err != nil {
+						log.Println("prepareSelectData Unmarshal: ", err)
+					}
+					result[i].Fields = rawJson
+				}
+			default:
+				t := fmt.Sprintf("Unknown type %T", result[i].Fields)
+				log.Println("prepareSelectData: Unknown type " + t)
 			}
-			result[i].Fields = rawJson
 		}
 	}
 

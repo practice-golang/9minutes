@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strings"
 
@@ -43,13 +44,18 @@ func (d *Mysql) CreateBoardManagerTable(recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
-		IDX INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-		NAME VARCHAR(128) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-		PRICE DOUBLE NULL DEFAULT NULL,
-		AUTHOR VARCHAR(128) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-		ISBN VARCHAR(13) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		NAME VARCHAR(128) NULL DEFAULT NULL,
+		CODE VARCHAR(64) NULL DEFAULT NULL,
+		TYPE VARCHAR(64) NULL DEFAULT NULL,
+		` + "`TABLE`" + ` VARCHAR(64) NULL DEFAULT NULL,
+		GRANT_READ VARCHAR(16) NULL DEFAULT NULL,
+		GRANT_WRITE VARCHAR(16) NULL DEFAULT NULL,
+		GRANT_COMMENT VARCHAR(16) NULL DEFAULT NULL,
+		FILE_UPLOAD VARCHAR(2) NULL DEFAULT NULL,
+		FIELDS TEXT NULL DEFAULT NULL,
+
 		PRIMARY KEY (IDX),
-		UNIQUE INDEX ISBN (ISBN),
 		INDEX IDX (IDX)
 	)
 	COLLATE='utf8_general_ci'
@@ -59,6 +65,7 @@ func (d *Mysql) CreateBoardManagerTable(recreate bool) error {
 
 	_, err = Dbo.Exec(sql)
 	if err != nil {
+		log.Println(sql)
 		return err
 	}
 
@@ -80,13 +87,13 @@ func (d *Mysql) CreateUserFieldTable(recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
-		IDX INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-		NAME VARCHAR(128) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-		PRICE DOUBLE NULL DEFAULT NULL,
-		AUTHOR VARCHAR(128) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-		ISBN VARCHAR(13) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		NAME VARCHAR(128) NULL DEFAULT NULL,
+		CODE VARCHAR(64) NULL DEFAULT NULL,
+		TYPE VARCHAR(64) NULL DEFAULT NULL,
+		COLUMN_NAME VARCHAR(64) NULL DEFAULT NULL,
+
 		PRIMARY KEY (IDX),
-		UNIQUE INDEX ISBN (ISBN),
 		INDEX IDX (IDX)
 	)
 	COLLATE='utf8_general_ci'
@@ -96,6 +103,7 @@ func (d *Mysql) CreateUserFieldTable(recreate bool) error {
 
 	_, err = Dbo.Exec(sql)
 	if err != nil {
+		log.Println(sql)
 		return err
 	}
 
@@ -106,20 +114,75 @@ func (d *Mysql) CreateUserFieldTable(recreate bool) error {
 func (d *Mysql) CreateUserTable(recreate bool) error {
 	sql := ""
 	if recreate {
-		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
 	}
 	sql += `
-	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
-		"IDX"			INTEGER,
-		"NAME"			TEXT,
-		"CODE"			TEXT,
-		"TYPE"			TEXT,
-		"COLUMN_NAME"	TEXT UNIQUE,
-		"ORDER"			INTEGER,
-		PRIMARY KEY("IDX" AUTOINCREMENT)
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		USERNAME VARCHAR(128) NULL DEFAULT NULL,
+		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		EMAIL VARCHAR(128) NULL DEFAULT NULL,
+		ADMIN VARCHAR(2) NULL DEFAULT NULL,
+		APPROVAL VARCHAR(2) NULL DEFAULT NULL,
+		REG_DTTM INT(14) UNSIGNED NULL DEFAULT NULL,
+
+		PRIMARY KEY(IDX),
+		UNIQUE INDEX USERNAME (USERNAME),
+		UNIQUE INDEX EMAIL (EMAIL),
+		INDEX IDX (IDX)
+	)
+	COLLATE='utf8_general_ci'
+	ENGINE=InnoDB;`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		log.Println(sql)
+		return err
+	}
+
+	// Add temp admin
+	sql = `
+	INSERT IGNORE INTO #TABLE_NAME (USERNAME, ` + "`PASSWORD`" + `, EMAIL, ` + "`ADMIN`" + `, APPROVAL)
+		VALUES ("admin", "admin", "admin@please.modify", "Y", "Y");`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	_, err = Dbo.Exec(sql)
+	if err != nil {
+		log.Println(sql)
+		return err
+	}
+
+	return nil
+}
+
+// CreateBasicBoard - Create board table
+func (d *Mysql) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		TITLE VARCHAR(256) NULL DEFAULT NULL,
+		CONTENT TEXT NULL DEFAULT NULL,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		FILES TEXT NULL DEFAULT NULL,
+		REG_DTTM INT(14) UNSIGNED NULL DEFAULT NULL,
+
+		PRIMARY KEY(IDX),
+		INDEX IDX (IDX)
 	);`
 
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"."+tableInfo.Table.String)
+
+	log.Println("MySQL/CreateBasicBoard: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
@@ -129,13 +192,63 @@ func (d *Mysql) CreateUserTable(recreate bool) error {
 	return nil
 }
 
-// CreateBasicBoard - Create board table
-func (d *Mysql) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
-	return nil
-}
-
 // CreateCustomBoard - Create board table
 func (d *Mysql) CreateCustomBoard(tableInfo models.Board, fields []models.Field, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		FILES TEXT NULL DEFAULT NULL,
+		REG_DTTM INT(14) UNSIGNED NULL DEFAULT NULL,`
+
+	if len(fields) > 0 {
+		for k, f := range fields {
+			log.Println(k, f.Name.String, f.Type.String, f.Order.Int64)
+			colType := ""
+			switch f.Type.String {
+			// cusom-tablelist
+			case "text":
+				colType = "TEXT"
+			case "number":
+				colType = "INT(16)"
+			case "real", "double":
+				colType = "DECIMAL(20,20)"
+
+			// cusom-board
+			case "title", "author", "input":
+				colType = "VARCHAR(512)"
+			case "editor":
+				colType = "TEXT"
+
+			default:
+				colType = "VARCHAR(128)"
+			}
+
+			sql += fmt.Sprintf(`%s		`+"`%s`"+`		%s,`, "\n", f.ColumnName.String, colType)
+		}
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"."+tableInfo.Table.String)
+
+	sql += `
+		PRIMARY KEY(IDX),
+		INDEX IDX (IDX)
+	);`
+
+	log.Println("MySQL/CreateCustomBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

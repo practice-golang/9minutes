@@ -7,6 +7,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/practice-golang/9minutes/config"
 	"github.com/tidwall/gjson"
 	"gopkg.in/guregu/null.v4"
 
@@ -124,7 +125,12 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 
 	exps = append(exps, ex.Expression())
 
-	ds := dbms.From(jsonBody["table"].(string)).Select(colNames...)
+	table := jsonBody["table"].(string)
+	if config.DbInfo.Type != "sqlite" {
+		table = DatabaseName + "." + table
+	}
+
+	ds := dbms.From(table).Select(colNames...)
 	ds = ds.Where(goqu.Or(exps...))
 
 	orderDirection := goqu.C(OrderScope).Asc()

@@ -55,6 +55,8 @@ func setupDB() error {
 			info.User, info.Password, info.Server, info.Port)
 		db.DatabaseName = info.Database
 		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
+		db.UserFieldTable = db.DatabaseName + "." + db.UserFieldTable
+		db.UserTable = db.DatabaseName + "." + db.UserTable
 	case "postgres":
 		db.DBType = db.POSTGRES
 

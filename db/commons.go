@@ -65,8 +65,10 @@ func SelectData(search interface{}) (interface{}, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := BoardManagerTable
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(BoardManagerTable).Select(search)
+	ds := dbms.From(table).Select(search)
 
 	boardResult := []models.Board{}
 
