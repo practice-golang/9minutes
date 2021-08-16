@@ -53,6 +53,9 @@ Current, Sqlite only
 - [x] File upload
 - [x] Sign up
 - [ ] Other DB except sqlite
+    - [ ] MySQL
+    - [ ] Postgres
+    - [ ] MS-SQL
 - [ ] User defined template
 - [ ] Add reg/last modified datetime, read count
 - [ ] Code cleaning
