@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/practice-golang/9minutes/models"
@@ -30,6 +31,8 @@ func AddBoards(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
 	}
 
+	failed := []string{}
+
 	for k, b := range boards {
 		f := []models.Field{}
 		if fields[k] != nil {
@@ -40,20 +43,24 @@ func AddBoards(c echo.Context) error {
 			err = db.Dbi.CreateBasicBoard(b, false)
 			if err != nil {
 				log.Println("Add Boards CreateBasicBoard", err)
+				failed = append(failed, b.Name.String)
 			}
 			err = db.Dbi.CreateComment(b, false)
 			if err != nil {
 				log.Println("Add Boards CreateBasicBoard", err)
+				failed = append(failed, b.Name.String)
 			}
 		case "custom-board":
 			err := db.Dbi.CreateCustomBoard(b, f, false)
 			if err != nil {
 				log.Println("Add Boards CreateCustomBoard", err)
+				failed = append(failed, b.Name.String)
 			}
 		case "custom-tablelist":
 			err := db.Dbi.CreateCustomBoard(b, f, false)
 			if err != nil {
 				log.Println("Add Boards CreateCustomBoard", err)
+				failed = append(failed, b.Name.String)
 			}
 		}
 	}
@@ -62,6 +69,7 @@ func AddBoards(c echo.Context) error {
 	affRows, _ := sqlResult.RowsAffected()
 
 	result := map[string]string{
+		"fails":         strings.Join(failed, "/"),
 		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
 	}
@@ -150,11 +158,17 @@ func EditBoard(c echo.Context) error {
 		case "custom-board":
 			log.Println("custom-board")
 
-			db.Dbi.EditCustomBoard(boardPrevious, board)
+			err := db.Dbi.EditCustomBoard(boardPrevious, board)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err.Error())
+			}
 		case "custom-tablelist":
 			log.Println("custom-tablelist")
 
-			db.Dbi.EditCustomBoard(boardPrevious, board)
+			err := db.Dbi.EditCustomBoard(boardPrevious, board)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, err.Error())
+			}
 		default:
 			log.Println("Edit board: No proper board type")
 		}

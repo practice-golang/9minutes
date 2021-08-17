@@ -49,7 +49,7 @@
         <div v-if="commentPermission">
             <template v-if="!commentAdd.isMember">
                 <input v-model="commentAdd['writer-name']" placeholder="name" />
-                <input v-model="commentAdd['writer-password']" placeholder="password" />
+                <input v-model="commentAdd['writer-password']" type="password" placeholder="password" />
             </template>
             <template v-else>
                 {{commentAdd['writer-name']}}

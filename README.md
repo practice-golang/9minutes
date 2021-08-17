@@ -53,12 +53,17 @@ Current, Sqlite only
 - [x] File upload
 - [x] Sign up
 - [ ] Other DB except sqlite
-    - [ ] MySQL
+    - [x] MySQL
     - [ ] Postgres
     - [ ] MS-SQL
+- [ ] Block duplicate board table name
+- [ ] API - list of board columns
+- [ ] User page
 - [ ] User defined template
 - [ ] Add reg/last modified datetime, read count
 - [ ] Code cleaning
+    - [ ] Password hash
+    - [ ] Diet dup codes
 - [ ] ~~Email sending~~
 - [ ] ~~Menu~~
 - [ ] ~~Test~~

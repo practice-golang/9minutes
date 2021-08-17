@@ -195,7 +195,8 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 	lastID, _ := sqlResult.LastInsertId()
 	affRows, _ := sqlResult.RowsAffected()
 
-	if db.DBType == db.SQLITE && lastID == 0 {
+	// if db.DBType == db.SQLITE && lastID == 0 {
+	if lastID == 0 {
 		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
 	}
 
@@ -248,7 +249,8 @@ func DeleteContentsBasicBoard(c echo.Context) error {
 	lastID, _ := sqlResult.LastInsertId()
 	affRows, _ := sqlResult.RowsAffected()
 
-	if db.DBType == db.SQLITE && lastID == 0 {
+	// if db.DBType == db.SQLITE && lastID == 0 {
+	if lastID == 0 {
 		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
 	}
 
@@ -368,7 +370,8 @@ func UpdateContentsListCustomBoard(c echo.Context) error {
 	lastID, _ := sqlResult.LastInsertId()
 	affRows, _ := sqlResult.RowsAffected()
 
-	if db.DBType == db.SQLITE && lastID == 0 {
+	// if db.DBType == db.SQLITE && lastID == 0 {
+	if lastID == 0 {
 		var allData map[string]interface{}
 		_ = json.Unmarshal(dataBytes, &allData)
 		lastID, _ = strconv.ParseInt(fmt.Sprint(allData["data"].(map[string]interface{})["IDX"]), 10, 64)

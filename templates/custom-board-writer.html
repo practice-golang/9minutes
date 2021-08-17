@@ -384,6 +384,8 @@
                     const result = await response.json()
                     if (result["affected-rows"] > 0) {
                         location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
+                    } else {
+                        swal.fire("Error occured", "", "error")
                     }
                     return false
                 }

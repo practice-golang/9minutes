@@ -78,8 +78,11 @@ func setupDB() error {
 		db.Dsn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 			info.Server, info.Port, info.User, info.Password, info.Database)
 
-		db.DatabaseName = info.Schema
-		db.BoardManagerTable = db.DatabaseName + "." + db.BoardManagerTable
+		db.DatabaseName = `"` + info.Schema + `"`
+		db.BoardManagerTable = `"` + info.Schema + `"."` + db.BoardManagerTable + `"`
+		db.BoardManagerTableNoQuotes = info.Schema + `.` + db.BoardManagerTableNoQuotes
+		db.UserFieldTable = `"` + info.Schema + `"."` + db.UserFieldTable + `"`
+		db.UserTable = `"` + info.Schema + `"."` + db.UserTable + `"`
 	case "sqlserver":
 		db.DBType = db.SQLSERVER
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",

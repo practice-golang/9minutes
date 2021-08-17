@@ -39,7 +39,7 @@
         <div v-if="commentPermission">
             <template v-if="!commentAdd.isMember">
                 <input v-model="commentAdd['writer-name']" placeholder="name" />
-                <input v-model="commentAdd['writer-password']" placeholder="password" />
+                <input v-model="commentAdd['writer-password']" type="password" placeholder="password" />
             </template>
             <template v-else>
                 {{commentAdd['writer-name']}}
@@ -294,7 +294,9 @@
                 if (response.ok) {
                     this.contents = (await response.json())[0]
 
-                    this.files = JSON.parse(this.contents["FILES"])
+                    if (this.contents["FILES"] != undefined) {
+                        this.files = JSON.parse(this.contents["FILES"])
+                    }
 
                     this.isShow = true
                     return false
@@ -369,8 +371,10 @@
 
                 if (response.ok) {
                     const result = await response.json()
+                    this.commentAdd.content = ""
+                    tinymce.activeEditor.setContent("")
+                    
                     this.getComments()
-
                     return false
                 }
 

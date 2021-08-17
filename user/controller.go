@@ -112,6 +112,7 @@ func DeleteUserFields(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
+	log.Println("user columsn:", idxInt, idxNullInt)
 	if len(data.([]models.UserColumn)) > 0 {
 		db.Dbi.DeleteUserTableFields(data.([]models.UserColumn))
 	}
@@ -227,7 +228,16 @@ func EditUser(c echo.Context) error {
 	user := c.Get("user")
 	if user != nil {
 		claims := user.(*jwt.Token).Claims.(*auth.CustomClaims)
-		dsIDX := fmt.Sprint(ds["IDX"].(float64))
+		dsIDX := ""
+		switch typedIDX := ds["IDX"].(type) {
+		case float64:
+			// dsIDX = fmt.Sprint(ds["IDX"].(float64))
+			dsIDX = fmt.Sprint(typedIDX)
+		case string:
+			dsIDX = typedIDX
+		default:
+			dsIDX = ds["IDX"].(string)
+		}
 		claimsIDX := claims.Idx
 		if claims.Admin != "Y" && claimsIDX != dsIDX {
 			return c.JSON(http.StatusUnauthorized, map[string]string{"msg": "Unauthorized"})

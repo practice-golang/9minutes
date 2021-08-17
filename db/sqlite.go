@@ -8,7 +8,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/practice-golang/9minutes/models"
 	"github.com/thoas/go-funk"
 	// _ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
@@ -173,8 +172,14 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 	`
 
 	if len(fields) > 0 {
-		for k, f := range fields {
-			log.Println(k, f.Name.String, f.Type.String, f.Order.Int64)
+		commentCount := 0
+
+		for _, f := range fields {
+			// log.Println(f.Name.String, f.Type.String, f.Order.Int64)
+			if f.Type.String == "comment" {
+				commentCount++
+			}
+
 			colType := ""
 			switch f.Type.String {
 			// cusom-tablelist
@@ -196,6 +201,10 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 			}
 
 			sql += fmt.Sprintf(`%s		"%s"		%s,`, "\n", f.ColumnName.String, colType)
+		}
+
+		if commentCount > 1 {
+			return errors.New("available only 1 comment")
 		}
 	}
 
@@ -233,41 +242,6 @@ func (d *Sqlite) EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.B
 	return nil
 }
 
-func diffCustomBoardFields(old, new []map[string]interface{}) (add, remove, modify []map[string]interface{}) {
-	var diff []map[string]interface{}
-
-	for i := 0; i < 2; i++ {
-		for _, s1 := range old {
-			found := false
-			for _, s2 := range new {
-				if s1["idx"] == s2["idx"] {
-					if i == 0 && !cmp.Equal(s1, s2) {
-						modify = append(modify, s2)
-					}
-
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				diff = append(diff, s1)
-			}
-		}
-
-		if i == 0 {
-			remove = diff
-			old, new = new, old
-		} else {
-			add = diff
-		}
-
-		diff = []map[string]interface{}{}
-	}
-
-	return
-}
-
 // EditCustomBoard - Create custom table
 func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
 	// var err error
@@ -276,6 +250,17 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 
 	var newFieldITF []map[string]interface{}
 	_ = json.Unmarshal([]byte(tableInfoNew.Fields.(string)), &newFieldITF)
+
+	commentCount := 0
+	for _, f := range newFieldITF {
+		if f["type"] == "comment" {
+			commentCount++
+		}
+	}
+
+	if commentCount > 1 {
+		return errors.New("available only 1 comment")
+	}
 
 	var oldFieldITF []map[string]interface{}
 
@@ -415,7 +400,7 @@ func (d *Sqlite) CreateComment(tableInfo models.Board, recreate bool) error {
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT")
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT_")
 
 	log.Println("Sqlite/CreateComment: ", sql)
 
@@ -541,44 +526,6 @@ func (d *Sqlite) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsIn
 	}
 
 	return nil
-}
-
-func diffUserTableFields(fieldsInfoOld, fieldsInfoNew []models.UserColumn) (add, remove, modify []models.UserColumn) {
-	var diff []models.UserColumn
-
-	old := fieldsInfoOld
-	new := fieldsInfoNew
-
-	for i := 0; i < 2; i++ {
-		for _, s1 := range old {
-			found := false
-			for _, s2 := range new {
-				if s1.Idx == s2.Idx {
-					if i == 0 && !cmp.Equal(s1, s2) {
-						modify = append(modify, s2)
-					}
-
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				diff = append(diff, s1)
-			}
-		}
-
-		if i == 0 {
-			remove = diff
-			old, new = new, old
-		} else {
-			add = diff
-		}
-
-		diff = []models.UserColumn{}
-	}
-
-	return
 }
 
 // DeleteUserTableFields - Delete user table field

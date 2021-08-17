@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	_ "github.com/doug-martin/goqu/v9/dialect/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/practice-golang/9minutes/models"
+	"github.com/thoas/go-funk"
 )
 
 type Mysql struct{ Dsn string }
@@ -92,6 +95,7 @@ func (d *Mysql) CreateUserFieldTable(recreate bool) error {
 		CODE VARCHAR(64) NULL DEFAULT NULL,
 		TYPE VARCHAR(64) NULL DEFAULT NULL,
 		COLUMN_NAME VARCHAR(64) NULL DEFAULT NULL,
+		` + "`ORDER`" + ` INT(11) NULL DEFAULT NULL,
 
 		PRIMARY KEY (IDX),
 		INDEX IDX (IDX)
@@ -209,8 +213,14 @@ func (d *Mysql) CreateCustomBoard(tableInfo models.Board, fields []models.Field,
 		REG_DTTM INT(14) UNSIGNED NULL DEFAULT NULL,`
 
 	if len(fields) > 0 {
-		for k, f := range fields {
-			log.Println(k, f.Name.String, f.Type.String, f.Order.Int64)
+		commentCount := 0
+
+		for _, f := range fields {
+			// log.Println(f.Name.String, f.Type.String, f.Order.Int64)
+			if f.Type.String == "comment" {
+				commentCount++
+			}
+
 			colType := ""
 			switch f.Type.String {
 			// cusom-tablelist
@@ -226,12 +236,19 @@ func (d *Mysql) CreateCustomBoard(tableInfo models.Board, fields []models.Field,
 				colType = "VARCHAR(512)"
 			case "editor":
 				colType = "TEXT"
+			case "comment":
+				colType = "VARCHAR(4)"
+				_ = d.CreateComment(tableInfo, false)
 
 			default:
 				colType = "VARCHAR(128)"
 			}
 
 			sql += fmt.Sprintf(`%s		`+"`%s`"+`		%s,`, "\n", f.ColumnName.String, colType)
+		}
+
+		if commentCount > 1 {
+			return errors.New("available only 1 comment")
 		}
 	}
 
@@ -254,26 +271,316 @@ func (d *Mysql) CreateCustomBoard(tableInfo models.Board, fields []models.Field,
 
 // EditBasicBoard - Create board table
 func (d *Mysql) EditBasicBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	// sql := `RENAME TABLE ` + "`#TABLE_NAME_OLD`" + ` TO ` + "`#TABLE_NAME_NEW`" + ` ;`
+	sql := `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+
+	log.Println("MySQL/EditBasicBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // EditCustomBoard - Create custom table
 func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	// var err error
+	// log.Println(tableInfoOld.Table.String, tableInfoNew.Table.String)
+	// log.Println(tableInfoOld.Fields, tableInfoNew.Fields)
+
+	var newFieldITF []map[string]interface{}
+	_ = json.Unmarshal([]byte(tableInfoNew.Fields.(string)), &newFieldITF)
+
+	commentCount := 0
+	for _, f := range newFieldITF {
+		if f["type"] == "comment" {
+			commentCount++
+		}
+	}
+
+	if commentCount > 1 {
+		return errors.New("available only 1 comment")
+	}
+
+	var oldFieldITF []map[string]interface{}
+
+	for _, f := range tableInfoOld.Fields.([]interface{}) {
+		oldF := f.(map[string]interface{})
+		oldFieldITF = append(oldFieldITF, oldF)
+	}
+
+	add, remove, modify := diffCustomBoardFields(oldFieldITF, newFieldITF)
+	log.Println("Add: ", add)
+	log.Println("Remove: ", remove)
+	log.Println("Modify: ", modify)
+
+	sql := ""
+	if tableInfoOld.Table.String != tableInfoNew.Table.String {
+		sql = `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
+
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+	}
+
+	sqlAdd := ""
+	if len(add) > 0 {
+		for _, c := range add {
+			sqlAdd += ` ADD COLUMN ` + c["column"].(string) + ` `
+			switch c["type"].(string) {
+			// cusom-tablelist
+			case "text":
+				sqlAdd += ` TEXT`
+			case "number":
+				sqlAdd += ` INT(16)`
+			case "real":
+				sqlAdd += ` DECIMAL(20,20)`
+
+			// cusom-board
+			case "title", "author", "input":
+				sqlAdd += ` VARCHAR(512)`
+			case "editor":
+				sqlAdd += ` TEXT`
+			case "comment":
+				sqlAdd += ` VARCHAR(4) NULL `
+				_ = d.CreateComment(tableInfoNew, false)
+			default:
+				sqlAdd += ` VARCHAR(128)`
+			}
+
+			sqlAdd += `, `
+			// if i < (len(add) - 1) {
+			// 	sqlAdd += `, `
+			// }
+		}
+		// sqlAdd += `; `
+	}
+
+	sqlRemove := ""
+	if len(remove) > 0 {
+		for _, c := range remove {
+			if c["type"].(string) == "comment" {
+				d.DeleteComment(c["column"].(string))
+			} else {
+				sqlRemove += " DROP COLUMN `" + c["column"].(string) + "`, "
+			}
+		}
+		// if strings.Contains(sqlRemove, "DROP COLUMN") {
+		// 	sqlRemove = sqlRemove[:len(sqlRemove)-2]
+		// }
+		// sql += sqlRemove + `; `
+	}
+
+	sqlModify := ""
+	sqlCommentRename := ""
+	if len(modify) > 0 {
+		for _, nc := range modify {
+			for _, ocINF := range tableInfoOld.Fields.([]interface{}) {
+				oc := ocINF.(map[string]interface{})
+				if nc["idx"].(float64) == oc["idx"].(float64) {
+					if nc["column"].(string) != oc["column"].(string) {
+						if oc["type"].(string) == "comment" {
+							sqlCommentRename += `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `; `
+
+							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+oc["column"].(string)+"_COMMENT")
+							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+nc["column"].(string)+"_COMMENT")
+						} else {
+							sqlModify += "CHANGE COLUMN `" + oc["column"].(string) + "` `" + nc["column"].(string) + "`"
+							switch nc["type"].(string) {
+							// cusom-tablelist
+							case "text":
+								sqlModify += ` TEXT`
+							case "number":
+								sqlModify += ` INT(16)`
+							case "real":
+								sqlModify += ` DECIMAL(20,20)`
+
+							// cusom-board
+							case "title", "author", "input":
+								sqlModify += ` VARCHAR(512)`
+							case "editor":
+								sqlModify += ` TEXT`
+							case "comment":
+								sqlModify += ` VARCHAR(4)`
+								_ = d.CreateComment(tableInfoNew, false)
+							default:
+								sqlModify += ` VARCHAR(128)`
+							}
+
+							sqlModify += " NULL"
+							sqlModify += ", "
+
+							// if i < (len(modify) - 1) {
+							// 	sqlModify += `, `
+							// }
+						}
+					}
+					break
+				}
+			}
+		}
+		// if strings.Contains(sqlModify, "RENAME COLUMN") {
+		// 	sqlModify = sqlModify[:len(sqlModify)-2]
+		// }
+		// sqlModify += `; `
+	}
+
+	if sqlAdd != "" || sqlRemove != "" || sqlModify != "" {
+		sql += `ALTER TABLE ` + "`#TABLE_NAME_NEW`" + ` ` + sqlAdd + sqlRemove + sqlModify
+		sql = sql[:len(sql)-2]
+
+		sql += ";"
+
+		sql += sqlCommentRename
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+	}
+
+	log.Println("MySQL/EditCustomBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // DeleteBoard - Delete a board table
 func (d *Mysql) DeleteBoard(tableName string) error {
+	sql := `DROP TABLE IF EXISTS ` + "`#TABLE_NAME`" + `;`
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"`.`"+tableName)
+
+	log.Println("MySQL/DeleteBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // CreateComment - Create comment table
 func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
+	sql := ""
+	if recreate {
+		sql += `DROP TABLE IF EXISTS #TABLE_NAME;`
+	}
+	sql += `
+	CREATE TABLE IF NOT EXISTS #TABLE_NAME (
+		IDX INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		BOARD_IDX INT(11) UNSIGNED NOT NULL,
+		CONTENT TEXT NULL DEFAULT NULL,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		REG_DTTM INT(14) UNSIGNED NULL DEFAULT NULL,
+
+		PRIMARY KEY(IDX),
+		INDEX IDX (IDX)
+	);`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"."+tableInfo.Table.String+"_COMMENT")
+
+	log.Println("MySQL/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteComment - Delete a comment table
+func (d *Mysql) DeleteComment(tableName string) error {
+	sql := `DROP TABLE IF EXISTS ` + "`#TABLE_NAME`" + `;`
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"`.`"+tableName+"_COMMENT")
+
+	log.Println("MySQL/DeleteComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // EditUserTableFields - Edit user table schema
 func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInfoNew []models.UserColumn, notUse []string) error {
+	add, remove, modify := diffUserTableFields(fieldsInfoOld, fieldsInfoNew)
+	log.Println("User fields Add: ", add)
+	log.Println("User fields Remove: ", remove)
+	log.Println("User fields Modify: ", modify)
+
+	sql := ""
+	if len(add) > 0 {
+		for _, a := range add {
+			sql += `ALTER TABLE #TABLE_NAME `
+			sql += ` ADD COLUMN ` + "`" + a.ColumnName.String + "`" + ` `
+			switch a.Type.String {
+			// cusom-tablelist
+			case "text":
+				sql += ` VARCHAR(256)`
+			case "number":
+				sql += ` INT(16)`
+			case "real":
+				sql += ` DECIMAL(20,20)`
+			}
+
+			sql += `; `
+		}
+	}
+
+	if len(remove) > 0 && !funk.Contains(notUse, "remove") {
+		sqlRemove := `ALTER TABLE #TABLE_NAME `
+		for _, r := range remove {
+			sqlRemove += ` DROP COLUMN ` + "`" + r.ColumnName.String + "`" + `, `
+		}
+		if strings.Contains(sqlRemove, "DROP COLUMN") {
+			sqlRemove = sqlRemove[:len(sqlRemove)-2]
+		}
+		sql += sqlRemove + `; `
+	}
+
+	if len(modify) > 0 {
+		sqlModify := ""
+		for _, nm := range modify {
+			for _, om := range fieldsInfoOld {
+				if nm.Idx.Int64 == om.Idx.Int64 {
+					if nm.ColumnName.String != om.ColumnName.String {
+						sqlModify += `ALTER TABLE #TABLE_NAME `
+						sqlModify += ` CHANGE COLUMN ` + "`" + om.ColumnName.String + "`" + ` TO ` + "`" + nm.ColumnName.String + "`" + `; `
+					}
+					break
+				}
+			}
+		}
+		sql += sqlModify
+	}
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
+
+	log.Println("MySQL/EditUserTableFields: ", sql)
+
+	if sql == "" {
+		if len(modify) > 0 {
+			return nil
+		} else {
+			return errors.New("nothing to change")
+		}
+	}
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -283,19 +590,19 @@ func (d *Mysql) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) erro
 	sql := ""
 
 	if len(remove) > 0 {
-		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
+		sqlRemove := "ALTER TABLE #TABLE_NAME"
 		for _, r := range remove {
 			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
 		}
 		if strings.Contains(sqlRemove, "DROP COLUMN") {
 			sqlRemove = sqlRemove[:len(sqlRemove)-2]
 		}
-		sql += sqlRemove + `; `
+		sql += sqlRemove + `;`
 	}
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
-	log.Println("Sqlite/DeleteUserTableFields: ", sql)
+	log.Println("MySQL/DeleteUserTableFields: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
@@ -309,22 +616,23 @@ func (d *Mysql) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) erro
 func (d *Mysql) AddUserTableFields(fields []models.UserColumn) error {
 	sql := ""
 	for _, a := range fields {
-		sql += `ALTER TABLE "#TABLE_NAME" ADD COLUMN ` + a.ColumnName.String + ` `
+		sql += "ALTER TABLE #TABLE_NAME ADD COLUMN `" + a.ColumnName.String + "`"
 		switch a.Type.String {
 		case "text":
-			sql += ` TEXT`
+			sql += ` VARCHAR(256)`
 		case "number":
-			sql += ` INTEGER`
+			sql += ` INT(16)`
 		case "real":
-			sql += ` REAL`
+			sql += ` DECIMAL(20,20)`
 		}
 
-		sql += `; `
+		sql += " NULL"
+		sql += `;`
 	}
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
-	log.Println("Sqlite/EditUserTableFields: ", sql)
+	log.Println("MySQL/EditUserTableFields: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {

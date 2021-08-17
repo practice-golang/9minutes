@@ -379,6 +379,7 @@
 
                 if (response.ok) {
                     const result = await response.json()
+
                     location.href = this.restURI + "/board?code=" + this.boardCode + "&mode=read&id=" + result["last-id"]
                     return false
                 }

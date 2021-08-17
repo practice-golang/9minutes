@@ -38,18 +38,19 @@ type DBI interface {
 }
 
 var (
-	Dbi               DBI    // DB Object Interface
-	Dsn               string // Data Source Name
-	DatabaseName      = "9minutes"
-	BoardManagerTable = "BOARD_TABLES"
-	UserFieldTable    = "USER_FIELDS"
-	UserTable         = "USERS"
-	Dbo               *sql.DB
-	DBType            int
-	UpdateScope       []string     // UPDATE ... WHERE IDX=?
-	IgnoreScope       []string     // Ignore if nil or null
-	listCount         uint     = 3 // Default list count
-	OrderScope        string       // Default order column name
+	Dbi                       DBI    // DB Object Interface
+	Dsn                       string // Data Source Name
+	DatabaseName              = "9minutes"
+	BoardManagerTable         = "BOARD_TABLES"
+	BoardManagerTableNoQuotes = "BOARD_TABLES" // makeshift - postgres
+	UserFieldTable            = "USER_FIELDS"
+	UserTable                 = "USERS"
+	Dbo                       *sql.DB
+	DBType                    int
+	UpdateScope               []string     // UPDATE ... WHERE IDX=?
+	IgnoreScope               []string     // Ignore if nil or null
+	listCount                 uint     = 3 // Default list count
+	OrderScope                string       // Default order column name
 )
 
 // InitDB - Prepare DB

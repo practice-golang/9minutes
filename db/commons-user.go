@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/practice-golang/9minutes/models"
@@ -54,11 +53,14 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	if !ex.IsEmpty() {
 		for c, v := range ex {
 			if c == "IDX" || c == "BOARD_IDX" {
-				val := fmt.Sprintf("%s", v)
-				ex[c] = goqu.Op{"eq": val}
+				log.Println("SelectUserFields/goqu_ex: ", v)
+				ex[c] = goqu.Op{"eq": v}
+				// val := fmt.Sprintf("%s", v)
+				// ex[c] = goqu.Op{"eq": val}
 			} else {
-				val := fmt.Sprintf("%s%s%s", "%", v, "%")
-				ex[c] = goqu.Op{"like": val}
+				ex[c] = goqu.Op{"like": v}
+				// val := fmt.Sprintf("%s%s%s", "%", v, "%")
+				// ex[c] = goqu.Op{"like": val}
 			}
 		}
 		exps = append(exps, ex.Expression())
@@ -68,7 +70,7 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	fieldsResult := []models.UserColumn{}
 
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("SelectUserFields: ", sql, args)
 
 	err = ds.ScanStructs(&fieldsResult)
 	if err != nil {

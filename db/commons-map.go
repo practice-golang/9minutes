@@ -54,8 +54,17 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := allData["table"].(string)
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(allData["table"]).Rows(rcds)
+	ds := dbms.Insert(table).Rows(rcds)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -127,7 +136,11 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 
 	table := jsonBody["table"].(string)
 	if config.DbInfo.Type != "sqlite" {
-		table = DatabaseName + "." + table
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
 	}
 
 	ds := dbms.From(table).Select(colNames...)
@@ -264,8 +277,17 @@ func UpdateContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := allData["table"].(string)
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(allData["table"]).Set(rcd).Where(whereEXP)
+	ds := dbms.Update(table).Set(rcd).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -313,8 +335,17 @@ func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := allData["table"].(string)
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(allData["table"])
+	ds := dbms.Delete(table)
 	sql, args, _ := ds.Where(whereEXP).ToSQL()
 	log.Println(sql, args)
 
@@ -368,7 +399,16 @@ func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 	}
 	log.Println("SelectContentsCountMAP keywords: ", keywords)
 
-	ds := dbms.From(jsonBody["table"].(string)).Select(goqu.COUNT("*").As("PAGE_COUNT"))
+	table := jsonBody["table"].(string)
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
+
+	ds := dbms.From(table).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 	ds = ds.Where(goqu.Or(exps...))
 
 	orderDirection := goqu.C(OrderScope).Asc()

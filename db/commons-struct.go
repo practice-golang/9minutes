@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/models"
 
 	"github.com/doug-martin/goqu/v9"
@@ -23,8 +24,17 @@ func InsertContents(data interface{}, table string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(table).Rows(data)
+	ds := dbms.Insert(tbl).Rows(data)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -53,8 +63,17 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 		whereEXP["WRITER_PASSWORD"] = data.(models.ContentsBasicBoardSET).WriterPassword
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(table).Set(data).Where(whereEXP)
+	ds := dbms.Update(tbl).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -83,8 +102,17 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 		whereEXP["WRITER_PASSWORD"] = data.(models.ContentsBasicBoardSET).WriterPassword
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(table).Where(whereEXP)
+	ds := dbms.Delete(tbl).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -119,9 +147,19 @@ func SelectContents(search interface{}) (interface{}, error) {
 	expsAND := []goqu.Expression{}
 
 	keywords := searchBytes.Keywords
+
+	table := searchBytes.Table.String
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
+
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Content list
-		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsBasicBoardList{})
+		ds = dbms.From(table).Select(models.ContentsBasicBoardList{})
 	} else {
 		// Not allow getting all of list
 		if !searchBytes.Options.Count.Valid || searchBytes.Options.Count.Int64 < 1 {
@@ -129,7 +167,7 @@ func SelectContents(search interface{}) (interface{}, error) {
 		}
 
 		// Contents
-		ds = dbms.From(searchBytes.Table.String).Select(models.ContentsBasicBoardGET{})
+		ds = dbms.From(table).Select(models.ContentsBasicBoardGET{})
 	}
 
 	for _, k := range keywords {
@@ -210,6 +248,14 @@ func SelectContentsCount(search interface{}) (uint, error) {
 	switch search := search.(type) {
 	case models.ContentSearch:
 		table = search.Table.String
+		if config.DbInfo.Type != "sqlite" {
+			if config.DbInfo.Type == "postgres" {
+				table = config.DbInfo.Schema + "." + table
+			} else {
+				table = DatabaseName + "." + table
+			}
+		}
+
 		keywords := search.Keywords
 		for _, k := range keywords {
 			ex := PrepareWhere(k)

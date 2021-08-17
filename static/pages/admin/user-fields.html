@@ -289,6 +289,7 @@
                     ])
                 })
                 if (response.ok) {
+                    this.clearColumnAdd()
                     this.getColumns()
                 }
             },
@@ -338,7 +339,7 @@
 
                 let response = await fetch(this.restURI + "/user-fields/" + idx, {
                     method: "DELETE",
-                    headers: headers,
+                    headers: headers
                 })
                 if (response.ok) {
                     this.getColumns()

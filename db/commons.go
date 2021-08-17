@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/models"
 
 	"github.com/doug-martin/goqu/v9"
@@ -42,8 +43,15 @@ func InsertData(data interface{}) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = BoardManagerTableNoQuotes
+	} else {
+		table = BoardManagerTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(BoardManagerTable).Rows(data)
+	ds := dbms.Insert(table).Rows(data)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -65,7 +73,12 @@ func SelectData(search interface{}) (interface{}, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
-	table := BoardManagerTable
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = BoardManagerTableNoQuotes
+	} else {
+		table = BoardManagerTable
+	}
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.From(table).Select(search)
@@ -148,10 +161,17 @@ func UpdateData(data interface{}) (sql.Result, error) {
 		return nil, err
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = BoardManagerTableNoQuotes
+	} else {
+		table = BoardManagerTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(BoardManagerTable).Set(data).Where(whereEXP)
+	ds := dbms.Update(table).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("DB UpdateData: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -168,10 +188,17 @@ func DeleteData(target, value string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = BoardManagerTableNoQuotes
+	} else {
+		table = BoardManagerTable
+	}
+
 	whereEXP := goqu.Ex{target: value}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(BoardManagerTable).Where(whereEXP)
+	ds := dbms.Delete(table).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -192,8 +219,15 @@ func SelectCount(search interface{}) (uint, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = BoardManagerTableNoQuotes
+	} else {
+		table = BoardManagerTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(BoardManagerTable).Select(goqu.COUNT("*").As("PAGE_COUNT"))
+	ds := dbms.From(table).Select(goqu.COUNT("*").As("PAGE_COUNT"))
 
 	switch search := search.(type) {
 	case models.BoardSearch:
@@ -251,6 +285,13 @@ func SelectComments(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String + "_COMMENT"
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
+	}
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Comment list
 		ds = dbms.From(table).Select(models.CommentList{})
@@ -322,8 +363,17 @@ func InsertComment(data interface{}, table string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(table).Rows(data)
+	ds := dbms.Insert(tbl).Rows(data)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -353,8 +403,17 @@ func UpdateComment(data interface{}, table string) (sql.Result, error) {
 		whereEXP["WRITER_PASSWORD"] = data.(models.CommentSET).WriterPassword
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(table).Set(data).Where(whereEXP)
+	ds := dbms.Update(tbl).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -383,8 +442,17 @@ func DeleteComment(data interface{}, table string) (sql.Result, error) {
 		whereEXP["WRITER_PASSWORD"] = data.(models.CommentSET).WriterPassword
 	}
 
+	tbl := table
+	if config.DbInfo.Type != "sqlite" {
+		if config.DbInfo.Type == "postgres" {
+			tbl = config.DbInfo.Schema + "." + tbl
+		} else {
+			tbl = DatabaseName + "." + tbl
+		}
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(table).Where(whereEXP)
+	ds := dbms.Delete(tbl).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 

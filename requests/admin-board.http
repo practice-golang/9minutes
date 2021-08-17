@@ -151,6 +151,14 @@ content-type: application/json
                 "type": "input",
                 "json": "agency",
                 "order": 9
+            },
+            {
+                "idx": 3,
+                "column": "COMM",
+                "name": "Comm",
+                "type": "comment",
+                "json": "comm",
+                "order": 10
             }
         ]
     },

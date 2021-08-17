@@ -6,6 +6,8 @@ import (
 	"reflect"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/google/go-cmp/cmp"
+	"github.com/practice-golang/9minutes/models"
 	"github.com/thoas/go-funk"
 	"gopkg.in/guregu/null.v4"
 )
@@ -82,4 +84,77 @@ func CheckValidAndPrepareWhere(data interface{}) (goqu.Ex, error) {
 	}
 
 	return result, nil
+}
+
+func diffCustomBoardFields(old, new []map[string]interface{}) (add, remove, modify []map[string]interface{}) {
+	var diff []map[string]interface{}
+
+	for i := 0; i < 2; i++ {
+		for _, s1 := range old {
+			found := false
+			for _, s2 := range new {
+				if s1["idx"] == s2["idx"] {
+					if i == 0 && !cmp.Equal(s1, s2) {
+						modify = append(modify, s2)
+					}
+
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				diff = append(diff, s1)
+			}
+		}
+
+		if i == 0 {
+			remove = diff
+			old, new = new, old
+		} else {
+			add = diff
+		}
+
+		diff = []map[string]interface{}{}
+	}
+
+	return
+}
+
+func diffUserTableFields(fieldsInfoOld, fieldsInfoNew []models.UserColumn) (add, remove, modify []models.UserColumn) {
+	var diff []models.UserColumn
+
+	old := fieldsInfoOld
+	new := fieldsInfoNew
+
+	for i := 0; i < 2; i++ {
+		for _, s1 := range old {
+			found := false
+			for _, s2 := range new {
+				if s1.Idx == s2.Idx {
+					if i == 0 && !cmp.Equal(s1, s2) {
+						modify = append(modify, s2)
+					}
+
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				diff = append(diff, s1)
+			}
+		}
+
+		if i == 0 {
+			remove = diff
+			old, new = new, old
+		} else {
+			add = diff
+		}
+
+		diff = []models.UserColumn{}
+	}
+
+	return
 }
