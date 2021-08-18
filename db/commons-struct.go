@@ -35,6 +35,11 @@ func InsertContents(data interface{}, table string) (sql.Result, error) {
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Insert(tbl).Rows(data)
+
+	if config.DbInfo.Type == "postgres" {
+		ds = ds.Returning(goqu.T(table).Col("IDX"))
+	}
+
 	sql, args, _ := ds.ToSQL()
 	log.Println(sql, args)
 
@@ -42,6 +47,8 @@ func InsertContents(data interface{}, table string) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("InsertContents: ", result)
 
 	return result, nil
 }

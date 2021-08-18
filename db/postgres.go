@@ -476,7 +476,7 @@ func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
 		"WRITER_IDX" VARCHAR(11) NULL DEFAULT NULL,
 		"WRITER_NAME" VARCHAR(64) NULL DEFAULT NULL,
 		"WRITER_PASSWORD" VARCHAR(128) NULL DEFAULT NULL,
-		"REG_DTTM" BIGINT UNSIGNED NULL DEFAULT NULL
+		"REG_DTTM" BIGINT NULL DEFAULT NULL
 	);`
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+`."`+tableInfo.Table.String+`_COMMENT`+`"`)

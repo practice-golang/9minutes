@@ -130,6 +130,8 @@ func AddContentsBasicBoard(c echo.Context) error {
 	lastID, _ := sqlResult.LastInsertId()
 	affRows, _ := sqlResult.RowsAffected()
 
+	log.Println("AddContentsBasicBoard / last-id: ", lastID)
+
 	result := map[string]string{
 		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
