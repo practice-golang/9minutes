@@ -121,20 +121,10 @@ func AddContentsBasicBoard(c echo.Context) error {
 		data.IsMember = null.NewString("N", true)
 	}
 
-	sqlResult, err := db.InsertContents(data, dataMap["table"].(string))
+	result, err := db.InsertContents(data, dataMap["table"].(string))
 	if err != nil {
 		log.Println("InsertContents: ", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
-	}
-
-	lastID, _ := sqlResult.LastInsertId()
-	affRows, _ := sqlResult.RowsAffected()
-
-	log.Println("AddContentsBasicBoard / last-id: ", lastID)
-
-	result := map[string]string{
-		"last-id":       fmt.Sprint(lastID),
-		"affected-rows": fmt.Sprint(affRows),
 	}
 
 	return c.JSON(http.StatusOK, result)
@@ -329,17 +319,9 @@ func AddContentsListCustomBoard(c echo.Context) error {
 
 	isFileUpload := board.CheckUpload(c)
 
-	sqlResult, err := db.InsertContentsMAP(dataBytes, userName, isFileUpload)
+	result, err := db.InsertContentsMAP(dataBytes, userName, isFileUpload)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": err.Error()})
-	}
-
-	lastID, _ := sqlResult.LastInsertId()
-	affRows, _ := sqlResult.RowsAffected()
-
-	result := map[string]string{
-		"affected-rows": fmt.Sprint(affRows),
-		"last-id":       fmt.Sprint(lastID),
 	}
 
 	return c.JSON(http.StatusOK, result)

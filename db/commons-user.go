@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/models"
 	"gopkg.in/guregu/null.v4"
 
@@ -21,10 +22,17 @@ func InsertUserField(data []models.UserColumn) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserFieldTableNoQuotes
+	} else {
+		table = UserFieldTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(UserFieldTable).Rows(data)
+	ds := dbms.Insert(table).Rows(data)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("InsertUserField: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -46,8 +54,15 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserFieldTableNoQuotes
+	} else {
+		table = UserFieldTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(UserFieldTable).Select(search)
+	ds := dbms.From(table).Select(search)
 
 	ex := PrepareWhere(search)
 	if !ex.IsEmpty() {
@@ -93,6 +108,13 @@ func UpdateUserFields(data interface{}) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserFieldTableNoQuotes
+	} else {
+		table = UserFieldTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
 	// var ex goqu.Ex
 	for _, d := range data.([]models.UserColumn) {
@@ -102,10 +124,10 @@ func UpdateUserFields(data interface{}) (sql.Result, error) {
 			return nil, err
 		}
 
-		ds := dbms.Update(UserFieldTable).Set(d).Where(ex)
+		ds := dbms.Update(table).Set(d).Where(ex)
 
 		sql, args, _ := ds.ToSQL()
-		log.Println(sql, args)
+		log.Println("UpdateUserFields: ", sql, args)
 
 		result, err = Dbo.Exec(sql)
 		if err != nil {
@@ -122,12 +144,19 @@ func DeleteUserFieldRow(target, value string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserFieldTableNoQuotes
+	} else {
+		table = UserFieldTable
+	}
+
 	whereEXP := goqu.Ex{target: value}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(UserFieldTable).Where(whereEXP)
+	ds := dbms.Delete(table).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("DeleteUserFieldRow: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -206,11 +235,18 @@ func SelectUserColumnNames() (interface{}, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserFieldTableNoQuotes
+	} else {
+		table = UserFieldTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.From(UserFieldTable).Select([]models.UserColumn{})
+	ds := dbms.From(table).Select([]models.UserColumn{})
 
 	sql, args, _ := ds.ToSQL()
-	log.Println("SelectContentsMAP: ", sql, args)
+	log.Println("SelectUserColumnNames: ", sql, args)
 
 	err = ds.ScanStructs(&colResult)
 	if err != nil {
@@ -242,10 +278,17 @@ func InsertUser(data interface{}) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserTableNoQuotes
+	} else {
+		table = UserTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Insert(UserTable).Rows(rcds)
+	ds := dbms.Insert(table).Rows(rcds)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("InsertUser: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -272,10 +315,17 @@ func UpdateUser(data interface{}) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserTableNoQuotes
+	} else {
+		table = UserTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(UserTable).Set(data).Where(whereEXP)
+	ds := dbms.Update(table).Set(data).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("UpdateUser: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -294,10 +344,17 @@ func DeleteUser(idx string) (sql.Result, error) {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	table := ""
+	if config.DbInfo.Type == "postgres" {
+		table = UserTableNoQuotes
+	} else {
+		table = UserTable
+	}
+
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Delete(UserTable).Where(whereEXP)
+	ds := dbms.Delete(table).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("DeleteUser: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {

@@ -44,7 +44,9 @@ var (
 	BoardManagerTable         = "BOARD_TABLES"
 	BoardManagerTableNoQuotes = "BOARD_TABLES" // makeshift - postgres
 	UserFieldTable            = "USER_FIELDS"
+	UserFieldTableNoQuotes    = "USER_FIELDS" // makeshift - postgres
 	UserTable                 = "USERS"
+	UserTableNoQuotes         = "USERS" // makeshift - postgres
 	Dbo                       *sql.DB
 	DBType                    int
 	UpdateScope               []string     // UPDATE ... WHERE IDX=?

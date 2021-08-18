@@ -19,7 +19,7 @@ import (
 )
 
 // InsertContentsMAP - Crud / custom-board
-func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sql.Result, error) {
+func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (map[string]string, error) {
 	rcds := []goqu.Record{}
 	var allData map[string]interface{}
 
@@ -55,7 +55,7 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {
@@ -65,13 +65,46 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Insert(table).Rows(rcds)
-	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
 
-	result, err := Dbo.Exec(sql)
-	if err != nil {
-		return nil, err
+	var sql string
+	var args []interface{}
+	var lastID, affRows int64
+
+	if dbType == "postgres" {
+		ds = ds.Returning("IDX")
+		sql, args, _ = ds.ToSQL()
+
+		var idx int64
+		rows, err := Dbo.Query(sql, args...)
+		if err != nil {
+			return nil, err
+		}
+
+		var idxs []int64
+		for rows.Next() {
+			_ = rows.Scan(&idx)
+			idxs = append(idxs, idx)
+		}
+
+		lastID = idx
+		affRows = int64(len(idxs))
+	} else {
+		sql, args, _ = ds.ToSQL()
+		sqlResult, err := Dbo.Exec(sql)
+		if err != nil {
+			return nil, err
+		}
+
+		lastID, _ = sqlResult.LastInsertId()
+		affRows, _ = sqlResult.RowsAffected()
 	}
+
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
+	}
+
+	log.Println("InsertContentsMAP: ", sql, args)
 
 	return result, nil
 }
@@ -135,7 +168,7 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 	exps = append(exps, ex.Expression())
 
 	table := jsonBody["table"].(string)
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {
@@ -278,7 +311,7 @@ func UpdateContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {
@@ -336,7 +369,7 @@ func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {
@@ -400,7 +433,7 @@ func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 	log.Println("SelectContentsCountMAP keywords: ", keywords)
 
 	table := jsonBody["table"].(string)
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {

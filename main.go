@@ -82,7 +82,9 @@ func setupDB() error {
 		db.BoardManagerTable = `"` + info.Schema + `"."` + db.BoardManagerTable + `"`
 		db.BoardManagerTableNoQuotes = info.Schema + `.` + db.BoardManagerTableNoQuotes
 		db.UserFieldTable = `"` + info.Schema + `"."` + db.UserFieldTable + `"`
+		db.UserFieldTableNoQuotes = info.Schema + `.` + db.UserFieldTableNoQuotes
 		db.UserTable = `"` + info.Schema + `"."` + db.UserTable + `"`
+		db.UserTableNoQuotes = info.Schema + `.` + db.UserTableNoQuotes
 	case "sqlserver":
 		db.DBType = db.SQLSERVER
 		db.Dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",

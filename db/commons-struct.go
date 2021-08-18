@@ -18,15 +18,17 @@ import (
 )
 
 // InsertContents - Crud contents / basic-board
-func InsertContents(data interface{}, table string) (sql.Result, error) {
+func InsertContents(data interface{}, table string) (map[string]string, error) {
 	dbType, err := getDialect()
 	if err != nil {
 		log.Println("ERR Select DBType: ", err)
 	}
 
+	log.Println("InsertContents: ", dbType)
+
 	tbl := table
-	if config.DbInfo.Type != "sqlite" {
-		if config.DbInfo.Type == "postgres" {
+	if dbType != "sqlite3" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else {
 			tbl = DatabaseName + "." + tbl
@@ -36,19 +38,45 @@ func InsertContents(data interface{}, table string) (sql.Result, error) {
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Insert(tbl).Rows(data)
 
-	if config.DbInfo.Type == "postgres" {
-		ds = ds.Returning(goqu.T(table).Col("IDX"))
+	var sql string
+	var args []interface{}
+	var lastID, affRows int64
+
+	if dbType == "postgres" {
+		ds = ds.Returning("IDX")
+		sql, args, _ = ds.ToSQL()
+
+		var idx int64
+		rows, err := Dbo.Query(sql, args...)
+		if err != nil {
+			return nil, err
+		}
+
+		var idxs []int64
+		for rows.Next() {
+			_ = rows.Scan(&idx)
+			idxs = append(idxs, idx)
+		}
+
+		lastID = idx
+		affRows = int64(len(idxs))
+	} else {
+		sql, args, _ = ds.ToSQL()
+		sqlResult, err := Dbo.Exec(sql)
+		if err != nil {
+			return nil, err
+		}
+
+		lastID, _ = sqlResult.LastInsertId()
+		affRows, _ = sqlResult.RowsAffected()
 	}
 
-	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
-
-	result, err := Dbo.Exec(sql)
-	if err != nil {
-		return nil, err
+	result := map[string]string{
+		"last-id":       fmt.Sprint(lastID),
+		"affected-rows": fmt.Sprint(affRows),
 	}
 
-	log.Println("InsertContents: ", result)
+	log.Println("InsertContents: ", sql, args)
 
 	return result, nil
 }
@@ -71,7 +99,7 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 	}
 
 	tbl := table
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else {
@@ -110,7 +138,7 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 	}
 
 	tbl := table
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else {
@@ -156,7 +184,7 @@ func SelectContents(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String
-	if config.DbInfo.Type != "sqlite" {
+	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else {
@@ -255,7 +283,7 @@ func SelectContentsCount(search interface{}) (uint, error) {
 	switch search := search.(type) {
 	case models.ContentSearch:
 		table = search.Table.String
-		if config.DbInfo.Type != "sqlite" {
+		if dbType != "sqlite3" {
 			if config.DbInfo.Type == "postgres" {
 				table = config.DbInfo.Schema + "." + table
 			} else {

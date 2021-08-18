@@ -561,7 +561,7 @@ func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fields
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
-	log.Println("MySQL/EditUserTableFields: ", sql)
+	log.Println("Postgres/EditUserTableFields: ", sql)
 
 	if sql == "" {
 		if len(modify) > 0 {
