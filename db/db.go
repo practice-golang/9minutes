@@ -48,6 +48,7 @@ var (
 	UserFieldTableNoQuotes    = "USER_FIELDS" // makeshift - postgres
 	UserTable                 = "USERS"
 	UserTableNoQuotes         = "USERS" // makeshift - postgres
+	UserTableName             = "USERS" // makeshift - sqlserver
 	Dbo                       *sql.DB
 	DBType                    int
 	UpdateScope               []string     // UPDATE ... WHERE IDX=?
