@@ -46,6 +46,7 @@ var (
 	BoardManagerTableName     = "BOARD_TABLES" // makeshift - sqlserver
 	UserFieldTable            = "USER_FIELDS"
 	UserFieldTableNoQuotes    = "USER_FIELDS" // makeshift - postgres
+	UserFieldTableName        = "USER_FIELDS" // makeshift - sqlserver
 	UserTable                 = "USERS"
 	UserTableNoQuotes         = "USERS" // makeshift - postgres
 	UserTableName             = "USERS" // makeshift - sqlserver

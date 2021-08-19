@@ -39,20 +39,23 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 		FROM sys.databases
 		WHERE name=N'#DATABASE'
 	)
-	CREATE DATABASE [#DATABASE]
+	CREATE DATABASE "#DATABASE"
 	-- GO
 	`
 	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+
+	log.Println("Sqlserver/CreateBoardManagerTable: ", sql)
+
 	_, err := Dbo.Exec(sql)
 	if err != nil {
 		return err
 	}
 
 	if recreate {
-		sql = `USE #DATABASE`
+		sql = `USE "#DATABASE"`
 		sql += `
 		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
-		DROP TABLE #TABLE_NAME
+		DROP TABLE "#TABLE_NAME"
 		-- GO
 		`
 
@@ -65,10 +68,10 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 		}
 	}
 
-	sql = `USE #DATABASE`
+	sql = `USE "#DATABASE"`
 	sql += `
 	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
-	CREATE TABLE #TABLE_NAME (
+	CREATE TABLE "#TABLE_NAME" (
 		IDX INT NOT NULL IDENTITY PRIMARY KEY,
 		NAME VARCHAR(128) NOT NULL,
 		PRICE DECIMAL(10,2) NOT NULL,
@@ -78,7 +81,9 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 	--GO`
 
 	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTable)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", BoardManagerTableName)
+
+	log.Println("Sqlserver/CreateBoardManagerTable: ", sql)
 
 	_, err = Dbo.Exec(sql)
 	if err != nil {
@@ -95,7 +100,7 @@ func (d *Sqlserver) CreateUserTable(recreate bool) error {
 		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
 	}
 	sql += `
-	CREATE TABLE IF NOT EXISTS "#TABLE_NAME" (
+	CREATE TABLE "#TABLE_NAME" (
 		"IDX"			INTEGER,
 		"NAME"			TEXT,
 		"CODE"			TEXT,
@@ -126,25 +131,28 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 		FROM sys.databases
 		WHERE name=N'#DATABASE'
 	)
-	CREATE DATABASE [#DATABASE]
+	CREATE DATABASE "#DATABASE"
 	-- GO
 	`
 	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	log.Println("Sqlserver/CreateUserFieldTable: ", sql)
+
 	_, err := Dbo.Exec(sql)
 	if err != nil {
 		return err
 	}
 
 	if recreate {
-		sql = `USE #DATABASE`
+		sql = `USE "#DATABASE"`
 		sql += `
 		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
-		DROP TABLE #TABLE_NAME
+		DROP TABLE "#TABLE_NAME"
 		-- GO
 		`
 
 		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTableName)
+		log.Println("Sqlserver/CreateUserFieldTable: ", sql)
 
 		_, err := Dbo.Exec(sql)
 		if err != nil {
@@ -152,10 +160,10 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 		}
 	}
 
-	sql = `USE #DATABASE`
+	sql = `USE "#DATABASE"`
 	sql += `
 	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
-	CREATE TABLE #TABLE_NAME (
+	CREATE TABLE "#TABLE_NAME" (
 		IDX INT NOT NULL IDENTITY PRIMARY KEY,
 		NAME VARCHAR(128) NOT NULL,
 		PRICE DECIMAL(10,2) NOT NULL,
@@ -165,7 +173,8 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 	--GO`
 
 	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTableName)
+	log.Println("Sqlserver/CreateUserFieldTable: ", sql)
 
 	_, err = Dbo.Exec(sql)
 	if err != nil {
@@ -228,7 +237,7 @@ func (d *Sqlserver) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) 
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTable)
 
-	log.Println("Sqlite/DeleteUserTableFields: ", sql)
+	log.Println("Sqlserver/DeleteUserTableFields: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
