@@ -285,12 +285,12 @@ func SelectComments(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String + "_COMMENT"
-	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
-			table = config.DbInfo.Schema + "." + table
-		} else {
-			table = DatabaseName + "." + table
-		}
+	if config.DbInfo.Type == "postgres" {
+		table = config.DbInfo.Schema + "." + table
+	} else if dbType == "sqlserver" {
+		table = DatabaseName + ".dbo." + table
+	} else {
+		table = DatabaseName + "." + table
 	}
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Comment list
@@ -367,6 +367,8 @@ func InsertComment(data interface{}, table string) (sql.Result, error) {
 	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
+		} else if dbType == "sqlserver" {
+			tbl = DatabaseName + ".dbo." + tbl
 		} else {
 			tbl = DatabaseName + "." + tbl
 		}
@@ -407,6 +409,8 @@ func UpdateComment(data interface{}, table string) (sql.Result, error) {
 	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
+		} else if dbType == "sqlserver" {
+			tbl = DatabaseName + ".dbo." + tbl
 		} else {
 			tbl = DatabaseName + "." + tbl
 		}
@@ -446,6 +450,8 @@ func DeleteComment(data interface{}, table string) (sql.Result, error) {
 	if dbType != "sqlite3" {
 		if config.DbInfo.Type == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
+		} else if dbType == "sqlserver" {
+			tbl = DatabaseName + ".dbo." + tbl
 		} else {
 			tbl = DatabaseName + "." + tbl
 		}

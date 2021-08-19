@@ -73,10 +73,15 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
 	CREATE TABLE "#TABLE_NAME" (
 		IDX INT NOT NULL IDENTITY PRIMARY KEY,
-		NAME VARCHAR(128) NOT NULL,
-		PRICE DECIMAL(10,2) NOT NULL,
-		AUTHOR VARCHAR(128) NOT NULL,
-		ISBN VARCHAR(128) NOT NULL UNIQUE,
+		NAME VARCHAR(128) NULL DEFAULT NULL,
+		CODE VARCHAR(64) NULL DEFAULT NULL,
+		TYPE VARCHAR(64) NULL DEFAULT NULL,
+		"TABLE" VARCHAR(64) NULL DEFAULT NULL,
+		GRANT_READ VARCHAR(16) NULL DEFAULT NULL,
+		GRANT_WRITE VARCHAR(16) NULL DEFAULT NULL,
+		GRANT_COMMENT VARCHAR(16) NULL DEFAULT NULL,
+		FILE_UPLOAD VARCHAR(2) NULL DEFAULT NULL,
+		FIELDS TEXT NULL DEFAULT NULL,
 	)
 	--GO`
 
@@ -95,24 +100,63 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 
 // CreateUserTable - Create user table
 func (d *Sqlserver) CreateUserTable(recreate bool) error {
-	sql := ""
-	if recreate {
-		sql += `DROP TABLE IF EXISTS "#TABLE_NAME";`
-	}
-	sql += `
-	CREATE TABLE "#TABLE_NAME" (
-		"IDX"			INTEGER,
-		"NAME"			TEXT,
-		"CODE"			TEXT,
-		"TYPE"			TEXT,
-		"COLUMN_NAME"	TEXT UNIQUE,
-		"ORDER"			INTEGER,
-		PRIMARY KEY("IDX" AUTOINCREMENT)
-	);`
+	sql := `
+	USE master
+	-- GO
 
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserFieldTable)
+	IF NOT EXISTS(
+		SELECT name
+		FROM sys.databases
+		WHERE name=N'#DATABASE'
+	)
+	CREATE DATABASE "#DATABASE"
+	-- GO
+	`
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	log.Println("Sqlserver/CreateUserFieldTable: ", sql)
 
 	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	if recreate {
+		sql = `USE "#DATABASE"`
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE "#TABLE_NAME"
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+		log.Println("Sqlserver/CreateUserFieldTable: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE "#DATABASE"`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE "#TABLE_NAME" (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		USERNAME VARCHAR(128) NULL DEFAULT NULL,
+		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		EMAIL VARCHAR(128) NULL DEFAULT NULL,
+		ADMIN VARCHAR(2) NULL DEFAULT NULL,
+		APPROVAL VARCHAR(2) NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,
+	)
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+	log.Println("Sqlserver/CreateUserTable: ", sql)
+
+	_, err = Dbo.Exec(sql)
 	if err != nil {
 		return err
 	}
@@ -165,10 +209,14 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
 	CREATE TABLE "#TABLE_NAME" (
 		IDX INT NOT NULL IDENTITY PRIMARY KEY,
-		NAME VARCHAR(128) NOT NULL,
-		PRICE DECIMAL(10,2) NOT NULL,
-		AUTHOR VARCHAR(128) NOT NULL,
-		ISBN VARCHAR(128) NOT NULL UNIQUE,
+		TITLE VARCHAR(256) NULL DEFAULT NULL,
+		CONTENT TEXT NULL DEFAULT NULL,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		FILES TEXT NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,
 	)
 	--GO`
 
@@ -186,6 +234,50 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 
 // CreateBasicBoard - Create board table
 func (d *Sqlserver) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
+	sql := ``
+	if recreate {
+		sql = `USE "#DATABASE"`
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE "#TABLE_NAME"
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+		log.Println("Sqlserver/CreateBasicBoard: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE "#DATABASE"`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE "#TABLE_NAME" (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		TITLE VARCHAR(256) NULL DEFAULT NULL,
+		CONTENT TEXT NULL DEFAULT NULL,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		FILES TEXT NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,
+	)
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String)
+	log.Println("Sqlserver/CreateBasicBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
