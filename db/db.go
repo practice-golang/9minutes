@@ -43,6 +43,7 @@ var (
 	DatabaseName              = "9minutes"
 	BoardManagerTable         = "BOARD_TABLES"
 	BoardManagerTableNoQuotes = "BOARD_TABLES" // makeshift - postgres
+	BoardManagerTableName     = "BOARD_TABLES" // makeshift - sqlserver
 	UserFieldTable            = "USER_FIELDS"
 	UserFieldTableNoQuotes    = "USER_FIELDS" // makeshift - postgres
 	UserTable                 = "USERS"
