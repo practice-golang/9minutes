@@ -313,7 +313,9 @@
                     // await tinymce.activeEditor.setContent(this.contents.content)
 
                     if (this.mode == "edit") {
-                        this.files = JSON.parse(this.contents["FILES"])
+                        if (this.contents["FILES"] != undefined) {
+                            this.files = JSON.parse(this.contents["FILES"])
+                        }
                         this.isShow = true
                     }
                 }

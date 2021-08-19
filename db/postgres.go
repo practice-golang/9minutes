@@ -513,11 +513,11 @@ func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fields
 	log.Println("User fields Remove: ", remove)
 	log.Println("User fields Modify: ", modify)
 
-	sql := ""
+	sql := ``
 	if len(add) > 0 {
 		for _, a := range add {
 			sql += `ALTER TABLE #TABLE_NAME `
-			sql += ` ADD COLUMN ` + "`" + a.ColumnName.String + "`" + ` `
+			sql += ` ADD COLUMN "` + a.ColumnName.String + `" `
 			switch a.Type.String {
 			// cusom-tablelist
 			case "text":
@@ -535,7 +535,7 @@ func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fields
 	if len(remove) > 0 && !funk.Contains(notUse, "remove") {
 		sqlRemove := `ALTER TABLE #TABLE_NAME `
 		for _, r := range remove {
-			sqlRemove += ` DROP COLUMN ` + "`" + r.ColumnName.String + "`" + `, `
+			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
 		}
 		if strings.Contains(sqlRemove, "DROP COLUMN") {
 			sqlRemove = sqlRemove[:len(sqlRemove)-2]
@@ -550,7 +550,7 @@ func (d *Postgres) EditUserTableFields(fieldsInfoOld []models.UserColumn, fields
 				if nm.Idx.Int64 == om.Idx.Int64 {
 					if nm.ColumnName.String != om.ColumnName.String {
 						sqlModify += `ALTER TABLE #TABLE_NAME `
-						sqlModify += ` CHANGE COLUMN ` + "`" + om.ColumnName.String + "`" + ` TO ` + "`" + nm.ColumnName.String + "`" + `; `
+						sqlModify += ` CHANGE COLUMN "` + om.ColumnName.String + `" TO "` + nm.ColumnName.String + `"; `
 					}
 					break
 				}
@@ -584,9 +584,9 @@ func (d *Postgres) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) e
 	sql := ""
 
 	if len(remove) > 0 {
-		sqlRemove := `ALTER TABLE "#TABLE_NAME" `
+		sqlRemove := `ALTER TABLE #TABLE_NAME `
 		for _, r := range remove {
-			sqlRemove += ` DROP COLUMN ` + r.ColumnName.String + `, `
+			sqlRemove += ` DROP COLUMN "` + r.ColumnName.String + `", `
 		}
 		if strings.Contains(sqlRemove, "DROP COLUMN") {
 			sqlRemove = sqlRemove[:len(sqlRemove)-2]
@@ -610,10 +610,10 @@ func (d *Postgres) DeleteUserTableFields(fieldsInfoRemove []models.UserColumn) e
 func (d *Postgres) AddUserTableFields(fields []models.UserColumn) error {
 	sql := ""
 	for _, a := range fields {
-		sql += `ALTER TABLE "#TABLE_NAME" ADD COLUMN ` + a.ColumnName.String + ` `
+		sql += `ALTER TABLE #TABLE_NAME ADD COLUMN "` + a.ColumnName.String + `" `
 		switch a.Type.String {
 		case "text":
-			sql += ` TEXT`
+			sql += ` VARCHAR(128)`
 		case "number":
 			sql += ` INTEGER`
 		case "real":

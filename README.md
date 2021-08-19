@@ -54,19 +54,21 @@ Current, Sqlite only
 - [x] Sign up
 - [ ] Other DB except sqlite
     - [x] MySQL
-    - [ ] Postgres
+    - [x] Postgres
     - [ ] MS-SQL
-- [ ] Block duplicate board table name
 - [ ] API - list of board columns
-- [ ] User page
-- [ ] User defined template
-- [ ] Add reg/last modified datetime, read count
 - [ ] Code cleaning
     - [ ] Password hash
     - [ ] Diet dup codes
+- [ ] User defined template
+- [ ] Block duplicate board table name
+- [ ] Add reg/last modified datetime, read count
+- [ ] ~~Test~~
+- [ ] ~~File downloader~~
+- [ ] ~~Delete elete post with attached files~~
 - [ ] ~~Email sending~~
 - [ ] ~~Menu~~
-- [ ] ~~Test~~
+- [ ] ~~User page~~
 
 
 ## License

@@ -34,7 +34,7 @@
                 <tr @keyup.enter="addData()">
                     <td v-for="f, k in columns">
                         <!-- <template v-if="isBaseColumn(f)"> -->
-                            <input v-if="f.json != 'idx' && isBaseColumn(f)" v-model="contentsAdd[f.json]" />
+                            <input v-if="f.json != 'idx' && isBaseColumn(f)" v-model="contentsAdd[f.column]" />
                         <!-- </template> -->
                     </td>
                     <td>

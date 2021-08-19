@@ -74,6 +74,8 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (ma
 		ds = ds.Returning("IDX")
 		sql, args, _ = ds.ToSQL()
 
+		log.Println("InsertContentsMAP: ", sql, args)
+
 		var idx int64
 		rows, err := Dbo.Query(sql, args...)
 		if err != nil {
@@ -90,6 +92,9 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (ma
 		affRows = int64(len(idxs))
 	} else {
 		sql, args, _ = ds.ToSQL()
+
+		log.Println("InsertContentsMAP: ", sql, args)
+
 		sqlResult, err := Dbo.Exec(sql)
 		if err != nil {
 			return nil, err
@@ -103,8 +108,6 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (ma
 		"last-id":       fmt.Sprint(lastID),
 		"affected-rows": fmt.Sprint(affRows),
 	}
-
-	log.Println("InsertContentsMAP: ", sql, args)
 
 	return result, nil
 }
