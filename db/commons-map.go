@@ -90,6 +90,26 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (ma
 
 		lastID = idx
 		affRows = int64(len(idxs))
+	} else if dbType == "sqlserver" {
+		sql, args, _ = ds.ToSQL()
+		sql = sql + " SELECT SCOPE_IDENTITY()" // AS InsertedID
+
+		log.Println("InsertContentsMAP: ", sql, args)
+
+		var idx int64
+		rows, err := Dbo.Query(sql, args...)
+		if err != nil {
+			return nil, err
+		}
+
+		var idxs []int64
+		for rows.Next() {
+			_ = rows.Scan(&idx)
+			idxs = append(idxs, idx)
+		}
+
+		lastID = idx
+		affRows = int64(len(idxs))
 	} else {
 		sql, args, _ = ds.ToSQL()
 
