@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -98,72 +100,6 @@ func (d *Sqlserver) CreateBoardManagerTable(recreate bool) error {
 	return nil
 }
 
-// CreateUserTable - Create user table
-func (d *Sqlserver) CreateUserTable(recreate bool) error {
-	sql := `
-	USE master
-	-- GO
-
-	IF NOT EXISTS(
-		SELECT name
-		FROM sys.databases
-		WHERE name=N'#DATABASE'
-	)
-	CREATE DATABASE "#DATABASE"
-	-- GO
-	`
-	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-	log.Println("Sqlserver/CreateUserFieldTable: ", sql)
-
-	_, err := Dbo.Exec(sql)
-	if err != nil {
-		return err
-	}
-
-	if recreate {
-		sql = `USE "#DATABASE"`
-		sql += `
-		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
-		DROP TABLE "#TABLE_NAME"
-		-- GO
-		`
-
-		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
-		log.Println("Sqlserver/CreateUserFieldTable: ", sql)
-
-		_, err := Dbo.Exec(sql)
-		if err != nil {
-			return err
-		}
-	}
-
-	sql = `USE "#DATABASE"`
-	sql += `
-	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
-	CREATE TABLE "#TABLE_NAME" (
-		IDX INT NOT NULL IDENTITY PRIMARY KEY,
-		USERNAME VARCHAR(128) NULL DEFAULT NULL,
-		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
-		EMAIL VARCHAR(128) NULL DEFAULT NULL,
-		ADMIN VARCHAR(2) NULL DEFAULT NULL,
-		APPROVAL VARCHAR(2) NULL DEFAULT NULL,
-		REG_DTTM BIGINT NULL DEFAULT NULL,
-	)
-	--GO`
-
-	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
-	log.Println("Sqlserver/CreateUserTable: ", sql)
-
-	_, err = Dbo.Exec(sql)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // CreateUserFieldTable - Create user manager table
 func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 	sql := `
@@ -232,6 +168,89 @@ func (d *Sqlserver) CreateUserFieldTable(recreate bool) error {
 	return nil
 }
 
+// CreateUserTable - Create user table
+func (d *Sqlserver) CreateUserTable(recreate bool) error {
+	sql := `
+	USE master
+	-- GO
+
+	IF NOT EXISTS(
+		SELECT name
+		FROM sys.databases
+		WHERE name=N'#DATABASE'
+	)
+	CREATE DATABASE "#DATABASE"
+	-- GO
+	`
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	log.Println("Sqlserver/CreateUserFieldTable: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	if recreate {
+		sql = `USE "#DATABASE"`
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE "#TABLE_NAME"
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+		log.Println("Sqlserver/CreateUserFieldTable: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE "#DATABASE"`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE "#TABLE_NAME" (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		USERNAME VARCHAR(128) UNIQUE NULL DEFAULT NULL,
+		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		EMAIL VARCHAR(128) UNIQUE NULL DEFAULT NULL,
+		ADMIN VARCHAR(2) NULL DEFAULT NULL,
+		APPROVAL VARCHAR(2) NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,
+	)
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+	log.Println("Sqlserver/CreateUserTable: ", sql)
+
+	_, err = Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	// Add temp admin
+	sql = `
+	USE "#DATABASE"
+	IF NOT EXISTS (SELECT TOP 1 * FROM #TABLE_NAME WHERE USERNAME = 'admin')
+	INSERT INTO #TABLE_NAME (USERNAME, "PASSWORD", EMAIL, "ADMIN", APPROVAL)
+		VALUES ('admin', 'admin', 'admin@please.modify', 'Y', 'Y')
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+
+	_, err = Dbo.Exec(sql)
+	if err != nil {
+		log.Println(sql)
+		return err
+	}
+
+	return nil
+}
+
 // CreateBasicBoard - Create board table
 func (d *Sqlserver) CreateBasicBoard(tableInfo models.Board, recreate bool) error {
 	sql := ``
@@ -283,6 +302,90 @@ func (d *Sqlserver) CreateBasicBoard(tableInfo models.Board, recreate bool) erro
 
 // CreateCustomBoard - Create board table
 func (d *Sqlserver) CreateCustomBoard(tableInfo models.Board, fields []models.Field, recreate bool) error {
+	sql := `USE "#DATABASE"`
+	if recreate {
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE "#TABLE_NAME"
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+		log.Println("Sqlserver/CreateUserFieldTable: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE "#DATABASE"`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE "#TABLE_NAME" (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		FILES TEXT NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,`
+
+	if len(fields) > 0 {
+		commentCount := 0
+
+		for _, f := range fields {
+			// log.Println(f.Name.String, f.Type.String, f.Order.Int64)
+			if f.Type.String == "comment" {
+				commentCount++
+			}
+
+			colType := ""
+			switch f.Type.String {
+			// cusom-tablelist
+			case "text":
+				colType = "TEXT"
+			case "number":
+				colType = "INT"
+			case "real", "double":
+				colType = "DECIMAL(20,20)"
+
+			// cusom-board
+			case "title", "author", "input":
+				colType = "VARCHAR(512)"
+			case "editor":
+				colType = "TEXT"
+			case "comment":
+				colType = "VARCHAR(4)"
+				_ = d.CreateComment(tableInfo, false)
+
+			default:
+				colType = "VARCHAR(128)"
+			}
+
+			sql += fmt.Sprintf(`%s		`+"`%s`"+`		%s,`, "\n", f.ColumnName.String, colType)
+		}
+
+		if commentCount > 1 {
+			return errors.New("available only 1 comment")
+		}
+	}
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", UserTableName)
+
+	sql += `
+	)
+	--GO`
+
+	log.Println("Sqlserver/CreateCustomBoard: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -303,6 +406,49 @@ func (d *Sqlserver) DeleteBoard(tableName string) error {
 
 // CreateComment - Create comment table
 func (d *Sqlserver) CreateComment(tableInfo models.Board, recreate bool) error {
+	sql := `USE "#DATABASE"`
+	if recreate {
+		sql += `
+		IF OBJECT_ID('#TABLE_NAME','U') IS NOT NULL
+		DROP TABLE "#TABLE_NAME"
+		-- GO
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT")
+		log.Println("Sqlserver/CreateComment: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+
+	sql = `USE "#DATABASE"`
+	sql += `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NULL
+	CREATE TABLE "#TABLE_NAME" (
+		IDX INT NOT NULL IDENTITY PRIMARY KEY,
+		BOARD_IDX INT NOT NULL,
+		CONTENT TEXT NULL DEFAULT NULL,
+		IS_MEMBER VARCHAR(2) NULL DEFAULT NULL,
+		WRITER_IDX VARCHAR(11) NULL DEFAULT NULL,
+		WRITER_NAME VARCHAR(64) NULL DEFAULT NULL,
+		WRITER_PASSWORD VARCHAR(128) NULL DEFAULT NULL,
+		REG_DTTM BIGINT NULL DEFAULT NULL,
+	)
+	--GO`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT")
+
+	log.Println("Sqlserver/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

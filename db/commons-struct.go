@@ -30,6 +30,8 @@ func InsertContents(data interface{}, table string) (map[string]string, error) {
 	if dbType != "sqlite3" {
 		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
+		} else if dbType == "sqlserver" {
+			tbl = DatabaseName + ".dbo." + tbl
 		} else {
 			tbl = DatabaseName + "." + tbl
 		}
