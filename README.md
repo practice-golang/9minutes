@@ -42,6 +42,9 @@ See `html` files in `/static` as pages and `/templates` as templates
 ## DB
 
 Sqlite, MySQL, Postgres, SQL Server
+* SQLite - Using non-cgo package https://gitlab.com/cznic/sqlite
+* MySQL - Tested MariaDB 10.5
+* Postgres - Tested PostgreSQL 12.3
 * SQL Server - Tested MS SQL Server express 2014 & 2019
 
 
