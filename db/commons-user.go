@@ -236,8 +236,10 @@ func SelectUserColumnNames() (interface{}, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserFieldTableNoQuotes
+	} else if dbType == "sqlserver" {
+		table = DatabaseName + ".dbo." + UserFieldTableName
 	} else {
 		table = UserFieldTable
 	}
@@ -302,11 +304,14 @@ func InsertUser(data interface{}) (sql.Result, error) {
 func UpdateUser(data interface{}) (sql.Result, error) {
 	whereEXP := goqu.Ex{}
 
+	rcd := goqu.Record{}
 	if data != nil {
 		for k, d := range data.(map[string]interface{}) {
 			if k == "IDX" {
 				whereEXP[k] = d
+				continue
 			}
+			rcd[k] = d
 		}
 	}
 
@@ -323,7 +328,7 @@ func UpdateUser(data interface{}) (sql.Result, error) {
 	}
 
 	dbms := goqu.New(dbType, Dbo)
-	ds := dbms.Update(table).Set(data).Where(whereEXP)
+	ds := dbms.Update(table).Set(rcd).Where(whereEXP)
 	sql, args, _ := ds.ToSQL()
 	log.Println("UpdateUser: ", sql, args)
 

@@ -44,7 +44,7 @@ func InsertData(data interface{}) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = BoardManagerTableNoQuotes
 	} else {
 		table = BoardManagerTable

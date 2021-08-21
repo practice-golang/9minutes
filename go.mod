@@ -8,6 +8,7 @@ require (
 	github.com/doug-martin/goqu/v9 v9.13.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/go-cmp v0.5.6
+	github.com/hashicorp/hcl v1.0.0
 	github.com/json-iterator/go v1.1.11
 	github.com/labstack/echo/v4 v4.3.0
 	github.com/lib/pq v1.10.2

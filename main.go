@@ -91,6 +91,8 @@ func setupDB() error {
 			info.User, info.Password, info.Server, info.Port, info.Database)
 		db.DatabaseName = info.Database
 		db.BoardManagerTable = db.DatabaseName + ".dbo." + db.BoardManagerTable
+		db.UserFieldTable = db.DatabaseName + ".dbo." + db.UserFieldTable
+		db.UserTable = db.DatabaseName + ".dbo." + db.UserTable
 	default:
 		log.Fatal("nothing to support DB")
 	}

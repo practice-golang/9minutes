@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"strconv"
+
 	jsoniter "github.com/json-iterator/go"
 	"github.com/labstack/echo/v4"
+	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/models"
 )
 
@@ -77,7 +80,12 @@ func prepareSelectData(data interface{}) []models.Board {
 			switch fields := result[i].Fields.(type) {
 			case string:
 				if fields != "" {
-					err := json.Unmarshal([]byte(fields), &rawJson)
+					fds := fields
+					if config.DbInfo.Type == "sqlserver" {
+						fds, _ = strconv.Unquote(`"` + fields + `"`)
+					}
+
+					err := json.Unmarshal([]byte(fds), &rawJson)
 					if err != nil {
 						log.Println("prepareSelectData Unmarshal: ", err)
 					}

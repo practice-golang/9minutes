@@ -303,6 +303,7 @@ func UpdateContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 		for k, d := range allData["data"].(map[string]interface{}) {
 			if k == "IDX" {
 				whereEXP["IDX"] = d
+				continue
 			}
 			if k == "WRITER_NAME" {
 				whereEXP["WRITER_NAME"] = d
