@@ -648,6 +648,26 @@ func (d *Sqlserver) CreateComment(tableInfo models.Board, recreate bool) error {
 	return nil
 }
 
+// EditComment - Edit a comment table
+func (d *Sqlserver) EditComment(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	sql := `
+	USE "#DATABASE"
+	EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW"`
+
+	sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String+"_COMMENT")
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String+"_COMMENT")
+
+	log.Println("Sqlserver/EditComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // DeleteComment - Delete a comment table
 func (d *Sqlserver) DeleteComment(tableName string) error {
 	sql := `DROP TABLE IF EXISTS ` + "`#TABLE_NAME`" + `;`

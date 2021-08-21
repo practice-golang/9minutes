@@ -154,6 +154,7 @@ func EditBoard(c echo.Context) error {
 				return c.JSON(http.StatusBadRequest, map[string]string{"msg": "Both tables are same"})
 			} else if boardPrevious.Table.String != board.Table.String {
 				db.Dbi.EditBasicBoard(boardPrevious, board)
+				db.Dbi.EditComment(boardPrevious, board)
 			}
 		case "custom-board":
 			log.Println("custom-board")

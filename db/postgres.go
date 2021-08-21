@@ -362,8 +362,8 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 		for _, nc := range modify {
 			for _, ocINF := range tableInfoOld.Fields.([]interface{}) {
 				oc := ocINF.(map[string]interface{})
-				if nc["idx"].(float64) == oc["idx"].(float64) {
-					if nc["column"].(string) != oc["column"].(string) {
+				if oc["idx"].(float64) == nc["idx"].(float64) {
+					if oc["column"].(string) != nc["column"].(string) {
 						if oc["type"].(string) == "comment" {
 							sqlCommentRename += `ALTER TABLE #TABLE_NAME_OLD RENAME TO #TABLE_NAME_NEW; `
 
@@ -482,6 +482,24 @@ func (d *Postgres) CreateComment(tableInfo models.Board, recreate bool) error {
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+`."`+tableInfo.Table.String+`_COMMENT`+`"`)
 
 	log.Println("Postgres/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Not use yet
+// EditComment - Edit comment table
+func (d *Postgres) EditComment(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	sql := `ALTER TABLE #TABLE_NAME_OLD RENAME TO #TABLE_NAME_NEW;`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", DatabaseName+`."`+tableInfoOld.Table.String+`_COMMENT"`)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", `"`+tableInfoNew.Table.String+`_COMMENT"`)
+
+	log.Println("Postgres/EditComment: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {

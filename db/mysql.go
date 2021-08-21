@@ -320,39 +320,40 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 	log.Println("Modify: ", modify)
 
 	sql := ""
+	sqlTableRename := ""
 	if tableInfoOld.Table.String != tableInfoNew.Table.String {
-		sql = `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
+		sqlTableRename = `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
 
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String)
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String)
+		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
 	}
 
 	sqlAdd := ""
 	if len(add) > 0 {
 		for _, c := range add {
-			sqlAdd += ` ADD COLUMN ` + c["column"].(string) + ` `
+			sqlAdd += " ADD COLUMN `" + c["column"].(string) + "` "
 			switch c["type"].(string) {
 			// cusom-tablelist
 			case "text":
-				sqlAdd += ` TEXT`
+				sqlAdd += `TEXT`
 			case "number":
-				sqlAdd += ` INT(16)`
+				sqlAdd += `INT(16)`
 			case "real":
-				sqlAdd += ` DECIMAL(20,20)`
+				sqlAdd += `DECIMAL(20,20)`
 
 			// cusom-board
 			case "title", "author", "input":
-				sqlAdd += ` VARCHAR(512)`
+				sqlAdd += `VARCHAR(512)`
 			case "editor":
-				sqlAdd += ` TEXT`
+				sqlAdd += `TEXT`
 			case "comment":
-				sqlAdd += ` VARCHAR(4) NULL `
-				_ = d.CreateComment(tableInfoNew, false)
+				sqlAdd += `VARCHAR(4)`
+				_ = d.CreateComment(tableInfoOld, false)
 			default:
-				sqlAdd += ` VARCHAR(128)`
+				sqlAdd += `VARCHAR(128)`
 			}
 
-			sqlAdd += `, `
+			sqlAdd += ` NULL, `
 			// if i < (len(add) - 1) {
 			// 	sqlAdd += `, `
 			// }
@@ -389,26 +390,26 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+oc["column"].(string)+"_COMMENT")
 							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+nc["column"].(string)+"_COMMENT")
 						} else {
-							sqlModify += "CHANGE COLUMN `" + oc["column"].(string) + "` `" + nc["column"].(string) + "`"
+							sqlModify += "CHANGE COLUMN `" + oc["column"].(string) + "` `" + nc["column"].(string) + "` "
 							switch nc["type"].(string) {
 							// cusom-tablelist
 							case "text":
-								sqlModify += ` TEXT`
+								sqlModify += `TEXT`
 							case "number":
-								sqlModify += ` INT(16)`
+								sqlModify += `INT(16)`
 							case "real":
-								sqlModify += ` DECIMAL(20,20)`
+								sqlModify += `DECIMAL(20,20)`
 
 							// cusom-board
 							case "title", "author", "input":
-								sqlModify += ` VARCHAR(512)`
+								sqlModify += `VARCHAR(512)`
 							case "editor":
-								sqlModify += ` TEXT`
+								sqlModify += `TEXT`
 							case "comment":
-								sqlModify += ` VARCHAR(4)`
+								sqlModify += `VARCHAR(4)`
 								_ = d.CreateComment(tableInfoNew, false)
 							default:
-								sqlModify += ` VARCHAR(128)`
+								sqlModify += `VARCHAR(128)`
 							}
 
 							sqlModify += " NULL"
@@ -429,21 +430,57 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 		// sqlModify += `; `
 	}
 
-	if sqlAdd != "" || sqlRemove != "" || sqlModify != "" {
-		sql += `ALTER TABLE ` + "`#TABLE_NAME_NEW`" + ` ` + sqlAdd + sqlRemove + sqlModify
-		sql = sql[:len(sql)-2]
+	if sqlTableRename != "" {
+		log.Println("MySQL/EditCustomBoard: ", sql)
 
-		sql += ";"
+		_, err := Dbo.Exec(sqlTableRename)
+		if err != nil {
+			return err
+		}
+	}
+	if sqlAdd != "" {
+		sql = `
+		ALTER TABLE ` + "`#TABLE_NAME_NEW`" + "\n" + sqlAdd
+		sql = sql[:len(sql)-2] + ";"
+
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+
+		log.Println("MySQL/EditCustomBoard: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+	if sqlRemove != "" {
+		sql = `
+		ALTER TABLE ` + "`#TABLE_NAME_NEW`" + "\n" + sqlRemove
+		sql = sql[:len(sql)-2] + ";"
+
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+
+		log.Println("MySQL/EditCustomBoard: ", sql)
+
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+	if sqlModify != "" {
+		sql = `
+		ALTER TABLE ` + "`#TABLE_NAME_NEW`" + "\n" + sqlModify
+		sql = sql[:len(sql)-2] + ";"
 
 		sql += sqlCommentRename
+
 		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
-	}
 
-	log.Println("MySQL/EditCustomBoard: ", sql)
+		log.Println("MySQL/EditCustomBoard: ", sql)
 
-	_, err := Dbo.Exec(sql)
-	if err != nil {
-		return err
+		_, err := Dbo.Exec(sql)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -488,6 +525,24 @@ func (d *Mysql) CreateComment(tableInfo models.Board, recreate bool) error {
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"."+tableInfo.Table.String+"_COMMENT")
 
 	log.Println("MySQL/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Not use yet
+// EditComment - Edit a comment table
+func (d *Mysql) EditComment(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	sql := `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String+"_COMMENT")
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String+"_COMMENT")
+
+	log.Println("MySQL/EditComment: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {

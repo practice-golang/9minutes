@@ -400,9 +400,26 @@ func (d *Sqlite) CreateComment(tableInfo models.Board, recreate bool) error {
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT_")
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", tableInfo.Table.String+"_COMMENT")
 
 	log.Println("Sqlite/CreateComment: ", sql)
+
+	_, err := Dbo.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// EditComment - Edit a comment table
+func (d *Sqlite) EditComment(tableInfoOld models.Board, tableInfoNew models.Board) error {
+	sql := `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW";`
+
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String+"_COMMENT")
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String+"_COMMENT")
+
+	log.Println("Sqlite/EditComment: ", sql)
 
 	_, err := Dbo.Exec(sql)
 	if err != nil {
