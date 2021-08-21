@@ -41,7 +41,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 
 ## DB
 
-Current, Sqlite only
+Sqlite, MySQL, Postgres, SQL Server
 
 
 ## Todo
