@@ -174,7 +174,6 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 		}
 	} else if !data.WriterPassword.Valid {
-		log.Println("WTF?? ", data.WriterPassword)
 		return c.JSON(http.StatusBadRequest, map[string]string{"msg": "you can not edit: need password"})
 	}
 
@@ -188,7 +187,7 @@ func UpdateContentsBasicBoard(c echo.Context) error {
 	affRows, _ := sqlResult.RowsAffected()
 
 	// if db.DBType == db.SQLITE && lastID == 0 {
-	if lastID == 0 {
+	if lastID < 1 {
 		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
 	}
 
@@ -242,7 +241,7 @@ func DeleteContentsBasicBoard(c echo.Context) error {
 	affRows, _ := sqlResult.RowsAffected()
 
 	// if db.DBType == db.SQLITE && lastID == 0 {
-	if lastID == 0 {
+	if lastID < 1 {
 		lastID, _ = strconv.ParseInt(data.Idx.String, 10, 64)
 	}
 

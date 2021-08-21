@@ -689,21 +689,10 @@
                         swal.fire("Empty", "Choose type", "warning")
                         break
                     default:
-                        this.fieldAdd.order = 8
-                        this.fieldAdd.idx = 1
-                        if (this.modalFields.length > 0) {
-                            this.fieldAdd.order = this.modalFields.length + 2
-
-                            let fields = this.modalFields
-                            fields.sort((first, second) => (first.idx > second.idx) ? 1 : ((second.idx > first.idx) ? -1 : 0))
-                            this.fieldAdd.idx = fields[fields.length - 1].idx + 1
-                            if (this.fieldAdd.length > 0) {
-                                this.fieldAdd.sort((first, second) => (first.order > second.order) ? 1 : ((second.order > first.order) ? -1 : 0))
-                            }
-                        }
+                        this.fieldAdd.order = this.nextFieldOrder
+                        this.fieldAdd.idx = this.nextFieldIdx
 
                         this.modalFields.push(Object.assign({}, this.fieldAdd))
-                        // Vue.set(this.boardEdit.fields, this.boardEdit.fields, this.boardEdit.fields)
                         this.fieldAdd = {}
                         break
                 }

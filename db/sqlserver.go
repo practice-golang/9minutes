@@ -519,8 +519,10 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", oc["column"].(string)+"_COMMENT")
 							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", nc["column"].(string)+"_COMMENT")
 						} else {
-							sqlModify += `ALTER TABLE #TABLE_NAME
-							EXEC sp_rename "#TABLE_NAME".` + oc["column"].(string) + ` ` + nc["column"].(string) + `, 'COLUMN'`
+							sqlModify += `
+							ALTER TABLE #TABLE_NAME
+							EXEC sp_rename 'dbo.#TABLE_NAME.` + oc["column"].(string) + `', '` + nc["column"].(string) + `', 'COLUMN';
+							`
 							if oc["type"].(string) != nc["type"].(string) {
 								colType := `ALTER COLUMN ` + nc["column"].(string) + ` `
 								switch nc["type"].(string) {
@@ -554,17 +556,14 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 				}
 			}
 		}
-		// if strings.Contains(sqlModify, "RENAME COLUMN") {
-		// 	sqlModify = sqlModify[:len(sqlModify)-2]
-		// }
-		// sqlModify += `; `
+
+		if len(sqlModify) > 0 {
+			sqlModify = sqlModify[:len(sqlModify)-2] + `;`
+		}
 	}
 
 	if sqlAdd != "" || sqlRemove != "" || sqlModify != "" {
 		sql += sqlAdd + sqlRemove + sqlModify
-		sql = sql[:len(sql)-2]
-
-		sql += ";"
 
 		sql += sqlCommentRename
 	}
