@@ -56,7 +56,7 @@ Sqlite, MySQL, Postgres, SQL Server
 - [x] Auth - token reissuing
 - [x] File upload
 - [x] Sign up
-- [ ] Other DB except sqlite
+- [x] Other DB except sqlite
     - [x] MySQL
     - [x] Postgres
     - [x] MS-SQL
