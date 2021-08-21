@@ -42,6 +42,7 @@ See `html` files in `/static` as pages and `/templates` as templates
 ## DB
 
 Sqlite, MySQL, Postgres, SQL Server
+* SQL Server - Tested MS SQL Server express 2014 & 2019
 
 
 ## Todo
