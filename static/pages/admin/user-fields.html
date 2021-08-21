@@ -76,7 +76,7 @@
                     </td>
                 </tr>
                 <!-- Edit mode -->
-                <tr @keyup.enter="updateData()" v-else>
+                <tr @keyup.enter="updateColumn()" v-else>
                     <td>{{b.idx}}</td>
                     <td><input v-model="columnEdit.name" /></td>
                     <td><input v-model="columnEdit.code" /></td>

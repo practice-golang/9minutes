@@ -581,6 +581,7 @@ func (d *Mysql) EditUserTableFields(fieldsInfoOld []models.UserColumn, fieldsInf
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
