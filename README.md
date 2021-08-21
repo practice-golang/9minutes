@@ -61,7 +61,7 @@ Sqlite, MySQL, Postgres, SQL Server
     - [x] Postgres
     - [x] MS-SQL
 - [ ] Bug - correct comment table renaming
-- [ ] API - list of board columns
+- [ ] API - Add get list of board columns
 - [ ] Code cleaning
     - [ ] Password hash
     - [ ] Diet dup codes
