@@ -55,7 +55,8 @@ Current, Sqlite only
 - [ ] Other DB except sqlite
     - [x] MySQL
     - [x] Postgres
-    - [ ] MS-SQL
+    - [x] MS-SQL
+- [ ] Bug - correct comment table renaming
 - [ ] API - list of board columns
 - [ ] Code cleaning
     - [ ] Password hash
