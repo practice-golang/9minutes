@@ -55,7 +55,7 @@ func InsertContentsMAP(data interface{}, userName string, isFileUpload bool) (ma
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = config.DbInfo.Schema + "." + table
 	} else if dbType == "sqlserver" {
 		table = DatabaseName + ".dbo." + table
@@ -192,7 +192,7 @@ func SelectContentsMAP(search interface{}) (interface{}, error) {
 
 	table := jsonBody["table"].(string)
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			table = config.DbInfo.Schema + "." + table
 		} else if dbType == "sqlserver" {
 			table = DatabaseName + ".dbo." + table
@@ -337,7 +337,7 @@ func UpdateContentsMAP(data interface{}, userName string, isFileUpload bool) (sq
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = config.DbInfo.Schema + "." + table
 	} else if dbType == "sqlserver" {
 		table = DatabaseName + ".dbo." + table
@@ -395,7 +395,7 @@ func DeleteContentsMAP(data interface{}, userName string) (sql.Result, error) {
 	}
 
 	table := allData["table"].(string)
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = config.DbInfo.Schema + "." + table
 	} else if dbType == "sqlserver" {
 		table = DatabaseName + ".dbo." + table
@@ -459,7 +459,7 @@ func SelectContentsCountMAP(search interface{}) (uint, uint, error) {
 	log.Println("SelectContentsCountMAP keywords: ", keywords)
 
 	table := jsonBody["table"].(string)
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = config.DbInfo.Schema + "." + table
 	} else if dbType == "sqlserver" {
 		table = DatabaseName + ".dbo." + table

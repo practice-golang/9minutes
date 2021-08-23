@@ -120,7 +120,7 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -161,7 +161,7 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -208,7 +208,7 @@ func SelectContents(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = config.DbInfo.Schema + "." + table
 	} else if dbType == "sqlserver" {
 		table = DatabaseName + ".dbo." + table
@@ -308,8 +308,10 @@ func SelectContentsCount(search interface{}) (uint, error) {
 	case models.ContentSearch:
 		table = search.Table.String
 		if dbType != "sqlite3" {
-			if config.DbInfo.Type == "postgres" {
+			if dbType == "postgres" {
 				table = config.DbInfo.Schema + "." + table
+			} else if dbType == "sqlserver" {
+				table = DatabaseName + ".dbo." + table
 			} else {
 				table = DatabaseName + "." + table
 			}

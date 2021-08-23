@@ -38,6 +38,9 @@ var (
 	//go:embed samples/9minutes.ini
 	sampleINI string
 
+	adminTemplateRoot string = "/static"
+	staticRoot        string = "/static"
+
 	jwtKey = []byte("9minutes")
 )
 
@@ -297,12 +300,19 @@ func jwtFromHeader(header string, authScheme string) jwtExtractor {
 	}
 }
 
-// Choose html page template
-func pageTemplateHandler(c echo.Context) error {
-	status := http.StatusOK
-	contents := "^_^_^"
-	log.Println(c.Request().URL)
-	return c.HTML(status, contents)
+// Choose html page template from fembed or real storage
+func pageTemplateHandler(u http.Handler, h http.Handler) echo.HandlerFunc {
+	if config.UserDeginedHTML {
+		return func(c echo.Context) error {
+			u.ServeHTTP(c.Response(), c.Request())
+			return nil
+		}
+	} else {
+		return func(c echo.Context) error {
+			h.ServeHTTP(c.Response(), c.Request())
+			return nil
+		}
+	}
 }
 
 func setupServer() *echo.Echo {
@@ -314,7 +324,6 @@ func setupServer() *echo.Echo {
 		middleware.Recover(),
 	)
 
-	staticRoot := "/static"
 	// routeTargetFilename := "$1"
 	rewriteTargetFilename := "page-loader"
 
@@ -468,16 +477,21 @@ func setupServer() *echo.Echo {
 	}
 
 	contentHandler := echo.WrapHandler(http.FileServer(http.FS(staticPATH)))
-	// contentHandler := echo.WrapHandler(http.FileServer(http.Dir("./")))
-	// staticRoot = "html"
-
 	contentRewriteAdmin := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
-			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): staticRoot + "/" + rewriteTargetFilename + ".html",
+			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): adminTemplateRoot + "/" + rewriteTargetFilename + ".html",
 		},
 	})
-
 	e.GET("/admin/*", contentHandler, contentRewriteAdmin)
+
+	contentAdminRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
+		RegexRules: map[*regexp.Regexp]string{
+			regexp.MustCompile(`^/page/([^\?]+)(\?(.*)|)`): adminTemplateRoot + "/pages/$1.html",
+		},
+	})
+	pa := e.Group("/page/admin")
+	pa.Use(middleware.JWTWithConfig(jwtConfigRestricted))
+	pa.GET("/*", adminTemplateHandler, contentAdminRewriteBody)
 
 	contentRewriteBody := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
@@ -489,23 +503,27 @@ func setupServer() *echo.Echo {
 	// bd.GET("/*", contentHandler, contentRewriteBody)
 	bd.GET("/*", adminTemplateHandler, contentRewriteBody)
 
+	frontHandler := pageTemplateHandler(http.FileServer(http.Dir("./")), http.FileServer(http.FS(staticPATH)))
+
 	contentRewriteUsers := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
 			regexp.MustCompile(`^/users/([^\?]+)(\?(.*)|)`): staticRoot + "/users/$1.html",
 		},
 	})
-	e.GET("/users/*", contentHandler, contentRewriteUsers)
+	// e.GET("/users/*", contentHandler, contentRewriteUsers)
+	e.GET("/users/*", frontHandler, contentRewriteUsers)
 
 	contentRewriteAssets := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
 			regexp.MustCompile(`^/assets/([^\?]+)(\?(.*)|)`): staticRoot + "/assets/$1",
 		},
 	})
-	e.GET("/assets/*", contentHandler, contentRewriteAssets)
+	// e.GET("/assets/*", contentHandler, contentRewriteAssets)
+	e.GET("/assets/*", frontHandler, contentRewriteAssets)
 
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": staticRoot + "/"})
 	// e.GET("/*", contentHandler, contentRewrite)
-	e.GET("/*", pageTemplateHandler, contentRewrite)
+	e.GET("/*", frontHandler, contentRewrite)
 
 	e.GET("/board", boardTemplateHandler)
 
@@ -614,6 +632,17 @@ func main() {
 	// log.Println(out)
 
 	if cfg != nil {
+		if cfg.Section("user-defined").HasKey("HTML") {
+			config.UserDeginedHTML, err = cfg.Section("user-defined").Key("HTML").Bool()
+			if err != nil {
+				config.UserDeginedHTML = false
+			} else if config.UserDeginedHTML && cfg.Section("user-defined").HasKey("PATH") {
+				staticRoot = cfg.Section("user-defined").Key("PATH").String()
+			}
+
+			log.Println(config.UserDeginedHTML, staticRoot)
+		}
+
 		config.DbInfo.Type = cfg.Section("database").Key("DBTYPE").String()
 		config.DbInfo.Server = cfg.Section("database").Key("ADDRESS").String()
 		config.DbInfo.Port, _ = cfg.Section("database").Key("PORT").Int()

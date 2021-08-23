@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/practice-golang/9minutes/config"
 	"github.com/practice-golang/9minutes/models"
 	"gopkg.in/guregu/null.v4"
 
@@ -23,7 +22,7 @@ func InsertUserField(data []models.UserColumn) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserFieldTableNoQuotes
 	} else {
 		table = UserFieldTable
@@ -55,7 +54,7 @@ func SelectUserFields(search interface{}) (interface{}, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserFieldTableNoQuotes
 	} else {
 		table = UserFieldTable
@@ -109,7 +108,7 @@ func UpdateUserFields(data interface{}) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserFieldTableNoQuotes
 	} else {
 		table = UserFieldTable
@@ -145,7 +144,7 @@ func DeleteUserFieldRow(target, value string) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserFieldTableNoQuotes
 	} else {
 		table = UserFieldTable
@@ -281,7 +280,7 @@ func InsertUser(data interface{}) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserTableNoQuotes
 	} else {
 		table = UserTable
@@ -321,7 +320,7 @@ func UpdateUser(data interface{}) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserTableNoQuotes
 	} else {
 		table = UserTable
@@ -350,7 +349,7 @@ func DeleteUser(idx string) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = UserTableNoQuotes
 	} else {
 		table = UserTable
