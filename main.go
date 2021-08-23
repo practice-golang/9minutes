@@ -297,6 +297,14 @@ func jwtFromHeader(header string, authScheme string) jwtExtractor {
 	}
 }
 
+// Choose html page template
+func pageTemplateHandler(c echo.Context) error {
+	status := http.StatusOK
+	contents := "^_^_^"
+	log.Println(c.Request().URL)
+	return c.HTML(status, contents)
+}
+
 func setupServer() *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
@@ -460,6 +468,9 @@ func setupServer() *echo.Echo {
 	}
 
 	contentHandler := echo.WrapHandler(http.FileServer(http.FS(staticPATH)))
+	// contentHandler := echo.WrapHandler(http.FileServer(http.Dir("./")))
+	// staticRoot = "html"
+
 	contentRewriteAdmin := middleware.RewriteWithConfig(middleware.RewriteConfig{
 		RegexRules: map[*regexp.Regexp]string{
 			regexp.MustCompile(`^/admin/([^\?]+)(\?(.*)|)`): staticRoot + "/" + rewriteTargetFilename + ".html",
@@ -493,7 +504,8 @@ func setupServer() *echo.Echo {
 	e.GET("/assets/*", contentHandler, contentRewriteAssets)
 
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": staticRoot + "/"})
-	e.GET("/*", contentHandler, contentRewrite)
+	// e.GET("/*", contentHandler, contentRewrite)
+	e.GET("/*", pageTemplateHandler, contentRewrite)
 
 	e.GET("/board", boardTemplateHandler)
 
