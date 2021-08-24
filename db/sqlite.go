@@ -196,6 +196,7 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 			case "editor":
 				colType = "TEXT"
 			case "comment":
+				colType = "TEXT"
 				_ = d.CreateComment(tableInfo, false)
 
 			default:
@@ -277,8 +278,8 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 	log.Println("Modify: ", modify)
 
 	commentTableCNT := 0
-	sqlCommentExist := `SELECT COUNT(name) AS CNT FROM sqlite_master WHERE type='table' AND name='#TABLE_NAME_OLD';`
-	sqlCommentExist = strings.ReplaceAll(sqlCommentExist, "#TABLE_NAME_OLD", tableInfoOld.Table.String+"_COMMENT")
+	sqlCommentExist := `SELECT COUNT(name) AS CNT FROM sqlite_master WHERE type='table' AND name='#TABLE_NAME';`
+	sqlCommentExist = strings.ReplaceAll(sqlCommentExist, "#TABLE_NAME", tableInfoOld.Table.String+"_COMMENT")
 	row := Dbo.QueryRow(sqlCommentExist)
 	err := row.Scan(&commentTableCNT)
 	if err != nil {
@@ -322,7 +323,7 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 			case "editor":
 				sqlAdd += ` TEXT`
 			case "comment":
-				if commentTableCNT > 0 {
+				if commentTableCNT == 0 {
 					_ = d.CreateComment(tableInfoNew, false)
 				}
 			}
@@ -403,6 +404,8 @@ func (d *Sqlite) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	d.DeleteComment(tableName)
 
 	return nil
 }

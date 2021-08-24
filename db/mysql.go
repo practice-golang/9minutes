@@ -319,13 +319,31 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 	log.Println("Remove: ", remove)
 	log.Println("Modify: ", modify)
 
+	commentTableCNT := 0
+	sqlCommentExist := `SELECT COUNT(TABLE_NAME) FROM information_schema.tables WHERE table_schema = "#DATABASE" AND TABLE_NAME = "#TABLE_NAME";`
+	sqlCommentExist = strings.ReplaceAll(sqlCommentExist, "#DATABASE", DatabaseName)
+	sqlCommentExist = strings.ReplaceAll(sqlCommentExist, "#TABLE_NAME", tableInfoOld.Table.String+"_COMMENT")
+	row := Dbo.QueryRow(sqlCommentExist)
+	err := row.Scan(&commentTableCNT)
+	if err != nil {
+		return err
+	}
+
 	sql := ""
 	sqlTableRename := ""
+	sqlCommentRename := ""
 	if tableInfoOld.Table.String != tableInfoNew.Table.String {
-		sqlTableRename = `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `;`
+		sqlTableRename = "ALTER TABLE `#TABLE_NAME_OLD` RENAME TO `#TABLE_NAME_NEW`;"
 
 		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String)
 		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String)
+
+		if commentTableCNT > 0 {
+			sqlCommentRename += "ALTER TABLE `#TABLE_NAME_OLD` RENAME TO `#TABLE_NAME_NEW`;"
+
+			sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+tableInfoOld.Table.String+"_COMMENT`")
+			sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+tableInfoNew.Table.String+"_COMMENT`")
+		}
 	}
 
 	sqlAdd := ""
@@ -348,7 +366,9 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 				sqlAdd += `TEXT`
 			case "comment":
 				sqlAdd += `VARCHAR(4)`
-				_ = d.CreateComment(tableInfoOld, false)
+				if commentTableCNT == 0 {
+					_ = d.CreateComment(tableInfoNew, false)
+				}
 			default:
 				sqlAdd += `VARCHAR(128)`
 			}
@@ -364,10 +384,12 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 	sqlRemove := ""
 	if len(remove) > 0 {
 		for _, c := range remove {
+			sqlRemove += " DROP COLUMN `" + c["column"].(string) + "`, "
+
 			if c["type"].(string) == "comment" {
-				d.DeleteComment(c["column"].(string))
-			} else {
-				sqlRemove += " DROP COLUMN `" + c["column"].(string) + "`, "
+				commentCount = 0
+				sqlCommentRename = ""
+				d.DeleteComment(tableInfoOld.Table.String)
 			}
 		}
 		// if strings.Contains(sqlRemove, "DROP COLUMN") {
@@ -377,7 +399,6 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 	}
 
 	sqlModify := ""
-	sqlCommentRename := ""
 	if len(modify) > 0 {
 		for _, nc := range modify {
 			for _, ocINF := range tableInfoOld.Fields.([]interface{}) {
@@ -385,10 +406,9 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 				if nc["idx"].(float64) == oc["idx"].(float64) {
 					if nc["column"].(string) != oc["column"].(string) {
 						if oc["type"].(string) == "comment" {
-							sqlCommentRename += `ALTER TABLE ` + "`#TABLE_NAME_OLD`" + ` RENAME TO ` + "`#TABLE_NAME_NEW`" + `; `
-
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+"`.`"+oc["column"].(string)+"_COMMENT")
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", DatabaseName+"`.`"+nc["column"].(string)+"_COMMENT")
+							if commentCount > 0 {
+								sqlModify += "CHANGE COLUMN `" + oc["column"].(string) + "` `" + nc["column"].(string) + "` VARCHAR(4) NULL, "
+							}
 						} else {
 							sqlModify += "CHANGE COLUMN `" + oc["column"].(string) + "` `" + nc["column"].(string) + "` "
 							switch nc["type"].(string) {
@@ -414,26 +434,26 @@ func (d *Mysql) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.B
 
 							sqlModify += " NULL"
 							sqlModify += ", "
-
-							// if i < (len(modify) - 1) {
-							// 	sqlModify += `, `
-							// }
 						}
 					}
 					break
 				}
 			}
 		}
-		// if strings.Contains(sqlModify, "RENAME COLUMN") {
-		// 	sqlModify = sqlModify[:len(sqlModify)-2]
-		// }
-		// sqlModify += `; `
 	}
 
 	if sqlTableRename != "" {
 		log.Println("MySQL/EditCustomBoard: ", sql)
 
 		_, err := Dbo.Exec(sqlTableRename)
+		if err != nil {
+			return err
+		}
+	}
+	if sqlCommentRename != "" {
+		log.Println("MySQL/EditCustomBoard: ", sql)
+
+		_, err := Dbo.Exec(sqlCommentRename)
 		if err != nil {
 			return err
 		}
@@ -497,6 +517,8 @@ func (d *Mysql) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	_ = d.DeleteComment(tableName)
 
 	return nil
 }

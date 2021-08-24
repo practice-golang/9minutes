@@ -61,10 +61,10 @@ Sqlite, MySQL, Postgres, SQL Server
     - [x] Postgres
     - [x] MS-SQL
 - [ ] Bug
-     - [x] Correct comment table renaming
      - [x] Remove writer from search target
      - [x] Cannot rename comment table
-     - [ ] Correct comment grant blank
+     - [x] Correct comment grant blank
+     - [ ] Correct comment table delete then recreate -> Change to checkbox
 - [ ] API - Add get list of board columns
 - [ ] Code cleaning
     - [ ] Password hash

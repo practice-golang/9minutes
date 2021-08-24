@@ -343,16 +343,11 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 	sqlRemove := ""
 	if len(remove) > 0 {
 		for _, c := range remove {
+			sqlRemove += ` DROP COLUMN "` + c["column"].(string) + `", `
 			if c["type"].(string) == "comment" {
-				d.DeleteComment(c["column"].(string))
-			} else {
-				sqlRemove += ` DROP COLUMN "` + c["column"].(string) + `", `
+				d.DeleteComment(tableInfoOld.Table.String)
 			}
 		}
-		// if strings.Contains(sqlRemove, "DROP COLUMN") {
-		// 	sqlRemove = sqlRemove[:len(sqlRemove)-2]
-		// }
-		// sql += sqlRemove + `; `
 	}
 
 	sqlTypeChange := ""
@@ -367,8 +362,8 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 						if oc["type"].(string) == "comment" {
 							sqlCommentRename += `ALTER TABLE #TABLE_NAME_OLD RENAME TO #TABLE_NAME_NEW; `
 
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+`."`+oc["column"].(string)+`_COMMENT`+`"`)
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", `"`+nc["column"].(string)+`_COMMENT`+`"`)
+							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", DatabaseName+`."`+tableInfoOld.Table.String+`_COMMENT`+`"`)
+							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", `"`+tableInfoNew.Table.String+`_COMMENT`+`"`)
 						} else {
 							sqlRename += `RENAME COLUMN "` + oc["column"].(string) + `" TO "` + nc["column"].(string) + `", `
 							sqlTypeChange += `ALTER COLUMN "` + nc["column"].(string) + `" TYPE `
@@ -404,10 +399,6 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 				}
 			}
 		}
-		// if strings.Contains(sqlModify, "RENAME COLUMN") {
-		// 	sqlModify = sqlModify[:len(sqlModify)-2]
-		// }
-		// sqlModify += `; `
 	}
 
 	if sqlAdd != "" {
@@ -449,7 +440,7 @@ func (d *Postgres) EditCustomBoard(tableInfoOld models.Board, tableInfoNew model
 // DeleteBoard - Delete a board table
 func (d *Postgres) DeleteBoard(tableName string) error {
 	sql := `DROP TABLE IF EXISTS #TABLE_NAME;`
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+`."`+tableName+`"`)
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+`."`+tableName+`";`)
 
 	log.Println("Postgres/DeleteBoard: ", sql)
 
@@ -457,6 +448,8 @@ func (d *Postgres) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	d.DeleteComment(tableName)
 
 	return nil
 }

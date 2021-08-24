@@ -500,11 +500,9 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 	sqlRemove := ""
 	if len(remove) > 0 {
 		for _, c := range remove {
+			sqlRemove += ` DROP COLUMN ` + c["column"].(string) + `, `
 			if c["type"].(string) == "comment" {
-				// d.DeleteComment(c["column"].(string))
 				d.DeleteComment(tableInfoOld.Table.String)
-			} else {
-				sqlRemove += ` DROP COLUMN ` + c["column"].(string) + `, `
 			}
 		}
 
@@ -554,7 +552,7 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 									colType += `TEXT`
 								case "comment":
 									colType += `VARCHAR(4)`
-									_ = d.CreateComment(tableInfoNew, false)
+									// _ = d.CreateComment(tableInfoNew, false)
 								default:
 									colType += `VARCHAR(128)`
 								}
@@ -609,6 +607,8 @@ func (d *Sqlserver) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	d.DeleteComment(tableName)
 
 	return nil
 }
