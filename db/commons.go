@@ -285,12 +285,14 @@ func SelectComments(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String + "_COMMENT"
-	if dbType == "postgres" {
-		table = config.DbInfo.Schema + "." + table
-	} else if dbType == "sqlserver" {
-		table = DatabaseName + ".dbo." + table
-	} else {
-		table = DatabaseName + "." + table
+	if dbType != "sqlite3" {
+		if dbType == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else if dbType == "sqlserver" {
+			table = DatabaseName + ".dbo." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
 	}
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Comment list

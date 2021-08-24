@@ -62,7 +62,9 @@ Sqlite, MySQL, Postgres, SQL Server
     - [x] MS-SQL
 - [ ] Bug
      - [x] Correct comment table renaming
-     - [ ] Remove writer from search target
+     - [x] Remove writer from search target
+     - [ ] Cannot rename comment table
+     - [ ] Comment grant blank
 - [ ] API - Add get list of board columns
 - [ ] Code cleaning
     - [ ] Password hash

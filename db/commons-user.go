@@ -235,12 +235,14 @@ func SelectUserColumnNames() (interface{}, error) {
 	}
 
 	table := ""
-	if dbType == "postgres" {
-		table = UserFieldTableNoQuotes
-	} else if dbType == "sqlserver" {
-		table = DatabaseName + ".dbo." + UserFieldTableName
-	} else {
-		table = UserFieldTable
+	if dbType != "sqlite3" {
+		if dbType == "postgres" {
+			table = UserFieldTableNoQuotes
+		} else if dbType == "sqlserver" {
+			table = DatabaseName + ".dbo." + UserFieldTableName
+		} else {
+			table = UserFieldTable
+		}
 	}
 
 	dbms := goqu.New(dbType, Dbo)
