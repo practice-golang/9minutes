@@ -11,6 +11,8 @@ type DBpath struct {
 	Filename string // sqlite
 }
 
+var UserDeginedHTML = false
+
 // DB - sqlite
 var (
 	DbInfo = DBpath{

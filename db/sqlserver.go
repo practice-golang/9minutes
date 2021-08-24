@@ -410,8 +410,8 @@ func (d *Sqlserver) EditBasicBoard(tableInfoOld models.Board, tableInfoNew model
 // EditBasicBoard - Create board table
 func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.Board) error {
 	// var err error
-	// log.Println(tableInfoOld.Table.String, tableInfoNew.Table.String)
-	// log.Println(tableInfoOld.Fields, tableInfoNew.Fields)
+	// log.Println("EditCustomBoard: ", tableInfoOld.Table.String, tableInfoNew.Table.String)
+	// log.Println("EditCustomBoard: ", tableInfoOld.Fields, tableInfoNew.Fields)
 
 	var newFieldITF []map[string]interface{}
 	_ = json.Unmarshal([]byte(tableInfoNew.Fields.(string)), &newFieldITF)
@@ -443,11 +443,21 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 	if tableInfoOld.Table.String != tableInfoNew.Table.String {
 		sql = `
 		USE "#DATABASE"
-		EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW"`
+		EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW"
+		`
 
 		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
 		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String)
 		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+
+		sql += `
+		IF OBJECT_ID(N'#TABLE_NAME_OLD', N'U') IS NOT NULL
+		EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW"
+		`
+
+		sql = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String+"_COMMENT")
+		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String+"_COMMENT")
 	}
 
 	sqlAdd := ``
@@ -490,14 +500,15 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 	sqlRemove := ""
 	if len(remove) > 0 {
 		for _, c := range remove {
+			sqlRemove += ` DROP COLUMN ` + c["column"].(string) + `, `
 			if c["type"].(string) == "comment" {
-				d.DeleteComment(c["column"].(string))
-			} else {
-				sqlRemove += ` DROP COLUMN ` + c["column"].(string) + `, `
+				d.DeleteComment(tableInfoOld.Table.String)
 			}
 		}
 
-		sqlRemove = sqlRemove[:len(sqlRemove)-2] + ";"
+		if sqlRemove != "" {
+			sqlRemove = sqlRemove[:len(sqlRemove)-2] + ";"
+		}
 	}
 
 	sqlModify := ``
@@ -510,14 +521,14 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 					if nc["column"].(string) != oc["column"].(string) {
 						if oc["type"].(string) == "comment" {
 
-							sqlCommentRename += `
-							USE "#DATABASE"
-							EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW";
-							`
+							// sqlCommentRename += `
+							// USE "#DATABASE"
+							// EXEC sp_rename "#TABLE_NAME_OLD", "#TABLE_NAME_NEW";
+							// `
 
-							sqlCommentRename = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", oc["column"].(string)+"_COMMENT")
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", nc["column"].(string)+"_COMMENT")
+							// sqlCommentRename = strings.ReplaceAll(sql, "#DATABASE", DatabaseName)
+							// sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", oc["column"].(string)+"_COMMENT")
+							// sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", nc["column"].(string)+"_COMMENT")
 						} else {
 							sqlModify += `
 							ALTER TABLE #TABLE_NAME
@@ -541,7 +552,7 @@ func (d *Sqlserver) EditCustomBoard(tableInfoOld models.Board, tableInfoNew mode
 									colType += `TEXT`
 								case "comment":
 									colType += `VARCHAR(4)`
-									_ = d.CreateComment(tableInfoNew, false)
+									// _ = d.CreateComment(tableInfoNew, false)
 								default:
 									colType += `VARCHAR(128)`
 								}
@@ -596,6 +607,8 @@ func (d *Sqlserver) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	d.DeleteComment(tableName)
 
 	return nil
 }
@@ -670,8 +683,10 @@ func (d *Sqlserver) EditComment(tableInfoOld models.Board, tableInfoNew models.B
 
 // DeleteComment - Delete a comment table
 func (d *Sqlserver) DeleteComment(tableName string) error {
-	sql := `DROP TABLE IF EXISTS ` + "`#TABLE_NAME`" + `;`
-	sql = strings.ReplaceAll(sql, "#TABLE_NAME", DatabaseName+"`.`"+tableName+"_COMMENT")
+	sql := `
+	IF OBJECT_ID(N'#TABLE_NAME', N'U') IS NOT NULL
+	DROP TABLE ` + `#TABLE_NAME` + `;`
+	sql = strings.ReplaceAll(sql, "#TABLE_NAME", `"`+DatabaseName+`"."dbo"."`+tableName+`_COMMENT"`)
 
 	log.Println("Sqlserver/DeleteComment: ", sql)
 

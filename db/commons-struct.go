@@ -14,7 +14,6 @@ import (
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 	_ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
 	_ "github.com/doug-martin/goqu/v9/dialect/sqlserver"
-	"github.com/doug-martin/goqu/v9/exp"
 )
 
 // InsertContents - Crud contents / basic-board
@@ -120,7 +119,7 @@ func UpdateContents(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -161,7 +160,7 @@ func DeleteContents(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -203,17 +202,19 @@ func SelectContents(search interface{}) (interface{}, error) {
 	var ds *goqu.SelectDataset
 	contentResult := []models.ContentsBasicBoardGET{}
 	exps := []goqu.Expression{}
-	expsAND := []goqu.Expression{}
+	// expsAND := []goqu.Expression{}
 
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String
-	if config.DbInfo.Type == "postgres" {
-		table = config.DbInfo.Schema + "." + table
-	} else if dbType == "sqlserver" {
-		table = DatabaseName + ".dbo." + table
-	} else {
-		table = DatabaseName + "." + table
+	if dbType != "sqlite3" {
+		if dbType == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else if dbType == "sqlserver" {
+			table = DatabaseName + ".dbo." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
 	}
 
 	if searchBytes.Options.Count.Int64 > 1 {
@@ -231,20 +232,20 @@ func SelectContents(search interface{}) (interface{}, error) {
 
 	for _, k := range keywords {
 		ex := PrepareWhere(k)
-		exAND := exp.Ex{}
+		// exAND := exp.Ex{}
 		if !ex.IsEmpty() {
 			for c, v := range ex {
 				if c == "IDX" || c == "BOARD_IDX" {
-					val := fmt.Sprintf("%s", v)
-					exAND[c] = goqu.Op{"eq": val}
+					// val := fmt.Sprintf("%s", v)
+					// exAND[c] = goqu.Op{"eq": val}
 					delete(ex, c)
 				} else if c == "WRITER_PASSWORD" {
-					val := fmt.Sprintf("%s", v)
-					exAND[c] = goqu.Op{"eq": val}
+					// val := fmt.Sprintf("%s", v)
+					// exAND[c] = goqu.Op{"eq": val}
 					delete(ex, c)
 				} else if c == "WRITER_NAME" {
-					val := fmt.Sprintf("%s", v)
-					exAND[c] = goqu.Op{"eq": val}
+					// val := fmt.Sprintf("%s", v)
+					// exAND[c] = goqu.Op{"eq": val}
 					delete(ex, c)
 				} else {
 					val := fmt.Sprintf("%s%s%s", "%", v, "%")
@@ -252,11 +253,11 @@ func SelectContents(search interface{}) (interface{}, error) {
 				}
 			}
 			exps = append(exps, ex.Expression())
-			expsAND = append(expsAND, exAND.Expression())
+			// expsAND = append(expsAND, exAND.Expression())
 		}
 	}
 	ds = ds.Where(goqu.Or(exps...))
-	ds = ds.Where(goqu.And(expsAND...))
+	// ds = ds.Where(goqu.And(expsAND...))
 
 	orderDirection := goqu.C(OrderScope).Asc()
 	if searchBytes.Options.Order.String == "desc" {
@@ -308,8 +309,10 @@ func SelectContentsCount(search interface{}) (uint, error) {
 	case models.ContentSearch:
 		table = search.Table.String
 		if dbType != "sqlite3" {
-			if config.DbInfo.Type == "postgres" {
+			if dbType == "postgres" {
 				table = config.DbInfo.Schema + "." + table
+			} else if dbType == "sqlserver" {
+				table = DatabaseName + ".dbo." + table
 			} else {
 				table = DatabaseName + "." + table
 			}

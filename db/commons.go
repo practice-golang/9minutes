@@ -53,7 +53,7 @@ func InsertData(data interface{}) (sql.Result, error) {
 	dbms := goqu.New(dbType, Dbo)
 	ds := dbms.Insert(table).Rows(data)
 	sql, args, _ := ds.ToSQL()
-	log.Println(sql, args)
+	log.Println("InsertData: ", sql, args)
 
 	result, err := Dbo.Exec(sql)
 	if err != nil {
@@ -74,7 +74,7 @@ func SelectData(search interface{}) (interface{}, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = BoardManagerTableNoQuotes
 	} else {
 		table = BoardManagerTable
@@ -162,7 +162,7 @@ func UpdateData(data interface{}) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = BoardManagerTableNoQuotes
 	} else {
 		table = BoardManagerTable
@@ -189,7 +189,7 @@ func DeleteData(target, value string) (sql.Result, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = BoardManagerTableNoQuotes
 	} else {
 		table = BoardManagerTable
@@ -220,7 +220,7 @@ func SelectCount(search interface{}) (uint, error) {
 	}
 
 	table := ""
-	if config.DbInfo.Type == "postgres" {
+	if dbType == "postgres" {
 		table = BoardManagerTableNoQuotes
 	} else {
 		table = BoardManagerTable
@@ -285,12 +285,14 @@ func SelectComments(search interface{}) (interface{}, error) {
 	keywords := searchBytes.Keywords
 
 	table := searchBytes.Table.String + "_COMMENT"
-	if config.DbInfo.Type == "postgres" {
-		table = config.DbInfo.Schema + "." + table
-	} else if dbType == "sqlserver" {
-		table = DatabaseName + ".dbo." + table
-	} else {
-		table = DatabaseName + "." + table
+	if dbType != "sqlite3" {
+		if dbType == "postgres" {
+			table = config.DbInfo.Schema + "." + table
+		} else if dbType == "sqlserver" {
+			table = DatabaseName + ".dbo." + table
+		} else {
+			table = DatabaseName + "." + table
+		}
 	}
 	if searchBytes.Options.Count.Int64 > 1 {
 		// Comment list
@@ -365,7 +367,7 @@ func InsertComment(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -407,7 +409,7 @@ func UpdateComment(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl
@@ -448,7 +450,7 @@ func DeleteComment(data interface{}, table string) (sql.Result, error) {
 
 	tbl := table
 	if dbType != "sqlite3" {
-		if config.DbInfo.Type == "postgres" {
+		if dbType == "postgres" {
 			tbl = config.DbInfo.Schema + "." + tbl
 		} else if dbType == "sqlserver" {
 			tbl = DatabaseName + ".dbo." + tbl

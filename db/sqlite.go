@@ -195,6 +195,9 @@ func (d *Sqlite) CreateCustomBoard(tableInfo models.Board, fields []models.Field
 				colType = "TEXT"
 			case "editor":
 				colType = "TEXT"
+			case "comment":
+				colType = "TEXT"
+				_ = d.CreateComment(tableInfo, false)
 
 			default:
 				colType = "TEXT"
@@ -274,71 +277,89 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 	log.Println("Remove: ", remove)
 	log.Println("Modify: ", modify)
 
-	sql := ""
-	if tableInfoOld.Table.String != tableInfoNew.Table.String {
-		sql = `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW"; `
-
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME_OLD", tableInfoOld.Table.String)
-		sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+	commentTableCNT := 0
+	sqlCommentExist := `SELECT COUNT(name) AS CNT FROM sqlite_master WHERE type='table' AND name='#TABLE_NAME';`
+	sqlCommentExist = strings.ReplaceAll(sqlCommentExist, "#TABLE_NAME", tableInfoOld.Table.String+"_COMMENT")
+	row := Dbo.QueryRow(sqlCommentExist)
+	err := row.Scan(&commentTableCNT)
+	if err != nil {
+		return err
 	}
 
+	sql := ""
+	sqlTableRename := ``
+	sqlCommentRename := ``
+	if tableInfoOld.Table.String != tableInfoNew.Table.String {
+		sqlTableRename = `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW"; `
+
+		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_OLD", tableInfoOld.Table.String)
+		sqlTableRename = strings.ReplaceAll(sqlTableRename, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
+
+		if commentTableCNT > 0 {
+			sqlCommentRename += `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW";`
+
+			sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", tableInfoOld.Table.String+"_COMMENT")
+			sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", tableInfoNew.Table.String+"_COMMENT")
+		}
+	}
+
+	sqlAdd := ``
 	if len(add) > 0 {
-		sql += `ALTER TABLE "#TABLE_NAME_NEW" `
+		sqlAdd += `ALTER TABLE "#TABLE_NAME_NEW" `
 		for i, c := range add {
-			sql += ` ADD COLUMN ` + c["column"].(string) + ` `
+			sqlAdd += ` ADD COLUMN ` + c["column"].(string) + ` `
 			switch c["type"].(string) {
 			// cusom-tablelist
 			case "text":
-				sql += ` TEXT`
+				sqlAdd += ` TEXT`
 			case "number":
-				sql += ` INTEGER`
+				sqlAdd += ` INTEGER`
 			case "real":
-				sql += ` REAL`
+				sqlAdd += ` REAL`
 
 			// cusom-board
 			case "title", "author", "input":
-				sql += ` TEXT`
+				sqlAdd += ` TEXT`
 			case "editor":
-				sql += ` TEXT`
+				sqlAdd += ` TEXT`
 			case "comment":
-				_ = d.CreateComment(tableInfoNew, false)
+				if commentTableCNT == 0 {
+					_ = d.CreateComment(tableInfoNew, false)
+				}
 			}
 
 			if i < (len(add) - 1) {
-				sql += `, `
+				sqlAdd += `, `
 			}
 		}
-		sql += `; `
+		sqlAdd += `; `
 	}
 
+	sqlRemove := ``
 	if len(remove) > 0 {
-		sqlRemove := `ALTER TABLE "#TABLE_NAME_NEW" `
 		for _, c := range remove {
+			sqlRemove += `ALTER TABLE "#TABLE_NAME_NEW" DROP COLUMN ` + c["column"].(string) + `;`
+
 			if c["type"].(string) == "comment" {
-				d.DeleteComment(c["column"].(string))
-			} else {
-				sqlRemove += ` DROP COLUMN ` + c["column"].(string) + `, `
+				commentCount = 0
+				sqlCommentRename = ``
+				d.DeleteComment(tableInfoOld.Table.String)
 			}
 		}
-		if strings.Contains(sqlRemove, "DROP COLUMN") {
-			sqlRemove = sqlRemove[:len(sqlRemove)-2]
-		}
-		sql += sqlRemove + `; `
 	}
 
+	sqlModify := ``
 	if len(modify) > 0 {
-		sqlModify := `ALTER TABLE "#TABLE_NAME_NEW" `
-		sqlCommentRename := ``
+		// sqlCommentRename := ``
 		for _, nc := range modify {
 			for _, ocINF := range tableInfoOld.Fields.([]interface{}) {
 				oc := ocINF.(map[string]interface{})
 				if nc["idx"].(float64) == oc["idx"].(float64) {
 					if nc["column"].(string) != oc["column"].(string) {
 						if oc["type"].(string) == "comment" {
-							sqlCommentRename += `ALTER TABLE "#TABLE_NAME_OLD" RENAME TO "#TABLE_NAME_NEW"; `
-
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_OLD", oc["column"].(string)+"_COMMENT")
-							sqlCommentRename = strings.ReplaceAll(sqlCommentRename, "#TABLE_NAME_NEW", nc["column"].(string)+"_COMMENT")
+							if commentCount > 0 {
+								sqlModify += ` RENAME COLUMN ` + oc["column"].(string) + ` TO ` + nc["column"].(string) + `, `
+							}
 						} else {
 							sqlModify += ` RENAME COLUMN ` + oc["column"].(string) + ` TO ` + nc["column"].(string) + `, `
 						}
@@ -349,16 +370,22 @@ func (d *Sqlite) EditCustomBoard(tableInfoOld models.Board, tableInfoNew models.
 		}
 		if strings.Contains(sqlModify, "RENAME COLUMN") {
 			sqlModify = sqlModify[:len(sqlModify)-2]
+			sqlModify = `ALTER TABLE "#TABLE_NAME_NEW" ` + sqlModify + `; `
 		}
-		sql += sqlModify + `; `
-		sql += sqlCommentRename
+		// sql += sqlCommentRename
 	}
+
+	sql += sqlTableRename
+	sql += sqlCommentRename
+	sql += sqlAdd
+	sql += sqlRemove
+	sql += sqlModify
 
 	sql = strings.ReplaceAll(sql, "#TABLE_NAME_NEW", tableInfoNew.Table.String)
 
 	log.Println("Sqlite/EditCustomBoard: ", sql)
 
-	_, err := Dbo.Exec(sql)
+	_, err = Dbo.Exec(sql)
 	if err != nil {
 		return err
 	}
@@ -377,6 +404,8 @@ func (d *Sqlite) DeleteBoard(tableName string) error {
 	if err != nil {
 		return err
 	}
+
+	d.DeleteComment(tableName)
 
 	return nil
 }
