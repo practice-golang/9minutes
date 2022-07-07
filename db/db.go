@@ -4,6 +4,7 @@ import (
 	"9minutes/model"
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 const (
@@ -111,7 +112,7 @@ func SetupDB() error {
 		}
 
 	default:
-		return errors.New("database type not supported")
+		return errors.New("database type not supported " + fmt.Sprint(Info.DatabaseType))
 	}
 
 	return nil
