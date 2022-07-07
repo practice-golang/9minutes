@@ -126,7 +126,7 @@ func Test_Index(t *testing.T) {
 			want = reLogout.ReplaceAll(want, []byte(""))
 			want = reAdmin.ReplaceAll(want, []byte(""))
 
-			require.Equal(t, string(want), string(data), tt.name+" not equal"+"embed_test / "+tt.args.c.URL.Path)
+			require.Equal(t, string(want), string(data), tt.name+" not equal"+" embed_test / "+tt.args.c.URL.Path)
 		})
 	}
 }
@@ -546,9 +546,31 @@ func TestHandleGetDir(t *testing.T) {
 				},
 				jsonBody: map[string]interface{}{"path": "..", "sort": "name", "order": "desc"},
 			},
-			want: []byte(`{"path":"..","full-path":"C:\\Users\\high\\Desktop\\pcbangstudio\\workspace\\9m-again","files":[{"name":"setup.go","size":3546,"datetime":"2022-01-11 04:47:53","isdir":false},{"name":"requests_user_fields.http","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},{"name":"requests_board.http","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},{"name":"requests.http","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},{"name":"main_test.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},{"name":"main.go","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},{"name":"go.sum","size":22179,"datetime":"2022-01-11 04:42:54","isdir":false},{"name":"go.mod","size":2200,"datetime":"2022-01-11 04:47:46","isdir":false},{"name":"delete_all_container.cmd","size":224,"datetime":"2022-01-10 20:06:41","isdir":false}]}`),
+			want: []byte(`
+			{"path":"..",
+			"full-path":"C:\\Users",
+			"files":[
+				{"name":"setup.go","size":3546,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"router_page_content.go","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},
+				{"name":"router_page_admin.go","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},
+				{"name":"router_page.go","size":3445,"datetime":"2022-01-11 04:55:55","isdir":false},
+				{"name":"router_others.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"router_notuse.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"router_api_board.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"router_api_admin.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"router_api.go","size":1388,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"requests_user_fields.http","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"requests_board.http","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"requests.http","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"main_test.go","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"main.go","size":1048,"datetime":"2022-01-11 04:47:53","isdir":false},
+				{"name":"go.sum","size":22179,"datetime":"2022-01-11 04:42:54","isdir":false},
+				{"name":"go.mod","size":2200,"datetime":"2022-01-11 04:47:46","isdir":false},
+				{"name":"delete_all_container.cmd","size":224,"datetime":"2022-01-10 20:06:41","isdir":false}
+			]}`),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			body, _ := json.Marshal(tt.args.jsonBody)
