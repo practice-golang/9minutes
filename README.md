@@ -26,7 +26,7 @@ $ ./9minutes
 
 ## HTML modification
 
-* When exist html files in storage, 9minutes load html files in real storage instead of embedded html
+* When html files are placed in storage, 9minutes load html files in real storage instead of embedded html
 * Get embedded html files
 ```sh
 $ ./9minutes -get html
