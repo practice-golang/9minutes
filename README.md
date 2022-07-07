@@ -42,11 +42,6 @@ See `setup.go` and `router_*.go`
 * Because of regex, used custom router
 
 
-## HTML, Static, Upload
-
-See `/embed`, `/html`, `/static`, `/upload`
-
-
 ## DB
 
 * SQLite
