@@ -436,6 +436,7 @@ func HandleReadContent(c *router.Context) {
 		h = bytes.ReplaceAll(h, []byte("$AUTHOR_NAME$"), []byte(fmt.Sprint(content.AuthorName.String)))
 		h = bytes.ReplaceAll(h, []byte("$VIEWS$"), []byte(fmt.Sprint(content.Views.Int64)))
 		h = bytes.ReplaceAll(h, []byte("$CONTENT$"), []byte(content.Content.String))
+		h = bytes.ReplaceAll(h, []byte("$FILE_LIST$"), []byte(content.Files.String))
 
 		h = bytes.ReplaceAll(h, []byte("$COMMENTS$"), commentsJSON)
 	}
@@ -533,6 +534,7 @@ func HandleEditContent(c *router.Context) {
 		h = bytes.ReplaceAll(h, []byte("$AUTHOR_IDX$"), []byte(fmt.Sprint(content.AuthorIdx.Int64)))
 		h = bytes.ReplaceAll(h, []byte("$VIEWS$"), []byte(fmt.Sprint(content.Views.Int64)))
 		h = bytes.ReplaceAll(h, []byte("$CONTENT$"), []byte(content.Content.String))
+		h = bytes.ReplaceAll(h, []byte("$FILE_LIST$"), []byte(content.Files.String))
 	}
 
 	c.Html(http.StatusOK, h)

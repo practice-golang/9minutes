@@ -6,6 +6,12 @@
         <p>Author: $AUTHOR_NAME$ / Views: $VIEWS$</p>
         <div id="content">$CONTENT$</div>
 
+        <div id="filelist-container">
+            <ul lr-loop="filelist">
+                <li><a href="{{link}}" target="_blank">{{filename}}</a></li>
+            </ul>
+        </div>
+
         <button type="button" onclick="moveToEdit()">Edit</button>
         <button type="button" onclick="deleteContent()">Delete</button>
         <button type="button" onclick="moveToList()">Back to list</button>
@@ -48,6 +54,8 @@
     const data = `<?= $data["CONTENT"] ?>`;
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
+
+    const accessURI = "/upload"
 
     function moveToEdit() {
         let boardType = ""
@@ -144,6 +152,17 @@
         }
     }
 
+    const filelistString = "$FILE_LIST$"
+    const filelist = new Array()
+    for (const f of filelistString.split("!")) {
+        console.log(f)
+        if (f == "") { continue }
+        filelist.push({
+            "filename": f,
+            "link": accessURI + "/" + f
+        })
+    }
+
     let commentsData = $COMMENTS$;
     let comments = commentsData["comment-list"]
 
@@ -155,6 +174,9 @@
             pages.push(pageInfo)
         }
     }
+
+    const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
+    lrFileList.render()
 
     const lrComments = new ListRenderer(document.querySelector("#comments-container"))
     lrComments.render()

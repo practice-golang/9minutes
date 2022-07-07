@@ -1,14 +1,23 @@
 @INCLUDE@board/include/header.html
 
 <body>
-    <div id="buttons">
+    <div>
         <label for="image-upload">Image:</label>
         <input type="file" id="image-upload" multiple>
         <button type="button" onclick="insertImage()">Upload</button>
+
+    </div>
+    <div>
         <label for="title-image-upload">Title Image:</label>
         <input type="file" id="title-image-upload">
         <button type="button" onclick="insertTitleImage()">Title image upload</button>
     </div>
+    <div>
+        <label for="file-upload">File:</label>
+        <input type="file" id="file-upload" multiple>
+        <button type="button" onclick="insertFile()">Upload</button>
+    </div>
+
     <div>
         Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
         Title image: $TITLE_IMAGE$
@@ -17,6 +26,12 @@
     <div>
         <button type="button" onclick="moveToList()">Cancel</button>
         <button type="button" onclick="updateContent()">Update</button>
+    </div>
+
+    <div id="filelist-container">
+        <ul lr-loop="filelist">
+            <li><a href="{{link}}" target="_blank">{{filename}}</a></li>
+        </ul>
     </div>
 </body>
 
@@ -28,9 +43,7 @@
     let data = `$CONTENT$`;
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
-    let titleImage = ""
-
-    console.log(data)
+    let titleImage = "$TITLE_IMAGE$"
 
     const options = {
         uploadActionURI: "/api/uploader/image",
@@ -38,6 +51,32 @@
     }
     const editorEL = document.querySelector("#editor")
     const editor = new MyEditor(data, editorEL, options)
+
+    async function insertFile() {
+        const uploadURI = options.uploadActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#file-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+            if (r.ok) {
+                const result = await r.json()
+                filelist.push({ "filename": result.storename })
+
+                lrFileList.reload()
+            }
+        }
+    }
 
     async function insertImage() {
         const uploadURI = options.uploadActionURI
@@ -58,7 +97,10 @@
             })
             if (r.ok) {
                 const result = await r.json()
+
                 editor.insertImage(`${accessURI}/${result.storename}`)
+                filelist.push({ "filename": result.storename })
+                lrFileList.reload()
             }
         }
     }
@@ -82,17 +124,25 @@
             })
             if (r.ok) {
                 const result = await r.json()
+
                 titleImage = `${accessURI}/${result.storename}`
+
+                filelist.push({ "filename": result.storename })
+                lrFileList.reload()
             }
         }
     }
 
     async function updateContent() {
+        const fileListArray = filelist.map(file => { return file.filename })
+        const fileListString = fileListArray.join("!")
+
         const data = {
             "idx": urlParams.get("idx"),
             "title": document.querySelector("#title").value,
             "title-image": titleImage,
-            "content": editor.getHTML()
+            "content": editor.getHTML(),
+            "files": fileListString
         }
 
         const r = await fetch("/api/board/content/$CODE$/$IDX$", {
@@ -118,14 +168,18 @@
         history.back()
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-        const buttonsEL = document.querySelector("#buttons")
-        // const editorHeight = 200 + "px"
-        // editorEL.style.height = editorHeight
-        const editorMaxHeight = window.innerHeight - buttonsEL.offsetHeight - 2 + "px"
-        editorEL.style.maxHeight = editorMaxHeight
-        titleImage = "$TITLE_IMAGE$";
-    })
+    const filelistString = "$FILE_LIST$"
+    const filelist = new Array()
+    for (const f of filelistString.split("!")) {
+        if (f == "") { continue }
+        filelist.push({
+            "filename": f,
+            "link": options.uploadAccessURI + "/" + f
+        })
+    }
+
+    const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
+    lrFileList.render()
 </script>
 
 <style>

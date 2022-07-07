@@ -52,7 +52,7 @@ See `setup.go` and `router_*.go`
 
 ## Todo
 * [] Try html/template at board list and content
-* [] File attatchment
+* [x] File attatchment
 * [] Shared session
 * [] User approval - email sending
 
