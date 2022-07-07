@@ -9,9 +9,7 @@ import (
 	"time"
 
 	"9minutes/auth"
-	"9minutes/config"
 	"9minutes/consts"
-	"9minutes/db"
 	"9minutes/logging"
 	"9minutes/router"
 
@@ -47,8 +45,6 @@ func Test_main(t *testing.T) {
 			// 	t.Fatal("http.Get", err)
 			// }
 			// defer res.Body.Close()
-
-			db.Info = config.DatabaseInfoSQLite
 
 			doSetup()
 

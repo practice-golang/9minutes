@@ -37,7 +37,7 @@ func TestSQLite_Exec(t *testing.T) {
 			dsn:  Info.FilePath,
 			d:    &SQLite{},
 			args: args{
-				sql:       "INSERT INTO " + Info.TableName + " (TITLE,AUTHOR) VALUES (?,?)",
+				sql:       "INSERT INTO " + Info.UserTable + " (TITLE,AUTHOR) VALUES (?,?)",
 				colValues: []interface{}{"test2", "test3"},
 			},
 		},
