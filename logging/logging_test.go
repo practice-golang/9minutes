@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"9m/consts"
+	"9minutes/consts"
 	"io/ioutil"
 	"os"
 	"testing"

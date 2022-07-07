@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"9m/consts"
-	"9m/crud"
-	"9m/model"
-	"9m/router"
+	"9minutes/consts"
+	"9minutes/crud"
+	"9minutes/model"
+	"9minutes/router"
 	"encoding/json"
 	"fmt"
 	"net/http"

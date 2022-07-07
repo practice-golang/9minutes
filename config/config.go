@@ -1,6 +1,6 @@
 package config
 
-import "9m/db"
+import "9minutes/db"
 
 var (
 	AdminUserCountPerPage  int = 10
@@ -22,7 +22,7 @@ var (
 var DatabaseInfoSQLite = db.DBInfo{
 	DatabaseType: db.SQLITE,
 	DatabaseName: "9m",
-	FilePath:     "./9m.db",
+	FilePath:     "./9minutes.db",
 }
 
 var DatabaseInfoMySQL = db.DBInfo{

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"9m/model"
-	"9m/router"
+	"9minutes/model"
+	"9minutes/router"
 
 	"gopkg.in/guregu/null.v4"
 )

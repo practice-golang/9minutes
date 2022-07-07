@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"9m/model"
+	"9minutes/model"
 
 	"gopkg.in/guregu/null.v4"
 )

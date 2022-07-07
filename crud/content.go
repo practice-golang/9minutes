@@ -1,9 +1,9 @@
 package crud
 
 import (
-	"9m/db"
-	"9m/model"
-	"9m/np"
+	"9minutes/db"
+	"9minutes/model"
+	"9minutes/np"
 	"fmt"
 	"math"
 	"strings"

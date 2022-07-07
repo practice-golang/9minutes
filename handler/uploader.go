@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"9m/router"
+	"9minutes/router"
 	"io/ioutil"
 	"log"
 	"net/http"

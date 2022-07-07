@@ -1,4 +1,4 @@
-module 9m
+module 9minutes
 
 go 1.18
 

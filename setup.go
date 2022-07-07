@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"9m/auth"
-	"9m/config"
-	"9m/db"
-	"9m/fd"
-	"9m/handler"
-	"9m/logging"
-	"9m/router"
-	"9m/wsock"
+	"9minutes/auth"
+	"9minutes/config"
+	"9minutes/db"
+	"9minutes/fd"
+	"9minutes/handler"
+	"9minutes/logging"
+	"9minutes/router"
+	"9minutes/wsock"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"
@@ -27,7 +27,7 @@ import (
 )
 
 func setupINI() {
-	iniPath := "9m.ini"
+	iniPath := "9minutes.ini"
 
 	cfg, err := ini.Load(iniPath)
 	if err != nil {
@@ -42,8 +42,8 @@ func setupINI() {
 			log.Fatal("Create INI: ", err)
 		}
 
-		fmt.Println("9m.ini is created")
-		fmt.Println("Please modify 9m.ini then run again")
+		fmt.Println("9minutes.ini is created")
+		fmt.Println("Please modify 9minutes.ini then run again")
 
 		os.Exit(1)
 	}

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"9m/auth"
-	"9m/router"
+	"9minutes/auth"
+	"9minutes/router"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"9m/handler"
-	"9m/router"
+	"9minutes/handler"
+	"9minutes/router"
 )
 
 func setAPIs(r *router.App) {

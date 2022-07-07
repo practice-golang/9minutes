@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"9m/consts"
-	"9m/crud"
-	"9m/model"
-	"9m/router"
+	"9minutes/consts"
+	"9minutes/crud"
+	"9minutes/model"
+	"9minutes/router"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"

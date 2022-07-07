@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"9m/auth"
-	"9m/consts"
-	"9m/logging"
-	"9m/router"
+	"9minutes/auth"
+	"9minutes/consts"
+	"9minutes/logging"
+	"9minutes/router"
 
 	"github.com/stretchr/testify/require"
 )
@@ -59,7 +59,7 @@ func Test_main(t *testing.T) {
 			fname := consts.ProgramName + "-" + time.Now().Format("20060102") + ".log"
 			logging.F.Close()
 			os.Remove(fname)
-			os.Remove("9m.db")
+			os.Remove("9minutes.db")
 
 			os.Remove(auth.JwtPrivateKeyFileName)
 			os.Remove(auth.JwtPublicKeyFileName)

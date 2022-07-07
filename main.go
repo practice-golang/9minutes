@@ -1,4 +1,4 @@
-package main // import "9m"
+package main // import "9minutes"
 
 import (
 	"embed"
@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"os"
 
-	"9m/config"
-	"9m/db"
-	"9m/logging"
+	"9minutes/config"
+	"9minutes/db"
+	"9minutes/logging"
 )
 
-//go:embed 9m.ini
+//go:embed 9minutes.ini
 var sampleINI string
 
 //go:embed html/*

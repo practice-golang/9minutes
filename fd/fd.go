@@ -1,7 +1,7 @@
 package fd
 
 import (
-	"9m/router"
+	"9minutes/router"
 	"io/fs"
 	"io/ioutil"
 	"os"

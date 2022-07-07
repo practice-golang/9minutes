@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"9m/auth"
-	"9m/config"
-	"9m/crud"
-	"9m/fd"
-	"9m/model"
-	"9m/router"
+	"9minutes/auth"
+	"9minutes/config"
+	"9minutes/crud"
+	"9minutes/fd"
+	"9minutes/model"
+	"9minutes/router"
 	"bytes"
 	"errors"
 	"os"

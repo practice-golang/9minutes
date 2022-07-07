@@ -10,8 +10,8 @@ import (
 	"log"
 	"time"
 
-	"9m/consts"
-	"9m/model"
+	"9minutes/consts"
+	"9minutes/model"
 
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwk"

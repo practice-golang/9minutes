@@ -1,8 +1,8 @@
 package db
 
 import (
-	"9m/consts"
-	"9m/model"
+	"9minutes/consts"
+	"9minutes/model"
 	"database/sql"
 	"strconv"
 	"time"

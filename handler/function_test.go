@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"9m/fd"
-	"9m/model"
-	"9m/router"
+	"9minutes/fd"
+	"9minutes/model"
+	"9minutes/router"
 	"bytes"
 	"embed"
 	"encoding/json"

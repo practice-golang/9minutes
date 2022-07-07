@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"9m/auth"
-	"9m/crud"
-	"9m/router"
+	"9minutes/auth"
+	"9minutes/crud"
+	"9minutes/router"
 )
 
 // HelloMiddleware - middleware for test

@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"9m/model"
-	"9m/router"
+	"9minutes/model"
+	"9minutes/router"
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/guregu/null.v4"

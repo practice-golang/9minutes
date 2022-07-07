@@ -1,7 +1,7 @@
 package db
 
 import (
-	"9m/model"
+	"9minutes/model"
 	"database/sql"
 	"errors"
 )

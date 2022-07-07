@@ -2,10 +2,10 @@
 package crud
 
 import (
-	"9m/consts"
-	"9m/db"
-	"9m/model"
-	"9m/np"
+	"9minutes/consts"
+	"9minutes/db"
+	"9minutes/model"
+	"9minutes/np"
 	"errors"
 
 	"github.com/blockloop/scan"

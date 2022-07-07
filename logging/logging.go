@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"9m/consts"
+	"9minutes/consts"
 
 	"github.com/rs/zerolog"
 )

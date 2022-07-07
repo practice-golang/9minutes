@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"9m/model"
+	"9minutes/model"
 
 	"github.com/brianvoe/sjwt"
 )

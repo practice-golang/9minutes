@@ -1,9 +1,9 @@
 package crud
 
 import (
-	"9m/config"
-	"9m/db"
-	"9m/model"
+	"9minutes/config"
+	"9minutes/db"
+	"9minutes/model"
 	"log"
 	"os"
 	"testing"

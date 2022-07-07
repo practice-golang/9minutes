@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	"9m/logging"
+	"9minutes/logging"
 )
 
 var StaticServer Handler

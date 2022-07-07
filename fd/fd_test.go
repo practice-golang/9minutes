@@ -1,7 +1,7 @@
 package fd
 
 import (
-	"9m/router"
+	"9minutes/router"
 	"embed"
 	"io/fs"
 	"os"
