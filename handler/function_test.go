@@ -121,6 +121,13 @@ func Test_Index(t *testing.T) {
 				want = bytes.ReplaceAll(want, includeDirective, include)
 			}
 
+			patternLinkMyPage = `\$LinkMyPage\$(.*)\n`
+			patternYouArePending = `\$YouArePending\$(.*)\n`
+			reYouArePending = regexp.MustCompile(patternYouArePending)
+			reMyPage = regexp.MustCompile(patternLinkMyPage)
+			want = reYouArePending.ReplaceAll(want, []byte(""))
+			want = reMyPage.ReplaceAll(want, []byte(""))
+
 			want = bytes.ReplaceAll(want, []byte("$USERNAME$"), []byte("Guest"))
 			want = bytes.ReplaceAll(want, []byte("$LinkLogin$"), []byte(""))
 			want = reLogout.ReplaceAll(want, []byte(""))
