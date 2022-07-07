@@ -16,7 +16,7 @@ Bulletin board
 $ go build .
 $ ./9minutes
 ```
-* Then run again
+* Then run again after modify 9minutes.ini
 ```sh
 $ ./9minutes
 ```
