@@ -1,0 +1,77 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD: ''
+        ports:
+          - 13306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        env:
+          MSSQL_SA_PASSWORD: 'SQLServer1433'
+          ACCEPT_EULA: Y
+        ports:
+          - 1433:1433
+
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: pgsql
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+#     - name: Setup PostgreSQL
+#       uses: Harmon758/postgresql-action@v1.0.0
+#       with:
+#         postgresql user: 'root'
+#         postgresql password: 'pgsql'
+
+    - name: Verify MySQL connection
+      run: |
+        sudo apt-get install -y mysql-client
+        mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -uroot -e "SHOW DATABASES"
+        
+    - name: Verify SQL Server connection
+      run: |
+        sqlcmd -S tcp:127.0.0.1,1433 -U SA -P "SQLServer1433"
+
+    - uses: actions/checkout@v2
+    
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v -race -coverprofile coverage.out ./...
+      
+#     - name: Codecov
+#       uses: codecov/codecov-action@v2
+#       with:
+#         token: ${{ secrets.CODECOV_TOKEN }}
+#         files: coverage.out
