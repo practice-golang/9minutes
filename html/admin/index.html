@@ -1,0 +1,38 @@
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+
+    <title>Admin page</title>
+</head>
+
+<body>
+    <div>
+        Good day, $USERNAME$.
+    </div>
+
+    <input type="hidden" id="is-loggedin" value=$ISLOGGEDIN$ />
+
+    <a id="login" href="/login.html">Login</a>
+    <a id="logout" href="/logout">Logout</a>
+    <hr />
+    <a href="/admin/boards-list.html">Boards</a>
+    <a href="/admin/user-columns.html">User columns</a>
+    <a href="/admin/users-list.html">User list</a>
+    <hr />
+    <a href="/hello.html">Hello</a>
+
+    <!-- <img width="480" src="/static/gopher.png" alt="logo" /> -->
+    <!-- <img width="480" src="/static/panic.png" alt="logo" /> -->
+</body>
+
+<script>
+    const isLoggedIn = document.querySelector("#is-loggedin").value
+
+    document.querySelector("#login").style.display = isLoggedIn ? "none" : "block"
+    document.querySelector("#logout").style.display = isLoggedIn ? "block" : "none"
+</script>
+
+</html>

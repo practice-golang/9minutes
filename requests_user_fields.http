@@ -1,0 +1,16 @@
+@uri = http://localhost:4416
+
+### Login - Form, Cookie
+POST {{uri}}/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Origin: {{uri}}
+
+username=admin&password=admin
+
+
+### User column list
+GET {{uri}}/api/admin/user-columns/list
+
+### User column list
+GET {{uri}}/api/admin/user-columns/count
+

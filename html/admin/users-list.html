@@ -1,0 +1,266 @@
+@INCLUDE@admin/include/header.html
+
+<script>
+    document.title = "Users list"
+</script>
+
+<body>
+    <h1>Users list</h1>
+
+    <a href="/admin">Back to admin</a>
+
+    <button type="button" onclick="openAdd()">Add user</button>
+
+    <label for="search">Search:</label>
+    <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
+    <button type="button" onclick="search()">Search</button>
+
+    <table id="users-list-container">
+        <thead>
+            <tr>
+                <td><input type="checkbox" name="select-all" placeholder="Select all" /></td>
+                <th>Index</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Grade</th>
+                <th>Approval</th>
+                <th>Control</th>
+            </tr>
+        </thead>
+        <tr id="add-user">
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td><input type="text" name="username" value="" placeholder="Username" /></td>
+            <td><input type="password" name="password" value="" placeholder="Password" /></td>
+            <td><input type="text" name="email" value="" placeholder="Email" /></td>
+            <td><input type="text" name="phone" value="" placeholder="Phone" /></td>
+            <td><input type="text" name="grade" list="grade-list" value="" placeholder="Grade" /></td>
+            <td><input type="text" name="approval" list="yn-list" value="" autocomplete="off" placeholder="Approval" /></td>
+            <td>
+                <button type="button" onclick="closeAdd()">Cancel</button>
+                <button type="button" onclick="addUser()">Save</button>
+            </td>
+        </tr>
+        <tbody id="users-list-body" lr-loop="usersList">
+            <tr lr-if="userEditIndex != $index">
+                <td><input type="checkbox" name="select$index" placeholder="Select" /></td>
+                <td>{{idx}}</td>
+                <td>{{username}}</td>
+                <td>-</td>
+                <td>{{email}}</td>
+                <td>{{phone}}</td>
+                <td>{{grade}}</td>
+                <td>{{approval}}</td>
+                <td>
+                    <button type="button" lr-click="openEdit($index)">Edit</button>
+                    <button type="button" lr-click="deleteUser($index)">Delete</button>
+                </td>
+            </tr>
+            <tr lr-if="userEditIndex == $index">
+                <td>&nbsp;</td>
+                <td>
+                    <input type="hidden" name="idx" value="{{idx}}" placeholder="Index" />
+                    <span>{{idx}}</span>
+                </td>
+                <td><input type="text" name="username" value="{{username}}" placeholder="Username" /></td>
+                <td><input type="password" name="password" value="" placeholder="Password" /></td>
+                <td><input type="text" name="email" value="{{email}}" placeholder="Email" /></td>
+                <td><input type="text" name="phone" value="{{phone}}" placeholder="Phone" /></td>
+                <td><input type="text" name="grade" list="grade-list" value="{{grade}}" placeholder="Grade" /></td>
+                <td><input type="text" name="approval" list="yn-list" value="{{approval}}" autocomplete="off" placeholder="Approval" /></td>
+                <td>
+                    <button type="button" onclick="closeEdit()">Cancel</button>
+                    <button type="button" onclick="updateUser()">Save</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <datalist id="grade-list">
+        <option value="admin">Admin</option>
+        <option value="manager">Manager</option>
+        <option value="regular_user">Regular user</option>
+        <option value="pending_user">Pending user</option>
+        <option value="banned_user">Banned user</option>
+    </datalist>
+
+    <datalist id="yn-list">
+        <option value="Y">Y</option>
+        <option value="N">N</option>
+    </datalist>
+
+    <div id="pages-container">
+        <div lr-loop="pages">
+            <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
+            <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+
+            <b lr-if="page == usersData['current-page']"><a onclick="location.href='{{link}}'">{{page}}</a></b>
+            <a lr-if="page != usersData['current-page']" onclick="location.href='{{link}}'">{{page}}</a>
+
+            <span lr-if="page < usersData['total-page'] && $index == (pages.length - 1)">&gt;</span>
+            <span lr-if="page < usersData['total-page'] && $index == (pages.length - 1)">&raquo;</span>
+        </div>
+    </div>
+</body>
+
+<script>
+    let userEditIndex = -1
+    const url = new URL(window.location.href)
+    const urlPath = url.pathname
+    const urlParams = url.searchParams
+    let usersData, usersList
+    let pages = new Array()
+
+    function openAdd() { document.querySelector("#add-user").style.display = "table-row" }
+    function closeAdd() { document.querySelector("#add-user").style.display = "none" }
+    async function addUser() {
+        const username = document.querySelector("#add-user input[name='username']").value
+        const password = document.querySelector("#add-user input[name='password']").value
+        const email = document.querySelector("#add-user input[name='email']").value
+        const phone = document.querySelector("#add-user input[name='phone']").value
+        const grade = document.querySelector("#add-user input[name='grade']").value
+        const approval = document.querySelector("#add-user input[name='approval']").value
+
+        const data = {
+            "username": username,
+            "password": password,
+            "email": email,
+            "phone": phone,
+            "grade": grade,
+            "approval": approval,
+        }
+
+        const uri = "/api/admin/users/user"
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) { location.reload()() }
+    }
+
+    function openEdit(idx) {
+        userEditIndex = idx
+        lrUsersList.reload()
+    }
+
+    function closeEdit(event) {
+        userEditIndex = -1
+        lrUsersList.reload()
+    }
+
+    async function updateUser() {
+        userEditIndex = -1
+
+        const idx = document.querySelector("#users-list-body input[name='idx']").value
+        const username = document.querySelector("#users-list-body input[name='username']").value
+        const password = document.querySelector("#users-list-body input[name='password']").value
+        const email = document.querySelector("#users-list-body input[name='email']").value
+        const phone = document.querySelector("#users-list-body input[name='phone']").value
+        const grade = document.querySelector("#users-list-body input[name='grade']").value
+        const approval = document.querySelector("#users-list-body input[name='approval']").value
+
+        const data = {
+            "idx": idx,
+            "username": username,
+            "email": email,
+            "phone": phone,
+            "grade": grade,
+            "approval": approval,
+        }
+
+        if (password != "") { data["password"] = password }
+
+        const uri = "/api/admin/users/user"
+        const r = await fetch(uri, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) { location.reload()() }
+    }
+
+    function deleteUser(index) {
+        const uri = "/api/admin/users/user/" + usersList[index].idx
+        fetch(uri, { method: 'DELETE' }).then(() => { location.href = urlPath })
+    }
+
+    function pressEnter() { if (window.event.keyCode == 13) { search() } }
+    function search() {
+        let countParam = ""
+        const search = document.querySelector("#search").value
+
+        if (search.length < 2) {
+            if (search == "") {
+                if (urlParams.get("count")) { countParam += "?count=" + urlParams.get("count") }
+                location.href = urlPath + countParam
+
+                return false
+            }
+
+            alert("Required at least 2 characters")
+
+            return false
+        }
+
+        if (urlParams.get("count")) { countParam += "&count=" + urlParams.get("count") }
+        const url = `?search=${search}` + countParam
+        location.href = url
+
+        return false
+    }
+
+    usersData = $USER_LIST$
+    usersList = usersData["user-list"]
+
+    let countParam = ""
+    if (urlParams.get("search")) {
+        document.querySelector("#search").value = urlParams.get("search")
+        countParam = "&search=" + urlParams.get("search")
+    }
+    if (urlParams.get("count")) { countParam += "&count=" + urlParams.get("count") }
+
+    for (let i = usersData["current-page"] - 1; i < usersData["current-page"] + 2; i++) {
+        if (i > usersData["total-page"]) { break }
+        if (i > 0) {
+            const pageInfo = {
+                "page": i,
+                "link": `?page=${i}` + countParam
+            }
+            pages.push(pageInfo)
+        }
+    }
+
+    const lrUsersList = new ListRenderer(document.querySelector("#users-list-container"))
+    lrUsersList.render()
+
+    const lrPage = new ListRenderer(document.querySelector("#pages-container"))
+    lrPage.render()
+</script>
+
+<style>
+    table,
+    th,
+    td {
+        border: 1px solid black;
+        /* empty-cells: hide; */
+    }
+
+    #add-user {
+        display: none;
+    }
+
+    #users-list {
+        display: none;
+    }
+
+    tbody>tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+
+@INCLUDE@admin/include/footer.html

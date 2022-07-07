@@ -1,0 +1,11 @@
+bin/
+upload/*
+!upload/.gitkeep
+coverage.out
+coverage.html
+/codecov.*
+/books.db
+
+/mariadata
+/pgdata
+/pglog

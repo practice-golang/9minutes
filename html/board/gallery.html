@@ -1,0 +1,157 @@
+@INCLUDE@board/include/header.html
+
+<body>
+    <label for="search">Search:</label>
+    <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
+    <button type="button" onclick="search()">Search</button>
+
+    <div id="list-container" class="gallery">
+        <ul lr-loop="list">
+            <li lr-click="moveToContent($index)">
+                <!-- <img src="{{title-image}}" alt="title-image" /> -->
+                <div class="title-img"><img src="{{title-image}}" alt="title-image" /></div>
+                <div class="title-text">{{title}}</div>
+            </li>
+        </ul>
+    </div>
+
+    <div id="pages-container">
+        <div lr-loop="pages">
+            <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
+            <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+
+            <a onclick="location.href='{{link}}'">{{page}}</a>
+
+            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
+            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
+        </div>
+    </div>
+
+    <div>
+        <button type="button" onclick="moveToWrite()">Write</button>
+    </div>
+</body>
+
+<script>
+    let boardEditIndex = -1
+    const url = new URL(window.location.href)
+    const urlParams = url.searchParams
+
+    let list = new Array()
+
+    function moveToContent(idx) {
+        const index = list[idx].idx
+        location.href = `read.html?code=$CODE$&type=gallery&idx=${index}`
+
+        return false
+    }
+
+    function moveToWrite() {
+        location.href = "write.html?code=$CODE$&type=gallery";
+        return false
+    }
+
+    async function deleteContent(e, idx) {
+        e.stopPropagation()
+
+        const index = list[idx].idx
+        const url = `/api/board/content/$CODE$/${index}`
+
+        const r = await fetch(url, { method: "DELETE" })
+
+        if (r.ok) {
+            location.reload()
+        } else {
+            alert("Failed to delete")
+        }
+
+        return false
+    }
+
+    function pressEnter() { if (window.event.keyCode == 13) { search() } }
+    function search() {
+        const search = document.querySelector("#search").value
+
+        if (search.length < 2) {
+            if (search == "") {
+                const url = `/board/gallery.html?code=$CODE$`
+
+                searchParam = ""
+                if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
+
+                location.href = url + searchParam
+
+                return false
+            }
+
+            alert("Required at least 2 characters")
+
+            return false
+        }
+
+        const url = `/board/gallery.html?code=$CODE$&search=${search}`
+        location.href = url
+
+        return false
+    }
+
+    let contentsData = $CONTENT_LIST$
+    list = contentsData["content-list"]
+
+    let searchParam = ""
+    if (urlParams.get("search")) {
+        document.querySelector("#search").value = urlParams.get("search")
+        searchParam = "&search=" + urlParams.get("search")
+    }
+    if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
+
+    let pages = new Array()
+    for (let i = contentsData["current-page"] - 1; i < contentsData["current-page"] + 2; i++) {
+        if (i > contentsData["total-page"]) { break }
+        if (i > 0) {
+            const pageInfo = {
+                "page": i,
+                "link": `/board/gallery.html?code=$CODE$&page=${i}` + searchParam
+            }
+            pages.push(pageInfo)
+        }
+    }
+
+    const lrList = new ListRenderer(document.querySelector("#list-container"))
+    lrList.render(list)
+
+    const lrPage = new ListRenderer(document.querySelector("#pages-container"))
+    lrPage.render()
+</script>
+
+<style>
+    .gallery {
+        width: 80vw;
+    }
+
+    .gallery ul {
+        display: flex;
+        flex-flow: row wrap;
+        list-style: none;
+        margin: 32px 0;
+    }
+
+    .gallery li {
+        margin: 0 0.2vw;
+        /* flex-basis: calc(50% - 20px); */
+    }
+
+    .gallery li img {
+        width: 20vw;
+        height: 15vw;
+        object-fit: cover;
+    }
+
+    .title-text {
+        margin-top: -25px;
+        margin-left: 5px;
+        color: chocolate;
+    }
+</style>
+
+@INCLUDE@admin/include/footer.html

@@ -1,0 +1,85 @@
+@INCLUDE@include/header.html
+
+<script>
+    document.title = "My page"
+</script>
+
+<body>
+    <div>
+        <span id="username"></span>
+        <input type="password" name="old-password" value="" placeholder="Old password" />
+        <input type="password" name="password" value="" placeholder="New password" />
+        <input type="password" name="password-confirm" value="" placeholder="Confirm new password" />
+        <input type="text" name="email" value="" placeholder="Email" />
+        <input type="text" name="phone" value="" placeholder="Phone" />
+    </div>
+
+    <button type="button" onclick="location.href='/'">Cancel</button>
+    <button type="button" onclick="updateUser()">Update</button>
+</body>
+
+<script>
+    async function updateUser() {
+        const data = {
+            email: document.querySelector('input[name="email"]').value,
+            phone: document.querySelector('input[name="phone"]').value
+        }
+
+        const passwordOLD = document.querySelector('input[name="old-password"]').value
+        const password = document.querySelector('input[name="password"]').value
+        const passwordConfirm = document.querySelector('input[name="password-confirm"]').value
+
+        if (passwordOLD != "" || password != "" || passwordConfirm != "") {
+            if (password == "") {
+                alert("Password is required")
+                return
+            }
+
+            if (password != passwordConfirm) {
+                alert("Password does not match")
+                return
+            }
+
+            if (passwordOLD == "") {
+                alert("Please enter your old password")
+                return
+            }
+
+            if (password == passwordOLD) {
+                alert("New password is the same as old password")
+                return
+            }
+
+            data["password"] = password
+            data["old-password"] = passwordOLD
+        }
+
+        let r = await fetch('/api/myinfo', {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            alert("Update successful")
+            location.href = '/'
+        } else {
+            alert(await r.text())
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const r = await fetch('/api/myinfo')
+        if (r.ok) {
+            const data = await r.json()
+
+            document.querySelector('#username').innerText = data.username
+            document.querySelector('input[name="email"]').value = data.email
+            document.querySelector('input[name="phone"]').value = data.phone
+        } else {
+            location.href = '/'
+        }
+    })
+</script>
+
+@INCLUDE@include/footer.html

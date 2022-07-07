@@ -1,0 +1,149 @@
+@INCLUDE@board/include/header.html
+
+<body>
+    <div id="buttons">
+        <label for="image-upload">Image:</label>
+        <input type="file" id="image-upload" multiple>
+        <button type="button" onclick="insertImage()">Upload</button>
+        <label for="title-image-upload">Title Image:</label>
+        <input type="file" id="title-image-upload">
+        <button type="button" onclick="insertTitleImage()">Title image upload</button>
+    </div>
+    <div>
+        Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
+        Title image: $TITLE_IMAGE$
+    </div>
+    <div id="editor"></div>
+    <div>
+        <button type="button" onclick="moveToList()">Cancel</button>
+        <button type="button" onclick="updateContent()">Update</button>
+    </div>
+</body>
+
+<link rel="stylesheet" href="/assets/css/editor.css">
+<script>"use strict"</script>
+<script src="/assets/js/myeditor.js"></script>
+
+<script>
+    let data = `$CONTENT$`;
+    const url = new URL(window.location.href)
+    const urlParams = url.searchParams
+    let titleImage = ""
+
+    console.log(data)
+
+    const options = {
+        uploadActionURI: "/api/uploader/image",
+        uploadAccessURI: "/upload",
+    }
+    const editorEL = document.querySelector("#editor")
+    const editor = new MyEditor(data, editorEL, options)
+
+    async function insertImage() {
+        const uploadURI = options.uploadActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#image-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+            if (r.ok) {
+                const result = await r.json()
+                editor.insertImage(`${accessURI}/${result.storename}`)
+            }
+        }
+    }
+
+    async function insertTitleImage() {
+        const uploadURI = options.uploadActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#title-image-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+            if (r.ok) {
+                const result = await r.json()
+                titleImage = `${accessURI}/${result.storename}`
+            }
+        }
+    }
+
+    async function updateContent() {
+        const data = {
+            "idx": urlParams.get("idx"),
+            "title": document.querySelector("#title").value,
+            "title-image": titleImage,
+            "content": editor.getHTML()
+        }
+
+        const r = await fetch("/api/board/content/$CODE$/$IDX$", {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            let boardType = ""
+            if (urlParams.get("type") == "gallery") { boardType = "&type=gallery" }
+
+            location.href = "/board/read.html?code=$CODE$&idx=$IDX$" + boardType
+        } else {
+            alert("Server error")
+        }
+
+        return false
+    }
+
+    function moveToList() {
+        // location.href = "./list.php?code=" + urlParams.get("code")
+        history.back()
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const buttonsEL = document.querySelector("#buttons")
+        // const editorHeight = 200 + "px"
+        // editorEL.style.height = editorHeight
+        const editorMaxHeight = window.innerHeight - buttonsEL.offsetHeight - 2 + "px"
+        editorEL.style.maxHeight = editorMaxHeight
+        titleImage = "$TITLE_IMAGE$";
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /*
+     Need js for custom resize handle??? :
+     https://spin.atomicobject.com/2019/11/21/creating-a-resizable-html-element
+     */
+    #editor {
+        resize: vertical;
+        overflow: auto;
+
+        border: 1px solid silver;
+    }
+</style>
+
+@INCLUDE@admin/include/footer.html

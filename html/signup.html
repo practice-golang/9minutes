@@ -1,0 +1,42 @@
+@INCLUDE@include/header.html
+
+<script>
+    document.title = "Sign up"
+</script>
+
+<body>
+    <div>
+        <input type="text" name="username" value="" placeholder="Username" required />
+        <input type="password" name="password" value="" placeholder="Password" required />
+        <input type="text" name="email" value="" placeholder="Email" required />
+        <input type="text" name="phone" value="" placeholder="Phone" required />
+    </div>
+
+    <button type="button" onclick="location.href='/'">Cancel</button>
+    <button type="button" onclick="signin()">Sign up</button>
+</body>
+
+<script>
+    async function signin() {
+        let data = {
+            username: document.querySelector('input[name="username"]').value,
+            password: document.querySelector('input[name="password"]').value,
+            email: document.querySelector('input[name="email"]').value,
+            phone: document.querySelector('input[name="phone"]').value
+        }
+
+        let r = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            location.href = '/'
+        } else {
+            alert(await r.text())
+        }
+    }
+</script>
+
+@INCLUDE@include/footer.html

@@ -1,0 +1,202 @@
+@INCLUDE@board/include/header.html
+
+<body>
+    <div class="content-container">
+        <h1>$TITLE$</h1>
+        <p>Author: $AUTHOR_NAME$ / Views: $VIEWS$</p>
+        <div id="content">$CONTENT$</div>
+
+        <button type="button" onclick="moveToEdit()">Edit</button>
+        <button type="button" onclick="deleteContent()">Delete</button>
+        <button type="button" onclick="moveToList()">Back to list</button>
+
+        <hr />
+
+        <div id="comments-container">
+            Comments:
+            <div lr-loop="comments">
+                <div class="comment-item">
+                    {{author-name}}
+                    <button type="button" lr-click="deleteComment($index)">X</button>
+                </div>
+                <div>{{content}}</div>
+            </div>
+        </div>
+
+        <div id="pages-container">
+            <div lr-loop="pages">
+                <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
+                <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+
+                <b lr-if="page == commentsData['current-page']">{{page}}</b>
+                <a lr-if="page != commentsData['current-page']" lr-click="fetchComments('{{page}}')">{{page}}</a>
+
+                <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
+                <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
+            </div>
+        </div>
+
+        <label for="comment-area">Write a comment:</label>
+        <div>
+            <textarea id="comment-area"></textarea>
+        </div>
+        <button type="button" onclick="writeComment()">Save comment</button>
+    </div>
+</body>
+
+<script>
+    const data = `<?= $data["CONTENT"] ?>`;
+    const url = new URL(window.location.href)
+    const urlParams = url.searchParams
+
+    function moveToEdit() {
+        let boardType = ""
+        if (urlParams.get("type") == "gallery") { boardType = "&type=gallery" }
+
+        location.href = "./edit.html?code=$CODE$&idx=$IDX$" + boardType
+    }
+
+    async function deleteContent(e, idx) {
+        const url = `/api/board/content/$CODE$/${urlParams.get("idx")}`
+
+        const r = await fetch(url, { method: "DELETE" })
+
+        if (r.ok) {
+            moveToList()
+        } else {
+            alert("Failed to delete")
+        }
+
+        return false
+    }
+    function moveToList() {
+        if (urlParams.get("type") == "gallery") {
+            location.href = "gallery.html?code=$CODE$";
+        } else {
+            location.href = "list.html?code=$CODE$";
+        }
+
+        return false
+    }
+
+    async function fetchComments(page) {
+        const param = "?page=" + page
+        const uri = "/api/board/comment/$CODE$/$IDX$" + param
+        const r = await fetch(uri, { method: 'GET' })
+
+        if (r.ok) {
+            const data = await r.json()
+            commentsData = data
+            comments = commentsData["comment-list"]
+
+            pages = new Array()
+            for (let i = commentsData["current-page"] - 1; i < commentsData["current-page"] + 2; i++) {
+                if (i > commentsData["total-page"]) { break }
+                if (i > 0) {
+                    const pageInfo = { "page": i, "link": null }
+                    pages.push(pageInfo)
+                }
+            }
+
+            lrComments.reload()
+            lrPage.reload()
+        }
+    }
+
+    async function writeComment() {
+        const comment = document.getElementById("comment-area").value
+
+        if (comment == "") {
+            alert("Write comment")
+            return false
+        }
+
+        const data = { "content": comment }
+
+        const r = await fetch("/api/board/comment/$CODE$/$IDX$", {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: { "Content-Type": "application/json" }
+        })
+
+        if (r.ok) {
+            // location.reload()
+
+            const pageToMove = Math.ceil((commentsData["total-count"] + 1) / commentsData["list-count"])
+
+            fetchComments(pageToMove)
+        } else {
+            alert(await r.text())
+        }
+
+        return false
+    }
+
+    async function deleteComment(index) {
+        const idx = comments[index].idx
+        const uri = "/api/board/comment/$CODE$/$IDX$/" + idx
+        const r = await fetch(uri, { method: 'DELETE' })
+
+        if (r.ok) {
+            await fetchComments()
+        } else {
+            alert(await r.text())
+        }
+    }
+
+    let commentsData = $COMMENTS$;
+    let comments = commentsData["comment-list"]
+
+    let pages = new Array()
+    for (let i = commentsData["current-page"] - 1; i < commentsData["current-page"] + 2; i++) {
+        if (i > commentsData["total-page"]) { break }
+        if (i > 0) {
+            const pageInfo = { "page": i, "link": null }
+            pages.push(pageInfo)
+        }
+    }
+
+    const lrComments = new ListRenderer(document.querySelector("#comments-container"))
+    lrComments.render()
+
+    const lrPage = new ListRenderer(document.querySelector("#pages-container"))
+    lrPage.render()
+</script>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .content-container {
+        width: 95vw;
+    }
+
+    #content img {
+        max-width: 100%;
+        overflow: auto;
+    }
+
+    #comments-container img {
+        max-width: 25%;
+        overflow: auto;
+    }
+
+    .comment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    textarea {
+        width: 100%;
+        height: 10vh;
+    }
+</style>
+
+@INCLUDE@admin/include/footer.html

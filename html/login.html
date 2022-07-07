@@ -1,0 +1,30 @@
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+
+    <title>Login</title>
+</head>
+
+<body>
+    <form method="post" action="/login">
+        <input type="hidden" name="destination" value="" />
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" tabindex="1" required />
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" tabindex="2" required />
+
+        <input type="submit" tabindex="3" value="Login" />
+        <input type="button" tabindex="4" value="Sign up" onclick="location.href='/signup.html'" />
+    </form>
+</body>
+
+<script>
+    document.querySelector("input[name='destination']").value = document.referrer
+</script>
+
+</html>

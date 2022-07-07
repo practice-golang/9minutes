@@ -1,0 +1,74 @@
+package db
+
+import (
+	"testing"
+
+	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/require"
+)
+
+func TestPostgres_Exec(t *testing.T) {
+	var err error
+	Info = DBInfo{
+		DatabaseType:  POSTGRES,
+		Protocol:      "tcp",
+		Addr:          "localhost",
+		Port:          "5432",
+		DatabaseName:  "postgres",
+		SchemaName:    "public",
+		TableName:     "books",
+		GrantID:       "root",
+		GrantPassword: "pgsql",
+	}
+
+	type args struct {
+		sql       string
+		colValues []interface{}
+		options   string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "POSTGRES",
+			args: args{
+				sql:       `INSERT INTO ` + GetFullTableName(Info.TableName) + ` ("TITLE","AUTHOR") VALUES ($1,$2)`,
+				colValues: []interface{}{"test2", "test3"},
+				options:   "IDX",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dsn := `host=` + Info.Addr + ` port=` + Info.Port + ` user=` + Info.GrantID + ` password=` + Info.GrantPassword + ` dbname=` + Info.DatabaseName + ` sslmode=disable`
+			Obj = &Postgres{dsn: dsn}
+			Con, err = Obj.connect()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			defer Con.Close()
+
+			err = Obj.CreateDB()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			// err = Obj.CreateTable()
+			// if err != nil {
+			// 	t.Error(err)
+			// 	return
+			// }
+
+			count, _, err := Obj.Exec(tt.args.sql, tt.args.colValues, tt.args.options)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			require.Equal(t, int64(1), count)
+		})
+	}
+}
