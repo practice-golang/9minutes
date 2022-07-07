@@ -12,17 +12,24 @@ Bulletin board
 ## Getting started
 
 * Build and run
+```sh
+$ go build .
+$ ./9minutes
+```
 * Then run again
+```sh
+$ ./9minutes
+```
 * Open `http://localhost:5525` in browser
 * Sign in with `admin` / `admin`
 
 
 ## Modify HTML
 
-* When exist html files in storage, 9m load html files in real storage instead of embedded html
+* When exist html files in storage, 9minutes load html files in real storage instead of embedded html
 * Get embedded html files
-```zsh
-$ ./9m -get html
+```sh
+$ ./9minutes -get html
 ```
 * Then, edit html files
 * Files in admin directory are not exported hence, If you want to modify them, download this repository and modify and build

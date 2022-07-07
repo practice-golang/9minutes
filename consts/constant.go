@@ -1,7 +1,7 @@
 package consts
 
 var (
-	ProgramName string = "9m"
+	ProgramName string = "9minutes"
 
 	BcryptCost       int    = 8
 	TableBooks       string = "books"
