@@ -98,7 +98,7 @@ func Test_Index(t *testing.T) {
 			patternLinkAdmin = `\$LinkAdmin\$(.*)\n`
 			reLogout = regexp.MustCompile(patternLinkLogout)
 			reAdmin = regexp.MustCompile(patternLinkAdmin)
-			patternIncludes = `@INCLUDE@(.*)\n`
+			patternIncludes = `@INCLUDE@(.*)(\n|$)`
 			reIncludes = regexp.MustCompile(patternIncludes)
 
 			/* Include */
