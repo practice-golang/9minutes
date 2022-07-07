@@ -1,6 +1,0 @@
-/bin
-/mariadata
-/pgdata
-pglog
-/data/*
-/data_tmp/*
