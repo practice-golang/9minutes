@@ -24,7 +24,7 @@ $ ./9minutes
 * Sign in with `admin` / `admin`
 
 
-## Modify HTML
+## HTML modification
 
 * When exist html files in storage, 9minutes load html files in real storage instead of embedded html
 * Get embedded html files
