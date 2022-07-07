@@ -51,10 +51,10 @@ See `setup.go` and `router_*.go`
 
 
 ## Todo
-* [] Try html/template at board list
+* [ ] Try html/template at board list
 * [x] File attatchment
-* [] Shared session
-* [] User approval - email sending
+* [ ] Shared session
+* [ ] User approval - email sending
 
 ## License
 
