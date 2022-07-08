@@ -15,8 +15,13 @@ import (
 	"9minutes/router"
 	"9minutes/wsock"
 
+	"github.com/alexedwards/scs/etcdstore"
+	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"
+	"github.com/gomodule/redigo/redis"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/rs/cors"
 	"gopkg.in/ini.v1"
 
@@ -49,14 +54,20 @@ func setupINI() {
 	}
 
 	if cfg != nil {
-		if cfg.Section("paths").HasKey("STATIC_PATH") {
-			StaticPath = cfg.Section("paths").Key("STATIC_PATH").String()
+		log.Println("Load INI: ", cfg.Section("dirpaths").Key("hahaha").String())
+
+		if cfg.Section("dirpaths").HasKey("STATIC_PATH") {
+			StaticPath = cfg.Section("dirpaths").Key("STATIC_PATH").String()
 		}
-		if cfg.Section("paths").HasKey("UPLOAD_PATH") {
-			UploadPath = cfg.Section("paths").Key("UPLOAD_PATH").String()
+		if cfg.Section("dirpaths").HasKey("UPLOAD_PATH") {
+			UploadPath = cfg.Section("dirpaths").Key("UPLOAD_PATH").String()
 		}
-		if cfg.Section("paths").HasKey("HTML_PATH") {
-			handler.StoreRoot = cfg.Section("paths").Key("HTML_PATH").String()
+		if cfg.Section("dirpaths").HasKey("HTML_PATH") {
+			handler.StoreRoot = cfg.Section("dirpaths").Key("HTML_PATH").String()
+		}
+
+		if cfg.Section("session").HasKey("STORE_TYPE") {
+			handler.StoreRoot = cfg.Section("session").Key("STORE_TYPE").String()
 		}
 
 		if cfg.Section("server").HasKey("ADDRESS") {
@@ -122,6 +133,51 @@ func setupINI() {
 			db.Info.GrantID = cfg.Section("database").Key("grant_id").String()
 		}
 	}
+}
+
+func setupSession() {
+
+	storeType := "memstore"
+	storeType = "etcd"
+	// storeType = "redis"
+
+	auth.SessionManager = scs.New()
+
+	switch storeType {
+	case "etcd":
+		cli, err := clientv3.New(clientv3.Config{
+			Endpoints:   []string{"127.0.0.1:2379"},
+			DialTimeout: 5 * time.Second,
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		auth.SessionManager.Store = etcdstore.New(cli)
+	case "redis":
+		pool := &redis.Pool{
+			MaxIdle: 10,
+			Dial: func() (redis.Conn, error) {
+				return redis.Dial("tcp", "localhost:6379")
+			},
+		}
+
+		auth.SessionManager.Store = redisstore.New(pool)
+	default:
+		auth.SessionManager.Store = memstore.New()
+	}
+
+	auth.SessionManager.Lifetime = 3 * time.Hour
+	auth.SessionManager.IdleTimeout = 20 * time.Minute
+	auth.SessionManager.Cookie.Name = "session_id"
+
+	// auth.SessionManager.Cookie.Domain = "example.com"
+	// auth.SessionManager.Cookie.HttpOnly = true
+	// auth.SessionManager.Cookie.Path = "/example/"
+	// auth.SessionManager.Cookie.Persist = true
+	// auth.SessionManager.Cookie.SameSite = http.SameSiteStrictMode
+	// auth.SessionManager.Cookie.Secure = true
 }
 
 func setupDB() {
@@ -257,18 +313,7 @@ func doSetup() {
 	_ = os.Mkdir(UploadPath, os.ModePerm)
 	_ = os.Mkdir(config.HtmlPath, os.ModePerm)
 
-	auth.SessionManager = scs.New()
-	auth.SessionManager.Store = memstore.New()
-	auth.SessionManager.Lifetime = 3 * time.Hour
-	auth.SessionManager.IdleTimeout = 20 * time.Minute
-	auth.SessionManager.Cookie.Name = "session_id"
-	// auth.SessionManager.Cookie.Domain = "example.com"
-	// auth.SessionManager.Cookie.HttpOnly = true
-	// auth.SessionManager.Cookie.Path = "/example/"
-	// auth.SessionManager.Cookie.Persist = true
-	// auth.SessionManager.Cookie.SameSite = http.SameSiteStrictMode
-	// auth.SessionManager.Cookie.Secure = true
-
+	setupSession()
 	setupDB()
 	setupKey()
 	setupLogger()

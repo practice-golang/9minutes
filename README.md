@@ -53,7 +53,7 @@ See `setup.go` and `router_*.go`
 ## Todo
 * [ ] Try html/template at board list
 * [x] File attatchment
-* [ ] Shared session
+* [x] Shared session
 * [ ] User approval - email sending
 
 ## License

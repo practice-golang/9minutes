@@ -31,6 +31,8 @@ var (
 	ServerHandler http.Handler
 
 	ListeningAddress string
+
+	sessionStoreType string = "memstore"
 )
 
 func firstRun() {
