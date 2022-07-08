@@ -47,7 +47,7 @@ See `setup.go` and `router_*.go`
 * SQLite
 * MySQL - MariaDB 10.5
 * Postgres - PostgreSQL 12.3
-* SQL Server - MS SQL Server express 2014 & 2019 (Not tested yet)
+* SQL Server - MS SQL Server express 2014 & 2019
 
 
 ## Todo
