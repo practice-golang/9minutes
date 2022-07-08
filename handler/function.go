@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"html/template"
+
 	"9minutes/config"
 	"9minutes/crud"
 	"9minutes/fd"
@@ -365,6 +367,143 @@ func HandleContentList(c *router.Context) {
 	h = bytes.ReplaceAll(h, []byte("$CONTENT_LIST$"), listJSON)
 
 	c.Html(http.StatusOK, h)
+}
+
+func HandleContentListTmpl(c *router.Context) {
+	var err error
+
+	code := ""
+	board := model.Board{}
+	queries := c.URL.Query()
+
+	if queries.Get("code") != "" {
+		code = queries.Get("code")
+
+		board.BoardCode = null.StringFrom(code)
+		board, err = crud.GetBoardByCode(board)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	var userInfo model.UserData
+	userGrade := 999
+
+	switch c.AuthInfo {
+	case nil:
+		userGrade = config.UserGrades.IndexOf("guest")
+	default:
+		userInfo, err = crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		userGrade = config.UserGrades.IndexOf(userInfo.Grade.String)
+	}
+
+	accessGrade := config.UserGrades.IndexOf(board.GrantRead.String)
+
+	if accessGrade < userGrade {
+		c.Text(http.StatusForbidden, "Forbidden")
+		return
+	}
+
+	listingOptions := model.ContentListingOptions{}
+	listingOptions.Search = null.StringFrom(queries.Get("search"))
+
+	listingOptions.Page = null.IntFrom(1)
+	listingOptions.ListCount = null.IntFrom(int64(config.ContentsCountPerPage))
+
+	if queries.Get("count") != "" {
+		countPerPage, err := strconv.Atoi(queries.Get("count"))
+		if err != nil {
+			c.Text(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
+	}
+
+	if queries.Get("page") != "" {
+		page := queries.Get("page")
+		pageNum, err := strconv.Atoi(page)
+		if err != nil {
+			c.Text(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		listingOptions.Page = null.IntFrom(int64(pageNum))
+	}
+
+	listingOptions.Page.Int64--
+
+	h, err := LoadHTML(c)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !board.Idx.Valid {
+		c.Text(http.StatusInternalServerError, "Board not found")
+		return
+	}
+
+	h = bytes.ReplaceAll(h, []byte("$CODE$"), []byte(code))
+
+	list, err := crud.GetContentList(board, listingOptions)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+	}
+
+	for i := list.CurrentPage - 1; i < (list.CurrentPage + 2); i++ {
+		if i < 1 || i > list.TotalPage {
+			continue
+		}
+		if i > list.TotalPage {
+			break
+		}
+
+		list.PageList = append(list.PageList, i)
+	}
+
+	listJSON, _ := json.Marshal(list)
+	h = bytes.ReplaceAll(h, []byte("$CONTENT_LIST$"), listJSON)
+
+	tmpl := template.New("list")
+	tmpl = tmpl.Funcs(
+		template.FuncMap{
+			"jump_to_before": func(page int) string {
+				jumpPage := page - 5
+				if jumpPage < 1 {
+					jumpPage = 1
+				}
+				result := fmt.Sprint(jumpPage)
+				return result
+			},
+			"jump_to_after": func(page int) string {
+				jumpPage := page + 5
+				if jumpPage > list.TotalPage {
+					jumpPage = list.TotalPage
+				}
+				result := fmt.Sprint(jumpPage)
+				return result
+			},
+		},
+	)
+
+	tmpl, err = tmpl.Parse(string(h))
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = tmpl.Execute(c.ResponseWriter, list)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.ResponseWriter.WriteHeader(http.StatusOK)
 }
 
 func HandleReadContent(c *router.Context) {
