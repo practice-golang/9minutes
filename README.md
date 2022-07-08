@@ -51,7 +51,6 @@ See `setup.go` and `router_*.go`
 
 
 ## Todo
-* [ ] Try html/template at board list
 * [x] File attatchment
 * [x] Shared session
 * [ ] User approval - email sending
