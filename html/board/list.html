@@ -37,8 +37,8 @@
             {{range $i, $o := .PageList}}
 
             {{if eq $i 0}}
-            <span>&laquo;</span>
-            <span>&lt;</span>
+            <a href="/board/list.html?code=$CODE$&page={{1}}">&laquo;</a>
+            <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}">&lt;</a>
             {{end}}
 
             {{if eq $o $.CurrentPage}}
@@ -48,8 +48,8 @@
             {{end}}
 
             {{if and (ne $i $.TotalPage) (eq $i 2)}}
-            <span>&gt;</span>
-            <span>&raquo;</span>
+            <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}">&gt;</a>
+            <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}">&raquo;</a>
             {{end}}
 
             {{end}}

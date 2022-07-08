@@ -470,7 +470,29 @@ func HandleContentListTmpl(c *router.Context) {
 	listJSON, _ := json.Marshal(list)
 	h = bytes.ReplaceAll(h, []byte("$CONTENT_LIST$"), listJSON)
 
-	tmpl, err := template.New("list").Parse(string(h))
+	tmpl := template.New("list")
+	tmpl = tmpl.Funcs(
+		template.FuncMap{
+			"jump_to_before": func(page int) string {
+				jumpPage := page - 5
+				if jumpPage < 1 {
+					jumpPage = 1
+				}
+				result := fmt.Sprint(jumpPage)
+				return result
+			},
+			"jump_to_after": func(page int) string {
+				jumpPage := page + 5
+				if jumpPage > list.TotalPage {
+					jumpPage = list.TotalPage
+				}
+				result := fmt.Sprint(jumpPage)
+				return result
+			},
+		},
+	)
+
+	tmpl, err = tmpl.Parse(string(h))
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
