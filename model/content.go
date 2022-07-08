@@ -14,6 +14,7 @@ type ContentListingOptions struct {
 // ContentPageData - Contents list
 type ContentPageData struct {
 	ContentList []ContentList `json:"content-list"`
+	PageList    []int         `json:"page-list"`
 	TotalPage   int           `json:"total-page"`
 	CurrentPage int           `json:"current-page"`
 }

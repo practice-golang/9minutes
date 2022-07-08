@@ -9,7 +9,9 @@ func setPageContent(r *router.App) {
 	/* Content - Read */
 	gbrdr := r.Group(`^/board`)
 	gbrdr.Use(handler.AuthSessionMiddleware)
-	gbrdr.GET(`/(list|gallery).html(\?[^\?]+)?$`, handler.HandleContentList)
+	// gbrdr.GET(`/(list|gallery).html(\?[^\?]+)?$`, handler.HandleContentList)
+	gbrdr.GET(`/gallery.html(\?[^\?]+)?$`, handler.HandleContentList)
+	gbrdr.GET(`/list.html(\?[^\?]+)?$`, handler.HandleContentListTmpl)
 	gbrdr.GET(`/read.html(\?[^\?]+)?$`, handler.HandleReadContent)
 
 	/* Content - Edit, Write */

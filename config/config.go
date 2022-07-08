@@ -5,8 +5,9 @@ import "9minutes/db"
 var (
 	AdminUserCountPerPage  int = 10
 	AdminBoardCountPerPage int = 10
-	ContentsCountPerPage   int = 25
-	CommentCountPerPage    int = 3
+	// ContentsCountPerPage   int = 25
+	ContentsCountPerPage int = 5
+	CommentCountPerPage  int = 3
 )
 
 var (
