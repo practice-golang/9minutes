@@ -9,7 +9,7 @@
     <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
     <button type="button" onclick="search()">Search</button>
 
-    <table id="list-container">
+    <table>
         <thead>
             <tr>
                 <th>No</th>
@@ -36,21 +36,21 @@
         {{range $i, $o := .PageList}}
 
         {{if eq $i 0}}
-        <a href="/board/list.html?code=$CODE$&page={{1}}">&laquo;</a>
-        <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}">&lt;</a>
+        <a href="/board/list.html?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
+        <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
         ..
         {{end}}
 
         {{if eq $o $.CurrentPage}}
         <b>{{$o}}</b>
         {{else}}
-        <a href="/board/list.html?code=$CODE$&page={{$o}}">{{$o}}</a>
+        <a href="/board/list.html?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
         {{end}}
 
         {{if and (ne $o $.TotalPage) (is_last_index $i)}}
         ..
-        <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}">&gt;</a>
-        <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}">&raquo;</a>
+        <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
+        <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
         {{end}}
 
         {{end}}
@@ -168,12 +168,6 @@
             pages.push(pageInfo)
         }
     }
-
-    // const lrList = new ListRenderer(document.querySelector("#list-container"))
-    // lrList.render()
-
-    // const lrPage = new ListRenderer(document.querySelector("#pages-container"))
-    // lrPage.render()
 </script>
 
 <style>

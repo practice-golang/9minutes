@@ -373,6 +373,8 @@ func HandleContentListTmpl(c *router.Context) {
 	var err error
 
 	code := ""
+	search := ""
+	searchParam := ""
 	board := model.Board{}
 	queries := c.URL.Query()
 
@@ -384,6 +386,11 @@ func HandleContentListTmpl(c *router.Context) {
 		if err != nil {
 			c.Text(http.StatusInternalServerError, err.Error())
 		}
+	}
+
+	if queries.Get("search") != "" {
+		search = queries.Get("search")
+		searchParam = "&search=" + search
 	}
 
 	var userInfo model.UserData
@@ -410,7 +417,7 @@ func HandleContentListTmpl(c *router.Context) {
 	}
 
 	listingOptions := model.ContentListingOptions{}
-	listingOptions.Search = null.StringFrom(queries.Get("search"))
+	listingOptions.Search = null.StringFrom(search)
 
 	listingOptions.Page = null.IntFrom(1)
 	listingOptions.ListCount = null.IntFrom(int64(config.ContentsCountPerPage))
@@ -450,6 +457,7 @@ func HandleContentListTmpl(c *router.Context) {
 	}
 
 	h = bytes.ReplaceAll(h, []byte("$CODE$"), []byte(code))
+	h = bytes.ReplaceAll(h, []byte("$SEARCH$"), []byte(searchParam))
 
 	list, err := crud.GetContentList(board, listingOptions)
 	if err != nil {
