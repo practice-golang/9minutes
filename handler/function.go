@@ -489,6 +489,9 @@ func HandleContentListTmpl(c *router.Context) {
 				result := fmt.Sprint(jumpPage)
 				return result
 			},
+			"is_last_index": func(idx int) bool {
+				return idx == len(list.PageList)-1
+			},
 		},
 	)
 
