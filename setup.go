@@ -54,7 +54,12 @@ func setupINI() {
 	}
 
 	if cfg != nil {
-		log.Println("Load INI: ", cfg.Section("dirpaths").Key("hahaha").String())
+		if cfg.Section("server").HasKey("ADDRESS") {
+			ListeningIP = cfg.Section("server").Key("ADDRESS").String()
+		}
+		if cfg.Section("server").HasKey("PORT") {
+			ListeningPort = cfg.Section("server").Key("PORT").String()
+		}
 
 		if cfg.Section("dirpaths").HasKey("STATIC_PATH") {
 			StaticPath = cfg.Section("dirpaths").Key("STATIC_PATH").String()
@@ -68,13 +73,6 @@ func setupINI() {
 
 		if cfg.Section("session").HasKey("STORE_TYPE") {
 			handler.StoreRoot = cfg.Section("session").Key("STORE_TYPE").String()
-		}
-
-		if cfg.Section("server").HasKey("ADDRESS") {
-			ListeningIP = cfg.Section("server").Key("ADDRESS").String()
-		}
-		if cfg.Section("server").HasKey("PORT") {
-			ListeningPort = cfg.Section("server").Key("PORT").String()
 		}
 
 		if cfg.Section("database").HasKey("DBTYPE") {
