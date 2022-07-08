@@ -23,7 +23,7 @@
                 <th>Username</th>
                 <th>Password</th>
                 <th>Email</th>
-                <th>Phone</th>
+                <!-- <th>Phone</th> -->
                 <th>Grade</th>
                 <th>Approval</th>
                 <th>Control</th>
@@ -35,7 +35,7 @@
             <td><input type="text" name="username" value="" placeholder="Username" /></td>
             <td><input type="password" name="password" value="" placeholder="Password" /></td>
             <td><input type="text" name="email" value="" placeholder="Email" /></td>
-            <td><input type="text" name="phone" value="" placeholder="Phone" /></td>
+            <!-- <td><input type="text" name="phone" value="" placeholder="Phone" /></td> -->
             <td><input type="text" name="grade" list="grade-list" value="" placeholder="Grade" /></td>
             <td><input type="text" name="approval" list="yn-list" value="" autocomplete="off" placeholder="Approval" /></td>
             <td>
@@ -50,7 +50,7 @@
                 <td>{{username}}</td>
                 <td>-</td>
                 <td>{{email}}</td>
-                <td>{{phone}}</td>
+                <!-- <td>{{phone}}</td> -->
                 <td>{{grade}}</td>
                 <td>{{approval}}</td>
                 <td>
@@ -67,7 +67,7 @@
                 <td><input type="text" name="username" value="{{username}}" placeholder="Username" /></td>
                 <td><input type="password" name="password" value="" placeholder="Password" /></td>
                 <td><input type="text" name="email" value="{{email}}" placeholder="Email" /></td>
-                <td><input type="text" name="phone" value="{{phone}}" placeholder="Phone" /></td>
+                <!-- <td><input type="text" name="phone" value="{{phone}}" placeholder="Phone" /></td> -->
                 <td><input type="text" name="grade" list="grade-list" value="{{grade}}" placeholder="Grade" /></td>
                 <td><input type="text" name="approval" list="yn-list" value="{{approval}}" autocomplete="off" placeholder="Approval" /></td>
                 <td>
@@ -119,7 +119,7 @@
         const username = document.querySelector("#add-user input[name='username']").value
         const password = document.querySelector("#add-user input[name='password']").value
         const email = document.querySelector("#add-user input[name='email']").value
-        const phone = document.querySelector("#add-user input[name='phone']").value
+        // const phone = document.querySelector("#add-user input[name='phone']").value
         const grade = document.querySelector("#add-user input[name='grade']").value
         const approval = document.querySelector("#add-user input[name='approval']").value
 
@@ -127,7 +127,7 @@
             "username": username,
             "password": password,
             "email": email,
-            "phone": phone,
+            // "phone": phone,
             "grade": grade,
             "approval": approval,
         }
@@ -159,7 +159,7 @@
         const username = document.querySelector("#users-list-body input[name='username']").value
         const password = document.querySelector("#users-list-body input[name='password']").value
         const email = document.querySelector("#users-list-body input[name='email']").value
-        const phone = document.querySelector("#users-list-body input[name='phone']").value
+        // const phone = document.querySelector("#users-list-body input[name='phone']").value
         const grade = document.querySelector("#users-list-body input[name='grade']").value
         const approval = document.querySelector("#users-list-body input[name='approval']").value
 
@@ -167,7 +167,7 @@
             "idx": idx,
             "username": username,
             "email": email,
-            "phone": phone,
+            // "phone": phone,
             "grade": grade,
             "approval": approval,
         }

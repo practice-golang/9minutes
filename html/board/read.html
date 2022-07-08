@@ -128,10 +128,9 @@
         })
 
         if (r.ok) {
-            // location.reload()
+            document.querySelector("#comment-area").value = ""
 
             const pageToMove = Math.ceil((commentsData["total-count"] + 1) / commentsData["list-count"])
-
             fetchComments(pageToMove)
         } else {
             alert(await r.text())
@@ -146,7 +145,8 @@
         const r = await fetch(uri, { method: 'DELETE' })
 
         if (r.ok) {
-            await fetchComments()
+            const pageToMove = Math.ceil((commentsData["total-count"] - 1) / commentsData["list-count"])
+            await fetchComments(pageToMove)
         } else {
             alert(await r.text())
         }
@@ -155,7 +155,6 @@
     const filelistString = "$FILE_LIST$"
     const filelist = new Array()
     for (const f of filelistString.split("!")) {
-        console.log(f)
         if (f == "") { continue }
         filelist.push({
             "filename": f,

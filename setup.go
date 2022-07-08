@@ -72,7 +72,7 @@ func setupINI() {
 		}
 
 		if cfg.Section("session").HasKey("STORE_TYPE") {
-			handler.StoreRoot = cfg.Section("session").Key("STORE_TYPE").String()
+			sessionStoreType = cfg.Section("session").Key("STORE_TYPE").String()
 		}
 
 		if cfg.Section("database").HasKey("DBTYPE") {
@@ -136,8 +136,9 @@ func setupINI() {
 func setupSession() {
 
 	storeType := "memstore"
-	storeType = "etcd"
+	// storeType = "etcd"
 	// storeType = "redis"
+	storeType = sessionStoreType
 
 	auth.SessionManager = scs.New()
 

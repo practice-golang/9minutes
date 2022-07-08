@@ -416,7 +416,7 @@ func HandleReadContent(c *router.Context) {
 		}
 
 		content.Views = null.IntFrom(content.Views.Int64 + 1)
-		err = crud.UpdateContent(board, content, "read")
+		err = crud.UpdateContent(board, content, "viewcount")
 		if err != nil {
 			c.Text(http.StatusInternalServerError, err.Error())
 		}

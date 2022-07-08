@@ -11,7 +11,7 @@
         <input type="password" name="password" value="" placeholder="New password" />
         <input type="password" name="password-confirm" value="" placeholder="Confirm new password" />
         <input type="text" name="email" value="" placeholder="Email" />
-        <input type="text" name="phone" value="" placeholder="Phone" />
+        <!-- <input type="text" name="phone" value="" placeholder="Phone" /> -->
     </div>
 
     <button type="button" onclick="location.href='/'">Cancel</button>
@@ -22,7 +22,7 @@
     async function updateUser() {
         const data = {
             email: document.querySelector('input[name="email"]').value,
-            phone: document.querySelector('input[name="phone"]').value
+            // phone: document.querySelector('input[name="phone"]').value
         }
 
         const passwordOLD = document.querySelector('input[name="old-password"]').value
@@ -75,7 +75,7 @@
 
             document.querySelector('#username').innerText = data.username
             document.querySelector('input[name="email"]').value = data.email
-            document.querySelector('input[name="phone"]').value = data.phone
+            // document.querySelector('input[name="phone"]').value = data.phone
         } else {
             location.href = '/'
         }

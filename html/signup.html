@@ -9,7 +9,7 @@
         <input type="text" name="username" value="" placeholder="Username" required />
         <input type="password" name="password" value="" placeholder="Password" required />
         <input type="text" name="email" value="" placeholder="Email" required />
-        <input type="text" name="phone" value="" placeholder="Phone" required />
+        <!-- <input type="text" name="phone" value="" placeholder="Phone" required /> -->
     </div>
 
     <button type="button" onclick="location.href='/'">Cancel</button>
@@ -22,7 +22,7 @@
             username: document.querySelector('input[name="username"]').value,
             password: document.querySelector('input[name="password"]').value,
             email: document.querySelector('input[name="email"]').value,
-            phone: document.querySelector('input[name="phone"]').value
+            // phone: document.querySelector('input[name="phone"]').value
         }
 
         let r = await fetch('/api/signup', {

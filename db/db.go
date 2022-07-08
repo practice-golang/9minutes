@@ -102,7 +102,7 @@ func SetupDB() error {
 		}
 
 	case SQLSERVER:
-		dsn := "sqlserver://" + Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Addr + ":" + Info.Port + "?" + Info.DatabaseName + "&connction+timeout=30"
+		dsn := "sqlserver://" + Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Addr + ":" + Info.Port + "?" + Info.DatabaseName + "&connction+timeout=30&encrypt=disable"
 		Obj = &SqlServer{dsn: dsn}
 
 		Con, err = Obj.connect()

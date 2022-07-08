@@ -153,7 +153,7 @@ func (d *SqlServer) CreateUserTable() error {
 	USE "` + Info.DatabaseName + `"
 	IF NOT EXISTS (SELECT TOP 1 * FROM "` + Info.UserTable + `" WHERE USERNAME = 'admin')
 	INSERT INTO "` + Info.UserTable + `" (
-		USERNAME, "PASSWORD", EMAIL, "GRADE", APPROVAL
+		USERNAME, "PASSWORD", EMAIL, "GRADE", APPROVAL, REG_DTTM
 	) VALUES (
 		'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	)`
@@ -407,8 +407,8 @@ func (d *SqlServer) DeleteComment(tableInfo model.Board) error {
 // GetPagingQuery - Get paging query
 func (d *SqlServer) GetPagingQuery(offset int, listCount int) string {
 	sql := `
-	OFFSET ` + strconv.Itoa(listCount) + ` ROWS
-	FETCH NEXT ` + strconv.Itoa(offset) + ` ROWS ONLY`
+	OFFSET ` + strconv.Itoa(offset) + ` ROWS
+	FETCH NEXT ` + strconv.Itoa(listCount) + ` ROWS ONLY`
 
 	return sql
 }
