@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/blockloop/scan"
+	"gopkg.in/guregu/null.v4"
 )
 
 func GetContentList(board model.Board, options model.ContentListingOptions) (model.ContentPageData, error) {
@@ -255,6 +256,11 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 func WriteContent(board model.Board, content model.Content) error {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
+	content.Title = null.StringFrom(strings.ReplaceAll(content.Title.String, "'", "&apos;"))
+	content.Content = null.StringFrom(strings.ReplaceAll(content.Content.String, "'", "&apos;"))
+	content.Title = null.StringFrom(strings.ReplaceAll(content.Title.String, "'", "&quot;"))
+	content.Content = null.StringFrom(strings.ReplaceAll(content.Content.String, "'", "&quot;"))
+
 	column := np.CreateString(content, db.GetDatabaseTypeString(), "insert", false)
 
 	sql := `
@@ -275,6 +281,11 @@ func WriteContent(board model.Board, content model.Content) error {
 func UpdateContent(board model.Board, content model.Content, skipTag string) error {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	idx := fmt.Sprint(content.Idx.Int64)
+
+	content.Title = null.StringFrom(strings.ReplaceAll(content.Title.String, "'", "&apos;"))
+	content.Content = null.StringFrom(strings.ReplaceAll(content.Content.String, "'", "&apos;"))
+	content.Title = null.StringFrom(strings.ReplaceAll(content.Title.String, "'", "&quot;"))
+	content.Content = null.StringFrom(strings.ReplaceAll(content.Content.String, "'", "&quot;"))
 
 	column := np.CreateString(content, db.GetDatabaseTypeString(), skipTag, false)
 	colNames := strings.Split(column.Names, ",")
