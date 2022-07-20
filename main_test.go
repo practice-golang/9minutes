@@ -10,6 +10,7 @@ import (
 
 	"9minutes/auth"
 	"9minutes/consts"
+	"9minutes/db"
 	"9minutes/logging"
 	"9minutes/router"
 
@@ -46,6 +47,7 @@ func Test_main(t *testing.T) {
 			// }
 			// defer res.Body.Close()
 
+			db.Info.DatabaseType = db.SQLITE
 			doSetup()
 
 			ServerHandler.ServeHTTP(tt.args.c.ResponseWriter, tt.args.c.Request)

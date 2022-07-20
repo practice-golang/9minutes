@@ -102,13 +102,13 @@ func Test_Index(t *testing.T) {
 			reIncludes = regexp.MustCompile(patternIncludes)
 
 			/* Include */
-			m := reIncludes.FindAllSubmatch(want, -1)
 			// includes := map[string][]byte{}
+			m := reIncludes.FindAllSubmatch(want, -1)
 			for _, v := range m {
 				includeFileName := string(v[1])
 				includeDirective := bytes.TrimSpace(v[0])
-				includeEmbedFilePath := EmbedRoot + "/" + includeFileName
-				includeStoreFilePath := StoreRoot + "/" + includeFileName
+				includeStoreFilePath := strings.TrimSpace(StoreRoot + "/" + includeFileName)
+				includeEmbedFilePath := strings.TrimSpace(EmbedRoot + "/" + includeFileName)
 
 				include := []byte{}
 				switch true {
@@ -121,15 +121,27 @@ func Test_Index(t *testing.T) {
 				want = bytes.ReplaceAll(want, includeDirective, include)
 			}
 
+			patternLinkLogin = `\$LinkLogin\$(.*)\n`
+			patternLinkLogout = `\$LinkLogout\$(.*)\n`
+			patternLinkAdmin = `\$LinkAdmin\$(.*)\n`
 			patternLinkMyPage = `\$LinkMyPage\$(.*)\n`
 			patternYouArePending = `\$YouArePending\$(.*)\n`
-			reYouArePending = regexp.MustCompile(patternYouArePending)
+			reLogin = regexp.MustCompile(patternLinkLogin)
+			reLogout = regexp.MustCompile(patternLinkLogout)
+			reAdmin = regexp.MustCompile(patternLinkAdmin)
 			reMyPage = regexp.MustCompile(patternLinkMyPage)
-			want = reYouArePending.ReplaceAll(want, []byte(""))
+			reYouArePending = regexp.MustCompile(patternYouArePending)
+
+			want = reLogout.ReplaceAll(want, []byte(""))
+			want = reAdmin.ReplaceAll(want, []byte(""))
 			want = reMyPage.ReplaceAll(want, []byte(""))
+			want = reYouArePending.ReplaceAll(want, []byte(""))
 
 			want = bytes.ReplaceAll(want, []byte("$USERNAME$"), []byte("Guest"))
 			want = bytes.ReplaceAll(want, []byte("$LinkLogin$"), []byte(""))
+			want = bytes.ReplaceAll(want, []byte("$LinkLogout$"), []byte(""))
+			want = bytes.ReplaceAll(want, []byte("$LinkAdmin$"), []byte(""))
+			want = bytes.ReplaceAll(want, []byte("$LinkMyPage$"), []byte(""))
 			want = reLogout.ReplaceAll(want, []byte(""))
 			want = reAdmin.ReplaceAll(want, []byte(""))
 

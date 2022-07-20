@@ -13,9 +13,10 @@ func TestSQLite_Exec(t *testing.T) {
 	var err error
 	Info = DBInfo{
 		DatabaseType: SQLITE,
-		DatabaseName: "books",
-		TableName:    "books",
-		FilePath:     "../books.db",
+		DatabaseName: "testdb",
+		TableName:    "users",
+		UserTable:    "users",
+		FilePath:     "./testdb.db",
 	}
 
 	type args struct {
@@ -37,7 +38,7 @@ func TestSQLite_Exec(t *testing.T) {
 			dsn:  Info.FilePath,
 			d:    &SQLite{},
 			args: args{
-				sql:       "INSERT INTO " + Info.UserTable + " (TITLE,AUTHOR) VALUES (?,?)",
+				sql:       "INSERT INTO " + Info.UserTable + " (USERNAME,PASSWORD) VALUES (?,?)",
 				colValues: []interface{}{"test2", "test3"},
 			},
 		},
@@ -56,12 +57,12 @@ func TestSQLite_Exec(t *testing.T) {
 
 			time.Sleep(time.Millisecond * 250)
 
-			// err = tt.d.CreateTable()
-			// if err != nil {
-			// 	os.Remove(tt.dsn)
-			// 	t.Error(err)
-			// 	return
-			// }
+			err = tt.d.CreateUserTable()
+			if err != nil {
+				os.Remove(tt.dsn)
+				t.Error(err)
+				return
+			}
 
 			// time.Sleep(time.Millisecond * 10)
 

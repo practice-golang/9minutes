@@ -16,10 +16,13 @@ func TestPostgres_Exec(t *testing.T) {
 		Port:          "5432",
 		DatabaseName:  "postgres",
 		SchemaName:    "public",
-		TableName:     "books",
+		TableName:     "users",
+		UserTable:     "users",
 		GrantID:       "root",
 		GrantPassword: "pgsql",
 	}
+
+	var TableUserColumns string = "user_fields"
 
 	type args struct {
 		sql       string
@@ -33,7 +36,7 @@ func TestPostgres_Exec(t *testing.T) {
 		{
 			name: "POSTGRES",
 			args: args{
-				sql:       `INSERT INTO ` + GetFullTableName(Info.TableName) + ` ("TITLE","AUTHOR") VALUES ($1,$2)`,
+				sql:       `INSERT INTO ` + GetFullTableName(Info.TableName) + ` ("USERNAME","PASSWORD") VALUES ($1,$2)`,
 				colValues: []interface{}{"test2", "test3"},
 				options:   "IDX",
 			},
@@ -56,17 +59,23 @@ func TestPostgres_Exec(t *testing.T) {
 				return
 			}
 
-			// err = Obj.CreateTable()
-			// if err != nil {
-			// 	t.Error(err)
-			// 	return
-			// }
+			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(Info.UserTable) + `;`)
+			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(TableUserColumns) + `;`)
+
+			err = Obj.CreateUserTable()
+			if err != nil {
+				t.Error(err)
+				return
+			}
 
 			count, _, err := Obj.Exec(tt.args.sql, tt.args.colValues, tt.args.options)
 			if err != nil {
 				t.Error(err)
 				return
 			}
+
+			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(Info.UserTable) + `;`)
+			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(TableUserColumns) + `;`)
 
 			require.Equal(t, int64(1), count)
 		})

@@ -11,7 +11,7 @@ dist:
 
 test:
 	go test ./... -race -cover -count=1
-	rm ./9minutes.db
+#	rm ./9minutes.db
 
 clean:
 	rm -rf ./bin/*
