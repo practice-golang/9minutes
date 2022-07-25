@@ -4,76 +4,73 @@
     document.title = "User table fields"
 </script>
 
-<body>
-    <h1>User fields</h1>
+<h1>User fields</h1>
 
-    <a href="/admin">Back to admin</a>
+<a href="/admin">Back to admin</a>
 
-    <button type="button" onclick="openAdd()">Add column</button>
+<button type="button" onclick="openAdd()">Add column</button>
 
-    <table id="column-list-container">
-        <thead>
-            <tr>
-                <td><input type="checkbox" name="select-all" placeholder="Select all" /></td>
-                <th>Display name</th>
-                <th>Column code</th>
-                <th>Column type</th>
-                <th>Column name</th>
-                <th>Sort Order</th>
-                <th>Control</th>
-            </tr>
-        </thead>
-        <tr id="add-column">
-            <td>&nbsp;</td>
-            <td><input type="text" name="display-name" value="" placeholder="Display name" /></td>
-            <td><input type="text" name="column-code" value="" placeholder="Column code" /></td>
-            <td><input type="text" name="column-type" value="" list="column-types" placeholder="Column type" /></td>
-            <td><input type="text" name="column-name" value="" placeholder="Column name" /></td>
-            <td>&nbsp;</td>
-            <td>
-                <button type="button" onclick="closeAdd()">Cancel</button>
-                <button type="button" onclick="addColumn()">Save</button>
+<table id="column-list-container">
+    <thead>
+        <tr>
+            <td><input type="checkbox" name="select-all" placeholder="Select all" /></td>
+            <th>Display name</th>
+            <th>Column code</th>
+            <th>Column type</th>
+            <th>Column name</th>
+            <th>Sort Order</th>
+            <th>Control</th>
+        </tr>
+    </thead>
+    <tr id="add-column">
+        <td>&nbsp;</td>
+        <td><input type="text" name="display-name" value="" placeholder="Display name" /></td>
+        <td><input type="text" name="column-code" value="" placeholder="Column code" /></td>
+        <td><input type="text" name="column-type" value="" list="column-types" placeholder="Column type" /></td>
+        <td><input type="text" name="column-name" value="" placeholder="Column name" /></td>
+        <td>&nbsp;</td>
+        <td>
+            <button type="button" onclick="closeAdd()">Cancel</button>
+            <button type="button" onclick="addColumn()">Save</button>
+        </td>
+    </tr>
+    <tbody id="column-list-body" lr-loop="columnList">
+        <tr lr-if="columnEditIndex != $index">
+            <td><input type="checkbox" name="select$index" placeholder="Select" /></td>
+            <td>{{display-name}}</td>
+            <td>{{column-code}}</td>
+            <td>{{column-type}}</td>
+            <td>{{column-name}}</td>
+            <td>{{sort-order}}</td>
+            <td lr-if="$index <= 6">&nbsp;</td>
+            <td lr-if="$index > 6">
+                <button type="button" lr-click="openEdit($index)">Edit</button>
+                <button type="button" lr-click="deleteColumn($index)">Delete</button>
             </td>
         </tr>
-        <tbody id="column-list-body" lr-loop="columnList">
-            <tr lr-if="columnEditIndex != $index">
-                <td><input type="checkbox" name="select$index" placeholder="Select" /></td>
-                <td>{{display-name}}</td>
-                <td>{{column-code}}</td>
-                <td>{{column-type}}</td>
-                <td>{{column-name}}</td>
-                <td>{{sort-order}}</td>
-                <td lr-if="$index <= 6">&nbsp;</td>
-                <td lr-if="$index > 6">
-                    <button type="button" lr-click="openEdit($index)">Edit</button>
-                    <button type="button" lr-click="deleteColumn($index)">Delete</button>
-                </td>
-            </tr>
-            <tr lr-if="columnEditIndex == $index">
-                <td>&nbsp;</td>
-                <td><input type="text" name="display-name" value="{{display-name}}" placeholder="Display name" /></td>
-                <td><input type="text" name="column-code" value="{{column-code}}" placeholder="Column code" /></td>
-                <td><input type="text" name="column-type" value="{{column-type}}" list="column-types" placeholder="Column type" /></td>
-                <td><input type="text" name="column-name" value="{{column-name}}" placeholder="Column name" /></td>
-                <td>
-                    <input type="hidden" name="sort-order" value="{{sort-order}}" />
-                    <span>{{sort-order}}</span>
-                </td>
-                <td>
-                    <button type="button" onclick="closeEdit()">Cancel</button>
-                    <button type="button" onclick="updateColumn()">Save</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+        <tr lr-if="columnEditIndex == $index">
+            <td>&nbsp;</td>
+            <td><input type="text" name="display-name" value="{{display-name}}" placeholder="Display name" /></td>
+            <td><input type="text" name="column-code" value="{{column-code}}" placeholder="Column code" /></td>
+            <td><input type="text" name="column-type" value="{{column-type}}" list="column-types" placeholder="Column type" /></td>
+            <td><input type="text" name="column-name" value="{{column-name}}" placeholder="Column name" /></td>
+            <td>
+                <input type="hidden" name="sort-order" value="{{sort-order}}" />
+                <span>{{sort-order}}</span>
+            </td>
+            <td>
+                <button type="button" onclick="closeEdit()">Cancel</button>
+                <button type="button" onclick="updateColumn()">Save</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-    <datalist id="column-types">
-        <option value="text">Text</option>
-        <option value="integer">Integer</option>
-        <option value="float">Float</option>
-    </datalist>
-
-</body>
+<datalist id="column-types">
+    <option value="text">Text</option>
+    <option value="integer">Integer</option>
+    <option value="float">Float</option>
+</datalist>
 
 <script>
     let columnEditIndex = -1

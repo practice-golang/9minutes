@@ -1,39 +1,37 @@
 @INCLUDE@board/include/header.html
 
-<body>
-    <div>
-        <label for="image-upload">Image:</label>
-        <input type="file" id="image-upload" multiple>
-        <button type="button" onclick="insertImage()">Upload</button>
+<div>
+    <label for="image-upload">Image:</label>
+    <input type="file" id="image-upload" multiple>
+    <button type="button" onclick="insertImage()">Upload</button>
 
-    </div>
-    <div>
-        <label for="title-image-upload">Title Image:</label>
-        <input type="file" id="title-image-upload">
-        <button type="button" onclick="insertTitleImage()">Title image upload</button>
-    </div>
-    <div>
-        <label for="file-upload">File:</label>
-        <input type="file" id="file-upload" multiple>
-        <button type="button" onclick="insertFile()">Upload</button>
-    </div>
+</div>
+<div>
+    <label for="title-image-upload">Title Image:</label>
+    <input type="file" id="title-image-upload">
+    <button type="button" onclick="insertTitleImage()">Title image upload</button>
+</div>
+<div>
+    <label for="file-upload">File:</label>
+    <input type="file" id="file-upload" multiple>
+    <button type="button" onclick="insertFile()">Upload</button>
+</div>
 
-    <div>
-        Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
-        Title image: $TITLE_IMAGE$
-    </div>
-    <div id="editor"></div>
-    <div>
-        <button type="button" onclick="moveToList()">Cancel</button>
-        <button type="button" onclick="updateContent()">Update</button>
-    </div>
+<div>
+    Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
+    Title image: $TITLE_IMAGE$
+</div>
+<div id="editor"></div>
+<div>
+    <button type="button" onclick="moveToList()">Cancel</button>
+    <button type="button" onclick="updateContent()">Update</button>
+</div>
 
-    <div id="filelist-container">
-        <ul lr-loop="filelist">
-            <li><a href="{{link}}" target="_blank">{{filename}}</a></li>
-        </ul>
-    </div>
-</body>
+<div id="filelist-container">
+    <ul lr-loop="filelist">
+        <li><a href="{{link}}" target="_blank">{{filename}}</a></li>
+    </ul>
+</div>
 
 <link rel="stylesheet" href="/assets/css/editor.css">
 <script>"use strict"</script>
@@ -200,4 +198,4 @@
     }
 </style>
 
-@INCLUDE@admin/include/footer.html
+@INCLUDE@board/include/footer.html

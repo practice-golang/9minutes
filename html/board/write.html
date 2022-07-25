@@ -1,39 +1,37 @@
 @INCLUDE@board/include/header.html
 
-<body>
-    <div>
-        <label for="title-image-upload">Title Image:</label>
-        <input type="file" id="title-image-upload">
-        <button type="button" onclick="insertTitleImage()">Upload title image</button>
-    </div>
-    <div>
-        <label for="image-upload">Image:</label>
-        <input type="file" id="image-upload" multiple>
-        <button type="button" onclick="insertImage()">Upload</button>
-    </div>
-    <div>
-        <label for="file-upload">File:</label>
-        <input type="file" id="file-upload" multiple>
-        <button type="button" onclick="insertFile()">Upload</button>
-    </div>
+<div>
+    <label for="title-image-upload">Title Image:</label>
+    <input type="file" id="title-image-upload">
+    <button type="button" onclick="insertTitleImage()">Upload title image</button>
+</div>
+<div>
+    <label for="image-upload">Image:</label>
+    <input type="file" id="image-upload" multiple>
+    <button type="button" onclick="insertImage()">Upload</button>
+</div>
+<div>
+    <label for="file-upload">File:</label>
+    <input type="file" id="file-upload" multiple>
+    <button type="button" onclick="insertFile()">Upload</button>
+</div>
 
-    <div>
-        <input type="hidden" id="title-image" placeholder="Title Image">
-        <input type="text" id="title" placeholder="Title">
-    </div>
+<div>
+    <input type="hidden" id="title-image" placeholder="Title Image">
+    <input type="text" id="title" placeholder="Title">
+</div>
 
-    <div id="editor"></div>
-    <div>
-        <button type="button" onclick="moveToList()">Cancel</button>
-        <button type="button" onclick="writeContent()">Save</button>
-    </div>
+<div id="editor"></div>
+<div>
+    <button type="button" onclick="moveToList()">Cancel</button>
+    <button type="button" onclick="writeContent()">Save</button>
+</div>
 
-    <div id="filelist-container">
-        <ul lr-loop="filelist">
-            <li>{{filename}}</li>
-        </ul>
-    </div>
-</body>
+<div id="filelist-container">
+    <ul lr-loop="filelist">
+        <li>{{filename}}</li>
+    </ul>
+</div>
 
 <link rel="stylesheet" href="/assets/css/editor.css">
 <script>"use strict"</script>
@@ -128,7 +126,7 @@
                 const result = await r.json()
 
                 titleImage = `${accessURI}/${result.storename}`
-                
+
                 filelist.push({ "filename": result.storename })
                 lrFileList.reload()
             }
@@ -196,4 +194,4 @@
     }
 </style>
 
-@INCLUDE@admin/include/footer.html
+@INCLUDE@board/include/footer.html

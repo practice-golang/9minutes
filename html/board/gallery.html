@@ -1,36 +1,34 @@
 @INCLUDE@board/include/header.html
 
-<body>
-    <label for="search">Search:</label>
-    <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
-    <button type="button" onclick="search()">Search</button>
+<label for="search">Search:</label>
+<input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
+<button type="button" onclick="search()">Search</button>
 
-    <div id="list-container" class="gallery">
-        <ul lr-loop="list">
-            <li lr-click="moveToContent($index)">
-                <!-- <img src="{{title-image}}" alt="title-image" /> -->
-                <div class="title-img"><img src="{{title-image}}" alt="title-image" /></div>
-                <div class="title-text">{{title}}</div>
-            </li>
-        </ul>
+<div id="list-container" class="gallery">
+    <ul lr-loop="list">
+        <li lr-click="moveToContent($index)">
+            <!-- <img src="{{title-image}}" alt="title-image" /> -->
+            <div class="title-img"><img src="{{title-image}}" alt="title-image" /></div>
+            <div class="title-text">{{title}}</div>
+        </li>
+    </ul>
+</div>
+
+<div id="pages-container">
+    <div lr-loop="pages">
+        <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
+        <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+
+        <a onclick="location.href='{{link}}'">{{page}}</a>
+
+        <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
+        <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
     </div>
+</div>
 
-    <div id="pages-container">
-        <div lr-loop="pages">
-            <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
-            <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
-
-            <a onclick="location.href='{{link}}'">{{page}}</a>
-
-            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
-            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
-        </div>
-    </div>
-
-    <div>
-        <button type="button" onclick="moveToWrite()">Write</button>
-    </div>
-</body>
+<div>
+    <button type="button" onclick="moveToWrite()">Write</button>
+</div>
 
 <script>
     let boardEditIndex = -1
@@ -154,4 +152,4 @@
     }
 </style>
 
-@INCLUDE@admin/include/footer.html
+@INCLUDE@board/include/footer.html

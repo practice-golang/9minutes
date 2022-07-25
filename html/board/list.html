@@ -4,62 +4,60 @@
     document.title = "Contents list"
 </script>
 
-<body>
-    <label for="search">Search:</label>
-    <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
-    <button type="button" onclick="search()">Search</button>
+<label for="search">Search:</label>
+<input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
+<button type="button" onclick="search()">Search</button>
 
-    <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Views</th>
-                <th class="no-show">Control</th>
-            </tr>
-        </thead>
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Views</th>
+            <th class="no-show">Control</th>
+        </tr>
+    </thead>
 
-        <tbody>
-            {{range $i, $o := .ContentList}}
-            <tr onclick="moveToContent('{{$i}}')">
-                <td>{{$o.Idx.Int64}}</td>
-                <td>{{$o.Title.String}}</td>
-                <td>{{$o.AuthorName.String}}</td>
-                <td>{{$o.Views.Int64}}</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
-
-    <div>
-        {{range $i, $o := .PageList}}
-
-        {{if eq $i 0}}
-        <a href="/board/list.html?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
-        <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
-        ..
+    <tbody>
+        {{range $i, $o := .ContentList}}
+        <tr onclick="moveToContent('{{$i}}')">
+            <td>{{$o.Idx.Int64}}</td>
+            <td>{{$o.Title.String}}</td>
+            <td>{{$o.AuthorName.String}}</td>
+            <td>{{$o.Views.Int64}}</td>
+        </tr>
         {{end}}
+    </tbody>
+</table>
 
-        {{if eq $o $.CurrentPage}}
-        <b>{{$o}}</b>
-        {{else}}
-        <a href="/board/list.html?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
-        {{end}}
+<div>
+    {{range $i, $o := .PageList}}
 
-        {{if and (ne $o $.TotalPage) (is_last_index $i)}}
-        ..
-        <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
-        <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
-        {{end}}
+    {{if eq $i 0}}
+    <a href="/board/list.html?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
+    <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
+    ..
+    {{end}}
 
-        {{end}}
-    </div>
+    {{if eq $o $.CurrentPage}}
+    <b>{{$o}}</b>
+    {{else}}
+    <a href="/board/list.html?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
+    {{end}}
 
-    <div>
-        <button type="button" onclick="moveToWrite()">Write</button>
-    </div>
-</body>
+    {{if and (ne $o $.TotalPage) (is_last_index $i)}}
+    ..
+    <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
+    <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
+    {{end}}
+
+    {{end}}
+</div>
+
+<div>
+    <button type="button" onclick="moveToWrite()">Write</button>
+</div>
 
 <script>
     let boardEditIndex = -1
@@ -176,4 +174,4 @@
     }
 </style>
 
-@INCLUDE@admin/include/footer.html
+@INCLUDE@board/include/footer.html
