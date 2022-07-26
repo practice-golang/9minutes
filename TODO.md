@@ -13,3 +13,4 @@
 * [ ] Sample menu - eg. board link
 * [ ] Add more test
 * [ ] Chatting???
+* [ ] Log analyzer
