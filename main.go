@@ -41,14 +41,27 @@ func firstRun() {
 	// db.Info = config.DatabaseInfoPgPublic
 	// db.Info = config.DatabaseInfoSqlServer
 
-	envPORT := os.Getenv("LISTEN_PORT")
+	envPORT := os.Getenv("PORT")
 	envDBMS := os.Getenv("DATABASE_TYPE")
 	if envPORT != "" {
 		ListeningPort = envPORT
 
+		envAddress := os.Getenv("DATABASE_ADDRESS")
+		envDbPort := os.Getenv("DATABASE_PORT")
+		envProtocol := os.Getenv("DATABASE_PROTOCOL")
+		envDbName := os.Getenv("DATABASE_NAME")
+		envDbID := os.Getenv("DATABASE_ID")
+		envDbPassword := os.Getenv("DATABASE_PASSWORD")
+
 		switch envDBMS {
 		case "mysql":
 			db.Info = config.DatabaseInfoMySQL
+			db.Info.Addr = envAddress
+			db.Info.Port = envDbPort
+			db.Info.Protocol = envProtocol
+			db.Info.DatabaseName = envDbName
+			db.Info.GrantID = envDbID
+			db.Info.GrantPassword = envDbPassword
 		case "postgres":
 			db.Info = config.DatabaseInfoPgPublic
 		case "sqlserver":
