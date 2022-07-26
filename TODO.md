@@ -14,6 +14,7 @@
 * [ ] Add sheet type - custom board type
 * [ ] beauty cuty html, css
 * [ ] Sample menu - eg. board link
+* [ ] Email sender
 * [ ] Add more test
 * [ ] Chatting???
 * [ ] Log analyzer
