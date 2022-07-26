@@ -17,6 +17,7 @@
 * [ ] Email sender
 * [ ] Add more test
 * [ ] Youtube link, embed
+* [ ] Image limit width
 * [ ] Captcha
 * [ ] Chatting???
 * [ ] Log analyzer
