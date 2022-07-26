@@ -1,5 +1,8 @@
 # Todo
 
+* [ ] html
+    * [ ] Remove `Back to admin` in all html - Use Admin link
+    * [ ] Add `Frontpage menu` in all board html
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
 * [ ] Download original filename
