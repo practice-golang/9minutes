@@ -10,6 +10,7 @@ import (
 
 	"9minutes/config"
 	"9minutes/db"
+	"9minutes/handler"
 	"9minutes/logging"
 )
 
@@ -44,7 +45,12 @@ func firstRun() {
 	envPORT := os.Getenv("PORT")
 	envDBMS := os.Getenv("DATABASE_TYPE")
 	if envPORT != "" {
+		ListeningIP = "0.0.0.0"
 		ListeningPort = envPORT
+
+		StaticPath = "./static"
+		UploadPath = "./upload"
+		handler.StoreRoot = "./html"
 
 		envAddress := os.Getenv("DATABASE_ADDRESS")
 		envDbPort := os.Getenv("DATABASE_PORT")
