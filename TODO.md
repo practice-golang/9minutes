@@ -16,6 +16,7 @@
 * [ ] Sample menu - eg. board link
 * [ ] Email sender
 * [ ] Add more test
+* [ ] Youtube link, embed
 * [ ] Captcha
 * [ ] Chatting???
 * [ ] Log analyzer
