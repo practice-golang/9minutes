@@ -21,3 +21,4 @@
 * [ ] Captcha
 * [ ] Chatting???
 * [ ] Log analyzer
+* [ ] Add more info into session
