@@ -1,8 +1,8 @@
 # Todo
 
-* [ ] Comment remove
-    - Remove working but, show 500 internal server error -> 왜 또 되고 있노???
-    - Correct paging range
+* [x] Comment remove
+    - Remove working but, show 500 internal server error -> 로그인 안 했을때 예외처리 빼먹은 거였음
+    - Correct paging range - 페이지 등록과 처음 열람시 -1로 설정 -> 마지막 페이지
 * [ ] html
     * [ ] Remove `Back to admin` in all html - Use Admin link
     * [ ] Add `Frontpage menu` in all board html
