@@ -15,9 +15,10 @@
 * [ ] Add more test
 * [ ] Image limit width
 * [ ] Captcha
-* [ ] Chatting???
 * [ ] Log analyzer
 * [ ] Add more info into session
+* [ ] Chatting???
+* [ ] CORS???
 
 * [x] Youtube link, embed
 * [x] Comment remove
