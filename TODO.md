@@ -1,6 +1,8 @@
 # Todo
 
-* [ ] Comment remove - Remove working but, show 500 internal server error
+* [ ] Comment remove
+    - Remove working but, show 500 internal server error -> 왜 또 되고 있노???
+    - Correct paging range
 * [ ] html
     * [ ] Remove `Back to admin` in all html - Use Admin link
     * [ ] Add `Frontpage menu` in all board html
