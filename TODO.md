@@ -13,13 +13,13 @@
 * [ ] Sample menu - eg. board link
 * [ ] Email sender - user approval
 * [ ] Add more test
-* [ ] Youtube link, embed
 * [ ] Image limit width
 * [ ] Captcha
 * [ ] Chatting???
 * [ ] Log analyzer
 * [ ] Add more info into session
 
+* [x] Youtube link, embed
 * [x] Comment remove
     - Remove working but, show 500 internal server error -> Missed exception when not logged in
     - Correct comment paging range<br />
