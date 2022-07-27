@@ -192,12 +192,40 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
 	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
 
-	paging := ``
-	if options.Page.Valid && options.ListCount.Valid {
-		paging = db.Obj.GetPagingQuery(int(options.Page.Int64*options.ListCount.Int64), int(options.ListCount.Int64))
+	var totalCount int64
+	sql := `
+	SELECT
+		COUNT(` + columnIdx.Names + `)
+	FROM ` + tableName + `
+	WHERE ` + columnBoardIdx.Names + ` = ` + idx
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return result, err
+	}
+	defer r.Close()
+
+	err = scan.Row(&totalCount, r)
+	if err != nil {
+		return result, err
 	}
 
-	sql := `
+	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	currentPage := int64(totalPage)
+
+	offset := 0
+	if totalCount > 0 {
+		offset = int(int64(totalPage)*options.ListCount.Int64 - options.ListCount.Int64)
+
+		if options.Page.Valid && options.Page.Int64 > -1 && options.ListCount.Valid {
+			currentPage = options.Page.Int64 + 1
+			offset = int(options.Page.Int64 * options.ListCount.Int64)
+		}
+	}
+
+	paging := db.Obj.GetPagingQuery(offset, int(options.ListCount.Int64))
+
+	sql = `
 	SELECT
 		` + column.Names + `,
 		(
@@ -211,7 +239,7 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 	ORDER BY ` + columnIdx.Names + ` ASC
 	` + paging
 
-	r, err := db.Con.Query(sql)
+	r, err = db.Con.Query(sql)
 	if err != nil {
 		return result, err
 	}
@@ -223,28 +251,9 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 		return result, err
 	}
 
-	var totalCount int64
-	sql = `
-	SELECT
-		COUNT(` + columnIdx.Names + `)
-	FROM ` + tableName
-
-	r, err = db.Con.Query(sql)
-	if err != nil {
-		return result, err
-	}
-	defer r.Close()
-
-	err = scan.Row(&totalCount, r)
-	if err != nil {
-		return result, err
-	}
-
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
-
 	result = model.CommentPageData{
 		CommentList: comments,
-		CurrentPage: int(options.Page.Int64) + 1,
+		CurrentPage: int(currentPage),
 		TotalPage:   int(totalPage),
 		TotalCount:  int(totalCount),
 		ListCount:   int(options.ListCount.Int64),

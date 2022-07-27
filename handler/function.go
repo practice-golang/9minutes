@@ -574,10 +574,13 @@ func HandleReadContent(c *router.Context) {
 		listingOptions := model.CommentListingOptions{}
 		listingOptions.Search = null.StringFrom(queries.Get("search"))
 
-		listingOptions.Page = null.IntFrom(0)
+		listingOptions.Page = null.IntFrom(-1)
 		listingOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
 
 		comments, err := crud.GetComments(board, content, listingOptions)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+		}
 		commentsJSON, _ := json.Marshal(comments)
 
 		h = bytes.ReplaceAll(h, []byte("$IDX$"), []byte(idx))
@@ -1004,12 +1007,35 @@ func DeleteComment(c *router.Context) {
 		c.Text(http.StatusNotFound, "Board was not found")
 	}
 
+	var userInfo model.UserData
+	userGrade := 999
+
+	switch c.AuthInfo {
+	case nil:
+		userGrade = config.UserGrades.IndexOf("guest")
+	default:
+		userInfo, err = crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		userGrade = config.UserGrades.IndexOf(userInfo.Grade.String)
+	}
+
+	accessGrade := config.UserGrades.IndexOf(board.GrantComment.String)
+
+	if accessGrade < userGrade {
+		c.Text(http.StatusForbidden, "Forbidden")
+		return
+	}
+
 	comment, err := crud.GetComment(board, fmt.Sprint(boardIdx), fmt.Sprint(commentIdx))
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 	}
 
-	userInfo, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+	userInfo, err = crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
