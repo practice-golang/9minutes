@@ -17,6 +17,7 @@
 * [ ] Captcha
 * [ ] Log analyzer
 * [ ] Add more info into session
+* [ ] DB backup, migration
 * [ ] Chatting???
 * [ ] CORS???
 
