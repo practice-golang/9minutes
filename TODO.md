@@ -5,11 +5,11 @@
     - Correct paging range - 페이지 등록과 처음 열람시 -1로 설정 -> 마지막 페이지
 * [ ] html
     * [ ] Remove `Back to admin` in all html - Use Admin link
-    * [ ] Add `Frontpage menu` in all board html
+    * [x] Add `Frontpage menu` in all board html
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
 * [ ] Download original filename
-* [ ] Comment enhancement - file/image upload, etc.
+* [ ] Comment enhancement - editor, file/image upload, etc.
 * [ ] Remove board type column or query param
 * [ ] Add avatar/profile image
 * [ ] Add heroku env for rest of dbs except mysql
