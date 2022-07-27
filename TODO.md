@@ -1,6 +1,6 @@
 # Todo
 
-* [ ] Comment remove - 500 internal server error
+* [ ] Comment remove - Remove working but, show 500 internal server error
 * [ ] html
     * [ ] Remove `Back to admin` in all html - Use Admin link
     * [ ] Add `Frontpage menu` in all board html
