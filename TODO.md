@@ -1,11 +1,5 @@
 # Todo
 
-* [x] Comment remove
-    - Remove working but, show 500 internal server error -> 로그인 안 했을때 예외처리 빼먹은 거였음
-    - Correct paging range - 페이지 등록과 처음 열람시 -1로 설정 -> 마지막 페이지
-* [ ] html
-    * [ ] Remove `Back to admin` in all html - Use Admin link
-    * [x] Add `Frontpage menu` in all board html
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
 * [ ] Download original filename
@@ -25,3 +19,11 @@
 * [ ] Chatting???
 * [ ] Log analyzer
 * [ ] Add more info into session
+
+* [x] Comment remove
+    - Remove working but, show 500 internal server error -> Missed exception when not logged in
+    - Correct comment paging range<br />
+    Set -1 (=last page) when add comment or first page reading
+* [x] html
+    * Remove `Back to admin` in all html - Use Admin link
+    * Add `Frontpage menu` in all board html
