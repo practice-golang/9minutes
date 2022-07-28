@@ -3,6 +3,7 @@
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
 * [ ] Download original filename
+* [ ] Delete uploaded file when edit content
 * [ ] Comment enhancement - editor, file/image upload, etc.
 * [ ] Remove board type column or query param
 * [ ] Add avatar/profile image
