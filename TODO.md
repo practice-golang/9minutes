@@ -21,6 +21,7 @@
 * [ ] DB backup, migration
 * [ ] Chatting???
 * [ ] CORS???
+* [ ] Embed css styled html
 
 * [x] Youtube link, embed
 * [x] Comment remove
