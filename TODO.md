@@ -1,6 +1,5 @@
 # Todo
 
-* [ ] Add session store address, port for etcd, redis
 * [ ] Change board read from ajax to template
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
@@ -26,6 +25,7 @@
 * [ ] CORS???
 * [ ] Embed css styled html
 
+* [x] Add session store address, port for etcd, redis
 * [x] Youtube link, embed
 * [x] Comment remove
     - Remove working but, show 500 internal server error -> Missed exception when not logged in
