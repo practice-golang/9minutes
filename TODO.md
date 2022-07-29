@@ -5,6 +5,7 @@
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
 * [ ] Download original filename
 * [ ] Delete uploaded file when edit content
+* [ ] Delete all related `book`, `books`
 * [ ] Comment enhancement - editor, file/image upload, etc.
 * [ ] Remove board type column or query param
 * [ ] Add avatar/profile image
