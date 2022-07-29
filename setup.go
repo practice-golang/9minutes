@@ -72,7 +72,23 @@ func setupINI() {
 		}
 
 		if cfg.Section("session").HasKey("STORE_TYPE") {
-			sessionStoreType = cfg.Section("session").Key("STORE_TYPE").String()
+			switch cfg.Section("session").Key("STORE_TYPE").String() {
+			case "etcd":
+				sessionStoreInfo.StoreType = auth.ETCD
+			case "redis":
+				sessionStoreInfo.StoreType = auth.REDIS
+			default:
+				sessionStoreInfo.StoreType = auth.MEMSTORE
+			}
+
+			if sessionStoreInfo.StoreType != auth.MEMSTORE {
+				if cfg.Section("session").HasKey("ADDRESS") {
+					sessionStoreInfo.Address = cfg.Section("session").Key("ADDRESS").String()
+				}
+				if cfg.Section("session").HasKey("PORT") {
+					sessionStoreInfo.Address = cfg.Section("session").Key("PORT").String()
+				}
+			}
 		}
 
 		if cfg.Section("database").HasKey("DBTYPE") {
@@ -134,18 +150,13 @@ func setupINI() {
 }
 
 func setupSession() {
-
-	storeType := "memstore"
-	// storeType = "etcd"
-	// storeType = "redis"
-	storeType = sessionStoreType
-
 	auth.SessionManager = scs.New()
 
-	switch storeType {
-	case "etcd":
+	switch sessionStoreInfo.StoreType {
+	case auth.ETCD:
+		addr := config.StoreInfoETCD.Address + ":" + config.StoreInfoETCD.Port
 		cli, err := clientv3.New(clientv3.Config{
-			Endpoints:   []string{"127.0.0.1:2379"},
+			Endpoints:   []string{addr},
 			DialTimeout: 5 * time.Second,
 		})
 
@@ -154,11 +165,12 @@ func setupSession() {
 		}
 
 		auth.SessionManager.Store = etcdstore.New(cli)
-	case "redis":
+	case auth.REDIS:
+		addr := config.StoreInfoRedis.Address + ":" + config.StoreInfoRedis.Port
 		pool := &redis.Pool{
 			MaxIdle: 10,
 			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", "localhost:6379")
+				return redis.Dial("tcp", addr)
 			},
 		}
 

@@ -26,14 +26,14 @@ var EmbedStatic embed.FS
 var StaticPath = config.StaticPath
 var UploadPath = config.UploadPath
 
+var sessionStoreInfo = config.StoreInfoMemory
+
 var (
 	ListeningIP   string = "localhost"
 	ListeningPort string = "4416"
 	ServerHandler http.Handler
 
 	ListeningAddress string
-
-	sessionStoreType string = "memstore"
 )
 
 func firstRun() {

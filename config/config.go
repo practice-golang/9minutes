@@ -1,6 +1,9 @@
 package config
 
-import "9minutes/db"
+import (
+	"9minutes/auth"
+	"9minutes/db"
+)
 
 var (
 	AdminUserCountPerPage  int = 10
@@ -79,4 +82,22 @@ var DatabaseInfoSqlServer = db.DBInfo{
 	SchemaName:    "dbo",
 	GrantID:       "sa",
 	GrantPassword: "SQLServer1433",
+}
+
+var StoreInfoMemory = auth.SessionStoreInfo{
+	StoreType: auth.MEMSTORE,
+	Address:   "",
+	Port:      "",
+}
+
+var StoreInfoETCD = auth.SessionStoreInfo{
+	StoreType: auth.ETCD,
+	Address:   "localhost",
+	Port:      "2379",
+}
+
+var StoreInfoRedis = auth.SessionStoreInfo{
+	StoreType: auth.REDIS,
+	Address:   "localhost",
+	Port:      "6379",
 }
