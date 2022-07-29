@@ -1,5 +1,6 @@
 # Todo
 
+* [ ] Add session store address, port for etcd, redis
 * [ ] Change board read from ajax to template
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
