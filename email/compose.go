@@ -7,15 +7,6 @@ import (
 	"strings"
 )
 
-func formatEmailAddress(addr string) string {
-	e, err := mail.ParseAddress(addr)
-	if err != nil {
-		return addr
-	}
-
-	return e.String()
-}
-
 func encodeRFC2047(str string) string {
 	addr := mail.Address{Address: str}
 	return strings.Trim(addr.String(), " <>@")
@@ -23,8 +14,8 @@ func encodeRFC2047(str string) string {
 
 func ComposeMimeMailTEXT(to string, from string, subject string, body string) []byte {
 	header := make(map[string]string)
-	header["From"] = formatEmailAddress(from)
-	header["To"] = formatEmailAddress(to)
+	header["From"] = getAddress(from)
+	header["To"] = getAddress(to)
 	header["Subject"] = encodeRFC2047(subject)
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/plain; charset=\"utf-8\""
@@ -41,8 +32,8 @@ func ComposeMimeMailTEXT(to string, from string, subject string, body string) []
 
 func ComposeMimeMailHTML(to string, from string, subject string, body string) []byte {
 	header := make(map[string]string)
-	header["From"] = formatEmailAddress(from)
-	header["To"] = formatEmailAddress(to)
+	header["From"] = getAddress(from)
+	header["To"] = getAddress(to)
 	header["Subject"] = encodeRFC2047(subject)
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/html; charset=\"utf-8\""

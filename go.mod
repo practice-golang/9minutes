@@ -9,6 +9,7 @@ require (
 	github.com/blockloop/scan v1.3.0
 	github.com/c2fo/testify v0.0.0-20150827203832-fba96363964a
 	github.com/denisenkom/go-mssqldb v0.11.0
+	github.com/emersion/go-msgauth v0.6.6
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gobwas/ws v1.1.0
 	github.com/gomodule/redigo v1.8.9
@@ -20,8 +21,8 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.4
-	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	gopkg.in/guregu/null.v4 v4.0.0
 	gopkg.in/ini.v1 v1.66.6
 	modernc.org/sqlite v1.14.4
