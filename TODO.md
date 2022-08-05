@@ -1,5 +1,8 @@
 # Todo
 
+* [ ] User approval
+    * [ ] Send random number via email
+    * [ ] verify random number
 * [ ] Change board read from ajax to template
 * [ ] Download count
 * [ ] Upload filename manage - Upload-xxxx -> hashed name
@@ -14,7 +17,6 @@
 * [ ] Add sheet type - custom board type
 * [ ] beauty cuty html, css
 * [ ] Sample menu - eg. board link
-* [ ] Email sender - user approval
 * [ ] Add more test
 * [ ] Image limit width
 * [ ] Captcha
@@ -25,6 +27,7 @@
 * [ ] CORS???
 * [ ] Embed css styled html
 
+* [x] Email sender - for user approval
 * [x] Add session store address, port for etcd, redis
 * [x] Youtube link, embed
 * [x] Comment remove
