@@ -10,6 +10,7 @@ import (
 	"9minutes/router"
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -160,6 +161,10 @@ func Signup(c *router.Context) {
 			return
 		}
 	}
+
+	verificationKEY := GetRandomString(32)
+	log.Println(verificationKEY)
+	// err = crud.AddUserVerification(verificationKEY, userData.Username.String)
 
 	result := map[string]string{
 		"result": "ok",

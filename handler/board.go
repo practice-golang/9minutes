@@ -99,6 +99,10 @@ func GetBoards(c *router.Context) {
 	listingOptions.Page.Int64--
 
 	result, err := crud.GetBoards(listingOptions)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
 	boardList := result.BoardList
 
 	// catalog 작업전까지 일단 무시

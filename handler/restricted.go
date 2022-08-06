@@ -155,6 +155,10 @@ func AddUser(c *router.Context) {
 		userData.RegDTTM = null.StringFrom(now)
 
 		err = crud.AddUser(userData)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 	default:
 		userData := make(map[string]interface{})
 
@@ -174,11 +178,10 @@ func AddUser(c *router.Context) {
 		userData["reg-dttm"] = now
 
 		err = crud.AddUserMap(userData)
-	}
-
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	result := map[string]string{

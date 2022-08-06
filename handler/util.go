@@ -9,9 +9,11 @@ import (
 	"9minutes/router"
 	"bytes"
 	"errors"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func LoadFile(c *router.Context) ([]byte, error) {
@@ -132,4 +134,19 @@ func LoadHTML(c *router.Context) ([]byte, error) {
 	h = bytes.ReplaceAll(h, []byte("$ISLOGGEDIN$"), []byte(isLoggedIn))
 
 	return h, err
+}
+
+// GetRandomString - Generate random string
+func GetRandomString(length int) string {
+	charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	rand.Seed(time.Now().UnixNano())
+
+	randomBytes := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		randomBytes[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(randomBytes)
 }

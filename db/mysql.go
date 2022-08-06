@@ -190,7 +190,7 @@ func (d *Mysql) CreateUserTable() error {
 // CreateUserVerificationTable - Create user verification table
 func (d *Mysql) CreateUserVerificationTable() error {
 	sql := `
-	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UserTable + `_VERIFICATION` + ` (
+	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UserTable + `_verification` + ` (
 		IDX      INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
 		USER_IDX INT(11)      NULL DEFAULT NULL,
 		TOKEN    VARCHAR(128) NULL DEFAULT NULL,

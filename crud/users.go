@@ -372,6 +372,26 @@ func AddUserMap(userMap map[string]interface{}) error {
 	return nil
 }
 
+func AddUserVerification(verificationKEY string, userColumn model.UserData) error {
+	// dbtype := db.GetDatabaseTypeString()
+	// tablename := db.GetFullTableName(consts.TableUsers + "_verification")
+
+	// column := np.CreateString(userColumn, dbtype, "insert", false)
+
+	// sql := `
+	// INSERT INTO ` + tablename + ` (
+	// 	` + column.Names + `
+	// ) VALUES (
+	// 	` + column.Values + `
+	// )`
+	// _, err := db.Con.Exec(sql)
+	// if err != nil {
+	// 	return err
+	// }
+
+	return nil
+}
+
 func UpdateUser(userColumn model.UserData) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)

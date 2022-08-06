@@ -161,7 +161,7 @@ func (d *SQLite) CreateUserTable() error {
 // CreateUserVerificationTable - Create user validation table
 func (d *SQLite) CreateUserVerificationTable() error {
 	sql := `
-	CREATE TABLE IF NOT EXISTS "` + Info.UserTable + `_VERIFICATION` + `" (
+	CREATE TABLE IF NOT EXISTS "` + Info.UserTable + `_verification` + `" (
 		"IDX"      INTEGER,
 		"USER_IDX" INTEGER,
 		"TOKEN"    TEXT,
