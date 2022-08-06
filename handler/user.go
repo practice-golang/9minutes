@@ -10,7 +10,7 @@ import (
 	"9minutes/router"
 	"bytes"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -43,8 +43,9 @@ func Login(c *router.Context) {
 	column := np.CreateString(model.UserData{}, dbtype, "", false)
 	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
 
-	sql := `SELECT
-	` + column.Names + `
+	sql := `
+	SELECT
+		` + column.Names + `
 	FROM ` + table + `
 	WHERE ` + where.Names + `='` + username + `'`
 
@@ -107,6 +108,8 @@ func Signup(c *router.Context) {
 	now := time.Now().Format("20060102150405")
 	columnsCount, _ := crud.GetUserColumnsCount()
 
+	userIDX := ""
+
 	switch columnsCount {
 	case model.UserDataFieldCount:
 		var userData model.UserData
@@ -123,9 +126,7 @@ func Signup(c *router.Context) {
 			return
 		}
 		userData.Password = null.StringFrom(string(password))
-
 		userData.RegDTTM = null.StringFrom(now)
-
 		userData.Grade = null.StringFrom("pending_user")
 		userData.Approval = null.StringFrom("N")
 
@@ -134,6 +135,14 @@ func Signup(c *router.Context) {
 			c.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
+
+		userInsertResult, err := crud.GetUserByNameAndEmail(userData.UserName.String, userData.Email.String)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		userIDX = fmt.Sprint(userInsertResult.Idx.Int64)
 	default:
 		userData := make(map[string]interface{})
 
@@ -148,10 +157,9 @@ func Signup(c *router.Context) {
 			c.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
+
 		userData["password"] = string(password)
-
 		userData["reg-dttm"] = now
-
 		userData["grade"] = "pending_user"
 		userData["approval"] = "N"
 
@@ -160,11 +168,28 @@ func Signup(c *router.Context) {
 			c.Text(http.StatusInternalServerError, err.Error())
 			return
 		}
+
+		userInsertResult, err := crud.GetUserByNameAndEmailMap(userData["username"].(string), userData["email"].(string))
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		userIDX = userInsertResult.(map[string]interface{})["IDX"].(string)
 	}
 
 	verificationKEY := GetRandomString(32)
-	log.Println(verificationKEY)
-	// err = crud.AddUserVerification(verificationKEY, userData.Username.String)
+
+	verificationData := map[string]string{
+		"USER_IDX": userIDX,
+		"TOKEN":    verificationKEY,
+	}
+
+	err = crud.AddUserVerification(verificationData)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	result := map[string]string{
 		"result": "ok",

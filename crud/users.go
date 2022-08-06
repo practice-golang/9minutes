@@ -12,6 +12,83 @@ import (
 	"github.com/blockloop/scan"
 )
 
+func GetUserByNameAndEmail(username, email string) (model.UserData, error) {
+	result := model.UserData{}
+
+	dbtype := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(consts.TableUsers)
+	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
+	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
+
+	sql := `
+	SELECT
+		` + columns + `
+	FROM ` + tablename + `
+	WHERE ` + whereUsername.Names + ` = '` + username + `'
+		AND ` + whereEmail.Names + ` = '` + email + `'`
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return result, err
+	}
+	defer r.Close()
+
+	err = scan.Row(&result, r)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
+	var result interface{}
+
+	tablename := db.GetFullTableName(consts.TableUsers)
+	columns := ""
+	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
+	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
+
+	// Use map with default and user defined columns
+	columnList, _ := GetUserColumnsList()
+	for _, column := range columnList {
+		if column.ColumnName.Valid {
+			columns += column.ColumnName.String + ","
+
+			jsonName := strings.ToLower(column.ColumnName.String)
+			jsonName = strings.ReplaceAll(jsonName, "_", "-")
+		}
+	}
+
+	columns = strings.TrimSuffix(columns, ",")
+
+	sql := `
+	SELECT
+		` + columns + `
+	FROM ` + tablename + `
+	WHERE ` + columnUsername.Names + ` = '` + username + `'
+		AND ` + columnEmail.Names + ` = '` + email + `'`
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return result, err
+	}
+	defer r.Close()
+
+	users := []map[string]interface{}{}
+	for r.Next() {
+		scanedRow, _ := scanMap(r)
+		users = append(users, scanedRow)
+	}
+
+	if len(users) > 0 {
+		result = users[0]
+	}
+
+	return result, nil
+}
+
 func GetUserByName(username string) (model.UserData, error) {
 	result := model.UserData{}
 
@@ -372,22 +449,22 @@ func AddUserMap(userMap map[string]interface{}) error {
 	return nil
 }
 
-func AddUserVerification(verificationKEY string, userColumn model.UserData) error {
-	// dbtype := db.GetDatabaseTypeString()
-	// tablename := db.GetFullTableName(consts.TableUsers + "_verification")
+func AddUserVerification(verificationData map[string]string) error {
+	dbtype := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(consts.TableUsers + "_verification")
 
-	// column := np.CreateString(userColumn, dbtype, "insert", false)
+	column := np.CreateString(verificationData, dbtype, "insert", false)
 
-	// sql := `
-	// INSERT INTO ` + tablename + ` (
-	// 	` + column.Names + `
-	// ) VALUES (
-	// 	` + column.Values + `
-	// )`
-	// _, err := db.Con.Exec(sql)
-	// if err != nil {
-	// 	return err
-	// }
+	sql := `
+	INSERT INTO ` + tablename + ` (
+		` + column.Names + `
+	) VALUES (
+		` + column.Values + `
+	)`
+	_, err := db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
