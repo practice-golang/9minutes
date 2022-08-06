@@ -2,9 +2,10 @@ package handler
 
 import (
 	"9minutes/router"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
@@ -28,13 +29,14 @@ func UploadFile(c *router.Context) {
 	}
 	defer file.Close()
 
-	tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	// tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
 	if err != nil {
 		log.Println(err)
 	}
 	defer tempFile.Close()
 
-	fileBytes, err := ioutil.ReadAll(file)
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		log.Println(err)
 	}
@@ -68,13 +70,14 @@ func UploadImage(c *router.Context) {
 	}
 	defer file.Close()
 
-	tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	// tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
 	if err != nil {
 		log.Println(err)
 	}
 	defer tempFile.Close()
 
-	fileBytes, err := ioutil.ReadAll(file)
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		log.Println(err)
 	}

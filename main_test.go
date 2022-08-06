@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -54,7 +54,7 @@ func Test_main(t *testing.T) {
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
 
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Fatal("read body", err)
 			}

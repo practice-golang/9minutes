@@ -219,6 +219,11 @@ func setupDB() {
 	if err != nil {
 		log.Fatal("CreateUserTable:", err)
 	}
+
+	err = db.Obj.CreateUserVerificationTable()
+	if err != nil {
+		log.Fatal("CreateUserVerificationTable:", err)
+	}
 }
 
 func setupKey() {
@@ -270,41 +275,18 @@ func setupRouter() {
 
 	r := router.New()
 
-	/* HTML, Assets, Login/Signup */
-	setPAGEs(r)
-
-	/* Admin */
-	setPageAdmin(r)
-
-	/* Content */
-	setPageContent(r)
-
-	/* MyPage */
-	setPageMyPage(r)
-
-	/* HTML for both user and anonymous */
-	setPageHTMLs(r)
-
-	/* API Board */
-	setApiBoard(r)
-
-	/* API Uploader */
-	setApiUploader(r)
-
-	/* API Login, Logout, Signup */
-	setApiLogin(r)
-
-	/* API Admin */
-	setApiAdmin(r)
-
-	/* API */
-	setAPIs(r)
-
-	/* Others */
-	setOthers(r)
-
-	/* Not use, should be removed at future */
-	setRouterNotUse(r)
+	setPAGEs(r)        // HTML, Assets, Login/Signup
+	setPageAdmin(r)    // Admin
+	setPageContent(r)  // Content
+	setPageMyPage(r)   // MyPage
+	setPageHTMLs(r)    // HTML for both user and anonymous
+	setApiBoard(r)     // API Board
+	setApiUploader(r)  // API Uploader
+	setApiLogin(r)     // API Login, Logout, Signup
+	setApiAdmin(r)     // API Admin
+	setAPIs(r)         // API
+	setOthers(r)       // Others
+	setRouterNotUse(r) // Not use, should be removed at future
 
 	ServerHandler = auth.SessionManager.LoadAndSave(cors.Default().Handler(r))
 	// ServerHandler = cors.Default().Handler(r)

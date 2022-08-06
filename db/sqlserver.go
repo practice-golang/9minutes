@@ -108,26 +108,26 @@ func (d *SqlServer) CreateBoardTable() error {
 
 // CreateUserTable - Create user table
 func (d *SqlServer) CreateUserTable() error {
-	sql := `
-	USE master
+	// sql := `
+	// USE master
 
-	IF NOT EXISTS(
-		SELECT name
-		FROM sys.databases
-		WHERE name=N'` + Info.DatabaseName + `'
-	)
-	CREATE DATABASE "` + Info.DatabaseName + `"`
+	// IF NOT EXISTS(
+	// 	SELECT name
+	// 	FROM sys.databases
+	// 	WHERE name=N'` + Info.DatabaseName + `'
+	// )
+	// CREATE DATABASE "` + Info.DatabaseName + `"`
 
-	_, err := Con.Exec(sql)
-	if err != nil {
-		return err
-	}
+	// _, err := Con.Exec(sql)
+	// if err != nil {
+	// 	return err
+	// }
 
-	sql = `USE "` + Info.DatabaseName + `"`
+	sql := `USE "` + Info.DatabaseName + `"`
 	sql += `
 	IF OBJECT_ID(N'` + Info.UserTable + `', N'U') IS NULL
 	CREATE TABLE "` + Info.UserTable + `" (
-		IDX      BIGINT       NOT NULL IDENTITY PRIMARY KEY,
+		IDX      INT       NOT NULL IDENTITY PRIMARY KEY,
 		USERNAME VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
 		EMAIL    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
@@ -136,7 +136,7 @@ func (d *SqlServer) CreateUserTable() error {
 		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
 	)`
 
-	_, err = Con.Exec(sql)
+	_, err := Con.Exec(sql)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (d *SqlServer) CreateUserTable() error {
 	sql += `
 	IF OBJECT_ID(N'` + userfieldTable + `', N'U') IS NULL
 	CREATE TABLE "` + userfieldTable + `" (
-		IDX          BIGINT NOT NULL IDENTITY PRIMARY KEY,
+		IDX          INT NOT NULL IDENTITY PRIMARY KEY,
 		DISPLAY_NAME VARCHAR(128) NULL DEFAULT NULL,
 		COLUMN_CODE  VARCHAR(128) NULL DEFAULT NULL,
 		COLUMN_TYPE  VARCHAR(128) NULL DEFAULT NULL,
@@ -199,6 +199,26 @@ func (d *SqlServer) CreateUserTable() error {
 		if !strings.Contains(err.Error(), "mssql: UNIQUE KEY") {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// CreateUserVerificationTable - Create user verification table
+func (d *SqlServer) CreateUserVerificationTable() error {
+	sql := `USE "` + Info.DatabaseName + `"`
+	sql += `
+	IF OBJECT_ID(N'` + Info.UserTable + `', N'U') IS NULL
+	CREATE TABLE "` + Info.UserTable + `" (
+		IDX      INT          NOT NULL IDENTITY PRIMARY KEY,
+		USER_IDX INT          NULL DEFAULT NULL,
+		TOKEN    VARCHAR(128) NULL DEFAULT NULL,
+		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+	)`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
 	}
 
 	return nil

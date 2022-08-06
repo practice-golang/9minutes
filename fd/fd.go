@@ -3,7 +3,6 @@ package fd
 import (
 	"9minutes/router"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"sort"
 )
@@ -49,33 +48,38 @@ func sortByTime(a, b fs.FileInfo) bool {
 	// default:
 	// 	return a.ModTime().Format("20060102150405") < b.ModTime().Format("20060102150405")
 	// }
+
 	return a.ModTime().Format("20060102150405") < b.ModTime().Format("20060102150405")
 }
 
-func Dir(path string, sortby, direction int) ([]fs.FileInfo, error) {
-	files, err := ioutil.ReadDir(path)
+func Dir(path string, sortby, direction int) ([]fs.DirEntry, error) {
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
 
 	if sortby > 1 && sortby < 5 {
 		sort.Slice(files, func(a, b int) bool {
+			aInfo, _ := files[a].Info()
+			bInfo, _ := files[b].Info()
+
 			switch sortby {
 			case NAME:
 				if direction == DESC {
-					return !sortByName(files[a], files[b])
+
+					return !sortByName(aInfo, bInfo)
 				}
-				return sortByName(files[a], files[b])
+				return sortByName(aInfo, bInfo)
 			case SIZE:
 				if direction == DESC {
-					return !sortBySize(files[a], files[b])
+					return !sortBySize(aInfo, bInfo)
 				}
-				return sortBySize(files[a], files[b])
+				return sortBySize(aInfo, bInfo)
 			case TIME:
 				if direction == DESC {
-					return !sortByTime(files[a], files[b])
+					return !sortByTime(aInfo, bInfo)
 				}
-				return sortByTime(files[a], files[b])
+				return sortByTime(aInfo, bInfo)
 			default:
 				return false
 			}

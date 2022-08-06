@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"9minutes/auth"
@@ -15,7 +15,7 @@ import (
 func Signin(c *router.Context) {
 	var err error
 
-	b, err := ioutil.ReadAll(c.Request.Body)
+	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.Json(http.StatusBadRequest, err.Error())
 	}
@@ -46,7 +46,7 @@ func Signin(c *router.Context) {
 func SigninAPI(c *router.Context) {
 	var err error
 
-	b, err := ioutil.ReadAll(c.Request.Body)
+	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.Json(http.StatusBadRequest, err.Error())
 	}

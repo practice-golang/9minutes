@@ -3,8 +3,8 @@ package router
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
@@ -103,8 +103,8 @@ func (a *App) PATCH(pattern string, handler Handler)   { a.Handle(pattern, handl
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := &Context{Request: r, ResponseWriter: w}
 
-	b, _ := ioutil.ReadAll(c.Body)
-	c.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+	b, _ := io.ReadAll(c.Body)
+	c.Body = io.NopCloser(bytes.NewBuffer(b))
 
 	logger := logging.Object.Log()
 	if json.Valid(b) {

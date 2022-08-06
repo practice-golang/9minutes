@@ -27,7 +27,7 @@ func LoadFile(c *router.Context) ([]byte, error) {
 	case fd.CheckFileExists(embedPath, true):
 		h, err = router.Content.ReadFile(embedPath)
 	default:
-		return nil, errors.New("File not found")
+		return nil, errors.New("file not found")
 	}
 
 	if err != nil {

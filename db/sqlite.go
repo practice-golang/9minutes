@@ -4,7 +4,6 @@ import (
 	"9minutes/consts"
 	"9minutes/model"
 	"database/sql"
-	"log"
 	"strconv"
 	"time"
 
@@ -164,13 +163,17 @@ func (d *SQLite) CreateUserVerificationTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.UserTable + `_VERIFICATION` + `" (
 		"IDX"      INTEGER,
-		"USER_IDX" INTEGER UNIQUE,
+		"USER_IDX" INTEGER,
+		"TOKEN"    TEXT,
 		"REG_DTTM" TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
-	log.Println(sql)
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

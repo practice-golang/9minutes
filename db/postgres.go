@@ -82,17 +82,17 @@ func (d *Postgres) Exec(sql string, colValues []interface{}, options string) (in
 func (d *Postgres) CreateBoardTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.BoardTable + ` (
-		"IDX" BIGSERIAL PRIMARY KEY,
+		"IDX"           SERIAL       PRIMARY KEY,
 		"BOARD_NAME"    VARCHAR(128) NULL DEFAULT NULL,
-		"BOARD_CODE"    VARCHAR(64) NULL DEFAULT NULL,
-		"BOARD_TYPE"    VARCHAR(64) NULL DEFAULT NULL,
-		"BOARD_TABLE"   VARCHAR(64) NULL DEFAULT NULL,
-		"COMMENT_TABLE" VARCHAR(64) NULL DEFAULT NULL,
-		"GRANT_READ"    VARCHAR(16) NULL DEFAULT NULL,
-		"GRANT_WRITE"   VARCHAR(16) NULL DEFAULT NULL,
-		"GRANT_COMMENT" VARCHAR(16) NULL DEFAULT NULL,
-		"GRANT_UPLOAD"  VARCHAR(16) NULL DEFAULT NULL,
-		"FIELDS"        TEXT NULL DEFAULT NULL
+		"BOARD_CODE"    VARCHAR(64)  NULL DEFAULT NULL,
+		"BOARD_TYPE"    VARCHAR(64)  NULL DEFAULT NULL,
+		"BOARD_TABLE"   VARCHAR(64)  NULL DEFAULT NULL,
+		"COMMENT_TABLE" VARCHAR(64)  NULL DEFAULT NULL,
+		"GRANT_READ"    VARCHAR(16)  NULL DEFAULT NULL,
+		"GRANT_WRITE"   VARCHAR(16)  NULL DEFAULT NULL,
+		"GRANT_COMMENT" VARCHAR(16)  NULL DEFAULT NULL,
+		"GRANT_UPLOAD"  VARCHAR(16)  NULL DEFAULT NULL,
+		"FIELDS"        TEXT         NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
@@ -107,7 +107,7 @@ func (d *Postgres) CreateBoardTable() error {
 func (d *Postgres) CreateUserTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + ` (
-		"IDX"      SERIAL PRIMARY KEY,
+		"IDX"      SERIAL       PRIMARY KEY,
 		"USERNAME" VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"PASSWORD" VARCHAR(128) NULL DEFAULT NULL,
 		"EMAIL"    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
@@ -177,6 +177,24 @@ func (d *Postgres) CreateUserTable() error {
 	ON CONFLICT ON CONSTRAINT "COLUMN_NAME_UQ" DO NOTHING;`
 
 	_, err = Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateUserVerificationTable - Create user verification table
+func (d *Postgres) CreateUserVerificationTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + ` (
+		"IDX"      SERIAL       PRIMARY KEY,
+		"USER_IDX" INTEGER      NULL DEFAULT NULL,
+		"TOKEN"    VARCHAR(128) NULL DEFAULT NULL,
+		"REG_DTTM" VARCHAR(14)  NULL DEFAULT NULL
+	);`
+
+	_, err := Con.Exec(sql)
 	if err != nil {
 		return err
 	}

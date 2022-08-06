@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -64,7 +64,7 @@ func Test_Index(t *testing.T) {
 			storeRootBackup := StoreRoot
 			embedRootBackup := EmbedRoot
 			compareFilePath := "../html/index.html"
-			want, err := ioutil.ReadFile(compareFilePath)
+			want, err := os.ReadFile(compareFilePath)
 			if err != nil {
 				t.Error("Reference file htm not found")
 			}
@@ -89,7 +89,7 @@ func Test_Index(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -172,7 +172,7 @@ func Test_HealthCheck(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -228,7 +228,7 @@ func Test_Hello(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -275,7 +275,7 @@ func Test_HelloParam(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -311,7 +311,7 @@ func Test_GetParam(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -364,7 +364,7 @@ func Test_PostForm(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -409,7 +409,7 @@ func Test_PostJson(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -420,7 +420,7 @@ func Test_PostJson(t *testing.T) {
 }
 
 func Test_HandleAsset(t *testing.T) {
-	listRendererJS, _ := ioutil.ReadFile("../html/assets/js/list-renderer.js")
+	listRendererJS, _ := os.ReadFile("../html/assets/js/list-renderer.js")
 	type args struct {
 		c    *router.Context
 		want []byte
@@ -478,7 +478,7 @@ func Test_HandleAsset(t *testing.T) {
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
 
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -598,7 +598,7 @@ func TestHandleGetDir(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}

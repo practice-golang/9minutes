@@ -2,7 +2,6 @@ package logging
 
 import (
 	"9minutes/consts"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -27,7 +26,7 @@ func Test_SetupLogger(t *testing.T) {
 			SetupLogger()
 
 			Object.Info().Msg("hello world")
-			data, _ := ioutil.ReadFile(fname)
+			data, _ := os.ReadFile(fname)
 
 			F.Close()
 			os.Remove(fname)
@@ -54,7 +53,7 @@ func Test_RenewLogger(t *testing.T) {
 			RenewLogger()
 
 			Object.Info().Msg("hello world")
-			data, _ := ioutil.ReadFile(fname)
+			data, _ := os.ReadFile(fname)
 
 			F.Close()
 			os.Remove(fname)

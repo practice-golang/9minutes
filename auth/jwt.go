@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"9minutes/consts"
@@ -54,7 +54,7 @@ func SaveRsaKeys() error {
 		Bytes: privASN,
 	})
 
-	err = ioutil.WriteFile(JwtPrivateKeyFileName, privBytes, 0644)
+	err = os.WriteFile(JwtPrivateKeyFileName, privBytes, 0644)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func SaveRsaKeys() error {
 		Bytes: pubASN,
 	})
 
-	err = ioutil.WriteFile(JwtPublicKeyFileName, pubBytes, 0644)
+	err = os.WriteFile(JwtPublicKeyFileName, pubBytes, 0644)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func SaveRsaKeys() error {
 func LoadRsaKeys() error {
 	var err error
 
-	privBytes, err := ioutil.ReadFile(JwtPrivateKeyFileName)
+	privBytes, err := os.ReadFile(JwtPrivateKeyFileName)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func LoadRsaKeys() error {
 		return err
 	}
 
-	pubBytes, err := ioutil.ReadFile(JwtPublicKeyFileName)
+	pubBytes, err := os.ReadFile(JwtPublicKeyFileName)
 	if err != nil {
 		return err
 	}

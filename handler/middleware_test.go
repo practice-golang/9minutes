@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -43,7 +43,7 @@ func Test_HelloMiddleware(t *testing.T) {
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
 
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}
@@ -165,7 +165,7 @@ func Test_AuthMiddleware(t *testing.T) {
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()
-			data, err := ioutil.ReadAll(res.Body)
+			data, err := io.ReadAll(res.Body)
 			if err != nil {
 				t.Errorf("expected error to be nil got %v", err)
 			}

@@ -129,6 +129,10 @@ func Signup(c *router.Context) {
 		userData.Approval = null.StringFrom("N")
 
 		err = crud.AddUser(userData)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 	default:
 		userData := make(map[string]interface{})
 
@@ -151,11 +155,10 @@ func Signup(c *router.Context) {
 		userData["approval"] = "N"
 
 		err = crud.AddUserMap(userData)
-	}
-
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	result := map[string]string{

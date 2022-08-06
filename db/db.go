@@ -41,6 +41,7 @@ type (
 		Exec(string, []interface{}, string) (int64, int64, error)
 		CreateBoardTable() error
 		CreateUserTable() error
+		CreateUserVerificationTable() error
 
 		AddTableColumn(tableName string, column model.UserColumn) error
 		EditTableColumn(tableName string, columnOld model.UserColumn, columnNew model.UserColumn) error

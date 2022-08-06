@@ -187,6 +187,29 @@ func (d *Mysql) CreateUserTable() error {
 	return nil
 }
 
+// CreateUserVerificationTable - Create user verification table
+func (d *Mysql) CreateUserVerificationTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UserTable + `_VERIFICATION` + ` (
+		IDX      INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
+		USER_IDX INT(11)      NULL DEFAULT NULL,
+		TOKEN    VARCHAR(128) NULL DEFAULT NULL,
+		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+
+		PRIMARY  KEY(IDX),
+		INDEX    IDX (IDX)
+	)
+	COLLATE='utf8_general_ci'
+	ENGINE=InnoDB;`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // AddTableColumn - Add table column
 func (d *Mysql) AddTableColumn(tableName string, column model.UserColumn) error {
 	sql := "ALTER TABLE " + Info.DatabaseName + `.` + tableName + " ADD COLUMN `" + column.ColumnName.String + "`"

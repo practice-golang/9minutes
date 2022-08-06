@@ -265,10 +265,11 @@ func HandleGetDir(c *router.Context) {
 	}
 
 	for _, file := range files {
+		f, _ := file.Info()
 		result.Files = append(result.Files, model.FileInfo{
 			Name:     null.StringFrom(file.Name()),
-			Size:     null.IntFrom(file.Size()),
-			DateTime: null.StringFrom(file.ModTime().Format("2006-01-02 15:04:05")),
+			Size:     null.IntFrom(f.Size()),
+			DateTime: null.StringFrom(f.ModTime().Format("2006-01-02 15:04:05")),
 			IsDir:    null.BoolFrom(file.IsDir()),
 		})
 	}
