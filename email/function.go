@@ -1,6 +1,7 @@
 package email
 
 import (
+	"log"
 	"net/smtp"
 )
 
@@ -29,11 +30,13 @@ func SendDirect(message Message) (err error) {
 
 	mx, err := GetMX(to)
 	if err != nil {
+		log.Println("MX:", err)
 		return err
 	}
 
 	domain, err := getDomain(from)
 	if err != nil {
+		log.Println("Domain:", err)
 		return err
 	}
 
@@ -41,12 +44,15 @@ func SendDirect(message Message) (err error) {
 	if message.Service.KeyDKIM != "" {
 		signedMessage, err = GetSignedMessage(msg, domain, message.Service.KeyDKIM)
 		if err != nil {
+			log.Println("SignedMessage:", err)
 			return err
 		}
 	}
 
 	err = smtp.SendMail(mx+":25", nil, from, []string{to}, signedMessage)
 	if err != nil {
+		log.Println("SendMail:", mx)
+		log.Println("SendMail:", err)
 		return err
 	}
 
@@ -96,6 +102,18 @@ func SendViaService(message Message) (err error) {
 	auth := smtp.PlainAuth("", id, password, addr)
 	err = smtp.SendMail(addr+":"+port, auth, from, to, msg)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SendVerificationEmail(message Message) error {
+	log.Println(message.From, message.FromName)
+	log.Println(message.To, message.ToName)
+	err := SendDirect(message)
+	if err != nil {
+		log.Println("Sender:", err)
 		return err
 	}
 

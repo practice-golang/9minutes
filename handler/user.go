@@ -5,6 +5,7 @@ import (
 	"9minutes/consts"
 	"9minutes/crud"
 	"9minutes/db"
+	"9minutes/email"
 	"9minutes/model"
 	"9minutes/np"
 	"9minutes/router"
@@ -109,6 +110,8 @@ func Signup(c *router.Context) {
 	columnsCount, _ := crud.GetUserColumnsCount()
 
 	userIDX := ""
+	username := ""
+	useremail := ""
 
 	switch columnsCount {
 	case model.UserDataFieldCount:
@@ -136,7 +139,10 @@ func Signup(c *router.Context) {
 			return
 		}
 
-		userInsertResult, err := crud.GetUserByNameAndEmail(userData.UserName.String, userData.Email.String)
+		username = userData.UserName.String
+		useremail = userData.Email.String
+
+		userInsertResult, err := crud.GetUserByNameAndEmail(username, useremail)
 		if err != nil {
 			c.Text(http.StatusInternalServerError, err.Error())
 			return
@@ -169,7 +175,10 @@ func Signup(c *router.Context) {
 			return
 		}
 
-		userInsertResult, err := crud.GetUserByNameAndEmailMap(userData["username"].(string), userData["email"].(string))
+		username = userData["username"].(string)
+		useremail = userData["email"].(string)
+
+		userInsertResult, err := crud.GetUserByNameAndEmailMap(username, useremail)
 		if err != nil {
 			c.Text(http.StatusInternalServerError, err.Error())
 			return
@@ -179,13 +188,32 @@ func Signup(c *router.Context) {
 	}
 
 	verificationKEY := GetRandomString(32)
-
 	verificationData := map[string]string{
 		"USER_IDX": userIDX,
 		"TOKEN":    verificationKEY,
 	}
 
 	err = crud.AddUserVerification(verificationData)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Send verification email
+	domain := "http://9m.enjoytools.net"
+	message := email.Message{
+		// From:    "no-reply@" + c.Host,
+		Service:          email.Service{KeyDKIM: ""},
+		AppendFromToName: false,
+		From:             "no-reply@enjoytools.net",
+		FromName:         "EnjoyTools",
+		ToName:           username,
+		To:               useremail,
+		Subject:          "EnjoyTools - Email Verification",
+		Body:             "Please click the link below to verify your email address.\r\n\r\n" + domain + "/verify/" + username + "/" + verificationKEY,
+		BodyType:         email.HTML,
+	}
+	err = email.SendVerificationEmail(message)
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
