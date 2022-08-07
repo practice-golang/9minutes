@@ -79,7 +79,7 @@ func Test_Index(t *testing.T) {
 			if tt.name == "Test_Index_notfound" {
 				StoreRoot = "./not-found"
 				EmbedRoot = "not-found"
-				want = []byte("File not found")
+				want = []byte("file not found")
 			}
 			// HandleHTML(tt.args.c)
 			Index(tt.args.c)
