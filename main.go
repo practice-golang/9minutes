@@ -10,6 +10,7 @@ import (
 
 	"9minutes/config"
 	"9minutes/db"
+	"9minutes/email"
 	"9minutes/handler"
 	"9minutes/logging"
 )
@@ -41,6 +42,9 @@ func firstRun() {
 	// db.Info = config.DatabaseInfoMySQL
 	// db.Info = config.DatabaseInfoPgPublic
 	// db.Info = config.DatabaseInfoSqlServer
+
+	email.Info = config.EmailServerDirect
+	// email.Info = config.EmailServerSMTP
 
 	envPORT := os.Getenv("PORT")
 	envDBMS := os.Getenv("DATABASE_TYPE")

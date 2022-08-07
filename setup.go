@@ -9,6 +9,7 @@ import (
 	"9minutes/auth"
 	"9minutes/config"
 	"9minutes/db"
+	"9minutes/email"
 	"9minutes/fd"
 	"9minutes/handler"
 	"9minutes/logging"
@@ -131,20 +132,39 @@ func setupINI() {
 			}
 		}
 
-		if cfg.Section("database").HasKey("addr") {
-			db.Info.Addr = cfg.Section("database").Key("addr").String()
+		if cfg.Section("email").HasKey("USE_EMAIL") {
+			email.Info.UseEmail = cfg.Section("email").Key("USE_EMAIL").MustBool(false)
 		}
-		if cfg.Section("database").HasKey("port") {
-			db.Info.Port = cfg.Section("database").Key("port").String()
+		if cfg.Section("email").HasKey("DOMAIN") {
+			email.Info.Domain = cfg.Section("email").Key("DOMAIN").String()
 		}
-		if cfg.Section("database").HasKey("database_name") {
-			db.Info.DatabaseName = cfg.Section("database").Key("database_name").String()
+		if cfg.Section("email").HasKey("SEND_DIRECT") {
+			email.Info.SendDirect = cfg.Section("email").Key("SEND_DIRECT").MustBool(false)
 		}
-		if cfg.Section("database").HasKey("schema_name") {
-			db.Info.SchemaName = cfg.Section("database").Key("schema_name").String()
+		if cfg.Section("email").HasKey("DKIM_PATH") {
+			dkimKey, err := os.ReadFile(cfg.Section("email").Key("DKIM_PATH").String())
+			if err != nil {
+				panic(err)
+			}
+			email.Info.Service.KeyDKIM = string(dkimKey)
 		}
-		if cfg.Section("database").HasKey("grant_id") {
-			db.Info.GrantID = cfg.Section("database").Key("grant_id").String()
+		if cfg.Section("email").HasKey("FROM_ADDRESS") {
+			email.Info.SenderInfo.Email = cfg.Section("email").Key("FROM_ADDRESS").String()
+		}
+		if cfg.Section("email").HasKey("FROM_NAME") {
+			email.Info.SenderInfo.Name = cfg.Section("email").Key("FROM_NAME").String()
+		}
+		if cfg.Section("email").HasKey("SERVER") {
+			email.Info.Service.Host = cfg.Section("email").Key("SERVER").String()
+		}
+		if cfg.Section("email").HasKey("PORT") {
+			email.Info.Service.Port = cfg.Section("email").Key("PORT").String()
+		}
+		if cfg.Section("email").HasKey("USER") {
+			email.Info.Service.ID = cfg.Section("email").Key("USER").String()
+		}
+		if cfg.Section("email").HasKey("PASSWORD") {
+			email.Info.Service.Password = cfg.Section("email").Key("PASSWORD").String()
 		}
 	}
 }

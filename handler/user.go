@@ -200,23 +200,26 @@ func Signup(c *router.Context) {
 	}
 
 	// Send verification email
-	domain := "http://9m.enjoytools.net"
+	domain := email.Info.Domain
 	message := email.Message{
-		// From:    "no-reply@" + c.Host,
-		Service:          email.Service{KeyDKIM: ""},
+		Service:          email.Service{KeyDKIM: email.Info.Service.KeyDKIM},
 		AppendFromToName: false,
-		From:             "no-reply@enjoytools.net",
-		FromName:         "EnjoyTools",
-		ToName:           username,
-		To:               useremail,
+		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
+		To:               email.To{Email: useremail, Name: username},
 		Subject:          "EnjoyTools - Email Verification",
-		Body:             "Please click the link below to verify your email address.\r\n\r\n" + domain + "/verify/" + username + "/" + verificationKEY,
-		BodyType:         email.HTML,
+		Body: `
+		Please click the link below to verify your email address.
+		<br />
+		<a href='` + domain + `/verify/` + username + `/` + verificationKEY + `'>Click here</a>`,
+		BodyType: email.HTML,
 	}
-	err = email.SendVerificationEmail(message)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+
+	if email.Info.UseEmail {
+		err = email.SendVerificationEmail(message)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	result := map[string]string{

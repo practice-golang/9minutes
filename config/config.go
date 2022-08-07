@@ -3,6 +3,7 @@ package config
 import (
 	"9minutes/auth"
 	"9minutes/db"
+	"9minutes/email"
 )
 
 var (
@@ -100,4 +101,20 @@ var StoreInfoRedis = auth.SessionStoreInfo{
 	StoreType: auth.REDIS,
 	Address:   "localhost",
 	Port:      "6379",
+}
+
+var EmailServerDirect = email.Config{
+	UseEmail:   false,
+	Domain:     "http://localhost:8080",
+	SendDirect: true,
+	Service:    email.Service{KeyDKIM: ""},
+	SenderInfo: email.From{Name: "Administrator", Email: "admin@domain.ext"},
+}
+
+var EmailServerSMTP = email.Config{
+	UseEmail:   false,
+	Domain:     "http://localhost:8080",
+	SendDirect: false,
+	Service:    email.Service{Host: "smtp.gmail.com", Port: "587", ID: "", Password: ""},
+	SenderInfo: email.From{Name: "Administrator", Email: "admin@domain.ext"},
 }

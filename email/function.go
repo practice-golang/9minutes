@@ -8,16 +8,14 @@ import (
 func SendDirect(message Message) (err error) {
 	from := message.From
 	to := message.To
-	fromName := message.FromName
-	toName := message.ToName
 	subject := message.Subject
 	body := message.Body
 
-	headerFrom := fromName + " <" + from + ">"
-	headerTo := toName + " <" + to + ">"
+	headerFrom := from.Name + " <" + from.Email + ">"
+	headerTo := to.Name + " <" + to.Email + ">"
 	if !message.AppendFromToName {
-		headerFrom = " <" + from + ">"
-		headerTo = " <" + to + ">"
+		headerFrom = " <" + from.Email + ">"
+		headerTo = " <" + to.Email + ">"
 	}
 
 	msg := []byte{}
@@ -28,13 +26,13 @@ func SendDirect(message Message) (err error) {
 		msg = ComposeMimeMailHTML(headerTo, headerFrom, subject, body)
 	}
 
-	mx, err := GetMX(to)
+	mx, err := GetMX(to.Email)
 	if err != nil {
 		log.Println("MX:", err)
 		return err
 	}
 
-	domain, err := getDomain(from)
+	domain, err := getDomain(from.Email)
 	if err != nil {
 		log.Println("Domain:", err)
 		return err
@@ -49,7 +47,7 @@ func SendDirect(message Message) (err error) {
 		}
 	}
 
-	err = smtp.SendMail(mx+":25", nil, from, []string{to}, signedMessage)
+	err = smtp.SendMail(mx+":25", nil, from.Email, []string{to.Email}, signedMessage)
 	if err != nil {
 		log.Println("SendMail:", mx)
 		log.Println("SendMail:", err)
@@ -71,12 +69,12 @@ func SendViaService(message Message) (err error) {
 	id := message.Service.ID
 	password := message.Service.Password
 
-	// 계정과 다른 메일주소로는 변경 안된다
-	// gmail은 걍 id로 변환, 네이버는 에러 - id와 다른 주소 사용시 : The sender address is unauthorized
+	// from/to name will be set as email address when using gmail
+	// Error caused when an email address using which different with id - The sender address is unauthorized
 	from := id
-	to := []string{message.To}
+	to := []string{message.To.Email}
 	fromName := message.FromName
-	toName := message.ToName
+	toName := message.To.Name
 	subject := "Subject: " + message.Subject + "\r\n"
 	body := message.Body + "\r\n"
 
@@ -102,18 +100,6 @@ func SendViaService(message Message) (err error) {
 	auth := smtp.PlainAuth("", id, password, addr)
 	err = smtp.SendMail(addr+":"+port, auth, from, to, msg)
 	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func SendVerificationEmail(message Message) error {
-	log.Println(message.From, message.FromName)
-	log.Println(message.To, message.ToName)
-	err := SendDirect(message)
-	if err != nil {
-		log.Println("Sender:", err)
 		return err
 	}
 
