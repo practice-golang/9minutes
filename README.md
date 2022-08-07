@@ -52,6 +52,13 @@ See `setup.go` and `router_*.go`
 * SQL Server - MS SQL Server express 2014 & 2019
 
 
+## Email sending for user verification
+
+* See `9minutes.ini`
+* Choose smtp or direct sending
+* When use direct sending, you should have own domain and should learn about DKIM, spf record and also PTR record
+
+
 ## License
 
 [3-Clause BSD](https://opensource.org/licenses/BSD-3-Clause)
