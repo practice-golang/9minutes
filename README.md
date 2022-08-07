@@ -2,12 +2,14 @@
 
 Bulletin board
 
+
 ## Goal
 
 * Create
     * HTML file server
     * Simple Board with user account managing
 * Escape from vaporware :-p
+
 
 ## Getting started
 
@@ -49,12 +51,6 @@ See `setup.go` and `router_*.go`
 * Postgres - PostgreSQL 12.3
 * SQL Server - MS SQL Server express 2014 & 2019
 
-
-## Todo
-* [x] html/template for content list
-* [x] File attatchment
-* [x] Shared session
-* [x] User approval - email sending
 
 ## License
 

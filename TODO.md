@@ -37,3 +37,7 @@
 * [x] html
     * Remove `Back to admin` in all html - Use Admin link
     * Add `Frontpage menu` in all board html
+* [x] html/template for content list
+* [x] File attatchment
+* [x] Shared session
+* [x] User approval - email sending
