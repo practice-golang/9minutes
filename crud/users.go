@@ -5,6 +5,8 @@ import (
 	"9minutes/db"
 	"9minutes/model"
 	"9minutes/np"
+	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -55,9 +57,7 @@ func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
 			columns += column.ColumnName.String + ","
-
-			jsonName := strings.ToLower(column.ColumnName.String)
-			jsonName = strings.ReplaceAll(jsonName, "_", "-")
+			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
 		}
 	}
 
@@ -125,9 +125,7 @@ func GetUserByNameMap(username string) (interface{}, error) {
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
 			columns += column.ColumnName.String + ","
-
-			jsonName := strings.ToLower(column.ColumnName.String)
-			jsonName = strings.ReplaceAll(jsonName, "_", "-")
+			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
 		}
 	}
 
@@ -155,6 +153,89 @@ func GetUserByNameMap(username string) (interface{}, error) {
 		result = users[0]
 	}
 
+	return result, nil
+}
+
+func VerifyAndUpdateUser(username, useremail, token string) (bool, error) {
+	result := false
+
+	dbtype := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(consts.TableUsers)
+	tablenameVerification := db.GetFullTableName(consts.TableUsers + "_verification")
+
+	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
+	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
+
+	whereUserIdx := np.CreateString(map[string]interface{}{"USER_IDX": nil}, dbtype, "", false)
+	whereToken := np.CreateString(map[string]interface{}{"TOKEN": nil}, dbtype, "", false)
+
+	whereIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
+	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
+	whereApproval := np.CreateString(map[string]interface{}{"APPROVAL": nil}, dbtype, "", false)
+
+	sql := `
+	SELECT
+		` + columns + `
+	FROM ` + tablename + `
+	WHERE ` + whereUsername.Names + ` = '` + username + `'
+		AND ` + whereEmail.Names + ` = '` + useremail + `'`
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return false, err
+	}
+	defer r.Close()
+
+	var user model.UserData
+	err = scan.Row(&user, r)
+	if err != nil {
+		return false, err
+	}
+
+	if user.Email.String != useremail {
+		return false, errors.New("user not found")
+	}
+
+	sql = `
+	SELECT
+		COUNT(*) AS COUNT
+	FROM ` + tablenameVerification + `
+	WHERE ` + whereUserIdx.Names + ` = '` + fmt.Sprint(user.Idx.Int64) + `'
+		AND ` + whereToken.Names + ` = '` + token + `'`
+
+	r, err = db.Con.Query(sql)
+	if err != nil {
+		return false, err
+	}
+	defer r.Close()
+
+	var count int64
+	err = scan.Row(&count, r)
+	if err != nil {
+		return false, err
+	}
+
+	if count == 0 {
+		return false, errors.New("verification key not found")
+	}
+
+	gradeChange := ""
+	gradeChange = whereGrade.Names + ` = 'regular_user'`
+
+	sql = `
+	UPDATE ` + tablename + ` SET
+		` + whereApproval.Names + ` = 'Y',
+		` + gradeChange + `
+	WHERE ` + whereIdx.Names + ` = '` + fmt.Sprint(user.Idx.Int64) + `'
+		AND ` + whereApproval.Names + ` = 'N'`
+
+	_, err = db.Con.Exec(sql)
+	if err != nil {
+		return false, err
+	}
+
+	result = true
 	return result, nil
 }
 
@@ -372,9 +453,7 @@ func GetUsersListMap(search string) ([]map[string]interface{}, error) {
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
 			columns += column.ColumnName.String + ","
-
-			jsonName := strings.ToLower(column.ColumnName.String)
-			jsonName = strings.ReplaceAll(jsonName, "_", "-")
+			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
 		}
 	}
 

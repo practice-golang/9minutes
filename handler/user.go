@@ -210,7 +210,7 @@ func Signup(c *router.Context) {
 		Body: `
 		Please click the link below to verify your email address.
 		<br />
-		<a href='` + domain + `/verify/` + username + `/` + verificationKEY + `'>Click here</a>`,
+		<a href='` + domain + `/verify?username=` + username + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
 		BodyType: email.HTML,
 	}
 
@@ -227,6 +227,38 @@ func Signup(c *router.Context) {
 	}
 
 	c.Json(http.StatusOK, result)
+}
+
+func UserVerification(c *router.Context) {
+	var err error
+
+	queries := c.URL.Query()
+	username := queries.Get("username")
+	useremail := queries.Get("email")
+	token := queries.Get("token")
+
+	if username == "" || useremail == "" || token == "" {
+		c.Text(http.StatusBadRequest, "Not enough parameters")
+		return
+	}
+
+	result, err := crud.VerifyAndUpdateUser(username, useremail, token)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !result {
+		c.Text(http.StatusBadRequest, "Invalid request")
+		return
+	}
+
+	c.Html(http.StatusOK, []byte(`
+	<script>
+		alert("Your email has been verified. You can now login.");
+		location.href = "/";
+	</script>
+	`))
 }
 
 func HandleUserList(c *router.Context) {

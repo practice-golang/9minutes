@@ -26,6 +26,9 @@ func setApiLogin(r *router.App) {
 	r.POST(`^/login`, handler.Login)
 	r.GET(`^/logout`, handler.Logout)
 	r.POST(`/api/signup`, handler.Signup)
+
+	/* User verification - Should be moved at next time */
+	r.GET(`/verify`, handler.UserVerification)
 }
 
 func setApiUploader(r *router.App) {

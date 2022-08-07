@@ -54,7 +54,7 @@ See `setup.go` and `router_*.go`
 * [x] html/template for content list
 * [x] File attatchment
 * [x] Shared session
-* [ ] User approval - email sending
+* [x] User approval - email sending
 
 ## License
 
