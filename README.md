@@ -54,7 +54,7 @@ See `setup.go` and `router_*.go`
 
 ## Paas - Heroku
 
-* Using following envs
+* Append following variables to environment setting in dyno
 ```
 PORT
 DATABASE_TYPE
