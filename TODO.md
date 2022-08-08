@@ -1,19 +1,23 @@
 # Todo
 
-* [ ] Upload filename change - Upload-xxxx -> hashed name
-* [ ] Download original filename
-* [ ] Download count
-* [ ] Delete uploaded file when edit content
+* Attachment
+    * [ ] Upload filename change - Upload-xxxx -> hashed name
+    * [ ] Download original filename
+    * [ ] Download count
+* Board
+    * [ ] Remove board type (board or gallery) column or query param
+    * [ ] Comment enhancement - editor, file/image upload, etc.
+    * [ ] Delete uploaded file when edit content
+    * [ ] Add sheet type - custom board type
+    * [ ] Image width limit
+* User
+    * [ ] Add avatar/profile image
+    * [ ] Captcha
+    * [ ] Add more info in session
+* Page, HTML
+    * [ ] Embed css styled html - beauty cuty html, css
 * [ ] Delete all related `book`, `books`
-* [ ] Comment enhancement - editor, file/image upload, etc.
-* [ ] Remove board type column or query param
-* [ ] Add avatar/profile image
-* [ ] Add sheet type - custom board type
-* [ ] Embed css styled html - beauty cuty html, css
 * [ ] Add more test
-* [ ] Image width limit
-* [ ] Captcha
-* [ ] Add more info into session
 * [ ] Add Oracle DB support
 * [ ] Log analyzer
 * [ ] Sample menu - eg. board link
