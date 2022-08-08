@@ -3,13 +3,15 @@
 * Board
     * [ ] Remove board type (board or gallery) column or query param
     * [ ] Comment enhancement - editor, file/image upload, etc.
-    * [ ] Delete uploaded file when edit content
-    * [ ] Add sheet type - custom board type
+    * [ ] Delete uploaded file when delete & edit content
     * [ ] Image width limit
+    * [ ] Add sheet type - custom board type
 * User
-    * [ ] Add avatar/profile image
-    * [ ] Captcha
+    * [ ] Add avatar as profile image
+    * [ ] Add user pic as profile image
     * [ ] Add more info in session
+    * [ ] Add resign
+    * [ ] Captcha
 * Page, HTML
     * [ ] Embed css styled html - beauty cuty html, css
 * [ ] Delete all related `book`, `books`
