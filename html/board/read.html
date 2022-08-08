@@ -152,11 +152,13 @@
 
     const filelistString = "$FILE_LIST$"
     const filelist = new Array()
-    for (const f of filelistString.split("!")) {
+    for (const f of filelistString.split("?")) {
         if (f == "") { continue }
+        const files = f.split("/")
         filelist.push({
-            "filename": f,
-            "link": accessURI + "/" + f
+            "storename": files[1],
+            "filename": files[0],
+            "link": accessURI + "/" + files[1]
         })
     }
 

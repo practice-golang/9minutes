@@ -43,6 +43,7 @@
     const urlParams = url.searchParams
     let titleImage = ""
     const filelist = new Array()
+    const storelist = new Array()
 
     const options = {
         uploadActionURI: "/api/uploader/image",
@@ -71,7 +72,8 @@
             if (r.ok) {
                 const result = await r.json()
 
-                filelist.push({ "filename": result.storename })
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
                 lrFileList.reload()
             }
         }
@@ -99,7 +101,8 @@
                 const result = await r.json()
 
                 editor.insertImage(`${accessURI}/${result.storename}`)
-                filelist.push({ "filename": result.storename })
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
                 lrFileList.reload()
             }
         }
@@ -127,21 +130,22 @@
 
                 titleImage = `${accessURI}/${result.storename}`
 
-                filelist.push({ "filename": result.storename })
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
                 lrFileList.reload()
             }
         }
     }
 
     async function writeContent() {
-        const fileListArray = filelist.map(file => { return file.filename })
-        const fileListString = fileListArray.join("!")
+        const storeListArray = storelist.map(file => { return file.filename })
+        const storeListString = storeListArray.join("?")
 
         const data = {
             "title": document.querySelector("#title").value,
             "title-image": titleImage,
             "content": editor.getHTML(),
-            "files": fileListString
+            "files": storeListString
         }
 
         const r = await fetch("/api/board/content/$CODE$", {

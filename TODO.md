@@ -2,7 +2,7 @@
 
 * Attachment
     * [x] Upload filename change - Upload-xxxx -> hashed name
-    * [ ] Add both filename and storagename to db
+    * [x] Add both filename and storagename to db
     * [ ] Download original filename
     * [ ] Download count
 * Board
