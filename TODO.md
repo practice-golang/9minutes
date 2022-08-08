@@ -1,33 +1,34 @@
 # Todo
 
-* [ ] User approval
-    * [ ] Send random number via email
-    * [ ] verify random number
-* [ ] Change board read from ajax to template
-* [ ] Download count
-* [ ] Upload filename manage - Upload-xxxx -> hashed name
+* [ ] Change datalist to select
+* [ ] Change board list/read from ajax to template
+* [ ] Upload filename change - Upload-xxxx -> hashed name
 * [ ] Download original filename
+* [ ] Download count
 * [ ] Delete uploaded file when edit content
 * [ ] Delete all related `book`, `books`
 * [ ] Comment enhancement - editor, file/image upload, etc.
 * [ ] Remove board type column or query param
 * [ ] Add avatar/profile image
-* [ ] Add heroku env for rest of dbs except mysql
-* [ ] Change datalist to select
 * [ ] Add sheet type - custom board type
-* [ ] beauty cuty html, css
-* [ ] Sample menu - eg. board link
+* [ ] Embed css styled html - beauty cuty html, css
 * [ ] Add more test
-* [ ] Image limit width
+* [ ] Image width limit
 * [ ] Captcha
-* [ ] Log analyzer
 * [ ] Add more info into session
-* [ ] DB backup, migration
-* [ ] Chatting???
+* [ ] Add Oracle DB support
+* [ ] Log analyzer
+* [ ] Sample menu - eg. board link
 * [ ] CORS???
-* [ ] Embed css styled html
+* [ ] Chatting???
+* [ ] DB backup, migration
 
+
+* [x] Add heroku env for rest of dbs except mysql
 * [x] Email sender - for user approval
+* [x] User approval
+    * [x] Send random number via email
+    * [x] verify random number
 * [x] Add session store address, port for etcd, redis
 * [x] Youtube link, embed
 * [x] Comment remove

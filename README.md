@@ -52,11 +52,63 @@ See `setup.go` and `router_*.go`
 * SQL Server - MS SQL Server express 2014 & 2019
 
 
+## Paas - Heroku
+
+* Using following envs
+```
+PORT
+DATABASE_TYPE
+DATABASE_ADDRESS
+DATABASE_PORT
+DATABASE_PROTOCOL
+DATABASE_NAME
+DATABASE_ID
+DATABASE_PASSWORD
+```
+
+
 ## Email sending for user verification
 
 * See `9minutes.ini`
 * Choose smtp or direct sending
-* When use direct sending, you should have own domain and should learn about DKIM, spf record and also PTR record
+* When use direct sending,
+    * you should have own domain
+    * IP address of `9minutes` is same as domain's
+    * you should learn about following and set
+        * `DKIM`
+        * `spf record`
+        * Also `PTR record` if possible to ask your internet service provider
+
+
+## Build
+
+* `GOBIN` must be set to `./bin`
+* Windows
+    * build
+    ```
+    $ mingw32-make.exe
+    ```
+    * test
+    ```
+    $ mingw32-make.exe test
+    ```
+    * build for all platform
+    ```
+    $ mingw32-make.exe dist
+    ```
+* Linux, MAC
+    * build
+    ```
+    $ make
+    ```
+    * test
+    ```
+    $ make test
+    ```
+    * build for all platform
+    ```
+    $ make dist
+    ```
 
 
 ## License
