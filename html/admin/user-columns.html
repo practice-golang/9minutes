@@ -24,7 +24,7 @@
         <td>&nbsp;</td>
         <td><input type="text" name="display-name" value="" placeholder="Display name" /></td>
         <td><input type="text" name="column-code" value="" placeholder="Column code" /></td>
-        <td><input type="text" name="column-type" value="" list="column-types" placeholder="Column type" /></td>
+        <td><input type="text" name="column-type" value="" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" /></td>
         <td><input type="text" name="column-name" value="" placeholder="Column name" /></td>
         <td>&nbsp;</td>
         <td>
@@ -50,7 +50,7 @@
             <td>&nbsp;</td>
             <td><input type="text" name="display-name" value="{{display-name}}" placeholder="Display name" /></td>
             <td><input type="text" name="column-code" value="{{column-code}}" placeholder="Column code" /></td>
-            <td><input type="text" name="column-type" value="{{column-type}}" list="column-types" placeholder="Column type" /></td>
+            <td><input type="text" name="column-type" value="{{column-type}}" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" /></td>
             <td><input type="text" name="column-name" value="{{column-name}}" placeholder="Column name" /></td>
             <td>
                 <input type="hidden" name="sort-order" value="{{sort-order}}" />
@@ -72,6 +72,13 @@
 
 <script>
     let columnEditIndex = -1
+
+    function restrictDatalist(e) {
+        for (let i = 0; i < e.list.options.length; i++) {
+            if (e.list.options[i].value == e.value) { return false }
+        }
+        e.value = ""
+    }
 
     async function fetchRestricted() {
         columnEditIndex = -1

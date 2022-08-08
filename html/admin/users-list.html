@@ -33,8 +33,8 @@
         <td><input type="password" name="password" value="" placeholder="Password" /></td>
         <td><input type="text" name="email" value="" placeholder="Email" /></td>
         <!-- <td><input type="text" name="phone" value="" placeholder="Phone" /></td> -->
-        <td><input type="text" name="grade" list="grade-list" value="" placeholder="Grade" /></td>
-        <td><input type="text" name="approval" list="yn-list" value="" autocomplete="off" placeholder="Approval" /></td>
+        <td><input type="text" name="grade" onchange="restrictDatalist(this)" list="grade-list" value="" placeholder="Grade" /></td>
+        <td><input type="text" name="approval" onchange="restrictDatalist(this)" list="yn-list" value="" autocomplete="off" placeholder="Approval" /></td>
         <td>
             <button type="button" onclick="closeAdd()">Cancel</button>
             <button type="button" onclick="addUser()">Save</button>
@@ -65,8 +65,8 @@
             <td><input type="password" name="password" value="" placeholder="Password" /></td>
             <td><input type="text" name="email" value="{{email}}" placeholder="Email" /></td>
             <!-- <td><input type="text" name="phone" value="{{phone}}" placeholder="Phone" /></td> -->
-            <td><input type="text" name="grade" list="grade-list" value="{{grade}}" placeholder="Grade" /></td>
-            <td><input type="text" name="approval" list="yn-list" value="{{approval}}" autocomplete="off" placeholder="Approval" /></td>
+            <td><input type="text" name="grade" onchange="restrictDatalist(this)" list="grade-list" value="{{grade}}" placeholder="Grade" /></td>
+            <td><input type="text" name="approval" onchange="restrictDatalist(this)" list="yn-list" value="{{approval}}" autocomplete="off" placeholder="Approval" /></td>
             <td>
                 <button type="button" onclick="closeEdit()">Cancel</button>
                 <button type="button" onclick="updateUser()">Save</button>
@@ -108,6 +108,13 @@
     const urlParams = url.searchParams
     let usersData, usersList
     let pages = new Array()
+
+    function restrictDatalist(e) {
+        for (let i = 0; i < e.list.options.length; i++) {
+            if (e.list.options[i].value == e.value) { return false }
+        }
+        e.value = ""
+    }
 
     function openAdd() { document.querySelector("#add-user").style.display = "table-row" }
     function closeAdd() { document.querySelector("#add-user").style.display = "none" }

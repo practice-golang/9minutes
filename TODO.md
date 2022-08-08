@@ -1,7 +1,5 @@
 # Todo
 
-* [ ] Change datalist to select
-* [ ] Change board list/read from ajax to template
 * [ ] Upload filename change - Upload-xxxx -> hashed name
 * [ ] Download original filename
 * [ ] Download count
@@ -24,6 +22,8 @@
 * [ ] DB backup, migration
 
 
+* [x] Change board list, read content from ajax to html/template except comments
+* [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
 * [x] Add heroku env for rest of dbs except mysql
 * [x] Email sender - for user approval
 * [x] User approval

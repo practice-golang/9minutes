@@ -36,13 +36,13 @@
         <td>&nbsp;</td>
         <td><input type="text" name="board-name" value="" placeholder="Board name" /></td>
         <td><input type="text" name="board-code" onchange="setTableNameByCode(this)" value="" placeholder="Board code" /></td>
-        <td><input type="text" name="board-type" list="board-types" value="" autocomplete="off" placeholder="Board type" /></td>
+        <td><input type="text" name="board-type" onchange="restrictDatalist(this)" list="board-types" value="" autocomplete="off" placeholder="Board type" /></td>
         <td><input type="text" name="board-table" value="" placeholder="Board table" disabled /></td>
         <td><input type="text" name="comment-table" value="" placeholder="Comment table" disabled /></td>
-        <td><input type="text" name="grant-read" list="grant-list" value="" autocomplete="off" placeholder="Grant read" /></td>
-        <td><input type="text" name="grant-write" list="grant-list" value="" autocomplete="off" placeholder="Grant write" /></td>
-        <td><input type="text" name="grant-comment" list="grant-list" value="" autocomplete="off" placeholder="Grant comment" /></td>
-        <td><input type="text" name="grant-upload" list="grant-list" value="" autocomplete="off" placeholder="Grant upload" /></td>
+        <td><input type="text" name="grant-read" onchange="restrictDatalist(this)" list="grant-list" value="" autocomplete="off" placeholder="Grant read" /></td>
+        <td><input type="text" name="grant-write" onchange="restrictDatalist(this)" list="grant-list" value="" autocomplete="off" placeholder="Grant write" /></td>
+        <td><input type="text" name="grant-comment" onchange="restrictDatalist(this)" list="grant-list" value="" autocomplete="off" placeholder="Grant comment" /></td>
+        <td><input type="text" name="grant-upload" onchange="restrictDatalist(this)" list="grant-list" value="" autocomplete="off" placeholder="Grant upload" /></td>
         <td>
             <button type="button" onclick="closeAdd()">Cancel</button>
             <button type="button" onclick="addBoard()">Save</button>
@@ -76,13 +76,13 @@
             </td>
             <td><input type="text" name="board-name" value="{{board-name}}" placeholder="Board name" /></td>
             <td><input type="text" name="board-code" value="{{board-code}}" placeholder="Board code" /></td>
-            <td><input type="text" name="board-type" list="board-types" value="{{board-type}}" autocomplete="off" placeholder="Board type" /></td>
+            <td><input type="text" name="board-type" list="board-types" value="{{board-type}}" autocomplete="off" placeholder="Board type" onchange="restrictDatalist(this)" /></td>
             <td><input type="text" name="board-table" value="{{board-table}}" placeholder="Board table" disabled /></td>
             <td><input type="text" name="comment-table" value="{{comment-table}}" placeholder="Comment table" disabled /></td>
-            <td><input type="text" name="grant-read" list="grant-list" value="{{grant-read}}" autocomplete="off" placeholder="Grant read" /></td>
-            <td><input type="text" name="grant-write" list="grant-list" value="{{grant-write}}" autocomplete="off" placeholder="Grant write" /></td>
-            <td><input type="text" name="grant-comment" list="grant-list" value="{{grant-comment}}" autocomplete="off" placeholder="Grant comment" /></td>
-            <td><input type="text" name="grant-upload" list="grant-list" value="{{grant-upload}}" autocomplete="off" placeholder="Grant upload" /></td>
+            <td><input type="text" name="grant-read" list="grant-list" value="{{grant-read}}" autocomplete="off" placeholder="Grant read" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-write" list="grant-list" value="{{grant-write}}" autocomplete="off" placeholder="Grant write" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-comment" list="grant-list" value="{{grant-comment}}" autocomplete="off" placeholder="Grant comment" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-upload" list="grant-list" value="{{grant-upload}}" autocomplete="off" placeholder="Grant upload" onchange="restrictDatalist(this)" /></td>
             <td>
                 <button type="button" onclick="closeEdit()">Cancel</button>
                 <button type="button" onclick="updateBoard()">Save</button>
@@ -125,6 +125,13 @@
     const urlParams = url.searchParams
     let boardsData, boardsList
     let pages = new Array()
+
+    function restrictDatalist(e) {
+        for (let i = 0; i < e.list.options.length; i++) {
+            if (e.list.options[i].value == e.value) { return false }
+        }
+        e.value = ""
+    }
 
     function setTableNameByCode(self) {
         self.value = self.value.replace(/\s/g, '')
