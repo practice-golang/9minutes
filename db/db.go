@@ -24,6 +24,7 @@ type (
 		SchemaName    string
 		TableName     string
 		BoardTable    string
+		UploadTable   string
 		UserTable     string
 		GrantID       string
 		GrantPassword string
@@ -40,6 +41,7 @@ type (
 		// Not return sql.Result
 		Exec(string, []interface{}, string) (int64, int64, error)
 		CreateBoardTable() error
+		CreateUploadTable() error
 		CreateUserTable() error
 		CreateUserVerificationTable() error
 
@@ -70,6 +72,7 @@ func SetupDB() error {
 	var err error
 
 	Info.BoardTable = "boards"
+	Info.UploadTable = "uploads"
 	Info.UserTable = "users"
 
 	switch Info.DatabaseType {

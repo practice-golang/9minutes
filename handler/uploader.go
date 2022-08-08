@@ -1,12 +1,17 @@
 package handler
 
 import (
+	"9minutes/crud"
 	"9minutes/router"
+	"crypto/sha256"
+	"encoding/base64"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 // https://tutorialedge.net/golang/go-file-upload-tutorial
@@ -29,18 +34,35 @@ func UploadFile(c *router.Context) {
 	}
 	defer file.Close()
 
-	// tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
-	tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
+	sha := sha256.New()
+	sha.Write([]byte(filepath.Base(handler.Filename) + time.Now().String()))
+	sha.Write([]byte(filepath.Ext(handler.Filename) + time.Now().String()))
+	storageName := base64.StdEncoding.EncodeToString(sha.Sum(nil))
+	storageName = strings.NewReplacer("=", "", "+", "", "/", "").Replace(storageName)
+	storageName = storageName + "_" + time.Now().Format("20060102150405") + filepath.Ext(handler.Filename)
+	// storageName := GetRandomString(128) + time.Now().Format("20060102150405") + "." + filepath.Ext(handler.Filename)
+
+	// // tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	// tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
+	tempFile, err := os.CreateTemp(router.UploadPath, "*"+storageName)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	defer tempFile.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	tempFile.Write(fileBytes)
+
+	err = crud.AddUploadedFile(handler.Filename, storageName)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	resultMAP := map[string]string{
 		"message":   "success",
@@ -70,18 +92,35 @@ func UploadImage(c *router.Context) {
 	}
 	defer file.Close()
 
-	// tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
-	tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
+	sha := sha256.New()
+	sha.Write([]byte(filepath.Base(handler.Filename) + time.Now().String()))
+	sha.Write([]byte(filepath.Ext(handler.Filename) + time.Now().String()))
+	storageName := base64.StdEncoding.EncodeToString(sha.Sum(nil))
+	storageName = strings.NewReplacer("=", "", "+", "", "/", "").Replace(storageName)
+	storageName = storageName + "_" + time.Now().Format("20060102150405") + filepath.Ext(handler.Filename)
+	// storageName := GetRandomString(128) + time.Now().Format("20060102150405") + "." + filepath.Ext(handler.Filename)
+
+	// // tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
+	// tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
+	tempFile, err := os.CreateTemp(router.UploadPath, "*"+storageName)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	defer tempFile.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	tempFile.Write(fileBytes)
+
+	err = crud.AddUploadedFile(handler.Filename, storageName)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	resultMAP := map[string]string{
 		"message":   "success",

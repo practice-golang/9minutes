@@ -100,6 +100,29 @@ func (d *Mysql) CreateBoardTable() error {
 	return nil
 }
 
+// CreateUploadTable - Create upload table
+func (d *Mysql) CreateUploadTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UploadTable + ` (
+		IDX           INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		FILE_NAME     VARCHAR(512) NULL DEFAULT NULL,
+		STORAGE_NAME  VARCHAR(512) NULL DEFAULT NULL,
+		ACCESS_COUNT  INT(11)      NULL DEFAULT NULL,
+
+		PRIMARY KEY (IDX),
+		INDEX   IDX (IDX)
+	)
+	COLLATE='utf8_general_ci'
+	ENGINE=InnoDB;`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *Mysql) CreateUserTable() error {
 	sql := `

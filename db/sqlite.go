@@ -85,6 +85,25 @@ func (d *SQLite) CreateBoardTable() error {
 	return nil
 }
 
+// CreateUploadTable - Create upload table
+func (d *SQLite) CreateUploadTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS "` + Info.UploadTable + `" (
+		"IDX"             INTEGER,
+		"FILE_NAME"       TEXT,
+		"STORAGE_NAME"    TEXT,
+
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *SQLite) CreateUserTable() error {
 	sql := `

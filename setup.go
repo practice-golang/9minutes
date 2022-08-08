@@ -232,14 +232,17 @@ func setupDB() {
 
 	err = db.Obj.CreateBoardTable()
 	if err != nil {
-		log.Fatal("CreateBoardManager:", err)
+		log.Fatal("CreateBoardTable:", err)
+	}
+	err = db.Obj.CreateUploadTable()
+	if err != nil {
+		log.Fatal("CreateUploadTable:", err)
 	}
 
 	err = db.Obj.CreateUserTable()
 	if err != nil {
 		log.Fatal("CreateUserTable:", err)
 	}
-
 	err = db.Obj.CreateUserVerificationTable()
 	if err != nil {
 		log.Fatal("CreateUserVerificationTable:", err)

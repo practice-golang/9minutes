@@ -106,6 +106,25 @@ func (d *SqlServer) CreateBoardTable() error {
 	return nil
 }
 
+// CreateUploadTable - Create upload table
+func (d *SqlServer) CreateUploadTable() error {
+	sql := `USE "` + Info.DatabaseName + `"`
+	sql += `
+	IF OBJECT_ID(N'` + Info.UploadTable + `', N'U') IS NULL
+	CREATE TABLE "` + Info.UploadTable + `" (
+		IDX             BIGINT NOT NULL IDENTITY PRIMARY KEY,
+		FILE_NAME       VARCHAR(512) NULL DEFAULT NULL,
+		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL
+	)`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *SqlServer) CreateUserTable() error {
 	// sql := `
