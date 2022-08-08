@@ -1,10 +1,5 @@
 # Todo
 
-* Attachment
-    * [x] Upload filename change - Upload-xxxx -> hashed name
-    * [x] Add both filename and storagename to db
-    * [ ] Download original filename
-    * [ ] Download count
 * Board
     * [ ] Remove board type (board or gallery) column or query param
     * [ ] Comment enhancement - editor, file/image upload, etc.
@@ -27,6 +22,11 @@
 * [ ] DB backup, migration
 
 
+* Attachment
+    * [x] Upload filename change - Upload-xxxx -> hashed name
+    * [x] Add both filename and storagename to db
+    * [x] Download original filename
+    * ~~Download count~~ - No
 * [x] Change board list, read content from ajax to html/template except comments
 * [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
 * [x] Add heroku env for rest of dbs except mysql
