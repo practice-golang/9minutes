@@ -4,6 +4,10 @@
 
 go get github.com/axw/gocov/gocov
 go get github.com/matm/gocov-html
+
+go build -mod=readonly -o ./bin/ github.com/axw/gocov/gocov
+go build -mod=readonly -o ./bin/ github.com/matm/gocov-html
+
 go mod tidy
 
 %GOBIN%\gocov test ./... | %GOBIN%\gocov-html > coverage.html

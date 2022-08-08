@@ -19,7 +19,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.26.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	go.etcd.io/etcd/client/v3 v3.5.4
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
