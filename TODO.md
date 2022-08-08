@@ -15,6 +15,7 @@
 * Page, HTML
     * [ ] Embed css styled html - beauty cuty html, css
 * [ ] Delete all related `book`, `books`
+* [ ] Rearrange route paths
 * [ ] Add more test
 * [ ] Add Oracle DB support
 * [ ] Log analyzer
