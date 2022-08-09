@@ -19,9 +19,7 @@
     * [ ] Add more info in session
     * [ ] Add resign
     * [ ] Captcha
-* Page, HTML
-    * [ ] Embed css styled html - beauty cuty html, css
-    * [ ] Sample menu - eg. board link
+
 * [ ] Delete all related `book`, `books`
 * [ ] Rearrange route paths
 * [ ] Add more test
@@ -32,11 +30,14 @@
 * [ ] DB backup, migration
 
 
+* ~~Page, HTML~~ - waive
+    * Embed css styled html - beauty cuty html, css
+    * Sample menu - eg. board link
 * Attachment
     * [x] Upload filename change - Upload-xxxx -> hashed name
     * [x] Add both filename and storagename to db
     * [x] Download original filename
-    * ~~Download count~~ - No. not yet
+    * ~~Download count~~ - waive
 * [x] Change board list, read content from ajax to html/template except comments
 * [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
 * [x] Add heroku env for rest of dbs except mysql
