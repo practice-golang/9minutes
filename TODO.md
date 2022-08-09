@@ -14,12 +14,12 @@
     * [ ] Captcha
 * Page, HTML
     * [ ] Embed css styled html - beauty cuty html, css
+    * [ ] Sample menu - eg. board link
 * [ ] Delete all related `book`, `books`
 * [ ] Rearrange route paths
 * [ ] Add more test
 * [ ] Add Oracle DB support
 * [ ] Log analyzer
-* [ ] Sample menu - eg. board link
 * [ ] CORS???
 * [ ] Chatting???
 * [ ] DB backup, migration
@@ -29,7 +29,7 @@
     * [x] Upload filename change - Upload-xxxx -> hashed name
     * [x] Add both filename and storagename to db
     * [x] Download original filename
-    * ~~Download count~~ - No
+    * ~~Download count~~ - No. not yet
 * [x] Change board list, read content from ajax to html/template except comments
 * [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
 * [x] Add heroku env for rest of dbs except mysql
