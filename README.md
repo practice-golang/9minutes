@@ -13,9 +13,10 @@ Bulletin board
 
 ## Getting started
 
-* Build and run
+* Download - See `Sample bins` at `Release`
+
+* Run
 ```sh
-$ go build .
 $ ./9minutes
 ```
 * Then run again after modify `9minutes.ini`

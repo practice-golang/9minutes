@@ -1,8 +1,8 @@
 # Todo
 
 * Board
-    * [ ] Comment enhancement - editor, file/image upload, etc.
     * [ ] Delete uploaded file when delete & edit content
+    * [ ] Comment enhancement - editor, file/image upload, etc.
     * [ ] Add sheet type - custom board type
     * [x] Remove query param - gallery type
     * [x] Image width limit
