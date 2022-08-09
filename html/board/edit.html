@@ -41,6 +41,9 @@
     let data = `$CONTENT$`;
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
+
+    const accessURI = "/upload"
+
     let titleImage = "$TITLE_IMAGE$"
 
     const options = {
@@ -153,10 +156,7 @@
         })
 
         if (r.ok) {
-            let boardType = ""
-            if (urlParams.get("type") == "gallery") { boardType = "&type=gallery" }
-
-            location.href = "/board/read.html?code=$CODE$&idx=$IDX$" + boardType
+            location.href = "/board/read.html?code=$CODE$&idx=$IDX$"
         } else {
             alert("Server error")
         }
@@ -165,18 +165,23 @@
     }
 
     function moveToList() {
-        // location.href = "./list.php?code=" + urlParams.get("code")
-        history.back()
+        location.href = "/board?code=" + urlParams.get("code")
+        // history.back()
     }
 
     const filelistString = "$FILE_LIST$"
     const filelist = new Array()
     const storelist = new Array()
-    for (const f of filelistString.split("!")) {
+    for (const f of filelistString.split("?")) {
         if (f == "") { continue }
+
+        storelist.push({ "filename": f })
+
+        const files = f.split("/")
         filelist.push({
-            "filename": f,
-            "link": options.uploadAccessURI + "/" + f
+            "storename": files[1],
+            "filename": files[0],
+            "link": accessURI + "/" + files[1]
         })
     }
 
@@ -199,6 +204,11 @@
         overflow: auto;
 
         border: 1px solid silver;
+    }
+
+    #editor img {
+        max-width: 70vw;
+        overflow: auto;
     }
 </style>
 

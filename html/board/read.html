@@ -49,17 +49,13 @@
 </div>
 
 <script>
-    const data = `<?= $data["CONTENT"] ?>`;
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
 
     const accessURI = "/upload"
 
     function moveToEdit() {
-        let boardType = ""
-        if (urlParams.get("type") == "gallery") { boardType = "&type=gallery" }
-
-        location.href = "./edit.html?code=$CODE$&idx=$IDX$" + boardType
+        location.href = "/board/edit.html?code=$CODE$&idx=$IDX$"
     }
 
     async function deleteContent(e, idx) {
@@ -76,12 +72,7 @@
         return false
     }
     function moveToList() {
-        if (urlParams.get("type") == "gallery") {
-            location.href = "gallery.html?code=$CODE$";
-        } else {
-            location.href = "list.html?code=$CODE$";
-        }
-
+        location.href = "/board?code=$CODE$"
         return false
     }
 
@@ -199,7 +190,7 @@
     }
 
     #content img {
-        max-width: 100%;
+        max-width: 70vw;
         overflow: auto;
     }
 

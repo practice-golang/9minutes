@@ -169,10 +169,7 @@
     }
 
     function moveToList() {
-        let listingPath = "list.html"
-        if (urlParams.get("type") == "gallery") { listingPath = "gallery.html" }
-
-        location.href = listingPath + "?code=" + urlParams.get("code")
+        location.href = "/board?code=" + urlParams.get("code")
     }
 
     const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))

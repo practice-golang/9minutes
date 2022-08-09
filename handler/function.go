@@ -281,99 +281,6 @@ func HandleContentList(c *router.Context) {
 	var err error
 
 	code := ""
-	board := model.Board{}
-	queries := c.URL.Query()
-
-	if queries.Get("code") != "" {
-		code = queries.Get("code")
-
-		board.BoardCode = null.StringFrom(code)
-		board, err = crud.GetBoardByCode(board)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-		}
-	}
-
-	var userInfo model.UserData
-	userGrade := 999
-
-	switch c.AuthInfo {
-	case nil:
-		userGrade = config.UserGrades.IndexOf("guest")
-	default:
-		userInfo, err = crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		userGrade = config.UserGrades.IndexOf(userInfo.Grade.String)
-	}
-
-	accessGrade := config.UserGrades.IndexOf(board.GrantRead.String)
-
-	if accessGrade < userGrade {
-		c.Text(http.StatusForbidden, "Forbidden")
-		return
-	}
-
-	listingOptions := model.ContentListingOptions{}
-	listingOptions.Search = null.StringFrom(queries.Get("search"))
-
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(int64(config.ContentsCountPerPage))
-
-	if queries.Get("count") != "" {
-		countPerPage, err := strconv.Atoi(queries.Get("count"))
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
-	}
-
-	if queries.Get("page") != "" {
-		page := queries.Get("page")
-		pageNum, err := strconv.Atoi(page)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		listingOptions.Page = null.IntFrom(int64(pageNum))
-	}
-
-	listingOptions.Page.Int64--
-
-	h, err := LoadHTML(c)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if !board.Idx.Valid {
-		c.Text(http.StatusInternalServerError, "Board not found")
-		return
-	}
-
-	h = bytes.ReplaceAll(h, []byte("$CODE$"), []byte(code))
-
-	list, err := crud.GetContentList(board, listingOptions)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-	}
-
-	listJSON, _ := json.Marshal(list)
-	h = bytes.ReplaceAll(h, []byte("$CONTENT_LIST$"), listJSON)
-
-	c.Html(http.StatusOK, h)
-}
-
-func HandleContentListTmpl(c *router.Context) {
-	var err error
-
-	code := ""
 	search := ""
 	searchParam := ""
 	board := model.Board{}
@@ -389,11 +296,6 @@ func HandleContentListTmpl(c *router.Context) {
 		}
 	}
 
-	if queries.Get("search") != "" {
-		search = queries.Get("search")
-		searchParam = "&search=" + search
-	}
-
 	var userInfo model.UserData
 	userGrade := 999
 
@@ -415,6 +317,11 @@ func HandleContentListTmpl(c *router.Context) {
 	if accessGrade < userGrade {
 		c.Text(http.StatusForbidden, "Forbidden")
 		return
+	}
+
+	if queries.Get("search") != "" {
+		search = queries.Get("search")
+		searchParam = "&search=" + search
 	}
 
 	listingOptions := model.ContentListingOptions{}
@@ -445,6 +352,15 @@ func HandleContentListTmpl(c *router.Context) {
 	}
 
 	listingOptions.Page.Int64--
+
+	switch board.BoardType.String {
+	case "board":
+		c.URL.Path = "/board/list.html"
+	case "gallery":
+		c.URL.Path = "/board/gallery.html"
+	}
+
+	log.Println(board.BoardType.String, c.URL.Path, c.URL.RawQuery, c.URL.RawPath)
 
 	h, err := LoadHTML(c)
 	if err != nil {
@@ -516,6 +432,7 @@ func HandleContentListTmpl(c *router.Context) {
 		return
 	}
 	c.ResponseWriter.WriteHeader(http.StatusOK)
+	// c.Html(http.StatusOK, h)
 }
 
 func HandleReadContent(c *router.Context) {

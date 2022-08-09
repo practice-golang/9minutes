@@ -1,29 +1,46 @@
 @INCLUDE@board/include/header.html
 
+<script>
+    document.title = "Gallery"
+</script>
+
 <label for="search">Search:</label>
 <input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
 <button type="button" onclick="search()">Search</button>
 
-<div id="list-container" class="gallery">
-    <ul lr-loop="list">
-        <li lr-click="moveToContent($index)">
-            <!-- <img src="{{title-image}}" alt="title-image" /> -->
-            <div class="title-img"><img src="{{title-image}}" alt="title-image" /></div>
-            <div class="title-text">{{title}}</div>
+<div class="gallery">
+    <ul>
+        {{range $i, $o := .ContentList}}
+        <li onclick="moveToContent('{{$i}}')">
+            <div class="title-img"><img src="{{$o.TitleImage.String}}" alt="title-image" /></div>
+            <div class="title-text">{{$o.Title.String}}</div>
         </li>
+        {{end}}
     </ul>
 </div>
 
-<div id="pages-container">
-    <div lr-loop="pages">
-        <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
-        <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+<div>
+    {{range $i, $o := .PageList}}
 
-        <a onclick="location.href='{{link}}'">{{page}}</a>
+    {{if eq $i 0}}
+    <a href="/board?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
+    <a href="/board?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
+    ..
+    {{end}}
 
-        <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
-        <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
-    </div>
+    {{if eq $o $.CurrentPage}}
+    <b>{{$o}}</b>
+    {{else}}
+    <a href="/board?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
+    {{end}}
+
+    {{if and (ne $o $.TotalPage) (is_last_index $i)}}
+    ..
+    <a href="/board?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
+    <a href="/board?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
+    {{end}}
+
+    {{end}}
 </div>
 
 <div>
@@ -39,13 +56,13 @@
 
     function moveToContent(idx) {
         const index = list[idx].idx
-        location.href = `read.html?code=$CODE$&type=gallery&idx=${index}`
+        location.href = `/board/read.html?code=$CODE$&idx=${index}`
 
         return false
     }
 
     function moveToWrite() {
-        location.href = "write.html?code=$CODE$&type=gallery";
+        location.href = "/board/write.html?code=$CODE$";
         return false
     }
 
@@ -72,7 +89,7 @@
 
         if (search.length < 2) {
             if (search == "") {
-                const url = `/board/gallery.html?code=$CODE$`
+                const url = `/board?code=$CODE$`
 
                 searchParam = ""
                 if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
@@ -87,7 +104,7 @@
             return false
         }
 
-        const url = `/board/gallery.html?code=$CODE$&search=${search}`
+        const url = `/board?code=$CODE$&search=${search}`
         location.href = url
 
         return false
@@ -109,17 +126,11 @@
         if (i > 0) {
             const pageInfo = {
                 "page": i,
-                "link": `/board/gallery.html?code=$CODE$&page=${i}` + searchParam
+                "link": `/board?code=$CODE$&page=${i}` + searchParam
             }
             pages.push(pageInfo)
         }
     }
-
-    const lrList = new ListRenderer(document.querySelector("#list-container"))
-    lrList.render(list)
-
-    const lrPage = new ListRenderer(document.querySelector("#pages-container"))
-    lrPage.render()
 </script>
 
 <style>

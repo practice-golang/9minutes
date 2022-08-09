@@ -62,8 +62,7 @@
             <td>{{grant-comment}}</td>
             <td>{{grant-upload}}</td>
             <td>
-                <button type="button" lr-click="moveToBoard($index)">List</button>
-                <button type="button" lr-click="moveToGallery($index)">Gallery</button>
+                <button type="button" lr-click="moveToListView($index)">View</button>
                 <button type="button" lr-click="openEdit($index)">Edit</button>
                 <button type="button" lr-click="deleteBoard($index)">Delete</button>
             </td>
@@ -102,7 +101,7 @@
 
 <datalist id="board-types">
     <option value="board">Board</option>
-    <option value="gallary">Gallary</option>
+    <option value="gallery">Gallery</option>
 </datalist>
 
 <div id="pages-container">
@@ -188,8 +187,7 @@
         if (r.ok) { location.reload() }
     }
 
-    function moveToBoard(index) { window.open("/board/list.html?code=" + boardsList[index]["board-code"], "_blank") }
-    function moveToGallery(index) { window.open("/board/gallery.html?code=" + boardsList[index]["board-code"], "_blank") }
+    function moveToListView(index) { window.open("/board?code=" + boardsList[index]["board-code"], "_blank") }
     function openEdit(idx) {
         boardEditIndex = idx
         lrBoardsList.reload()

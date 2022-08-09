@@ -1,11 +1,11 @@
 # Todo
 
 * Board
-    * [ ] Remove board type (board or gallery) column or query param
     * [ ] Comment enhancement - editor, file/image upload, etc.
     * [ ] Delete uploaded file when delete & edit content
-    * [ ] Image width limit
     * [ ] Add sheet type - custom board type
+    * [x] Remove query param - gallery type
+    * [x] Image width limit
 * User
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image

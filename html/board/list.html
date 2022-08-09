@@ -35,21 +35,21 @@
     {{range $i, $o := .PageList}}
 
     {{if eq $i 0}}
-    <a href="/board/list.html?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
-    <a href="/board/list.html?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
+    <a href="/board?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
+    <a href="/board?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
     ..
     {{end}}
 
     {{if eq $o $.CurrentPage}}
     <b>{{$o}}</b>
     {{else}}
-    <a href="/board/list.html?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
+    <a href="/board?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
     {{end}}
 
     {{if and (ne $o $.TotalPage) (is_last_index $i)}}
     ..
-    <a href="/board/list.html?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
-    <a href="/board/list.html?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
+    <a href="/board?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
+    <a href="/board?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
     {{end}}
 
     {{end}}
@@ -91,13 +91,13 @@
 
     function moveToContent(idx) {
         const index = list[idx].idx
-        location.href = `read.html?code=$CODE$&idx=${index}`
+        location.href = `/board/read.html?code=$CODE$&idx=${index}`
 
         return false
     }
 
     function moveToWrite() {
-        location.href = "write.html?code=$CODE$";
+        location.href = "/board/write.html?code=$CODE$";
         return false
     }
 
@@ -124,7 +124,7 @@
 
         if (search.length < 2) {
             if (search == "") {
-                const url = `/board/list.html?code=$CODE$`
+                const url = `/board?code=$CODE$`
 
                 searchParam = ""
                 if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
@@ -139,7 +139,7 @@
             return false
         }
 
-        const url = `/board/list.html?code=$CODE$&search=${search}`
+        const url = `/board?code=$CODE$&search=${search}`
         location.href = url
 
         return false
@@ -161,7 +161,7 @@
         if (i > 0) {
             const pageInfo = {
                 "page": i,
-                "link": `/board/list.html?code=$CODE$&page=${i}` + searchParam
+                "link": `/board?code=$CODE$&page=${i}` + searchParam
             }
             pages.push(pageInfo)
         }
