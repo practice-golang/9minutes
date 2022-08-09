@@ -42,6 +42,15 @@ type Content struct {
 	RegDTTM    null.String `json:"reg-dttm"    db:"REG_DTTM"    npskip:"update, viewcount"`
 }
 
+type FilesToDelete struct {
+	DeleteFiles []File `json:"delete-files"`
+}
+
+type File struct {
+	FileName  null.String `json:"filename" db:"FILE_NAME"`
+	StoreName null.String `json:"storename" db:"STORAGE_NAME"`
+}
+
 // CommentListingOptions - Search, page
 type CommentListingOptions struct {
 	Search    null.String

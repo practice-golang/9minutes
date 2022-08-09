@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -360,8 +360,6 @@ func HandleContentList(c *router.Context) {
 		c.URL.Path = "/board/gallery.html"
 	}
 
-	log.Println(board.BoardType.String, c.URL.Path, c.URL.RawQuery, c.URL.RawPath)
-
 	h, err := LoadHTML(c)
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
@@ -660,6 +658,7 @@ func WriteContent(c *router.Context) {
 func UpdateContent(c *router.Context) {
 	var board model.Board
 	var content model.Content
+	var deleteList model.FilesToDelete
 
 	uri := strings.Split(c.URL.Path, "/")
 
@@ -682,7 +681,14 @@ func UpdateContent(c *router.Context) {
 	idx, _ := strconv.Atoi(uri[len(uri)-1])
 	content.Idx = null.IntFrom(int64(idx))
 
-	err = json.NewDecoder(c.Body).Decode(&content)
+	rbody, err := io.ReadAll(c.Body)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// err = json.NewDecoder(c.Body).Decode(&content)
+	err = json.Unmarshal(rbody, &content)
 	if err != nil {
 		c.Text(http.StatusBadRequest, err.Error())
 		return
@@ -692,6 +698,22 @@ func UpdateContent(c *router.Context) {
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	err = json.Unmarshal(rbody, &deleteList)
+	if err != nil {
+		c.Text(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	for _, f := range deleteList.DeleteFiles {
+		filepath := router.UploadPath + "/" + f.StoreName.String
+		err = crud.DeleteUploadedFile(f.FileName.String, f.StoreName.String)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+		DeleteUploadFile(filepath)
 	}
 
 	result := map[string]interface{}{
@@ -730,6 +752,28 @@ func DeleteContent(c *router.Context) {
 	if content.AuthorIdx.Int64 != userInfo.Idx.Int64 && userInfo.Grade.String != "admin" && userInfo.Grade.String != "manager" {
 		c.Text(http.StatusForbidden, "forbidden")
 		return
+	}
+
+	deleteFiles := strings.Split(content.Files.String, "?")
+	deleteList := model.FilesToDelete{}
+	for _, df := range deleteFiles {
+		deleteFile := model.File{}
+
+		dfs := strings.Split(df, "/")
+		deleteFile.FileName = null.StringFrom(dfs[0])
+		deleteFile.StoreName = null.StringFrom(dfs[1])
+
+		deleteList.DeleteFiles = append(deleteList.DeleteFiles, deleteFile)
+	}
+
+	for _, f := range deleteList.DeleteFiles {
+		filepath := router.UploadPath + "/" + f.StoreName.String
+		err = crud.DeleteUploadedFile(f.FileName.String, f.StoreName.String)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+		DeleteUploadFile(filepath)
 	}
 
 	err = crud.DeleteContent(board, fmt.Sprint(idx))
@@ -785,7 +829,6 @@ func GetComments(c *router.Context) {
 	accessGrade := config.UserGrades.IndexOf(board.GrantRead.String)
 
 	if accessGrade < userGrade {
-		log.Println(c.AuthInfo, accessGrade, userGrade)
 		c.Text(http.StatusForbidden, "Forbidden")
 		return
 	}

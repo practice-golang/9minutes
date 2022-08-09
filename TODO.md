@@ -1,7 +1,14 @@
 # Todo
 
 * Board
-    * [ ] Delete uploaded file when delete & edit content
+    * [ ] Delete uploaded file(s)
+        * [ ] Write
+            * [ ] Upload then delete
+            * [ ] Cancel write
+        * [x] Update
+            * [x] Upload then delete
+            * [ ] Cancel write
+        * [x] Delete
     * [ ] Comment enhancement - editor, file/image upload, etc.
     * [ ] Add sheet type - custom board type
     * [x] Remove query param - gallery type

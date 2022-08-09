@@ -73,17 +73,17 @@ DATABASE_PASSWORD
 * See `9minutes.ini`
 * Choose smtp or direct sending
 * When use direct sending,
-    * you should have own domain
-    * IP address of `9minutes` is same as domain's
-    * you should learn about following and set
+    * You should have own domain
+    * IP address of `9minutes` is same as the domain's
+    * You should learn about following and set
         * `DKIM`
         * `spf record`
-        * Also `PTR record` if possible to ask your internet service provider
+        * Also `PTR record`
 
 
 ## Build
 
-* `GOBIN` must be set to `./bin`
+* Set `GOBIN` to `./bin`
 * Windows
     * build
     ```
@@ -97,7 +97,7 @@ DATABASE_PASSWORD
     ```
     $ mingw32-make.exe dist
     ```
-* Linux, MAC
+* Linux, Mac
     * build
     ```
     $ make

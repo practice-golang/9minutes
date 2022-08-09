@@ -29,7 +29,16 @@
 
 <div id="filelist-container">
     <ul lr-loop="filelist">
-        <li><a href="{{link}}" target="_blank">{{filename}}</a></li>
+        <li>
+            <span lr-if="deletelist[$index] == undefined">
+                <a href="{{link}}" target="_blank">{{filename}}</a>
+                <button lr-click="setFileToDelete($index)">X</button>
+            </span>
+            <span lr-if="deletelist[$index] != undefined">
+                <s><a href="{{link}}" target="_blank">{{filename}}</a></s>
+                <button lr-click="unsetFileFromDelete($index)">Undo</button>
+            </span>
+        </li>
     </ul>
 </div>
 
@@ -46,15 +55,22 @@
 
     let titleImage = "$TITLE_IMAGE$"
 
+    const filelistString = "$FILE_LIST$"
+    const filelist = new Array()
+    const storelist = new Array()
+    const appendlist = new Array()
+    const deletelist = {}
+
     const options = {
-        uploadActionURI: "/api/uploader/image",
+        uploadFileActionURI: "/api/uploader/file",
+        uploadImageActionURI: "/api/uploader/image",
         uploadAccessURI: "/upload",
     }
     const editorEL = document.querySelector("#editor")
     const editor = new MyEditor(data, editorEL, options)
 
     async function insertFile() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadFileActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#file-upload").files
@@ -81,7 +97,7 @@
     }
 
     async function insertImage() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadImageActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#image-upload").files
@@ -109,7 +125,7 @@
     }
 
     async function insertTitleImage() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadImageActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#title-image-upload").files
@@ -137,16 +153,37 @@
         }
     }
 
+    function setFileToDelete(idx) {
+        deletelist[idx] = { "filename": filelist[idx].filename, "storename": filelist[idx].storename }
+
+        lrFileList.reload()
+    }
+
+    function unsetFileFromDelete(idx) {
+        delete deletelist[idx]
+
+        lrFileList.reload()
+    }
+
     async function updateContent() {
+        for (const idx in storelist) {
+            for (const j in deletelist) {
+                if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
+                    storelist.splice(idx, 1)
+                }
+            }
+        }
         const storeListArray = storelist.map(file => { return file.filename })
         const storeListString = storeListArray.join("?")
+        const deleteFiles = Object.values(deletelist)
 
         const data = {
             "idx": urlParams.get("idx"),
             "title": document.querySelector("#title").value,
             "title-image": titleImage,
             "content": editor.getHTML(),
-            "files": storeListString
+            "files": storeListString,
+            "delete-files": deleteFiles
         }
 
         const r = await fetch("/api/board/content/$CODE$/$IDX$", {
@@ -169,9 +206,6 @@
         // history.back()
     }
 
-    const filelistString = "$FILE_LIST$"
-    const filelist = new Array()
-    const storelist = new Array()
     for (const f of filelistString.split("?")) {
         if (f == "") { continue }
 
@@ -187,6 +221,15 @@
 
     const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
     lrFileList.render()
+
+    async function postprocess() {
+        const r = await fetch("/board")
+        if (r.ok) {
+            console.log("^_^_^")
+        }
+    }
+
+    window.onbeforeunload = function () { postprocess() }
 </script>
 
 <style>

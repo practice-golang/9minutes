@@ -150,3 +150,9 @@ func GetRandomString(length int) string {
 
 	return string(randomBytes)
 }
+
+func DeleteUploadFile(filepath string) {
+	if fd.CheckFileExists(filepath, false) {
+		os.Remove(filepath)
+	}
+}

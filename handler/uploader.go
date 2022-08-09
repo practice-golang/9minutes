@@ -57,6 +57,7 @@ func UploadFile(c *router.Context) {
 		return
 	}
 	tempFile.Write(fileBytes)
+	storageName = filepath.Base(tempFile.Name())
 
 	err = crud.AddUploadedFile(handler.Filename, storageName)
 	if err != nil {
@@ -67,7 +68,7 @@ func UploadFile(c *router.Context) {
 	resultMAP := map[string]string{
 		"message":   "success",
 		"filename":  handler.Filename,
-		"storename": filepath.Base(tempFile.Name()),
+		"storename": storageName,
 	}
 
 	c.Json(http.StatusOK, resultMAP)
@@ -115,6 +116,7 @@ func UploadImage(c *router.Context) {
 		return
 	}
 	tempFile.Write(fileBytes)
+	storageName = filepath.Base(tempFile.Name())
 
 	err = crud.AddUploadedFile(handler.Filename, storageName)
 	if err != nil {
@@ -125,7 +127,7 @@ func UploadImage(c *router.Context) {
 	resultMAP := map[string]string{
 		"message":   "success",
 		"filename":  handler.Filename,
-		"storename": filepath.Base(tempFile.Name()),
+		"storename": storageName,
 	}
 
 	c.Json(http.StatusOK, resultMAP)

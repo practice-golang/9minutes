@@ -46,14 +46,15 @@
     const storelist = new Array()
 
     const options = {
-        uploadActionURI: "/api/uploader/image",
+        uploadFileActionURI: "/api/uploader/file",
+        uploadImageActionURI: "/api/uploader/image",
         uploadAccessURI: "/upload",
     }
     const editorEL = document.querySelector("#editor")
     const editor = new MyEditor(data, editorEL, options)
 
     async function insertFile() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadFileActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#file-upload").files
@@ -80,7 +81,7 @@
     }
 
     async function insertImage() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadImageActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#image-upload").files
@@ -109,7 +110,7 @@
     }
 
     async function insertTitleImage() {
-        const uploadURI = options.uploadActionURI
+        const uploadURI = options.uploadImageActionURI
         const accessURI = options.uploadAccessURI
 
         const files = document.querySelector("#title-image-upload").files
@@ -174,6 +175,15 @@
 
     const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))
     lrFileList.render()
+
+    async function postprocess() {
+        const r = await fetch("/board")
+        if (r.ok) {
+            console.log("^_^_^")
+        }
+    }
+
+    window.onbeforeunload = function () { postprocess() }
 </script>
 
 <style>
