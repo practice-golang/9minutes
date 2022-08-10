@@ -37,7 +37,7 @@ func GetBoardByIdx(board model.Board) (model.Board, error) {
 		return board, err
 	}
 
-	// catalog 작업전까지 일단 무시
+	// Ignore until board type sheet
 	if board.Fields != nil {
 		var fields model.Field
 		err = json.Unmarshal(board.Fields.([]byte), &fields)

@@ -3,8 +3,8 @@ package consts
 var (
 	ProgramName string = "9minutes"
 
+	// TableBooks       string = "books"
 	BcryptCost       int    = 8
-	TableBooks       string = "books"
 	TableBoards      string = "boards"
 	TableUsers       string = "users"
 	TableUserColumns string = "user_fields"

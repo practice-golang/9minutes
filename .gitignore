@@ -4,7 +4,6 @@ upload/*
 coverage.out
 coverage.html
 /codecov.*
-/books.db
 
 /mariadata
 /pgdata

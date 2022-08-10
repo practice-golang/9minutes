@@ -7,7 +7,6 @@
     * [ ] Add resign
     * [ ] Captcha
 
-* [ ] Delete all related `book`, `books`
 * [ ] Rearrange route paths
 * [ ] Add more test
 * [ ] Add Oracle DB support
@@ -21,11 +20,11 @@
     * [ ] Add sheet type - custom board type
     * [x] Delete uploaded file(s)
         * [x] Write
-            * [x] Upload then delete
-            * [x] Cancel write
+            * [x] Write then delete post
+            * [x] Cancel write post
         * [x] Update
-            * [x] Upload then delete
-            * [x] Cancel write
+            * [x] Update then delete post
+            * [x] Cancel write post
         * [x] Delete
     * [x] Remove query param - gallery type
     * [x] Image width limit
@@ -39,6 +38,7 @@
     * [x] Add both filename and storagename to db
     * [x] Download original filename
     * ~~Download count~~ - waive
+* [x] Delete all related `book`, `books`
 * [x] Change board list, read content from ajax to html/template except comments
 * [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
 * [x] Add heroku env for rest of dbs except mysql
