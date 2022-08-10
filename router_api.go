@@ -16,6 +16,7 @@ func setAPIs(r *router.App) {
 	gmi := r.Group(`^/api/myinfo`, handler.AuthApiSessionMiddleware)
 	gmi.GET(`(/?)$`, handler.GetMyInfo)
 	gmi.PUT(`(/?)$`, handler.UpdateMyInfo)
+	gmi.DELETE(`(/?)$`, handler.ResignUser)
 
 	/* API File & Directory */
 	g.POST(`/dir/list$`, handler.HandleGetDir)

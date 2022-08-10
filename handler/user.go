@@ -47,12 +47,14 @@ func Login(c *router.Context) {
 
 	column := np.CreateString(model.UserData{}, dbtype, "", false)
 	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	whereAND := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
 	sql := `
 	SELECT
 		` + column.Names + `
 	FROM ` + table + `
-	WHERE ` + where.Names + `='` + username + `'`
+	WHERE ` + where.Names + `='` + username + `'
+		AND ` + whereAND.Names + `!='` + "resigned_user" + `'`
 
 	rows, err := db.Con.Query(sql)
 	if err != nil {

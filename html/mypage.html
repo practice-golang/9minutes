@@ -16,6 +16,10 @@
 <button type="button" onclick="location.href='/'">Cancel</button>
 <button type="button" onclick="updateUser()">Update</button>
 
+<br />
+
+<button onclick="resignUser()">Resign</button>
+
 <script>
     async function updateUser() {
         const data = {
@@ -61,6 +65,20 @@
         if (r.ok) {
             alert("Update successful")
             location.href = '/'
+        } else {
+            alert(await r.text())
+        }
+    }
+
+    async function resignUser() {
+        const confirmed = confirm("Are you sure you want to resign?")
+        if (!confirmed) { return }
+
+        let r = await fetch('/api/myinfo', { method: 'DELETE' })
+
+        if (r.ok) {
+            alert("Resign successful")
+            location.href = '/logout'
         } else {
             alert(await r.text())
         }

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/blockloop/scan"
+	"gopkg.in/guregu/null.v4"
 )
 
 func GetUserByNameAndEmail(username, email string) (model.UserData, error) {
@@ -626,6 +627,45 @@ func DeleteUser(userColumn model.UserData) error {
 	sql := `
 	DELETE FROM ` + tablename + `
 	WHERE ` + columnIdx.Names + ` = ` + idx
+
+	_, err := db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ResignUser(idx int64) error {
+	dbType := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(consts.TableUsers)
+
+	type resignUserColumns struct {
+		Grade    null.String `db:"GRADE"`
+		Approval null.String `db:"APPROVAL"`
+	}
+
+	columnsStruct := resignUserColumns{
+		Grade:    null.StringFrom("resigned_user"),
+		Approval: null.StringFrom("N"),
+	}
+
+	column := np.CreateString(columnsStruct, dbType, "", false)
+	colNames := strings.Split(column.Names, ",")
+	colValues := strings.Split(column.Values, ",")
+
+	holder := ""
+	for i := 0; i < len(colNames); i++ {
+		holder += colNames[i] + " = " + colValues[i] + ", "
+	}
+	holder = strings.TrimSuffix(holder, ", ")
+
+	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbType, "", false)
+
+	sql := `
+	UPDATE ` + tablename + ` SET
+		` + holder + `
+	WHERE ` + columnIdx.Names + ` = ` + fmt.Sprint(idx)
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

@@ -91,3 +91,30 @@ func UpdateMyInfo(c *router.Context) {
 
 	c.Json(http.StatusOK, result)
 }
+
+func ResignUser(c *router.Context) {
+	var err error
+
+	if c.AuthInfo == nil {
+		c.Text(http.StatusForbidden, "Unauthorized")
+		return
+	}
+
+	userData, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = crud.ResignUser(userData.Idx.Int64)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	result := map[string]string{
+		"result": "ok",
+	}
+
+	c.Json(http.StatusOK, result)
+}
