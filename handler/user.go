@@ -331,6 +331,79 @@ func UserVerification(c *router.Context) {
 	`))
 }
 
+func ResetPassword(c *router.Context) {
+	var err error
+
+	columnsCount, _ := crud.GetUserColumnsCount()
+
+	username := c.FormValue("username")
+	useremail := c.FormValue("email")
+
+	if username == "" {
+		c.Text(http.StatusBadRequest, "Username is empty")
+		return
+	}
+	if useremail == "" {
+		c.Text(http.StatusBadRequest, "Email is empty")
+		return
+	}
+
+	password := GetRandomString(16)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	switch columnsCount {
+	case model.UserDataFieldCount:
+		user, err := crud.GetUserByNameAndEmail(username, useremail)
+		if err != nil {
+			// c.Text(http.StatusInternalServerError, err.Error())
+			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
+			return
+		}
+
+		user.Password = null.StringFrom(string(passwordHash))
+		crud.UpdateUser(user)
+
+	default:
+		user, err := crud.GetUserByNameAndEmailMap(username, useremail)
+		if err != nil {
+			// c.Text(http.StatusInternalServerError, err.Error())
+			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
+			return
+		}
+
+		user.(map[string]interface{})["password"] = string(passwordHash)
+		crud.UpdateUserMap(user.(map[string]interface{}))
+	}
+
+	// Send password reset email
+	message := email.Message{
+		Service:          email.Service{KeyDKIM: email.Info.Service.KeyDKIM},
+		AppendFromToName: false,
+		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
+		To:               email.To{Email: useremail, Name: username},
+		Subject:          "EnjoyTools - Password changed",
+		Body: `
+		The password for your account was changed on ` + time.Now().UTC().Format("2006-01-02 15:04:05 UTC") + `
+		<br /><br />
+		` + password,
+		BodyType: email.HTML,
+	}
+
+	if email.Info.UseEmail {
+		err = email.SendVerificationEmail(message)
+		if err != nil {
+			c.Text(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	c.Html(http.StatusOK, []byte(consts.MsgPasswordResetEmail))
+}
+
 func HandleUserList(c *router.Context) {
 	// Use struct with default columns or map with default and user defined columns
 	columnsCount, _ := crud.GetUserColumnsCount()

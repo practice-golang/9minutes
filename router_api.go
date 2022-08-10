@@ -32,6 +32,9 @@ func setApiLogin(r *router.App) {
 	r.GET(`^/logout`, handler.Logout)
 	r.POST(`/api/signup`, handler.Signup)
 
+	/* Reset password */
+	r.POST(`/password-reset$`, handler.ResetPassword)
+
 	/* User verification - Should be moved at next time */
 	r.GET(`/verify`, handler.UserVerification)
 }

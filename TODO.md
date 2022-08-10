@@ -2,14 +2,6 @@
 
 * [ ] Add post index and board index to upload table
 
-* User
-    * [ ] Add password reset
-    * [ ] Add avatar as profile image
-    * [ ] Add user pic as profile image
-    * [x] Add resign
-    * [x] Captcha
-    * [x] Add more info in session
-
 * [ ] Rearrange route paths
 * [ ] Add more test
 * [ ] Add Oracle DB support
@@ -19,8 +11,8 @@
 * [ ] DB backup, migration
 
 * Board
-    * [ ] Comment enhancement - editor, file/image upload, etc.
     * [ ] Add sheet type - custom board type
+    * [ ] ~~Comment enhancement - editor, file/image upload, etc.~~ waive
     * [x] Delete uploaded file(s)
         * [x] Write
             * [x] Write then delete post
@@ -32,7 +24,13 @@
     * [x] Remove query param - gallery type
     * [x] Image width limit
 
-
+* User
+    * ~~Add avatar as profile image~~ - waive
+    * ~~Add user pic as profile image~~ - waive
+    * [x] Add password reset
+    * [x] Add resign
+    * [x] Captcha
+    * [x] Add more info in session
 * ~~Page, HTML~~ - waive
     * Embed css styled html - beauty cuty html, css
     * Sample menu - eg. board link

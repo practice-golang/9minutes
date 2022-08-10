@@ -23,13 +23,15 @@ func GetUserByNameAndEmail(username, email string) (model.UserData, error) {
 	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
 	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
 	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
+	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
 	sql := `
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
 	WHERE ` + whereUsername.Names + ` = '` + username + `'
-		AND ` + whereEmail.Names + ` = '` + email + `'`
+		AND ` + whereEmail.Names + ` = '` + email + `'
+		AND ` + whereGrade.Names + ` != '` + "resigned_user" + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -48,10 +50,13 @@ func GetUserByNameAndEmail(username, email string) (model.UserData, error) {
 func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	var result interface{}
 
+	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
+
 	columns := ""
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
-	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
+	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
+	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
 	// Use map with default and user defined columns
 	columnList, _ := GetUserColumnsList()
@@ -68,8 +73,9 @@ func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	WHERE ` + columnUsername.Names + ` = '` + username + `'
-		AND ` + columnEmail.Names + ` = '` + email + `'`
+	WHERE ` + whereUsername.Names + ` = '` + username + `'
+		AND ` + whereEmail.Names + ` = '` + email + `'
+		AND ` + whereGrade.Names + ` != '` + "resigned_user" + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
