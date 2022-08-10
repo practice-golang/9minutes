@@ -25,8 +25,8 @@ type (
 )
 
 var (
-	JwtPrivateKeyFileName = "private.key"
-	JwtPublicKeyFileName  = "public.key"
+	JwtPrivateKeyFileName = "jwt.key"
+	JwtPublicKeyFileName  = "jwt.pub"
 
 	SessionManager *scs.SessionManager
 )
