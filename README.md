@@ -68,13 +68,14 @@ DATABASE_PASSWORD
 ```
 
 
-## Email sending for user verification
+## Email sending
 
+* For the purpose of user verification and password reset
 * See `9minutes.ini`
 * Choose smtp or direct sending
 * When use direct sending,
     * You should have own domain
-    * IP address of `9minutes` is same as the domain's
+    * IP address of `9minutes` should be same as the domain's or should be in spf records
     * You should learn about following and set
         * `DKIM`
         * `spf record`

@@ -3,8 +3,8 @@
 * [ ] Add post index and board index to upload table
 
 * [ ] Rearrange route paths
-* [ ] Add more test
 * [ ] Add Oracle DB support
+* [ ] Add more test
 * [ ] Log analyzer
 * [ ] CORS???
 * [ ] Chatting???
