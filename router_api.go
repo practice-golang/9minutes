@@ -36,4 +36,7 @@ func setApiUploader(r *router.App) {
 	gu := r.Group(`^/api/uploader`, handler.AuthApiSessionMiddleware)
 	gu.POST(`/file$`, handler.UploadFile)
 	gu.POST(`/image$`, handler.UploadImage)
+
+	// Delete all of files, images, title-image which is(are) uploaded during writing or editing on board, when cancel
+	gu.DELETE(`/file$`, handler.DeleteFiles)
 }

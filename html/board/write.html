@@ -29,7 +29,16 @@
 
 <div id="filelist-container">
     <ul lr-loop="filelist">
-        <li>{{filename}}</li>
+        <li>
+            <span lr-if="deletelist[$index] == undefined">
+                {{filename}}
+                <button lr-click="setFileToDelete($index)">X</button>
+            </span>
+            <span lr-if="deletelist[$index] != undefined">
+                <s>{{filename}}</s>
+                <button lr-click="unsetFileFromDelete($index)">Undo</button>
+            </span>
+        </li>
     </ul>
 </div>
 
@@ -44,6 +53,7 @@
     let titleImage = ""
     const filelist = new Array()
     const storelist = new Array()
+    const deletelist = {}
 
     const options = {
         uploadFileActionURI: "/api/uploader/file",
@@ -138,7 +148,27 @@
         }
     }
 
+    function setFileToDelete(idx) {
+        const names = storelist[idx].filename.split("/")
+        deletelist[idx] = { "filename": names[0], "storename": names[1] }
+
+        lrFileList.reload()
+    }
+
+    function unsetFileFromDelete(idx) {
+        delete deletelist[idx]
+
+        lrFileList.reload()
+    }
+
     async function writeContent() {
+        for (const idx in storelist) {
+            for (const j in deletelist) {
+                if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
+                    storelist.splice(idx, 1)
+                }
+            }
+        }
         const storeListArray = storelist.map(file => { return file.filename })
         const storeListString = storeListArray.join("?")
 
@@ -176,14 +206,17 @@
     const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))
     lrFileList.render()
 
-    async function postprocess() {
-        const r = await fetch("/board")
-        if (r.ok) {
-            console.log("^_^_^")
-        }
+    async function cancelprocess() {
+        const data = { "idx": "-1", "delete-files": storelist }
+
+        const r = await fetch("/api/uploader/file", {
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
     }
 
-    window.onbeforeunload = function () { postprocess() }
+    window.onbeforeunload = function () { cancelprocess() }
 </script>
 
 <style>

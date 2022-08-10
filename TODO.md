@@ -1,18 +1,5 @@
 # Todo
 
-* Board
-    * [ ] Delete uploaded file(s)
-        * [ ] Write
-            * [ ] Upload then delete
-            * [ ] Cancel write
-        * [x] Update
-            * [x] Upload then delete
-            * [ ] Cancel write
-        * [x] Delete
-    * [ ] Comment enhancement - editor, file/image upload, etc.
-    * [ ] Add sheet type - custom board type
-    * [x] Remove query param - gallery type
-    * [x] Image width limit
 * User
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image
@@ -28,6 +15,20 @@
 * [ ] CORS???
 * [ ] Chatting???
 * [ ] DB backup, migration
+
+* Board
+    * [ ] Comment enhancement - editor, file/image upload, etc.
+    * [ ] Add sheet type - custom board type
+    * [x] Delete uploaded file(s)
+        * [x] Write
+            * [x] Upload then delete
+            * [x] Cancel write
+        * [x] Update
+            * [x] Upload then delete
+            * [x] Cancel write
+        * [x] Delete
+    * [x] Remove query param - gallery type
+    * [x] Image width limit
 
 
 * ~~Page, HTML~~ - waive

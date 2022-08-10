@@ -2,9 +2,11 @@ package handler
 
 import (
 	"9minutes/crud"
+	"9minutes/model"
 	"9minutes/router"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"gopkg.in/guregu/null.v4"
 )
 
 // https://tutorialedge.net/golang/go-file-upload-tutorial
@@ -131,4 +135,39 @@ func UploadImage(c *router.Context) {
 	}
 
 	c.Json(http.StatusOK, resultMAP)
+}
+
+func DeleteFiles(c *router.Context) {
+	type deleteFiles struct {
+		Idx   null.String  `json:"idx"`
+		Files []model.File `json:"delete-files"`
+	}
+	var requestDelete deleteFiles
+
+	err := json.NewDecoder(c.Body).Decode(&requestDelete)
+	if err != nil {
+		log.Println("Cancel process:", err)
+		return
+	}
+
+	if len(requestDelete.Files) == 0 {
+		return
+	}
+
+	for _, fstr := range requestDelete.Files {
+		if fstr.FileName.Valid {
+			finfo := strings.Split(fstr.FileName.String, "/")
+			err = crud.DeleteUploadedFile(finfo[0], finfo[1])
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			filepath := router.UploadPath + "/" + finfo[1]
+			DeleteUploadFile(filepath)
+		}
+	}
+
+	// Because of browser have already gone so, response nothing
+	// c.Json(http.StatusOK, "")
 }

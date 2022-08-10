@@ -58,8 +58,8 @@
     const filelistString = "$FILE_LIST$"
     const filelist = new Array()
     const storelist = new Array()
-    const appendlist = new Array()
     const deletelist = {}
+    const appendlist = new Array()
 
     const options = {
         uploadFileActionURI: "/api/uploader/file",
@@ -88,8 +88,10 @@
             })
             if (r.ok) {
                 const result = await r.json()
+
                 filelist.push({ "filename": result.filename })
                 storelist.push({ "filename": result.filename + "/" + result.storename })
+                appendlist.push({ "filename": result.filename + "/" + result.storename })
 
                 lrFileList.reload()
             }
@@ -119,6 +121,8 @@
                 editor.insertImage(`${accessURI}/${result.storename}`)
                 filelist.push({ "filename": result.filename })
                 storelist.push({ "filename": result.filename + "/" + result.storename })
+                appendlist.push({ "filename": result.filename + "/" + result.storename })
+
                 lrFileList.reload()
             }
         }
@@ -148,13 +152,16 @@
 
                 filelist.push({ "filename": result.filename })
                 storelist.push({ "filename": result.filename + "/" + result.storename })
+                appendlist.push({ "filename": result.filename + "/" + result.storename })
+
                 lrFileList.reload()
             }
         }
     }
 
     function setFileToDelete(idx) {
-        deletelist[idx] = { "filename": filelist[idx].filename, "storename": filelist[idx].storename }
+        const names = storelist[idx].filename.split("/")
+        deletelist[idx] = { "filename": names[0], "storename": names[1] }
 
         lrFileList.reload()
     }
@@ -222,14 +229,17 @@
     const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
     lrFileList.render()
 
-    async function postprocess() {
-        const r = await fetch("/board")
-        if (r.ok) {
-            console.log("^_^_^")
-        }
+    async function cancelprocess() {
+        const data = { "idx": urlParams.get("idx"), "delete-files": appendlist }
+
+        const r = await fetch("/api/uploader/file", {
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
     }
 
-    window.onbeforeunload = function () { postprocess() }
+    window.onbeforeunload = function () { cancelprocess() }
 </script>
 
 <style>

@@ -757,6 +757,10 @@ func DeleteContent(c *router.Context) {
 	deleteFiles := strings.Split(content.Files.String, "?")
 	deleteList := model.FilesToDelete{}
 	for _, df := range deleteFiles {
+		if !strings.Contains(df, "/") {
+			continue
+		}
+
 		deleteFile := model.File{}
 
 		dfs := strings.Split(df, "/")
