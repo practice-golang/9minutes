@@ -174,6 +174,19 @@ func Signup(c *router.Context) {
 		userData.Grade = null.StringFrom("pending_user")
 		userData.Approval = null.StringFrom("N")
 
+		if userData.UserName.String == "" {
+			c.Text(http.StatusBadRequest, "Username is empty")
+			return
+		}
+		if userData.Email.String == "" {
+			c.Text(http.StatusBadRequest, "Email is empty")
+			return
+		}
+		if userData.Password.String == "" {
+			c.Text(http.StatusBadRequest, "Password is empty")
+			return
+		}
+
 		err = crud.AddUser(userData)
 		if err != nil {
 			c.Text(http.StatusInternalServerError, err.Error())
@@ -210,6 +223,19 @@ func Signup(c *router.Context) {
 		userData["reg-dttm"] = now
 		userData["grade"] = "pending_user"
 		userData["approval"] = "N"
+
+		if userData["username"].(string) == "" {
+			c.Text(http.StatusBadRequest, "Username is empty")
+			return
+		}
+		if userData["email"].(string) == "" {
+			c.Text(http.StatusBadRequest, "Email is empty")
+			return
+		}
+		if userData["password"].(string) == "" {
+			c.Text(http.StatusBadRequest, "Password is empty")
+			return
+		}
 
 		err = crud.AddUserMap(userData)
 		if err != nil {
