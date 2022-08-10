@@ -28,7 +28,7 @@ func Test_SetupCookieToken(t *testing.T) {
 				authinfo: model.AuthInfo{
 					Name:     null.StringFrom("test_name"),
 					IpAddr:   null.StringFrom("192.168.1.1"),
-					Platform: null.StringFrom("test_platform"),
+					Os:       null.StringFrom("test_platform"),
 					Duration: null.IntFrom(3600),
 				},
 			},
@@ -78,7 +78,7 @@ func Test_GetClaim(t *testing.T) {
 				authinfo: model.AuthInfo{
 					Name:     null.StringFrom("test_name"),
 					IpAddr:   null.StringFrom("192.168.0.1"),
-					Platform: null.StringFrom("test_platform"),
+					Os:       null.StringFrom("test_platform"),
 					Duration: null.IntFrom(3600),
 				},
 				from_cookie: "cookie",
@@ -87,7 +87,7 @@ func Test_GetClaim(t *testing.T) {
 			want: model.AuthInfo{
 				Name:     null.StringFrom("test_name"),
 				IpAddr:   null.StringFrom("192.168.0.1"),
-				Platform: null.StringFrom("test_platform"),
+				Os:       null.StringFrom("test_platform"),
 				Duration: null.IntFrom(3600),
 			},
 		},

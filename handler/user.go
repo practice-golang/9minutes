@@ -19,6 +19,8 @@ import (
 	"github.com/blockloop/scan"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
+
+	"github.com/mileusna/useragent"
 )
 
 func Login(c *router.Context) {
@@ -74,11 +76,27 @@ func Login(c *router.Context) {
 		return
 	}
 
+	ua := useragent.Parse(c.Request.UserAgent())
+	deviceType := ""
+	switch true {
+	case ua.Desktop:
+		deviceType = "desktop"
+	case ua.Mobile:
+		deviceType = "mobile"
+	case ua.Tablet:
+		deviceType = "tablet"
+	case ua.Bot:
+		deviceType = "bot"
+	}
+
 	authinfo := model.AuthInfo{
-		Name:     null.NewString(username, true),
-		IpAddr:   null.NewString(c.RemoteAddr, true),
-		Platform: null.NewString("", true),
-		Duration: null.NewInt(60*60*24*7, true),
+		Name:       null.NewString(username, true),
+		IpAddr:     null.NewString(c.RemoteAddr, true),
+		Device:     null.NewString(ua.Device, true),
+		DeviceType: null.NewString(deviceType, true),
+		Os:         null.NewString(ua.OS, true),
+		Browser:    null.NewString(ua.Name, true),
+		Duration:   null.NewInt(60*60*24*7, true),
 		// Duration: null.NewInt(10, true), // 10 seconds test
 	}
 

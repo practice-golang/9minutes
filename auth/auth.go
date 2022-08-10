@@ -27,7 +27,7 @@ func SetupCookieToken(w http.ResponseWriter, authinfo model.AuthInfo) error {
 func SetCookieSession(c *router.Context, authinfo model.AuthInfo) error {
 	SessionManager.Put(c.Context(), "userid", authinfo.Name.String)
 	SessionManager.Put(c.Context(), "ip", authinfo.IpAddr.String)
-	SessionManager.Put(c.Context(), "platform", authinfo.Platform.String)
+	SessionManager.Put(c.Context(), "platform", authinfo.Os.String)
 
 	return nil
 }
@@ -40,9 +40,9 @@ func GetCookieSession(c *router.Context) (model.AuthInfo, error) {
 	}
 
 	result = model.AuthInfo{
-		Name:     null.NewString(SessionManager.GetString(c.Context(), "userid"), true),
-		IpAddr:   null.NewString(SessionManager.GetString(c.Context(), "ip"), true),
-		Platform: null.NewString(SessionManager.GetString(c.Context(), "platform"), true),
+		Name:   null.NewString(SessionManager.GetString(c.Context(), "userid"), true),
+		IpAddr: null.NewString(SessionManager.GetString(c.Context(), "ip"), true),
+		Os:     null.NewString(SessionManager.GetString(c.Context(), "platform"), true),
 	}
 
 	return result, nil

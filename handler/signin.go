@@ -32,7 +32,7 @@ func Signin(c *router.Context) {
 	authinfo := model.AuthInfo{
 		Name:     null.NewString(signin.Name.String, true),
 		IpAddr:   null.NewString(c.RemoteAddr, true),
-		Platform: null.NewString("", true),
+		Os:       null.NewString("", true),
 		Duration: null.NewInt(60*60*24*7, true),
 		// Duration: null.NewInt(10, true), // 10 seconds test
 	}
@@ -63,7 +63,7 @@ func SigninAPI(c *router.Context) {
 	authinfo := model.AuthInfo{
 		Name:     null.NewString(signin.Name.String, true),
 		IpAddr:   null.NewString(c.RemoteAddr, true),
-		Platform: null.NewString("", true),
+		Os:       null.NewString("", true),
 		Duration: null.NewInt(60*60*24*7, true),
 		// Duration: null.NewInt(10, true), // 10 seconds test
 	}

@@ -3,9 +3,9 @@
 * User
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image
-    * [ ] Add more info in session
-    * [ ] Add resign
     * [ ] Captcha
+    * [ ] Add resign
+    * [x] Add more info in session
 
 * [ ] Rearrange route paths
 * [ ] Add more test

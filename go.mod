@@ -16,6 +16,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.14
 	github.com/lib/pq v1.10.4
 	github.com/microcosm-cc/bluemonday v1.0.18
+	github.com/mileusna/useragent v1.2.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/rs/cors v1.8.2
 	github.com/rs/zerolog v1.26.1

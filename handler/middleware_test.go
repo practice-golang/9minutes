@@ -75,7 +75,7 @@ func Test_AuthMiddleware(t *testing.T) {
 				authinfo: model.AuthInfo{
 					Name:     null.StringFrom("test_name"),
 					IpAddr:   null.StringFrom("192.168.0.1"),
-					Platform: null.StringFrom("test_platform"),
+					Os:       null.StringFrom("test_platform"),
 					Duration: null.IntFrom(3600),
 				},
 				run_func: AuthApiMiddleware,
@@ -103,7 +103,7 @@ func Test_AuthMiddleware(t *testing.T) {
 				authinfo: model.AuthInfo{
 					Name:     null.StringFrom("test_name"),
 					IpAddr:   null.StringFrom("192.168.0.1"),
-					Platform: null.StringFrom("test_platform"),
+					Os:       null.StringFrom("test_platform"),
 					Duration: null.IntFrom(3600),
 				},
 				run_func: AuthMiddleware,
