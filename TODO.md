@@ -3,9 +3,10 @@
 * [ ] Add post index and board index to upload table
 
 * User
+    * [ ] Add resign
+    * [ ] Add password reset
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image
-    * [ ] Add resign
     * [x] Captcha
     * [x] Add more info in session
 
