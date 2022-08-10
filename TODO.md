@@ -3,6 +3,7 @@
 * [ ] Add post index and board index to upload table
 * [ ] Add option to generate dkim.key
 
+* [ ] Finish approval
 * [ ] Rearrange route paths
 * [ ] Add Oracle DB support
 * [ ] Add more test
