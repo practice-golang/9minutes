@@ -1,5 +1,7 @@
 # Todo
 
+* [ ] Add post index and board index to upload table
+
 * User
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image
