@@ -5,8 +5,8 @@
 * User
     * [ ] Add avatar as profile image
     * [ ] Add user pic as profile image
-    * [ ] Captcha
     * [ ] Add resign
+    * [x] Captcha
     * [x] Add more info in session
 
 * [ ] Rearrange route paths

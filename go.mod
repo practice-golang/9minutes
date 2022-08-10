@@ -8,6 +8,7 @@ require (
 	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/blockloop/scan v1.3.0
 	github.com/c2fo/testify v0.0.0-20150827203832-fba96363964a
+	github.com/dchest/captcha v1.0.0
 	github.com/denisenkom/go-mssqldb v0.11.0
 	github.com/emersion/go-msgauth v0.6.6
 	github.com/go-sql-driver/mysql v1.6.0

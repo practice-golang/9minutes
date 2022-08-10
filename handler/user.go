@@ -12,11 +12,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/blockloop/scan"
+	"github.com/dchest/captcha"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 
@@ -131,11 +133,32 @@ func Signup(c *router.Context) {
 	username := ""
 	useremail := ""
 
+	rbody, err := io.ReadAll(c.Body)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var captchaData map[string]string
+	err = json.Unmarshal(rbody, &captchaData)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	captchaResult := captcha.VerifyString(captchaData["captcha-id"], captchaData["captcha-answer"])
+
+	if !captchaResult {
+		c.Text(http.StatusBadRequest, "Captcha is not correct")
+		return
+	}
+
 	switch columnsCount {
 	case model.UserDataFieldCount:
 		var userData model.UserData
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
+		// err = json.NewDecoder(c.Body).Decode(&userData)
+		err = json.Unmarshal(rbody, &userData)
 		if err != nil {
 			c.Text(http.StatusBadRequest, err.Error())
 			return
@@ -170,7 +193,8 @@ func Signup(c *router.Context) {
 	default:
 		userData := make(map[string]interface{})
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
+		// err = json.NewDecoder(c.Body).Decode(&userData)
+		err = json.Unmarshal(rbody, &userData)
 		if err != nil {
 			c.Text(http.StatusBadRequest, err.Error())
 			return

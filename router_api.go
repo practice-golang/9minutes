@@ -19,6 +19,10 @@ func setAPIs(r *router.App) {
 
 	/* API File & Directory */
 	g.POST(`/dir/list$`, handler.HandleGetDir)
+
+	/* Captcha */
+	g.GET(`/captcha/[^/]+\.png$`, handler.GetCaptchaImage)
+	g.PATCH(`/captcha$`, handler.RenewCaptcha)
 }
 
 func setApiLogin(r *router.App) {

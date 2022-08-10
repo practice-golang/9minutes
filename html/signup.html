@@ -16,17 +16,29 @@
         <!-- <input type="text" name="phone" value="" placeholder="Phone" required /> -->
     </div>
 
+    <div>
+        <img id="captcha-image" src="/api/captcha/$CAPTCHAID$.png" alt="Captcha image">
+        <a onclick="reloadCaptcha()">Reload</a>
+        <input type=hidden name="captcha-id" value="$CAPTCHAID$"><br>
+        <input name=captcha-answer placeholder="Write number in image" />
+    </div>
+
     <button type="button" onclick="location.href='/'">Cancel</button>
     <button type="button" onclick="signup()">Sign up</button>
 </body>
 
 <script>
+    let captchaID = "$CAPTCHAID$";
+
     async function signup() {
         let data = {
             username: document.querySelector('input[name="username"]').value,
             password: document.querySelector('input[name="password"]').value,
             email: document.querySelector('input[name="email"]').value,
             // phone: document.querySelector('input[name="phone"]').value
+
+            "captcha-id": document.querySelector('input[name="captcha-id"]').value,
+            "captcha-answer": document.querySelector('input[name="captcha-answer"]').value
         }
 
         let r = await fetch('/api/signup', {
@@ -39,7 +51,25 @@
             location.href = '/'
         } else {
             alert(await r.text())
+            renewCaptcha()
         }
+    }
+
+    async function renewCaptcha() {
+        const r = await fetch('/api/captcha', { method: 'PATCH' })
+
+        if (r.ok) {
+            const data = await r.json()
+            captchaID = data["captcha-id"]
+
+            document.querySelector('#captcha-image').src = `/api/captcha/${captchaID}.png`
+            document.querySelector('input[name="captcha-id"]').value = captchaID
+        }
+    }
+
+    async function reloadCaptcha() {
+        const now = new Date()
+        document.querySelector('#captcha-image').src = `/api/captcha/${captchaID}.png?reload=${now.getTime()}`
     }
 </script>
 

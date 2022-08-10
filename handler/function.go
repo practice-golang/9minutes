@@ -26,6 +26,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 	// "github.com/goccy/go-json"
 
+	"github.com/dchest/captcha"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -183,6 +184,10 @@ func HandleSignup(c *router.Context) {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Captcha
+	captchaID := captcha.New()
+	h = bytes.ReplaceAll(h, []byte("$CAPTCHAID$"), []byte(captchaID))
 
 	c.Html(http.StatusOK, h)
 }
