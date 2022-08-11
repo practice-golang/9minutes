@@ -2,8 +2,9 @@
 
 * [ ] Rearrange route paths
 * [ ] Use approval column
+* [ ] Add Oracle DB
+* [ ] Add datagrid, divide from board
 * [ ] Add more test
-* [ ] Add Oracle DB support
 * [ ] Log analyzer
 * [ ] DB backup, migration
 
@@ -22,7 +23,6 @@
         * ~~Download count~~ - waive
 
 * Board
-    * [ ] Add sheet type - custom board type
     * [x] Delete uploaded file(s)
         * [x] Write
             * [x] Write then delete post
