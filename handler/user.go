@@ -272,7 +272,7 @@ func Signup(c *router.Context) {
 	// Send verification email
 	domain := email.Info.Domain
 	message := email.Message{
-		Service:          email.Service{KeyDKIM: email.Info.Service.KeyDKIM},
+		Service:          email.Info.Service,
 		AppendFromToName: false,
 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
 		To:               email.To{Email: useremail, Name: username},
