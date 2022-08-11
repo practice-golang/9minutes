@@ -72,14 +72,9 @@ DATABASE_PASSWORD
 
 * For the purpose of user verification and password reset
 * See `9minutes.ini`
-* Choose smtp or direct sending
-* When use direct sending,
-    * You should have own domain
-    * IP address of `9minutes` should be same as the domain's or should be in spf records
-    * You should learn about following and set
-        * `DKIM`
-        * `spf record`
-        * Also `PTR record`
+* You can choose `smtp` or `direct sending`
+* When use `direct sending`, you should learn about domain, `DKIM`, `spf record`, `PTR record`
+    * Also most of cloud service blocked port 25 so probably you can not use it
 
 
 ## Build
