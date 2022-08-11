@@ -38,8 +38,6 @@ type Message struct {
 	AppendFromToName bool
 	From             From
 	To               To
-	FromName         string
-	ToName           string
 	Subject          string
 	Body             string
 	BodyType         BodyType

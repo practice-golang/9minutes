@@ -73,7 +73,7 @@ func SendViaService(message Message) (err error) {
 	// Error caused when an email address using which different with id - The sender address is unauthorized
 	from := id
 	to := []string{message.To.Email}
-	fromName := message.FromName
+	fromName := message.From.Name
 	toName := message.To.Name
 	subject := "Subject: " + message.Subject + "\r\n"
 	body := message.Body + "\r\n"
@@ -96,6 +96,9 @@ func SendViaService(message Message) (err error) {
 	lineBreak := "\r\n"
 
 	msg := []byte(headerFrom + headerTo + subject + mime + lineBreak + body)
+
+	log.Println(message.Service)
+	log.Println(string(msg))
 
 	auth := smtp.PlainAuth("", id, password, addr)
 	err = smtp.SendMail(addr+":"+port, auth, from, to, msg)
