@@ -1,9 +1,9 @@
 # Todo
 
-* [ ] Correct and finish approval
 * [ ] Rearrange route paths
-* [ ] Add Oracle DB support
+* [ ] Use approval column
 * [ ] Add more test
+* [ ] Add Oracle DB support
 * [ ] Log analyzer
 * [ ] DB backup, migration
 
@@ -21,10 +21,6 @@
     * Attachment
         * ~~Download count~~ - waive
 
-* [x] Add post index and board index to upload table
-    * [x] Write - Upload
-    * [x] Update - Upload
-    * [x] Delete
 * Board
     * [ ] Add sheet type - custom board type
     * [x] Delete uploaded file(s)
@@ -37,6 +33,10 @@
         * [x] Delete
     * [x] Remove query param - gallery type
     * [x] Image width limit
+* [x] Add post index and board index to upload table
+    * [x] Write - Upload
+    * [x] Update - Upload
+    * [x] Delete
 * [x] Add option to generate dkim.key
 * User
     * [x] Add password reset
