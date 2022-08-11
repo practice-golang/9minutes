@@ -7,9 +7,16 @@ var Info = Config{
 }
 
 func SendVerificationEmail(message Message) error {
-	err := SendDirect(message)
-	if err != nil {
-		return err
+	if Info.SendDirect {
+		err := SendDirect(message)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := SendViaService(message)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
