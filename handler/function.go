@@ -647,11 +647,26 @@ func WriteContent(c *router.Context) {
 
 	content.Views = null.IntFrom(0)
 
-	err = crud.WriteContent(board, content)
+	// r, err := crud.WriteContent(board, content)
+	_, err = crud.WriteContent(board, content)
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// boardIDX := board.Idx.Int64
+	// postIDX, _ := r.LastInsertId()
+
+	// files := strings.Split(content.Files.String, "?")
+
+	// for _, f := range files {
+	// 	files := strings.Split(f, "/")
+
+	// 	filename := files[0]
+	// 	storename := files[1]
+
+	// 	crud.UpdateUploadedFile(boardIDX, postIDX, filename, storename)
+	// }
 
 	result := map[string]interface{}{
 		"result": "success",

@@ -112,9 +112,11 @@ func (d *SqlServer) CreateUploadTable() error {
 	sql += `
 	IF OBJECT_ID(N'` + Info.UploadTable + `', N'U') IS NULL
 	CREATE TABLE "` + Info.UploadTable + `" (
-		IDX             BIGINT NOT NULL IDENTITY PRIMARY KEY,
+		IDX             BIGINT       NOT NULL IDENTITY PRIMARY KEY,
 		FILE_NAME       VARCHAR(512) NULL DEFAULT NULL,
-		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL
+		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL,
+		BOARD_IDX       INT          NULL,
+		POST_IDX        INT          NULL
 	)`
 
 	_, err := Con.Exec(sql)

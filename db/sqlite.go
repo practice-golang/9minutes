@@ -92,6 +92,8 @@ func (d *SQLite) CreateUploadTable() error {
 		"IDX"             INTEGER,
 		"FILE_NAME"       TEXT,
 		"STORAGE_NAME"    TEXT,
+		"BOARD_IDX"       INTEGER,
+		"POST_IDX"        INTEGER,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`

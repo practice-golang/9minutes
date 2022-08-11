@@ -1,6 +1,9 @@
 # Todo
 
 * [ ] Add post index and board index to upload table
+    * [ ] Write - Upload
+    * [ ] Update - Upload
+    * [ ] Delete
 
 * [ ] Correct and finish approval
 * [ ] Rearrange route paths

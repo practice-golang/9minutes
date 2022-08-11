@@ -4,6 +4,7 @@ import (
 	"9minutes/db"
 	"9minutes/model"
 	"9minutes/np"
+	"database/sql"
 	"fmt"
 	"math"
 	"strings"
@@ -262,7 +263,7 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 	return result, nil
 }
 
-func WriteContent(board model.Board, content model.Content) error {
+func WriteContent(board model.Board, content model.Content) (sql.Result, error) {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
 	content.Title = null.StringFrom(strings.ReplaceAll(content.Title.String, "'", "&apos;"))
@@ -279,12 +280,12 @@ func WriteContent(board model.Board, content model.Content) error {
 		` + column.Values + `
 	)`
 
-	_, err := db.Con.Exec(sql)
+	result, err := db.Con.Exec(sql)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 func UpdateContent(board model.Board, content model.Content, skipTag string) error {

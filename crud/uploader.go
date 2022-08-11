@@ -3,6 +3,7 @@ package crud
 import (
 	"9minutes/db"
 	"9minutes/np"
+	"fmt"
 )
 
 func AddUploadedFile(fileName, storageName string) error {
@@ -17,6 +18,30 @@ func AddUploadedFile(fileName, storageName string) error {
 	) VALUES (
 		'` + fileName + `', '` + storageName + `'
 	)`
+
+	_, err := db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateUploadedFile(boardIDX, postIDX int64, filename, storename string) error {
+	dbtype := db.GetDatabaseTypeString()
+	tableName := db.GetFullTableName(db.Info.UploadTable)
+
+	colFilename := np.CreateString(map[string]interface{}{"FILE_NAME": nil}, dbtype, "", false)
+	colStorename := np.CreateString(map[string]interface{}{"STORAGE_NAME": nil}, dbtype, "", false)
+	colBoardIDX := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
+	colPostIDX := np.CreateString(map[string]interface{}{"POST_IDX": nil}, dbtype, "", false)
+
+	sql := `
+	UPDATE ` + tableName + ` SET
+		` + colBoardIDX.Names + ` = '` + fmt.Sprint(boardIDX) + `',
+		` + colPostIDX.Names + ` = '` + fmt.Sprint(postIDX) + `'
+	WHERE ` + colFilename.Names + ` = '` + filename + `'
+		AND ` + colStorename.Names + ` = '` + storename + `'`
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

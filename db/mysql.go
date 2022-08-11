@@ -104,10 +104,11 @@ func (d *Mysql) CreateBoardTable() error {
 func (d *Mysql) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UploadTable + ` (
-		IDX           INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+		IDX           INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
 		FILE_NAME     VARCHAR(512) NULL DEFAULT NULL,
 		STORAGE_NAME  VARCHAR(512) NULL DEFAULT NULL,
-		ACCESS_COUNT  INT(11)      NULL DEFAULT NULL,
+		BOARD_IDX     INT(11)      NULL DEFAULT NULL,
+		POST_IDX      INT(11)      NULL DEFAULT NULL,
 
 		PRIMARY KEY (IDX),
 		INDEX   IDX (IDX)

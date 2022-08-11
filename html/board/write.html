@@ -47,6 +47,7 @@
 <script src="/assets/js/myeditor.js"></script>
 
 <script>
+    const statusWriteContent = false
     const data = ``
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
@@ -162,6 +163,8 @@
     }
 
     async function writeContent() {
+        statusWriteContent = true
+
         for (const idx in storelist) {
             for (const j in deletelist) {
                 if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
@@ -207,6 +210,8 @@
     lrFileList.render()
 
     async function cancelprocess() {
+        if (statusWriteContent) { return false }
+
         const data = { "idx": "-1", "delete-files": storelist }
 
         const r = await fetch("/api/uploader/file", {

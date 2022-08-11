@@ -107,10 +107,11 @@ func (d *Postgres) CreateBoardTable() error {
 func (d *Postgres) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UploadTable + ` (
-		"IDX"             SERIAL       PRIMARY KEY,
-		"FILE_NAME"       VARCHAR(512) NULL DEFAULT NULL,
+		"IDX"             SERIAL        PRIMARY KEY,
+		"FILE_NAME"       VARCHAR(512)  NULL DEFAULT NULL,
 		"STORAGE_NAME"    VARCHAR(512)  NULL DEFAULT NULL,
-		"ACCESS_COUNT"    INTEGER      NULL DEFAULT NULL
+		"BOARD_IDX"       INTEGER       NULL DEFAULT NULL,
+		"POST_IDX"        INTEGER       NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
