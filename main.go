@@ -123,7 +123,7 @@ func writeEmbedToDir(dir string) {
 
 func main() {
 	if len(os.Args) > 1 {
-		flagGetHTML := flag.String("get", "html", "Get html files")
+		flagGet := flag.String("get", "html|dkim", "Get html, dkim files")
 
 		flag.Usage = func() {
 			flagSet := flag.CommandLine
@@ -139,16 +139,19 @@ func main() {
 
 		flag.Parse()
 
-		if *flagGetHTML == "html" {
+		switch *flagGet {
+		case "html":
 			writeEmbedToDir("html")
-			fmt.Println("done to export")
+			fmt.Println("done to export html files")
+		case "dkim":
+			email.GenerateKeys()
+			fmt.Println("done to generate dkim keys")
 		}
 
 		os.Exit(0)
 	}
 
 	firstRun()
-
 	doSetup()
 
 	logging.Object.Log().Timestamp().Str("listen", ListeningIP+"\n").Send()

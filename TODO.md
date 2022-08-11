@@ -1,15 +1,13 @@
 # Todo
 
 * [ ] Add post index and board index to upload table
-* [ ] Add option to generate dkim.key
 
-* [ ] Finish approval
+* [ ] Correct and finish approval
 * [ ] Rearrange route paths
 * [ ] Add Oracle DB support
 * [ ] Add more test
 * [ ] Log analyzer
 * [ ] CORS???
-* [ ] Chatting???
 * [ ] DB backup, migration
 
 * Board
@@ -26,6 +24,8 @@
     * [x] Remove query param - gallery type
     * [x] Image width limit
 
+* [x] Add option to generate dkim.key
+* ~~Chatting???~~ - waive
 * User
     * ~~Add avatar as profile image~~ - waive
     * ~~Add user pic as profile image~~ - waive
