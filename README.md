@@ -74,7 +74,7 @@ DATABASE_PASSWORD
 * See `9minutes.ini`
 * You can choose `smtp` or `direct sending`
 * When use `direct sending`, you should learn about domain, `DKIM`, `spf record`, `PTR record`
-    * Also most of cloud service blocked port 25 so probably you can not use it
+    * Also most of cloud service blocked port 25 so you probably can not use it
 
 
 ## Build
