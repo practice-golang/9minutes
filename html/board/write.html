@@ -47,7 +47,7 @@
 <script src="/assets/js/myeditor.js"></script>
 
 <script>
-    const statusWriteContent = false
+    let statusWriteContent = false
     const data = ``
     const url = new URL(window.location.href)
     const urlParams = url.searchParams
@@ -89,6 +89,8 @@
                 lrFileList.reload()
             }
         }
+
+        document.querySelector("#file-upload").value = ""
     }
 
     async function insertImage() {
@@ -118,6 +120,8 @@
                 lrFileList.reload()
             }
         }
+
+        document.querySelector("#image-upload").value = ""
     }
 
     async function insertTitleImage() {
@@ -147,6 +151,8 @@
                 lrFileList.reload()
             }
         }
+
+        document.querySelector("#title-image-upload").value = ""
     }
 
     function setFileToDelete(idx) {
@@ -191,12 +197,15 @@
         if (r.ok) {
             const result = await r.json()
             if (result.result == "success") {
+                await deleteNotUploaded()
                 moveToList()
             } else {
                 alert("Writing failed")
+                statusWriteContent = false
             }
         } else {
             alert("Server error")
+            statusWriteContent = false
         }
 
         return false
@@ -206,13 +215,9 @@
         location.href = "/board?code=" + urlParams.get("code")
     }
 
-    const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))
-    lrFileList.render()
-
-    async function cancelprocess() {
-        if (statusWriteContent) { return false }
-
-        const data = { "idx": "-1", "delete-files": storelist }
+    async function deleteNotUploaded() {
+        const deleteFiles = Object.values(deletelist)
+        const data = { "board-idx": "-1", "post-idx": "-1", "delete-files": deleteFiles }
 
         const r = await fetch("/api/uploader/file", {
             method: 'DELETE',
@@ -221,7 +226,30 @@
         })
     }
 
-    window.onbeforeunload = function () { cancelprocess() }
+    async function cancelProcess() {
+        if (statusWriteContent) { return false }
+
+        const deleteFiles = new Array()
+        for (const i in storelist) {
+            const files = storelist[i].filename.split("/")
+            const deleteFile = { "filename": files[0], "storename": files[1] }
+            deleteFiles.push(deleteFile)
+        }
+
+        const data = { "board-idx": "-1", "post-idx": "-1", "delete-files": deleteFiles }
+
+        const r = await fetch("/api/uploader/file", {
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+    }
+
+    window.onbeforeunload = () => { cancelProcess() }
+
+
+    const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))
+    lrFileList.render()
 </script>
 
 <style>

@@ -139,8 +139,9 @@ func UploadImage(c *router.Context) {
 
 func DeleteFiles(c *router.Context) {
 	type deleteFiles struct {
-		Idx   null.String  `json:"idx"`
-		Files []model.File `json:"delete-files"`
+		BoardIdx null.Int     `json:"board-idx"`
+		PostIdx  null.Int     `json:"post-idx"`
+		Files    []model.File `json:"delete-files"`
 	}
 	var requestDelete deleteFiles
 
@@ -154,16 +155,15 @@ func DeleteFiles(c *router.Context) {
 		return
 	}
 
-	for _, fstr := range requestDelete.Files {
-		if fstr.FileName.Valid {
-			finfo := strings.Split(fstr.FileName.String, "/")
-			err = crud.DeleteUploadedFile(finfo[0], finfo[1])
+	for _, f := range requestDelete.Files {
+		if f.FileName.Valid && f.StoreName.Valid {
+			err = crud.DeleteUploadedFile(requestDelete.BoardIdx.Int64, requestDelete.PostIdx.Int64, f.FileName.String, f.StoreName.String)
 			if err != nil {
 				log.Println(err)
 				return
 			}
 
-			filepath := router.UploadPath + "/" + finfo[1]
+			filepath := router.UploadPath + "/" + f.StoreName.String
 			DeleteUploadFile(filepath)
 		}
 	}

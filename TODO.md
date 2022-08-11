@@ -1,10 +1,5 @@
 # Todo
 
-* [ ] Add post index and board index to upload table
-    * [ ] Write - Upload
-    * [ ] Update - Upload
-    * [ ] Delete
-
 * [ ] Correct and finish approval
 * [ ] Rearrange route paths
 * [ ] Add Oracle DB support
@@ -26,6 +21,10 @@
     * Attachment
         * ~~Download count~~ - waive
 
+* [x] Add post index and board index to upload table
+    * [x] Write - Upload
+    * [x] Update - Upload
+    * [x] Delete
 * Board
     * [ ] Add sheet type - custom board type
     * [x] Delete uploaded file(s)
