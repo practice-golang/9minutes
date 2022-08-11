@@ -7,12 +7,24 @@
 * [ ] Add Oracle DB support
 * [ ] Add more test
 * [ ] Log analyzer
-* [ ] CORS???
 * [ ] DB backup, migration
+
+* Waive
+    * ~~CORS???~~ - waive
+    * Board
+        * [ ] ~~Comment enhancement - editor, file/image upload, etc.~~ waive
+    * ~~Chatting???~~ - waive
+    * User
+        * ~~Add avatar as profile image~~ - waive
+        * ~~Add user pic as profile image~~ - waive
+    * ~~Page, HTML~~ - waive
+        * Embed css styled html - beauty cuty html, css
+        * Sample menu - eg. board link
+    * Attachment
+        * ~~Download count~~ - waive
 
 * Board
     * [ ] Add sheet type - custom board type
-    * [ ] ~~Comment enhancement - editor, file/image upload, etc.~~ waive
     * [x] Delete uploaded file(s)
         * [x] Write
             * [x] Write then delete post
@@ -23,24 +35,16 @@
         * [x] Delete
     * [x] Remove query param - gallery type
     * [x] Image width limit
-
 * [x] Add option to generate dkim.key
-* ~~Chatting???~~ - waive
 * User
-    * ~~Add avatar as profile image~~ - waive
-    * ~~Add user pic as profile image~~ - waive
     * [x] Add password reset
     * [x] Add resign
     * [x] Captcha
     * [x] Add more info in session
-* ~~Page, HTML~~ - waive
-    * Embed css styled html - beauty cuty html, css
-    * Sample menu - eg. board link
 * Attachment
     * [x] Upload filename change - Upload-xxxx -> hashed name
     * [x] Add both filename and storagename to db
     * [x] Download original filename
-    * ~~Download count~~ - waive
 * [x] Delete all related `book`, `books`
 * [x] Change board list, read content from ajax to html/template except comments
 * [x] ~~Change datalist to select - admin~~ / Gave up :p, Add restrictDatalist function rather than to change them
