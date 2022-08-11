@@ -97,9 +97,6 @@ func SendViaService(message Message) (err error) {
 
 	msg := []byte(headerFrom + headerTo + subject + mime + lineBreak + body)
 
-	log.Println(message.Service)
-	log.Println(string(msg))
-
 	auth := smtp.PlainAuth("", id, password, addr)
 	err = smtp.SendMail(addr+":"+port, auth, from, to, msg)
 	if err != nil {
