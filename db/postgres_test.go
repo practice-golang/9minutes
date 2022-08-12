@@ -75,7 +75,16 @@ func TestPostgres_Exec(t *testing.T) {
 			}
 
 			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(Info.UserTable) + `;`)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
 			_, err = Con.Exec(`DROP TABLE IF EXISTS ` + GetFullTableName(TableUserColumns) + `;`)
+			if err != nil {
+				t.Error(err)
+				return
+			}
 
 			require.Equal(t, int64(1), count)
 		})

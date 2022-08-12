@@ -12,6 +12,7 @@ const (
 	MYSQL     // MySQL
 	POSTGRES  // PostgreSQL
 	SQLSERVER // MS SQL Server
+	ORACLE    // Oracle
 )
 
 type (

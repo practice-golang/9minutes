@@ -72,6 +72,10 @@ func TestMysql_Exec(t *testing.T) {
 			}
 
 			_, err = Con.Exec(`DROP DATABASE IF EXISTS ` + Info.DatabaseName + `;`)
+			if err != nil {
+				t.Error(err)
+				return
+			}
 
 			require.Equal(t, int64(1), count)
 		})
