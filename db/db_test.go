@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/model"
 	"os"
 	"testing"
 )
@@ -14,7 +15,7 @@ func TestSetupDB(t *testing.T) {
 		{
 			name: "SQLITE",
 			info: DBInfo{
-				DatabaseType: SQLITE,
+				DatabaseType: model.SQLITE,
 				DatabaseName: "books",
 				TableName:    "books",
 				FilePath:     "../books.db",
@@ -23,7 +24,7 @@ func TestSetupDB(t *testing.T) {
 		{
 			name: "MYSQL",
 			info: DBInfo{
-				DatabaseType:  MYSQL,
+				DatabaseType:  model.MYSQL,
 				Protocol:      "tcp",
 				Addr:          "localhost",
 				Port:          "13306",
@@ -37,7 +38,7 @@ func TestSetupDB(t *testing.T) {
 		{
 			name: "POSTGRES",
 			info: DBInfo{
-				DatabaseType:  POSTGRES,
+				DatabaseType:  model.POSTGRES,
 				Protocol:      "tcp",
 				Addr:          "localhost",
 				Port:          "5432",
@@ -51,7 +52,7 @@ func TestSetupDB(t *testing.T) {
 		{
 			name: "SQLSERVER",
 			info: DBInfo{
-				DatabaseType:  SQLSERVER,
+				DatabaseType:  model.SQLSERVER,
 				Protocol:      "tcp",
 				Addr:          "localhost",
 				Port:          "1433",
@@ -86,7 +87,7 @@ func TestSetupDB(t *testing.T) {
 			}
 
 			Con.Close()
-			if tt.info.DatabaseType == SQLITE {
+			if tt.info.DatabaseType == model.SQLITE {
 				os.Remove(tt.info.FilePath)
 			}
 		})

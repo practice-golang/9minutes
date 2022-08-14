@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/model"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -10,7 +11,7 @@ import (
 func TestMysql_Exec(t *testing.T) {
 	var err error
 	Info = DBInfo{
-		DatabaseType:  MYSQL,
+		DatabaseType:  model.MYSQL,
 		Protocol:      "tcp",
 		Addr:          "localhost",
 		Port:          "13306",

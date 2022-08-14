@@ -6,15 +6,6 @@ import (
 	"errors"
 )
 
-const (
-	_         = iota
-	SQLITE    // SQLite
-	MYSQL     // MySQL
-	POSTGRES  // PostgreSQL
-	SQLSERVER // MS SQL Server
-	ORACLE    // Oracle
-)
-
 type (
 	DBInfo struct {
 		DatabaseType  int
@@ -78,7 +69,7 @@ func SetupDB() error {
 
 	switch Info.DatabaseType {
 
-	case SQLITE:
+	case model.SQLITE:
 		dsn := Info.FilePath
 		Obj = &SQLite{dsn: dsn}
 
@@ -87,7 +78,7 @@ func SetupDB() error {
 			return err
 		}
 
-	case MYSQL:
+	case model.MYSQL:
 		// dsn := Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Protocol + "(" + Info.Addr + ":" + Info.Port + ")/" + Info.DatabaseName
 		dsn := Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Protocol + "(" + Info.Addr + ":" + Info.Port + ")/"
 		Obj = &Mysql{dsn: dsn}
@@ -97,7 +88,7 @@ func SetupDB() error {
 			return err
 		}
 
-	case POSTGRES:
+	case model.POSTGRES:
 		dsn := `host=` + Info.Addr + ` port=` + Info.Port + ` user=` + Info.GrantID + ` password=` + Info.GrantPassword + ` dbname=` + Info.DatabaseName + ` sslmode=disable`
 		Obj = &Postgres{dsn: dsn}
 
@@ -106,7 +97,7 @@ func SetupDB() error {
 			return err
 		}
 
-	case SQLSERVER:
+	case model.SQLSERVER:
 		dsn := "sqlserver://" + Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Addr + ":" + Info.Port + "?" + Info.DatabaseName + "&connction+timeout=30&encrypt=disable"
 		Obj = &SqlServer{dsn: dsn}
 

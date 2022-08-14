@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/model"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -14,17 +15,17 @@ func TestGetTableName(t *testing.T) {
 	}{
 		{
 			name: "SQLITE",
-			db:   SQLITE,
+			db:   model.SQLITE,
 			want: "test_table",
 		},
 		{
 			name: "MYSQL",
-			db:   MYSQL,
+			db:   model.MYSQL,
 			want: "test_table",
 		},
 		{
 			name: "POSTGRES",
-			db:   POSTGRES,
+			db:   model.POSTGRES,
 			want: "test_table",
 		},
 	}
@@ -51,17 +52,17 @@ func TestGetFullTableName(t *testing.T) {
 	}{
 		{
 			name: "SQLITE",
-			db:   SQLITE,
+			db:   model.SQLITE,
 			want: `"test_table"`,
 		},
 		{
 			name: "MYSQL",
-			db:   MYSQL,
+			db:   model.MYSQL,
 			want: "`test_db`.`test_table`",
 		},
 		{
 			name: "POSTGRES",
-			db:   POSTGRES,
+			db:   model.POSTGRES,
 			want: `"test_schema"."test_table"`,
 		},
 	}
@@ -88,17 +89,17 @@ func TestGetDatabaseTypeString(t *testing.T) {
 	}{
 		{
 			name: "SQLITE",
-			db:   SQLITE,
+			db:   model.SQLITE,
 			want: "sqlite",
 		},
 		{
 			name: "MYSQL",
-			db:   MYSQL,
+			db:   model.MYSQL,
 			want: "mysql",
 		},
 		{
 			name: "POSTGRES",
-			db:   POSTGRES,
+			db:   model.POSTGRES,
 			want: "postgres",
 		},
 	}
@@ -120,17 +121,17 @@ func TestQuotesName(t *testing.T) {
 	}{
 		{
 			name: "SQLITE",
-			db:   SQLITE,
+			db:   model.SQLITE,
 			want: `"field_name"`,
 		},
 		{
 			name: "MYSQL",
-			db:   MYSQL,
+			db:   model.MYSQL,
 			want: `'field_name'`,
 		},
 		{
 			name: "POSTGRES",
-			db:   POSTGRES,
+			db:   model.POSTGRES,
 			want: `"field_name"`,
 		},
 	}
@@ -152,17 +153,17 @@ func TestQuotesValue(t *testing.T) {
 	}{
 		{
 			name: "SQLITE",
-			db:   SQLITE,
+			db:   model.SQLITE,
 			want: "'field_value'",
 		},
 		{
 			name: "MYSQL",
-			db:   MYSQL,
+			db:   model.MYSQL,
 			want: "'field_value'",
 		},
 		{
 			name: "POSTGRES",
-			db:   POSTGRES,
+			db:   model.POSTGRES,
 			want: "'field_value'",
 		},
 	}

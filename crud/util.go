@@ -2,6 +2,7 @@ package crud
 
 import (
 	"9minutes/db"
+	"9minutes/model"
 	"database/sql"
 	"strings"
 )
@@ -30,7 +31,7 @@ func scanMap(r *sql.Rows) (map[string]interface{}, error) {
 		jsonColumnName = strings.ReplaceAll(jsonColumnName, "_", "-")
 
 		switch db.Info.DatabaseType {
-		case db.MYSQL:
+		case model.MYSQL:
 			if values[i] != nil {
 				result[jsonColumnName] = string(values[i].([]byte))
 			} else {

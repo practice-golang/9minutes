@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/model"
 	"testing"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -10,7 +11,7 @@ import (
 func TestSqlServer_Exec(t *testing.T) {
 	var err error
 	Info = DBInfo{
-		DatabaseType:  SQLSERVER,
+		DatabaseType:  model.SQLSERVER,
 		Protocol:      "tcp",
 		Addr:          "localhost",
 		Port:          "1433",

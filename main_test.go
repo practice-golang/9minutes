@@ -12,6 +12,7 @@ import (
 	"9minutes/consts"
 	"9minutes/db"
 	"9minutes/logging"
+	"9minutes/model"
 	"9minutes/router"
 
 	"github.com/stretchr/testify/require"
@@ -47,7 +48,7 @@ func Test_main(t *testing.T) {
 			// }
 			// defer res.Body.Close()
 
-			db.Info.DatabaseType = db.SQLITE
+			db.Info.DatabaseType = model.SQLITE
 			doSetup()
 
 			ServerHandler.ServeHTTP(tt.args.c.ResponseWriter, tt.args.c.Request)

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/model"
 	"testing"
 
 	_ "github.com/lib/pq"
@@ -10,7 +11,7 @@ import (
 func TestPostgres_Exec(t *testing.T) {
 	var err error
 	Info = DBInfo{
-		DatabaseType:  POSTGRES,
+		DatabaseType:  model.POSTGRES,
 		Protocol:      "tcp",
 		Addr:          "localhost",
 		Port:          "5432",

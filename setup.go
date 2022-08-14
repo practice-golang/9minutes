@@ -13,6 +13,7 @@ import (
 	"9minutes/fd"
 	"9minutes/handler"
 	"9minutes/logging"
+	"9minutes/model"
 	"9minutes/router"
 	"9minutes/wsock"
 
@@ -107,7 +108,7 @@ func setupINI() {
 				}
 			}
 
-			if db.Info.DatabaseType != db.SQLITE {
+			if db.Info.DatabaseType != model.SQLITE {
 				if cfg.Section("database").HasKey("ADDRESS") {
 					db.Info.Addr = cfg.Section("database").Key("ADDRESS").String()
 				}
@@ -124,7 +125,7 @@ func setupINI() {
 					db.Info.DatabaseName = cfg.Section("database").Key("DATABASE").String()
 				}
 
-				if db.Info.DatabaseType == db.SQLSERVER || db.Info.DatabaseType == db.POSTGRES {
+				if db.Info.DatabaseType == model.SQLSERVER || db.Info.DatabaseType == model.POSTGRES {
 					if cfg.Section("database").HasKey("SCHEMA") {
 						db.Info.SchemaName = cfg.Section("database").Key("SCHEMA").String()
 					}

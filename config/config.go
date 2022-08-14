@@ -4,6 +4,7 @@ import (
 	"9minutes/auth"
 	"9minutes/db"
 	"9minutes/email"
+	"9minutes/model"
 )
 
 var (
@@ -25,13 +26,13 @@ var (
 )
 
 var DatabaseInfoSQLite = db.DBInfo{
-	DatabaseType: db.SQLITE,
+	DatabaseType: model.SQLITE,
 	DatabaseName: "9m",
 	FilePath:     "./9minutes.db",
 }
 
 var DatabaseInfoMySQL = db.DBInfo{
-	DatabaseType:  db.MYSQL,
+	DatabaseType:  model.MYSQL,
 	Protocol:      "tcp",
 	Addr:          "localhost",
 	Port:          "13306",
@@ -41,7 +42,7 @@ var DatabaseInfoMySQL = db.DBInfo{
 }
 
 var DatabaseInfoPgPublic = db.DBInfo{
-	DatabaseType:  db.POSTGRES,
+	DatabaseType:  model.POSTGRES,
 	Protocol:      "tcp",
 	Addr:          "localhost",
 	Port:          "5432",
@@ -52,7 +53,7 @@ var DatabaseInfoPgPublic = db.DBInfo{
 }
 
 var DatabaseInfoPgSchema = db.DBInfo{
-	DatabaseType:  db.POSTGRES,
+	DatabaseType:  model.POSTGRES,
 	Protocol:      "tcp",
 	Addr:          "localhost",
 	Port:          "5432",
@@ -64,7 +65,7 @@ var DatabaseInfoPgSchema = db.DBInfo{
 
 // For not using database name 'postgres', you should create database yourself
 var DatabaseInfoPgOtherDatabase = db.DBInfo{
-	DatabaseType:  db.POSTGRES,
+	DatabaseType:  model.POSTGRES,
 	Protocol:      "tcp",
 	Addr:          "localhost",
 	Port:          "5432",
@@ -75,7 +76,7 @@ var DatabaseInfoPgOtherDatabase = db.DBInfo{
 }
 
 var DatabaseInfoSqlServer = db.DBInfo{
-	DatabaseType:  db.SQLSERVER,
+	DatabaseType:  model.SQLSERVER,
 	Protocol:      "tcp",
 	Addr:          "localhost",
 	Port:          "1433",
