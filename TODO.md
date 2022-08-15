@@ -2,11 +2,10 @@
 
 * [ ] Rearrange route paths
 * [ ] Use approval column
-* [ ] Add Oracle DB
-* [ ] Add datagrid, divide from board
+* [ ] Add datagrid type, separate from board
 * [ ] Add more test
 * [ ] Log analyzer
-* [ ] DB backup, migration
+* [ ] DB dump, migration - try [goose](https://github.com/pressly/goose)
 
 * Waive
     * ~~CORS???~~ - waive
@@ -22,6 +21,7 @@
     * Attachment
         * ~~Download count~~ - waive
 
+* [x] Add Oracle DB - Only codes, no test. Will correct by handcraft
 * Board
     * [x] Delete uploaded file(s)
         * [x] Write
