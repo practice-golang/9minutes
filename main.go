@@ -38,10 +38,15 @@ var (
 )
 
 func firstRun() {
-	db.Info = config.DatabaseInfoSQLite
+	// db.Info = config.DatabaseInfoSQLite
 	// db.Info = config.DatabaseInfoMySQL
 	// db.Info = config.DatabaseInfoPgPublic
 	// db.Info = config.DatabaseInfoSqlServer
+
+	// db.Info = config.DatabaseInfoOracle
+	// db.InfoOracleAdmin = config.DatabaseInfoOracleSystem
+	db.Info = config.DatabaseInfoOracleCloud
+	db.InfoOracleAdmin = config.DatabaseInfoOracleCloudAdmin
 
 	email.Info = config.EmailServerDirect
 	// email.Info = config.EmailServerSMTP

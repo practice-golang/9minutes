@@ -1,4 +1,4 @@
-docker run --name oracle11g -d -p 1580:8080 -p 1521:1521 jaspeen/oracle-xe-11g
+docker run --name oracle12c -d -p 1580:8080 -p 1521:1521 truevoly/oracle-12c
 
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SQLServer1433" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
 

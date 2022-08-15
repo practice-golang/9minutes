@@ -18,6 +18,8 @@ func GetFullTableName(table string) string {
 		tablename = `"` + Info.SchemaName + `"."` + table + `"`
 	case model.SQLSERVER:
 		tablename = `"` + Info.DatabaseName + `"."` + Info.SchemaName + `"."` + table + `"`
+	case model.ORACLE:
+		tablename = `"` + strings.ToUpper(Info.GrantID) + `"."` + strings.ToUpper(Info.TableName) + `"`
 	}
 
 	return tablename
@@ -43,6 +45,8 @@ func GetDatabaseTypeString() string {
 		dbtype = "postgres"
 	case model.SQLSERVER:
 		dbtype = "sqlserver"
+	case model.ORACLE:
+		dbtype = "oracle"
 	}
 
 	return dbtype
@@ -64,6 +68,9 @@ func QuotesName(data string) string {
 	case model.SQLSERVER:
 		data = strings.ReplaceAll(data, `"`, `""`)
 		result = `"` + data + `"`
+	case model.ORACLE:
+		data = strings.ReplaceAll(data, `"`, `""`)
+		result = `"` + data + `"`
 	}
 
 	return result
@@ -83,6 +90,9 @@ func QuotesValue(data string) string {
 		data = strings.ReplaceAll(data, "'", "''")
 		result = "'" + data + "'"
 	case model.SQLSERVER:
+		data = strings.ReplaceAll(data, "'", "''")
+		result = "'" + data + "'"
+	case model.ORACLE:
 		data = strings.ReplaceAll(data, "'", "''")
 		result = "'" + data + "'"
 	}

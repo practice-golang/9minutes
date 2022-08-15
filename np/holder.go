@@ -34,6 +34,13 @@ func CreateHolders(dbtype, colNames string) (string, error) {
 				holders += ","
 			}
 		}
+	case "oracle":
+		for i := 0; i < count; i++ {
+			holders += ":" + fmt.Sprint(i+1)
+			if i < count-1 {
+				holders += ","
+			}
+		}
 	default:
 		for i := 0; i < count; i++ {
 			holders += "?"
@@ -91,6 +98,8 @@ func CreateAssignHolders(dbtype string, columnNames interface{}, offset int) (st
 		case "sqlserver":
 			// holder = "'%s'"
 			holder = "@p" + fmt.Sprint(i+1+offset)
+		case "oracle":
+			holder = ":" + fmt.Sprint(i+1+offset)
 		}
 
 		holders += colNames[i] + "=" + holder

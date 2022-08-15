@@ -86,6 +86,64 @@ var DatabaseInfoSqlServer = db.DBInfo{
 	GrantPassword: "SQLServer1433",
 }
 
+// Oracle Local XE >= 12c
+var DatabaseInfoOracle = db.DBInfo{
+	DatabaseType:  model.ORACLE,
+	Protocol:      "tcp",
+	Addr:          "localhost",
+	Port:          "1521",
+	DatabaseName:  "XE",         // physical&on-premise: database name, cloud: service name
+	SchemaName:    "",           // not use
+	TableName:     "books",      // table name
+	GrantID:       "myaccount",  // physical&on-premise: username only, cloud: username and database name
+	GrantPassword: "mypassword", // password
+	FilePath:      "",           // wallet file path for cloud using
+}
+
+// Oracle Local XE. >= 12c ID = system for create DB
+// Require only for database(=user) creation. Comment out this after database creation is done
+var DatabaseInfoOracleSystem = db.DBInfo{
+	DatabaseType:  model.ORACLE,
+	Protocol:      "tcp",
+	Addr:          "localhost",
+	Port:          "1521",
+	DatabaseName:  "XE",
+	SchemaName:    "",
+	TableName:     "books",
+	GrantID:       "system",
+	GrantPassword: "oracle",
+	FilePath:      "",
+}
+
+// Oracle Cloud 19c
+var DatabaseInfoOracleCloud = db.DBInfo{
+	DatabaseType:  model.ORACLE,
+	Protocol:      "tcp",
+	Addr:          "adb.ap-seoul-1.oraclecloud.com",
+	Port:          "1522",
+	DatabaseName:  "a12345abcde1_mydbname_low.adb.oraclecloud.com",
+	SchemaName:    "",
+	TableName:     "books",
+	GrantID:       "myaccount",
+	GrantPassword: "MyPassword!522",
+	FilePath:      "./wallet_myaccount",
+}
+
+// Oracle Cloud 19c. ID = ADMIN for create DB
+// Require only for database(=user) creation. Comment out this after database creation is done
+var DatabaseInfoOracleCloudAdmin = db.DBInfo{
+	DatabaseType:  model.ORACLE,
+	Protocol:      "tcp",
+	Addr:          "adb.ap-seoul-1.oraclecloud.com",
+	Port:          "1522",
+	DatabaseName:  "a12345abcde1_mydbname_low.adb.oraclecloud.com",
+	SchemaName:    "",
+	TableName:     "books",
+	GrantID:       "admin",
+	GrantPassword: "MyPassword!522",
+	FilePath:      "./wallet_admin",
+}
+
 var StoreInfoMemory = auth.SessionStoreInfo{
 	StoreType: auth.MEMSTORE,
 	Address:   "",

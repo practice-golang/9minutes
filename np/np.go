@@ -160,6 +160,11 @@ func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) Colu
 		quoteValues = "'"
 		separatorNames = `","`
 		separatorValues = `','`
+	case "oracle":
+		quoteNames = `"`
+		quoteValues = "'"
+		separatorNames = `","`
+		separatorValues = `','`
 	}
 
 	result := createString(o, dbtype, skipValue, separatorNames, separatorValues, checkValid)

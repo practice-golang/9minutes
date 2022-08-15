@@ -4,6 +4,10 @@ import (
 	"9minutes/model"
 	"database/sql"
 	"errors"
+	"net/url"
+	"strconv"
+
+	go_ora "github.com/sijms/go-ora/v2"
 )
 
 type (
@@ -55,9 +59,10 @@ type (
 )
 
 var (
-	Info DBInfo   // DB connection info
-	Obj  DBObject // Duck interface
-	Con  *sql.DB  // DB connection
+	Info            DBInfo   // DB connection info
+	InfoOracleAdmin DBInfo   // Oracle Admin connection info
+	Obj             DBObject // Duck interface
+	Con             *sql.DB  // DB connection
 )
 
 func SetupDB() error {
@@ -100,6 +105,19 @@ func SetupDB() error {
 	case model.SQLSERVER:
 		dsn := "sqlserver://" + Info.GrantID + ":" + Info.GrantPassword + "@" + Info.Addr + ":" + Info.Port + "?" + Info.DatabaseName + "&connction+timeout=30&encrypt=disable"
 		Obj = &SqlServer{dsn: dsn}
+
+		Con, err = Obj.connect()
+		if err != nil {
+			return err
+		}
+
+	case model.ORACLE:
+		port, _ := strconv.Atoi(Info.Port)
+		dsn := go_ora.BuildUrl(Info.Addr, port, Info.DatabaseName, Info.GrantID, Info.GrantPassword, nil)
+		if Info.FilePath != "" {
+			dsn += "?SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(Info.FilePath)
+		}
+		Obj = &Oracle{dsn: dsn}
 
 		Con, err = Obj.connect()
 		if err != nil {

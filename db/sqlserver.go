@@ -245,20 +245,6 @@ func (d *SqlServer) CreateUserVerificationTable() error {
 	return nil
 }
 
-// EditTableColumn - Edit table column name
-func (d *SqlServer) EditTableColumn(tableName string, columnOld model.UserColumn, columnNew model.UserColumn) error {
-	sql := `
-	USE "` + Info.DatabaseName + `"
-	EXEC sp_rename 'dbo.` + tableName + `.` + columnOld.ColumnName.String + `', '` + columnNew.ColumnName.String + `', 'COLUMN';`
-
-	_, err := Con.Exec(sql)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // AddTableColumn - Add table column
 func (d *SqlServer) AddTableColumn(tableName string, column model.UserColumn) error {
 	sql := `
@@ -280,6 +266,20 @@ func (d *SqlServer) AddTableColumn(tableName string, column model.UserColumn) er
 	}
 
 	sql += `;`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// EditTableColumn - Edit table column name
+func (d *SqlServer) EditTableColumn(tableName string, columnOld model.UserColumn, columnNew model.UserColumn) error {
+	sql := `
+	USE "` + Info.DatabaseName + `"
+	EXEC sp_rename 'dbo.` + tableName + `.` + columnOld.ColumnName.String + `', '` + columnNew.ColumnName.String + `', 'COLUMN';`
 
 	_, err := Con.Exec(sql)
 	if err != nil {
