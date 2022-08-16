@@ -59,7 +59,7 @@ func (d *Oracle) createAccount() {
 		return
 	}
 
-	sql = `CREATE USER ` + Info.GrantID + ` IDENTIFIED BY "` + Info.GrantPassword + `"`
+	sql = `CREATE USER "` + strings.ToUpper(Info.GrantID) + `" IDENTIFIED BY "` + Info.GrantPassword + `"`
 	if InfoOracleAdmin.FilePath != "" {
 		sql += `
 		DEFAULT TABLESPACE ` + tableSpace + `
@@ -286,37 +286,15 @@ func (d *Oracle) CreateUserTable() error {
 	}
 
 	sql = `
-	INSERT INTO ` + userfieldTable + `
-		("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES
-		(
-			SELECT "Idx", "idx", "integer", "IDX", 1 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Username", "username", "text", "USERNAME", 2 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Password", "password", "text", "PASSWORD", 3 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Email", "email", "text", "EMAIL", 4 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Grade", "grade", "text", "GRADE", 5 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Approval", "approval", "text", "APPROVAL", 6 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		),
-		(
-			"Registered datetime", "regdate", "text", "REG_DTTM", 7 FROM DUAL
-			WHERE NOT EXISTS (SELECT * FROM ` + userfieldTable + ` WHERE "COLUMN_NAME" = 'IDX')
-		)`
+	INSERT ALL
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Idx', 'idx', 'integer', 'IDX', 1)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Username', 'username', 'text', 'USERNAME', 2)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Password', 'password', 'text', 'PASSWORD', 3)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Email', 'email', 'text', 'EMAIL', 4)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Grade', 'grade', 'text', 'GRADE', 5)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Approval', 'approval', 'text', 'APPROVAL', 6)
+	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Registered datetime', 'regdate', 'text', 'REG_DTTM', 7)
+	SELECT 1 FROM DUAL`
 
 	_, err = Con.Exec(sql)
 	if err != nil {

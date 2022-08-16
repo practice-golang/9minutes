@@ -94,7 +94,6 @@ var DatabaseInfoOracle = db.DBInfo{
 	Port:          "1521",
 	DatabaseName:  "XE",         // physical&on-premise: database name, cloud: service name
 	SchemaName:    "",           // not use
-	TableName:     "books",      // table name
 	GrantID:       "myaccount",  // physical&on-premise: username only, cloud: username and database name
 	GrantPassword: "mypassword", // password
 	FilePath:      "",           // wallet file path for cloud using
@@ -109,7 +108,6 @@ var DatabaseInfoOracleSystem = db.DBInfo{
 	Port:          "1521",
 	DatabaseName:  "XE",
 	SchemaName:    "",
-	TableName:     "books",
 	GrantID:       "system",
 	GrantPassword: "oracle",
 	FilePath:      "",
@@ -123,7 +121,6 @@ var DatabaseInfoOracleCloud = db.DBInfo{
 	Port:          "1522",
 	DatabaseName:  "a12345abcde1_mydbname_low.adb.oraclecloud.com",
 	SchemaName:    "",
-	TableName:     "books",
 	GrantID:       "myaccount",
 	GrantPassword: "MyPassword!522",
 	FilePath:      "./wallet_myaccount",
@@ -138,7 +135,6 @@ var DatabaseInfoOracleCloudAdmin = db.DBInfo{
 	Port:          "1522",
 	DatabaseName:  "a12345abcde1_mydbname_low.adb.oraclecloud.com",
 	SchemaName:    "",
-	TableName:     "books",
 	GrantID:       "admin",
 	GrantPassword: "MyPassword!522",
 	FilePath:      "./wallet_admin",

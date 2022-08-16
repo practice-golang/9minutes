@@ -19,7 +19,7 @@ func GetFullTableName(table string) string {
 	case model.SQLSERVER:
 		tablename = `"` + Info.DatabaseName + `"."` + Info.SchemaName + `"."` + table + `"`
 	case model.ORACLE:
-		tablename = `"` + strings.ToUpper(Info.GrantID) + `"."` + strings.ToUpper(Info.TableName) + `"`
+		tablename = `"` + strings.ToUpper(Info.GrantID) + `"."` + strings.ToUpper(table) + `"`
 	}
 
 	return tablename

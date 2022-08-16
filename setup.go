@@ -140,22 +140,22 @@ func setupINI() {
 					}
 
 					if cfg.Section("database_admin").HasKey("ADDRESS") {
-						db.InfoOracleAdmin.Addr = cfg.Section("database").Key("ADDRESS").String()
+						db.InfoOracleAdmin.Addr = cfg.Section("database_admin").Key("ADDRESS").String()
 					}
 					if cfg.Section("database_admin").HasKey("PORT") {
-						db.InfoOracleAdmin.Port = cfg.Section("database").Key("PORT").String()
+						db.InfoOracleAdmin.Port = cfg.Section("database_admin").Key("PORT").String()
 					}
 					if cfg.Section("database_admin").HasKey("USER") {
-						db.InfoOracleAdmin.GrantID = cfg.Section("database").Key("USER").String()
+						db.InfoOracleAdmin.GrantID = cfg.Section("database_admin").Key("USER").String()
 					}
 					if cfg.Section("database_admin").HasKey("PASSWORD") {
-						db.InfoOracleAdmin.GrantPassword = cfg.Section("database").Key("PASSWORD").String()
+						db.InfoOracleAdmin.GrantPassword = cfg.Section("database_admin").Key("PASSWORD").String()
 					}
 					if cfg.Section("database_admin").HasKey("DATABASE") {
-						db.InfoOracleAdmin.DatabaseName = cfg.Section("database").Key("DATABASE").String()
+						db.InfoOracleAdmin.DatabaseName = cfg.Section("database_admin").Key("DATABASE").String()
 					}
 					if cfg.Section("database_admin").HasKey("FILEPATH") {
-						db.InfoOracleAdmin.FilePath = cfg.Section("database").Key("FILEPATH").String()
+						db.InfoOracleAdmin.FilePath = cfg.Section("database_admin").Key("FILEPATH").String()
 					}
 
 				}
