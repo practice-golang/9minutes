@@ -89,6 +89,13 @@ func (d *Oracle) connect() (*sql.DB, error) {
 		return nil, err
 	}
 
+	go func() {
+		for {
+			time.Sleep(time.Minute * 4)
+			_ = db.Ping()
+		}
+	}()
+
 	return db, nil
 }
 
