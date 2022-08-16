@@ -153,7 +153,7 @@ func (d *Oracle) CreateBoardTable() error {
 		GRANT_WRITE      VARCHAR(16),
 		GRANT_COMMENT    VARCHAR(16),
 		GRANT_UPLOAD     VARCHAR(16),
-		FIELDS           LONG,
+		FIELDS           NCLOB,
 
 		UNIQUE("IDX")
 	)`
@@ -418,9 +418,9 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		TITLE       VARCHAR(256),
 		TITLE_IMAGE VARCHAR(256),
-		CONTENT     LONG,
+		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
-		FILES       LONG,
+		FILES       NCLOB,
 		VIEWS       VARCHAR(11),
 		REG_DTTM    VARCHAR(14),
 
@@ -437,7 +437,7 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 
 // CreateComment - Create comment table
 func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
-	commentName := strings.ToUpper(`"` + Info.DatabaseName + `"."` + tableInfo.CommentTable.String + `"`)
+	commentName := strings.ToUpper(`"` + Info.GrantID + `"."` + tableInfo.CommentTable.String + `"`)
 
 	sql := ``
 	if recreate {
@@ -452,9 +452,9 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 	CREATE TABLE ` + commentName + ` (
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		BOARD_IDX   NUMBER(11),
-		CONTENT     LONG,
+		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
-		FILES       LONG,
+		FILES       NCLOB,
 		REG_DTTM    VARCHAR(14),
 		
 		UNIQUE("IDX")

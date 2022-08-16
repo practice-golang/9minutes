@@ -382,6 +382,7 @@ func HandleContentList(c *router.Context) {
 	list, err := crud.GetContentList(board, listingOptions)
 	if err != nil {
 		c.Text(http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	for i := list.CurrentPage - 1; i < (list.CurrentPage + 2); i++ {
@@ -659,6 +660,9 @@ func WriteContent(c *router.Context) {
 	files := strings.Split(content.Files.String, "?")
 
 	for _, f := range files {
+		if f == "" {
+			continue
+		}
 		files := strings.Split(f, "/")
 
 		filename := files[0]
@@ -727,6 +731,9 @@ func UpdateContent(c *router.Context) {
 
 	files := strings.Split(content.Files.String, "?")
 	for _, f := range files {
+		if f == "" {
+			continue
+		}
 		files := strings.Split(f, "/")
 
 		filename := files[0]

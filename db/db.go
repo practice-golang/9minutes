@@ -115,7 +115,9 @@ func SetupDB() error {
 		port, _ := strconv.Atoi(Info.Port)
 		dsn := go_ora.BuildUrl(Info.Addr, port, Info.DatabaseName, Info.GrantID, Info.GrantPassword, nil)
 		if Info.FilePath != "" {
-			dsn += "?SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(Info.FilePath)
+			// dsn += "?SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(Info.FilePath)
+			// dsn += "?TRACE FILE=trace.log&prefetch_rows=10&SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(Info.FilePath)
+			dsn += "?prefetch_rows=10&SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(Info.FilePath)
 		}
 		Obj = &Oracle{dsn: dsn}
 

@@ -51,15 +51,15 @@ func GetContentList(board model.Board, options model.ContentListingOptions) (mod
 			SELECT
 				` + columnUsername.Names + `
 			FROM ` + userTableName + `
-			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
+			WHERE ` + columnIdx.Names + ` = A.` + columnAuthorIdx.Names + `
 		) AS ` + columnAuthorName.Names + `,
 		(
 			SELECT
 				COUNT(` + columnIdx.Names + `)
 			FROM ` + commentTableName + `
-			WHERE ` + columnBoardIdx.Names + ` = ` + tableName + `.` + columnIdx.Names + `
+			WHERE ` + columnBoardIdx.Names + ` = A.` + columnIdx.Names + `
 		) AS ` + columnCommentCount.Names + `
-	FROM ` + tableName + `
+	FROM ` + tableName + ` A
 	` + sqlSearch + `
 	ORDER BY ` + columnIdx.Names + ` DESC
 	` + paging

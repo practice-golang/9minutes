@@ -1,10 +1,8 @@
 # Todo
 
 * [ ] Rearrange route paths
-* [ ] Use approval column
+* [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
-* [ ] Add more test
-* [ ] Log analyzer
 * [ ] DB dump, migration - try [goose](https://github.com/pressly/goose)
 
 * Waive
@@ -20,6 +18,8 @@
         * Sample menu - eg. board link
     * Attachment
         * ~~Download count~~ - waive
+    * ~~Add more test~~ - waive
+    * ~~Log analyzer~~ - waive
 
 * [x] Add Oracle DB - Only codes, no test. Will correct by handcraft
 * Board
