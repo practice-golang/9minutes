@@ -51,7 +51,7 @@ See `setup.go` and `router_*.go`
 * MySQL - Tested with MariaDB 10.5
 * Postgres - Tested with PostgreSQL 12.3
 * SQL Server - Tested with MS SQL Server express 2014 & 2019
-* Oracle - Testing with 12c as lcoal, 19c as autonomous database of oracle cloud. 11g or before not support
+* Oracle - Tested with 12c as lcoal, 19c as autonomous database of oracle cloud. 11g or before not support
 
 
 ## Heroku
