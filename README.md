@@ -83,15 +83,13 @@ $ ./9minutes -get dkim
 
 * Set `GOBIN` to `./bin`
 * Windows
-    * build
-    ```
-    $ mingw32-make.exe
-    ```
+```
+$ mingw32-make.exe
+```
 * Linux, Mac
-    * build
-    ```
-    $ make
-    ```
+```
+$ make
+```
 
 
 ## License
