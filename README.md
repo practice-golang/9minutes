@@ -53,7 +53,8 @@ See `setup.go` and `router_*.go`
 
 ## Heroku
 
-* Append following variables to environment setting in dyno
+* Append following variables to environment setting of dyno
+* Oracle wallet is not supported
 ```
 PORT
 DATABASE_TYPE
