@@ -32,7 +32,7 @@ $ ./9minutes
 $ ./9minutes -get html
 ```
 * Then, edit html files
-* Files in admin directory are not exported hence, If you want to modify them, download this repository and modify and build
+* Files in admin directory are not exported hence, If you want to modify them, download this repository then modify and build
 
 
 ## API, Route
