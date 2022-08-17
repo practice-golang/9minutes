@@ -76,7 +76,10 @@ DATABASE_PASSWORD
 * You can choose `smtp` or `direct sending`
 * When use `direct sending`, you should learn about domain, `DKIM`, `spf record`, `PTR record`
     * Also most of cloud service blocked port 25 so you probably can not use it
-
+* Get DKIM key files - If not yet generate dkim keys
+```sh
+$ ./9minutes -get dkim
+```
 
 ## Build
 
