@@ -92,15 +92,15 @@ func (d *Oracle) connect() (*sql.DB, error) {
 
 	go func() {
 		for {
-			time.Sleep(time.Minute * 3)
-			// err = db.Ping()
-			// if err != nil {
-			// 	log.Println(err)
-			// }
-			sql := `SELECT 1 FROM DUAL`
-			_, err = db.Exec(sql)
+			time.Sleep(time.Minute * 1)
+			err = db.Ping()
 			if err != nil {
 				log.Println(err)
+				db.Close()
+				db, err = sql.Open("oracle", d.dsn)
+				if err != nil {
+					log.Println("Oracle reconnect:", err)
+				}
 			}
 		}
 	}()
@@ -253,7 +253,8 @@ func (d *Oracle) CreateUserTable() error {
 		APPROVAL    VARCHAR(2),
 		REG_DTTM    VARCHAR(14),
 
-		UNIQUE("IDX", "USERNAME", "EMAIL")
+		CONSTRAINT "` + Info.UserTable + `_idx" PRIMARY KEY ("IDX"),
+		CONSTRAINT "` + Info.UserTable + `_userconstraint" UNIQUE ("USERNAME", "EMAIL")
 	)`
 
 	_, err = Con.Exec(sql)
@@ -293,7 +294,8 @@ func (d *Oracle) CreateUserTable() error {
 		COLUMN_NAME  VARCHAR(128),
 		SORT_ORDER   NUMBER(5),
 
-		UNIQUE("IDX", "COLUMN_NAME")
+		CONSTRAINT "user_fields_idx" PRIMARY KEY ("IDX"),
+		CONSTRAINT "user_fields_columnconstraint" UNIQUE ("COLUMN_NAME")
 	)`
 
 	_, err = Con.Exec(sql)
@@ -302,15 +304,14 @@ func (d *Oracle) CreateUserTable() error {
 	}
 
 	sql = `
-	INSERT ALL
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Idx', 'idx', 'integer', 'IDX', 1)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Username', 'username', 'text', 'USERNAME', 2)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Password', 'password', 'text', 'PASSWORD', 3)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Email', 'email', 'text', 'EMAIL', 4)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Grade', 'grade', 'text', 'GRADE', 5)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Approval', 'approval', 'text', 'APPROVAL', 6)
-	INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER") VALUES ('Registered datetime', 'regdate', 'text', 'REG_DTTM', 7)
-	SELECT 1 FROM DUAL`
+	INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
+	SELECT 'Idx' AS "DISPLAY_NAME", 'idx' AS "COLUMN_CODE", 'integer' AS "COLUMN_TYPE", 'IDX' AS "COLUMN_NAME", 1 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Username' AS "DISPLAY_NAME", 'username' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'USERNAME' AS "COLUMN_NAME", 2 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Password' AS "DISPLAY_NAME", 'password' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'PASSWORD' AS "COLUMN_NAME", 3 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Email' AS "DISPLAY_NAME", 'email' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'EMAIL' AS "COLUMN_NAME", 4 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Grade' AS "DISPLAY_NAME", 'grade' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'GRADE' AS "COLUMN_NAME", 5 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Approval' AS "DISPLAY_NAME", 'approval' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'APPROVAL' AS "COLUMN_NAME", 6 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'Registered datetime' AS "DISPLAY_NAME", 'regdate' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'REG_DTTM' AS "COLUMN_NAME", 7 AS "SORT_ORDER" FROM DUAL`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -363,13 +364,13 @@ func (d *Oracle) CreateUserVerificationTable() error {
 func (d *Oracle) AddTableColumn(tableName string, column model.UserColumn) error {
 	targetTable := strings.ToUpper(`"` + Info.GrantID + `"."` + tableName + `"`)
 
-	sql := "ALTER TABLE " + targetTable + " ADD COLUMN `" + column.ColumnName.String + "`"
+	sql := `ALTER TABLE ` + targetTable + ` ADD "` + column.ColumnName.String + `"`
 
 	switch column.ColumnType.String {
 	case "text":
 		sql += ` VARCHAR(256)`
 	case "long_text":
-		sql += ` LONG`
+		sql += ` NCLOB`
 	case "number":
 		sql += ` NUMBER(16)`
 	case "real":
@@ -392,7 +393,7 @@ func (d *Oracle) EditTableColumn(tableName string, columnOld model.UserColumn, c
 
 	sql := `
 	ALTER TABLE ` + targetTable + `
-	MODIFY '` + columnOld.ColumnName.String + `' TO '` + columnNew.ColumnName.String + `'`
+	RENAME COLUMN "` + columnOld.ColumnName.String + `" TO "` + columnNew.ColumnName.String + `"`
 
 	_, err := Con.Exec(sql)
 	if err != nil {
@@ -404,7 +405,11 @@ func (d *Oracle) EditTableColumn(tableName string, columnOld model.UserColumn, c
 
 // DeleteTableColumn - Delete table column
 func (d *Oracle) DeleteTableColumn(tableName string, column model.UserColumn) error {
-	sql := `ALTER TABLE "` + tableName + `" DROP COLUMN "` + column.ColumnName.String + `"`
+	targetTable := strings.ToUpper(`"` + Info.GrantID + `"."` + tableName + `"`)
+
+	sql := `
+	ALTER TABLE ` + targetTable + `
+	DROP COLUMN "` + column.ColumnName.String + `"`
 
 	_, err := Con.Exec(sql)
 	if err != nil {

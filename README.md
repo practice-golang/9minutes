@@ -47,13 +47,14 @@ See `setup.go` and `router_*.go`
 
 ## DB
 
-* SQLite
-* MySQL - MariaDB 10.5
-* Postgres - PostgreSQL 12.3
-* SQL Server - MS SQL Server express 2014 & 2019
+* SQLite3 - Tested
+* MySQL - Tested with MariaDB 10.5
+* Postgres - Tested with PostgreSQL 12.3
+* SQL Server - Tested with MS SQL Server express 2014 & 2019
+* Oracle - Testing with 12c as lcoal, 19c as autonomous database of oracle cloud. 11g or before not support
 
 
-## Paas - Heroku
+## Heroku
 
 * Append following variables to environment setting in dyno
 ```

@@ -42,7 +42,8 @@ func GetUserColumnsList() ([]model.UserColumn, error) {
 	sql := `
 	SELECT
 		` + columns + `
-	FROM ` + tablename
+	FROM ` + tablename + `
+	ORDER BY IDX ASC`
 
 	// where := []interface{}{}
 	// r, err := db.Con.Query(sql, where...)

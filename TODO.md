@@ -1,9 +1,11 @@
 # Todo
 
+* [ ] Correct user defined column at admin user-list
 * [ ] Rearrange route paths
 * [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
 * [ ] DB dump, migration - try [goose](https://github.com/pressly/goose)
+* [ ] Column data encryption & decryption like password
 
 * Waive
     * ~~CORS???~~ - waive
