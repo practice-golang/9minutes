@@ -6,7 +6,6 @@
 * [ ] DB dump, migration - Will try to taste [goose](https://github.com/pressly/goose)
 * [ ] files dump, migration - No idea yet
 * [ ] Make user column definitions move to up or down
-* [ ] Add column data encryption & decryption like password
 
 * Waive
     * ~~CORS???~~ - waive
@@ -24,6 +23,7 @@
     * ~~Add more test~~ - waive
     * ~~Log analyzer~~ - waive
 
+* ~~Add column data encryption & decryption like password~~ - Because of hard coded in HTML, ordering is not required
 * ~~Correct user defined column at admin user-list~~ - Not a problem, admin should modify the html by handcraft
 * [x] Add Oracle DB - Only codes, no test. Will correct by handcraft
 * Board
