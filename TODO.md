@@ -5,6 +5,7 @@
 * [ ] Add datagrid type, separate from board
 * [ ] DB dump, migration - Will try to taste [goose](https://github.com/pressly/goose)
 * [ ] files dump, migration - No idea yet
+* [ ] Make user column definitions move to up or down
 * [ ] Add column data encryption & decryption like password
 
 * Waive
