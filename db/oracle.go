@@ -4,6 +4,7 @@ import (
 	"9minutes/consts"
 	"9minutes/model"
 	"database/sql"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -91,8 +92,16 @@ func (d *Oracle) connect() (*sql.DB, error) {
 
 	go func() {
 		for {
-			time.Sleep(time.Minute * 4)
-			_ = db.Ping()
+			time.Sleep(time.Minute * 3)
+			// err = db.Ping()
+			// if err != nil {
+			// 	log.Println(err)
+			// }
+			sql := `SELECT 1 FROM DUAL`
+			_, err = db.Exec(sql)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
