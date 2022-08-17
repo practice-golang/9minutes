@@ -87,26 +87,10 @@ $ ./9minutes -get dkim
     ```
     $ mingw32-make.exe
     ```
-    * test
-    ```
-    $ mingw32-make.exe test
-    ```
-    * build for all platform
-    ```
-    $ mingw32-make.exe dist
-    ```
 * Linux, Mac
     * build
     ```
     $ make
-    ```
-    * test
-    ```
-    $ make test
-    ```
-    * build for all platform
-    ```
-    $ make dist
     ```
 
 
