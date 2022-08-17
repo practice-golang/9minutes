@@ -1,11 +1,11 @@
 # Todo
 
-* [ ] Correct user defined column at admin user-list
 * [ ] Rearrange route paths
 * [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
-* [ ] DB dump, migration - try [goose](https://github.com/pressly/goose)
-* [ ] Column data encryption & decryption like password
+* [ ] DB dump, migration - Will try to taste [goose](https://github.com/pressly/goose)
+* [ ] files dump, migration - No idea yet
+* [ ] Add column data encryption & decryption like password
 
 * Waive
     * ~~CORS???~~ - waive
@@ -23,6 +23,7 @@
     * ~~Add more test~~ - waive
     * ~~Log analyzer~~ - waive
 
+* ~~Correct user defined column at admin user-list~~ - Not a problem, admin should modify the html by handcraft
 * [x] Add Oracle DB - Only codes, no test. Will correct by handcraft
 * Board
     * [x] Delete uploaded file(s)
