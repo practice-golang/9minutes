@@ -423,8 +423,8 @@ func GetUsersList(search string) ([]model.UserData, error) {
 
 	if search != "" {
 		sqlSearch = `
-		WHERE ` + columnUsername.Names + ` LIKE '%` + search + `%'
-			OR ` + columnEmail.Names + ` LIKE '%` + search + `%'`
+		WHERE LOWER(` + columnUsername.Names + `) LIKE LOWER('%` + search + `%')
+			OR LOWER(` + columnEmail.Names + `) LIKE LOWER('%` + search + `%')`
 	}
 
 	sql := `

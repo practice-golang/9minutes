@@ -23,6 +23,7 @@
     * ~~Add more test~~ - waive
     * ~~Log analyzer~~ - waive
 
+* [x] Case insensitive search - admin/user-list, post list in board
 * ~~Add column data encryption & decryption like password~~ - Because of hard coded in HTML, ordering is not required
 * ~~Correct user defined column at admin user-list~~ - Not a problem, admin should modify the html by handcraft
 * [x] Add Oracle DB - Only codes, no test. Will correct by handcraft

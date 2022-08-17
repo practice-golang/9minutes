@@ -35,8 +35,8 @@ func GetContentList(board model.Board, options model.ContentListingOptions) (mod
 
 	if options.Search.Valid && options.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + columnTitle.Names + ` LIKE '%` + options.Search.String + `%'
-			OR ` + columnContent.Names + ` LIKE '%` + options.Search.String + `%'`
+		WHERE LOWER(` + columnTitle.Names + `) LIKE LOWER('%` + options.Search.String + `%')
+			OR LOWER(` + columnContent.Names + `) LIKE LOWER('%` + options.Search.String + `%')`
 	}
 
 	paging := ``
