@@ -19,10 +19,7 @@ Bulletin board
 ```sh
 $ ./9minutes
 ```
-* Then run again after modify `9minutes.ini`
-```sh
-$ ./9minutes
-```
+* Modify `9minutes.ini` then run again `9minutes` binary
 * Open `http://localhost:5525` in browser
 * Sign in with `admin` / `admin`
 
