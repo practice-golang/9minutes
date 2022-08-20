@@ -3,7 +3,7 @@
 * [ ] Rearrange route paths
 * [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
-* [ ] DB dump, migration - Will try to taste [goose](https://github.com/pressly/goose)
+* [ ] DB dump, migration - Will try to taste [goose](https://github.com/pressly/goose), [sql-migrate](https://github.com/rubenv/sql-migrate), [migrate](https://github.com/golang-migrate/migrate), [dbmate](https://github.com/amacneil/dbmate)
 * [ ] files dump, migration - No idea yet
 * [ ] Make user column definitions move to up or down
 
