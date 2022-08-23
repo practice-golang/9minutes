@@ -1,5 +1,6 @@
 # Todo
 
+* [ ] Oracle - grip connection longtime
 * [ ] Rearrange route paths
 * [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
