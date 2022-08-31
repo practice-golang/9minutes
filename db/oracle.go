@@ -95,12 +95,13 @@ func (d *Oracle) connect() (*sql.DB, error) {
 			time.Sleep(time.Minute * 1)
 			err = db.Ping()
 			if err != nil {
-				log.Println(err)
+				log.Println("Ping:", err)
 				db.Close()
 				db, err = sql.Open("oracle", d.dsn)
 				if err != nil {
 					log.Println("Oracle reconnect:", err)
 				}
+				Con = db
 			}
 		}
 	}()
