@@ -51,20 +51,13 @@ See `setup.go` and `router_*.go`
 * Oracle - Tested with 12c as local, 19c as autonomous database of oracle cloud. 11g or before not support
 
 
-## Heroku
+## File access priority of router
 
-* Append following variables to environment setting of dyno
-* Oracle wallet is not supported
-```
-PORT
-DATABASE_TYPE
-DATABASE_ADDRESS
-DATABASE_PORT
-DATABASE_PROTOCOL -> tcp
-DATABASE_NAME
-DATABASE_ID
-DATABASE_PASSWORD
-```
+|        | embed | Find fs first |
+|--------|-------|---------------|
+| embed  | yes   | no            |
+| html   | yes   | yes           |
+| static | no    | yes           |
 
 
 ## Email sending
@@ -79,6 +72,7 @@ DATABASE_PASSWORD
 $ ./9minutes -get dkim
 ```
 
+
 ## Build
 
 * Set `GOBIN` to `./bin`
@@ -89,6 +83,53 @@ $ mingw32-make.exe
 * Linux, Mac
 ```
 $ make
+```
+
+
+## Etc.
+
+### Reverse proxy examples
+
+* NginX
+```nginx
+# https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name domain.name;
+
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header Accept-Encoding "";
+        proxy_set_header Real-Ip $remote_addr;
+        proxy_pass http://localhost:5525;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+}
+```
+
+* Caddy
+```powershell
+# https://caddyserver.com/docs/quick-starts/reverse-proxy
+caddy reverse-proxy --from :80 --to 127.0.0.1:5525
+```
+
+### Heroku
+
+* Append following variables to environment setting of dyno
+* Oracle wallet is not supported
+```
+PORT
+DATABASE_TYPE
+DATABASE_ADDRESS
+DATABASE_PORT
+DATABASE_PROTOCOL -> tcp
+DATABASE_NAME
+DATABASE_ID
+DATABASE_PASSWORD
 ```
 
 
