@@ -53,6 +53,8 @@ See `setup.go` and `router_*.go`
 
 ## File access priority of router
 
+* When router request triggered, router find and load the html file as following table
+
 |        | embed | Find fs first |
 |--------|-------|---------------|
 | embed  | yes   | no            |
