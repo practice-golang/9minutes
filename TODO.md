@@ -1,6 +1,7 @@
 # Todo
 
 * [ ] Oracle - grip connection longtime
+    * https://easyoradba.com/2021/03/10/shell-script-to-keep-oracle-always-free-autonomous-database-alive-with-sqlcl/
 * [ ] Rearrange route paths
 * [ ] Use or delete approval column
 * [ ] Add datagrid type, separate from board
