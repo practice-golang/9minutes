@@ -62,9 +62,9 @@ func firstRun() {
 		ListeningIP = "0.0.0.0"
 		ListeningPort = envPORT
 
-		StaticPath = "./static"
-		UploadPath = "./upload"
-		handler.StoreRoot = "./html"
+		StaticPath = "static"
+		UploadPath = "upload"
+		handler.StoreRoot = "static/html"
 
 		envAddress := os.Getenv("DATABASE_ADDRESS")
 		envDbPort := os.Getenv("DATABASE_PORT")
