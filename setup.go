@@ -172,11 +172,13 @@ func setupINI() {
 			email.Info.SendDirect = cfg.Section("email").Key("SEND_DIRECT").MustBool(false)
 		}
 		if cfg.Section("email").HasKey("DKIM_PATH") {
-			dkimKey, err := os.ReadFile(cfg.Section("email").Key("DKIM_PATH").String())
-			if err != nil {
-				panic(err)
+			if email.Info.UseEmail && email.Info.SendDirect {
+				dkimKey, err := os.ReadFile(cfg.Section("email").Key("DKIM_PATH").String())
+				if err != nil {
+					panic(err)
+				}
+				email.Info.Service.KeyDKIM = string(dkimKey)
 			}
-			email.Info.Service.KeyDKIM = string(dkimKey)
 		}
 		if cfg.Section("email").HasKey("FROM_ADDRESS") {
 			email.Info.SenderInfo.Email = cfg.Section("email").Key("FROM_ADDRESS").String()

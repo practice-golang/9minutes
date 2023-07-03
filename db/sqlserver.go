@@ -259,9 +259,9 @@ func (d *SqlServer) AddTableColumn(tableName string, column model.UserColumn) er
 		sql += `VARCHAR(128)`
 	case "long_text":
 		sql += `VARCHAR(MAX)`
-	case "number":
+	case "number-integer":
 		sql += `INTEGER`
-	case "real":
+	case "number-real":
 		sql += `REAL`
 	}
 

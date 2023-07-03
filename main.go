@@ -4,9 +4,11 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"log"
+	"io"
+	"io/fs"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"9minutes/config"
 	"9minutes/db"
@@ -18,11 +20,14 @@ import (
 //go:embed 9minutes.ini
 var sampleINI string
 
-//go:embed html/*
+//go:embed static/html/*
 var Content embed.FS
 
 //go:embed embed/*
-var EmbedStatic embed.FS
+var EmbedStatic embed.FS // should be removed
+
+//go:embed static/*
+var StaticEmbed embed.FS
 
 var StaticPath = config.StaticPath
 var UploadPath = config.UploadPath
@@ -57,9 +62,9 @@ func firstRun() {
 		ListeningIP = "0.0.0.0"
 		ListeningPort = envPORT
 
-		StaticPath = "./static"
-		UploadPath = "./upload"
-		handler.StoreRoot = "./html"
+		StaticPath = "static"
+		UploadPath = "upload"
+		handler.StoreRoot = "static/html"
 
 		envAddress := os.Getenv("DATABASE_ADDRESS")
 		envDbPort := os.Getenv("DATABASE_PORT")
@@ -91,39 +96,82 @@ func firstRun() {
 	ListeningAddress = ListeningIP + ":" + ListeningPort
 }
 
-func writeEmbedToDir(dir string) {
-	rootDir, err := Content.ReadDir(dir)
+// func writeEmbedToDir(dir string) {
+// 	rootDir, err := Content.ReadDir(dir)
+// 	if err != nil {
+// 		fmt.Println("Error: ", err)
+// 		return
+// 	}
+
+// 	for _, f := range rootDir {
+// 		if dir+"/"+f.Name() == "html/admin" {
+// 			continue
+// 		}
+
+// 		if f.IsDir() {
+// 			os.MkdirAll(dir+"/"+f.Name(), os.ModePerm)
+// 			writeEmbedToDir(dir + "/" + f.Name())
+// 		} else {
+// 			sf, err := os.Create(dir + "/" + f.Name())
+// 			if err != nil {
+// 				log.Fatal("failed to create file for embedded html: ", err)
+// 			}
+// 			defer sf.Close()
+
+// 			ef, err := Content.ReadFile(dir + "/" + f.Name())
+// 			if err != nil {
+// 				log.Fatal("failed to read embedded html: ", err)
+// 			}
+
+// 			_, err = sf.Write(ef)
+// 			if err != nil {
+// 				log.Fatal("failed to write file from embedded html: ", err)
+// 			}
+// 		}
+// 	}
+// }
+
+func exportStaticEmbed() error {
+	exportPath := "."
+
+	err := os.MkdirAll(exportPath, 0755)
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return
+		return err
 	}
 
-	for _, f := range rootDir {
-		if dir+"/"+f.Name() == "html/admin" {
-			continue
+	err = fs.WalkDir(Content, "static", func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			filePath := filepath.Join(exportPath, path)
+			err := os.MkdirAll(filepath.Dir(filePath), 0755)
+			if err != nil {
+				return err
+			}
+
+			srcFile, err := Content.Open(path)
+			if err != nil {
+				return err
+			}
+			defer srcFile.Close()
+
+			dstFile, err := os.Create(filePath)
+			if err != nil {
+				return err
+			}
+			defer dstFile.Close()
+
+			_, err = io.Copy(dstFile, srcFile)
+			if err != nil {
+				return err
+			}
 		}
+		return nil
+	})
 
-		if f.IsDir() {
-			os.MkdirAll(dir+"/"+f.Name(), os.ModePerm)
-			writeEmbedToDir(dir + "/" + f.Name())
-		} else {
-			sf, err := os.Create(dir + "/" + f.Name())
-			if err != nil {
-				log.Fatal("failed to create file for embedded html: ", err)
-			}
-			defer sf.Close()
-
-			ef, err := Content.ReadFile(dir + "/" + f.Name())
-			if err != nil {
-				log.Fatal("failed to read embedded html: ", err)
-			}
-
-			_, err = sf.Write(ef)
-			if err != nil {
-				log.Fatal("failed to write file from embedded html: ", err)
-			}
-		}
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
 func main() {
@@ -146,7 +194,8 @@ func main() {
 
 		switch *flagGet {
 		case "html":
-			writeEmbedToDir("html")
+			// writeEmbedToDir("html")
+			exportStaticEmbed()
 			fmt.Println("done to export html files")
 		case "dkim":
 			email.GenerateKeys()

@@ -50,7 +50,7 @@
             <td>&nbsp;</td>
             <td><input type="text" name="display-name" value="{{display-name}}" placeholder="Display name" /></td>
             <td><input type="text" name="column-code" value="{{column-code}}" placeholder="Column code" /></td>
-            <td><input type="text" name="column-type" value="{{column-type}}" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" /></td>
+            <td><input type="text" name="column-type" value="{{column-type}}" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" disabled /></td>
             <td><input type="text" name="column-name" value="{{column-name}}" placeholder="Column name" /></td>
             <td>
                 <input type="hidden" name="sort-order" value="{{sort-order}}" />
@@ -66,8 +66,8 @@
 
 <datalist id="column-types">
     <option value="text">Text</option>
-    <option value="integer">Integer</option>
-    <option value="float">Float</option>
+    <option value="number-integer">Number Integer</option>
+    <option value="number-real">Number Real</option>
 </datalist>
 
 <script>

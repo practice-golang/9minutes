@@ -372,9 +372,9 @@ func (d *Oracle) AddTableColumn(tableName string, column model.UserColumn) error
 		sql += ` VARCHAR(256)`
 	case "long_text":
 		sql += ` NCLOB`
-	case "number":
+	case "number-integer":
 		sql += ` NUMBER(16)`
-	case "real":
+	case "number-real":
 		sql += ` NUMBER(20,20)`
 	}
 

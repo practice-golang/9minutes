@@ -243,9 +243,9 @@ func (d *Mysql) AddTableColumn(tableName string, column model.UserColumn) error 
 		sql += ` VARCHAR(256)`
 	case "long_text":
 		sql += ` TEXT`
-	case "number":
+	case "number-integer":
 		sql += ` INT(16)`
-	case "real":
+	case "number-real":
 		sql += ` DECIMAL(20,20)`
 	}
 
@@ -264,7 +264,7 @@ func (d *Mysql) AddTableColumn(tableName string, column model.UserColumn) error 
 func (d *Mysql) EditTableColumn(tableName string, columnOld model.UserColumn, columnNew model.UserColumn) error {
 	sql := `
 	ALTER TABLE ` + Info.DatabaseName + `.` + tableName + `
-	CHANGE COLUMN ` + "`" + columnOld.ColumnName.String + "`" + ` TO ` + "`" + columnNew.ColumnName.String + "`" + `; `
+	RENAME COLUMN ` + "`" + columnOld.ColumnName.String + "`" + ` TO ` + "`" + columnNew.ColumnName.String + "`" + `; `
 
 	_, err := Con.Exec(sql)
 	if err != nil {
