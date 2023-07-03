@@ -208,9 +208,9 @@ func (d *SQLite) AddTableColumn(tableName string, column model.UserColumn) error
 		sql += ` TEXT`
 	case "long_text":
 		sql += ` TEXT`
-	case "number":
+	case "number-integer":
 		sql += ` INTEGER`
-	case "real":
+	case "number-real":
 		sql += ` REAL`
 	}
 

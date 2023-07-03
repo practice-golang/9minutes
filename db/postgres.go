@@ -230,9 +230,9 @@ func (d *Postgres) AddTableColumn(tableName string, column model.UserColumn) err
 		sql += ` VARCHAR(128)`
 	case "long_text":
 		sql += ` VARCHAR(65535)`
-	case "number":
+	case "number-integer":
 		sql += ` INTEGER`
-	case "real":
+	case "number-real":
 		sql += ` REAL`
 	}
 
@@ -250,7 +250,7 @@ func (d *Postgres) AddTableColumn(tableName string, column model.UserColumn) err
 func (d *Postgres) EditTableColumn(tableName string, columnOld model.UserColumn, columnNew model.UserColumn) error {
 	sql := `
 	ALTER TABLE ` + tableName + `
-	CHANGE COLUMN "` + columnOld.ColumnName.String + `" TO "` + columnNew.ColumnName.String + `"; `
+	RENAME COLUMN "` + columnOld.ColumnName.String + `" TO "` + columnNew.ColumnName.String + `"; `
 
 	_, err := Con.Exec(sql)
 	if err != nil {
