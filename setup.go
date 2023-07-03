@@ -330,6 +330,8 @@ func setupRouter() {
 
 	// r := router.New()
 
+	handler.NewSessionStore()
+
 	cfg := fiber.Config{
 		AppName:               "hello-fiber",
 		DisableStartupMessage: true,

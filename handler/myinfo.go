@@ -11,40 +11,42 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/guregu/null.v4"
 )
 
-// func GetMyInfo(c *router.Context) {
-// 	if c.AuthInfo == nil {
-// 		c.Text(http.StatusForbidden, "Unauthorized")
-// 		return
-// 	}
-
-// 	columnsCount, _ := crud.GetUserColumnsCount()
-
-// 	switch columnsCount {
-// 	case model.UserDataFieldCount:
-// 		user, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
-// 		if err != nil {
-// 			c.Text(http.StatusInternalServerError, err.Error())
-// 			return
-// 		}
-
-// 		c.Json(http.StatusOK, user)
-// 	default:
-// 		user, err := crud.GetUserByNameMap(c.AuthInfo.(model.AuthInfo).Name.String)
-// 		if err != nil {
-// 			c.Text(http.StatusInternalServerError, err.Error())
-// 			return
-// 		}
-
-// 		c.Json(http.StatusOK, user)
-// 	}
-// }
-
 func GetMyInfo(c *fiber.Ctx) error {
-	// get cookie
-	cookie := c.Cookies("session")
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
 
+	name := sess.Get("name")
+	if name == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	columnsCount, _ := crud.GetUserColumnsCount()
+
+	switch columnsCount {
+	case model.UserDataFieldCount:
+		user, err := crud.GetUserByName(name.(string))
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		user.Password = null.NewString("", false)
+
+		return c.Status(http.StatusOK).JSON(user)
+	default:
+		user, err := crud.GetUserByNameMap(name.(string))
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		delete(user.(map[string]interface{}), "password")
+
+		return c.Status(http.StatusOK).JSON(user)
+	}
 }
 
 func UpdateMyInfo(c *router.Context) {

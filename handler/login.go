@@ -7,7 +7,6 @@ import (
 	"9minutes/model"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 func LoginAPI(c *fiber.Ctx) error {
@@ -18,26 +17,6 @@ func LoginAPI(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
-
-	// authinfo := model.AuthInfo{
-	// 	Name:     null.NewString(signin.Name.String, true),
-	// 	IpAddr:   null.NewString(c.IP(), true),
-	// 	Os:       null.NewString("", true),
-	// 	Duration: null.NewInt(60*60*24*7, true),
-	// 	// Duration: null.NewInt(10, true), // 10 seconds test
-	// }
-
-	// token, err := auth.GenerateToken(authinfo)
-	// if err != nil {
-	// 	return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// }
-
-	// result := map[string]string{
-	// 	"token": token,
-	// 	"msg":   "Signin success",
-	// }
-
-	store := session.New()
 
 	sess, err := store.Get(c)
 	if err != nil {

@@ -4,7 +4,7 @@
 ### Group - health
 GET {{uri}}/api/health
 
-### Group - Login, Bearer
+### Group - Login
 POST {{uri}}/api/login HTTP/1.1
 content-type: application/json
 Origin: {{uri}}
@@ -14,9 +14,11 @@ Origin: {{uri}}
     "password": "admin"
 }
 
-
-
-
+### Group - Login, Myinfo
+GET {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+Cookie: session_id=1e5318e7-9cc0-47a4-8a41-fad48c14fa38;
 
 
 

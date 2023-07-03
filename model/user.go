@@ -40,7 +40,7 @@ type UserColumn struct {
 type UserData struct {
 	Idx      null.Int    `json:"idx"      db:"IDX"      npskip:"insert, update"`
 	UserName null.String `json:"username" db:"USERNAME"`
-	Password null.String `json:"password" db:"PASSWORD"`
+	Password null.String `json:"password,omitempty" db:"PASSWORD"`
 	Email    null.String `json:"email"    db:"EMAIL"`
 	Grade    null.String `json:"grade"    db:"GRADE"`
 	Approval null.String `json:"approval" db:"APPROVAL"`
