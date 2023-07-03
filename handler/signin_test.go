@@ -91,7 +91,7 @@ func Test_SigninAPI(t *testing.T) {
 					ResponseWriter: http.ResponseWriter(httptest.NewRecorder()),
 				},
 				want:     []byte("Signin success"),
-				run_func: SigninAPI,
+				run_func: LoginAPI,
 			},
 		},
 	}

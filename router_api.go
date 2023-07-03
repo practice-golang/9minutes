@@ -3,40 +3,42 @@ package main
 import (
 	"9minutes/handler"
 	"9minutes/router"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-func setAPIs(r *router.App) {
+func setAPIs(a *fiber.App) {
 	/* API */
-	g := r.Group(`^/api`)
-	g.GET(`/?$`, handler.HealthCheck)
-	g.GET(`/hello$`, handler.Hello)
-	g.POST(`/signin$`, handler.SigninAPI)
+	g := a.Group("/api")
+	g.Get("/health", handler.HealthCheck)
+	g.Post("/login", handler.LoginAPI)
 
-	/* API myinfo */
-	gmi := r.Group(`^/api/myinfo`, handler.AuthApiSessionMiddleware)
-	gmi.GET(`(/?)$`, handler.GetMyInfo)
-	gmi.PUT(`(/?)$`, handler.UpdateMyInfo)
-	gmi.DELETE(`(/?)$`, handler.ResignUser)
+	// /* API myinfo */
+	// gmi := a.Group("/api/myinfo", handler.AuthApiSessionMiddleware)
+	gmi := a.Group("/api/myinfo") // Require add session middleware
+	gmi.Get("/", handler.GetMyInfo)
+	// gmi.PUT(`(/?)$`, handler.UpdateMyInfo)
+	// gmi.DELETE(`(/?)$`, handler.ResignUser)
 
-	/* API File & Directory */
-	g.POST(`/dir/list$`, handler.HandleGetDir)
+	// /* API File & Directory */
+	// g.POST(`/dir/list$`, handler.HandleGetDir)
 
-	/* Captcha */
-	g.GET(`/captcha/[^/]+\.png$`, handler.GetCaptchaImage)
-	g.PATCH(`/captcha$`, handler.RenewCaptcha)
+	// /* Captcha */
+	// g.GET(`/captcha/[^/]+\.png$`, handler.GetCaptchaImage)
+	// g.PATCH(`/captcha$`, handler.RenewCaptcha)
 }
 
-func setApiLogin(r *router.App) {
+func setApiLogin(a *fiber.App) {
 	/* Login, Logout */
-	r.POST(`^/login`, handler.Login)
-	r.GET(`^/logout`, handler.Logout)
-	r.POST(`/api/signup`, handler.Signup)
+	a.Post("/login", handler.Login)
+	// a.GET(`^/logout`, handler.Logout)
+	// a.POST(`/api/signup`, handler.Signup)
 
-	/* Reset password */
-	r.POST(`/password-reset$`, handler.ResetPassword)
+	// /* Reset password */
+	// a.POST(`/password-reset$`, handler.ResetPassword)
 
-	/* User verification - Should be moved at next time */
-	r.GET(`/verify`, handler.UserVerification)
+	// /* User verification - Should be moved at next time */
+	// a.GET(`/verify`, handler.UserVerification)
 }
 
 func setApiUploader(r *router.App) {

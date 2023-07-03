@@ -13,6 +13,7 @@ require (
 	github.com/emersion/go-msgauth v0.6.6
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gobwas/ws v1.2.1
+	github.com/gofiber/fiber/v2 v2.47.0
 	github.com/gomodule/redigo v1.8.9
 	github.com/lestrrat-go/jwx v1.2.26
 	github.com/lib/pq v1.10.9
@@ -32,6 +33,7 @@ require (
 )
 
 require (
+	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
@@ -48,6 +50,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
+	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
@@ -55,9 +58,18 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
+	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee // indirect
+	github.com/tinylib/msgp v1.1.8 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.47.0 // indirect
+	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.9 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.9 // indirect
 	go.uber.org/atomic v1.11.0 // indirect

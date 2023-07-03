@@ -3,6 +3,8 @@ package main
 import (
 	"9minutes/handler"
 	"9minutes/router"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func setPAGEs(r *router.App) {
@@ -17,12 +19,13 @@ func setPAGEs(r *router.App) {
 	glogin.GET(`signup.html`, handler.HandleSignup)
 }
 
-func setPageHTMLs(r *router.App) {
-	/* Both user and anonymous */
-	gl := r.Group(`^/`)
-	gl.Use(handler.AuthSessionMiddleware, handler.RemoveTrailingSlashMiddleware)
-	gl.GET(`[^/]+.html$`, handler.HandleHTML)
-	gl.GET(`assets/css/[^/]+.html$`, handler.HandleHTML)
+func setPageHTMLs(a *fiber.App) {
+	// /* Both user and anonymous */
+	// gl := a.Group("/")
+	// gl.Use(handler.AuthSessionMiddleware, handler.RemoveTrailingSlashMiddleware)
+	// gl.Get(`[^/]+.html$`, handler.HandleHTML)
+	// gl.Get(`assets/css/[^/]+.html$`, handler.HandleHTML)
+	a.Static("/", StaticPath)
 }
 
 func setPageMyPage(r *router.App) {

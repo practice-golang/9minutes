@@ -9,6 +9,7 @@ import (
 	"9minutes/model"
 	"9minutes/router"
 
+	"github.com/gofiber/fiber/v2"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -24,7 +25,7 @@ func SetupCookieToken(w http.ResponseWriter, authinfo model.AuthInfo) error {
 	return nil
 }
 
-func SetCookieSession(c *router.Context, authinfo model.AuthInfo) error {
+func SetCookieSession(c *fiber.Ctx, authinfo model.AuthInfo) error {
 	SessionManager.Put(c.Context(), "userid", authinfo.Name.String)
 	SessionManager.Put(c.Context(), "ip", authinfo.IpAddr.String)
 	SessionManager.Put(c.Context(), "platform", authinfo.Os.String)
@@ -32,7 +33,7 @@ func SetCookieSession(c *router.Context, authinfo model.AuthInfo) error {
 	return nil
 }
 
-func GetCookieSession(c *router.Context) (model.AuthInfo, error) {
+func GetCookieSession(c *fiber.Ctx) (model.AuthInfo, error) {
 	var result model.AuthInfo
 
 	if SessionManager == nil || !SessionManager.Exists(c.Context(), "userid") {

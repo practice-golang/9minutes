@@ -9,35 +9,42 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetMyInfo(c *router.Context) {
-	if c.AuthInfo == nil {
-		c.Text(http.StatusForbidden, "Unauthorized")
-		return
-	}
+// func GetMyInfo(c *router.Context) {
+// 	if c.AuthInfo == nil {
+// 		c.Text(http.StatusForbidden, "Unauthorized")
+// 		return
+// 	}
 
-	columnsCount, _ := crud.GetUserColumnsCount()
+// 	columnsCount, _ := crud.GetUserColumnsCount()
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		user, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
+// 	switch columnsCount {
+// 	case model.UserDataFieldCount:
+// 		user, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		c.Json(http.StatusOK, user)
-	default:
-		user, err := crud.GetUserByNameMap(c.AuthInfo.(model.AuthInfo).Name.String)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		c.Json(http.StatusOK, user)
+// 	default:
+// 		user, err := crud.GetUserByNameMap(c.AuthInfo.(model.AuthInfo).Name.String)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		c.Json(http.StatusOK, user)
-	}
+// 		c.Json(http.StatusOK, user)
+// 	}
+// }
+
+func GetMyInfo(c *fiber.Ctx) error {
+	// get cookie
+	cookie := c.Cookies("session")
+
 }
 
 func UpdateMyInfo(c *router.Context) {

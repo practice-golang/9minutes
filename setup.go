@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -14,17 +15,16 @@ import (
 	"9minutes/handler"
 	"9minutes/logging"
 	"9minutes/model"
-	"9minutes/router"
 	"9minutes/wsock"
 
 	"github.com/alexedwards/scs/etcdstore"
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gomodule/redigo/redis"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/rs/cors"
 	"gopkg.in/ini.v1"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -321,39 +321,37 @@ func setupLogger() {
 }
 
 func setupRouter() {
-	router.StaticPath = StaticPath
-	router.UploadPath = UploadPath
-	router.Content = Content
-	router.EmbedStatic = EmbedStatic
+	// router.StaticPath = StaticPath
+	// router.UploadPath = UploadPath
+	// router.Content = Content
+	// router.EmbedStatic = EmbedStatic
 
-	router.SetupStaticServer()
+	// router.SetupStaticServer()
 
-	r := router.New()
+	// r := router.New()
 
-	setPAGEs(r)        // HTML, Assets, Login/Signup
-	setPageAdmin(r)    // Admin
-	setPageContent(r)  // Content
-	setPageMyPage(r)   // MyPage
-	setPageHTMLs(r)    // HTML for both user and anonymous
-	setApiBoard(r)     // API Board
-	setApiUploader(r)  // API Uploader
-	setApiLogin(r)     // API Login, Logout, Signup
-	setApiAdmin(r)     // API Admin
-	setAPIs(r)         // API
-	setOthers(r)       // Others
-	setRouterNotUse(r) // Not use, should be removed at future
+	cfg := fiber.Config{
+		AppName:               "hello-fiber",
+		DisableStartupMessage: true,
+		JSONEncoder:           json.Marshal,
+		JSONDecoder:           json.Unmarshal,
+	}
+	app = fiber.New(cfg)
 
-	ServerHandler = auth.SessionManager.LoadAndSave(cors.Default().Handler(r))
-	// ServerHandler = cors.Default().Handler(r)
-	// c := cors.New(cors.Options{
-	// 	AllowedOrigins:   []string{"http://"+listen},
-	// 	AllowedMethods:   []string{"GET"},
-	// 	AllowedHeaders:   []string{"*"},
-	// 	AllowCredentials: true,
-	// 	Debug:            false,
-	// })
-	// ServerHandler := c.Handler(r)
+	// setPAGEs(r)        // HTML, Assets, Login/Signup
+	// setPageAdmin(r)    // Admin
+	// setPageContent(app) // Content
+	// setPageMyPage(r)   // MyPage
+	// setPageHTMLs(app) // HTML for both user and anonymous
+	// setApiBoard(r)     // API Board
+	// setApiUploader(r)  // API Uploader
+	setApiLogin(app) // API Login, Logout, Signup
+	setApiAdmin(app) // API Admin
+	setAPIs(app)     // API
+	// setOthers(r)       // Others
+	// setRouterNotUse(app) // Not use, should be removed at future
 
+	// ServerHandler = auth.SessionManager.LoadAndSave(cors.Default().Handler(r))
 }
 
 func doSetup() {

@@ -27,6 +27,7 @@ import (
 	// "github.com/goccy/go-json"
 
 	"github.com/dchest/captcha"
+	"github.com/gofiber/fiber/v2"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -48,11 +49,6 @@ var (
 
 var bm = bluemonday.UGCPolicy()
 
-// var bm := bluemonday.NewPolicy()
-// bm.AllowStandardURLs()
-// bm.AllowAttrs("href").OnElements("a")
-// bm.AllowElements([]string{"p", "br", "pre", "code"}...)
-
 func Index(c *router.Context) {
 	c.URL.Path = "/index.html"
 	HandleHTML(c)
@@ -63,17 +59,8 @@ func AdminIndex(c *router.Context) {
 	HandleHTML(c)
 }
 
-func HealthCheck(c *router.Context) {
-	c.Text(http.StatusOK, "Ok")
-}
-
-func Hello(c *router.Context) {
-	switch c.Method {
-	case http.MethodGet:
-		c.Text(http.StatusOK, "Hello world GET")
-	case http.MethodPost:
-		c.Text(http.StatusOK, "Hello world POST")
-	}
+func HealthCheck(c *fiber.Ctx) error {
+	return c.SendString("Ok")
 }
 
 func HelloParam(c *router.Context) {

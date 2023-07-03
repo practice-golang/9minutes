@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"net/http"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -15,6 +15,8 @@ import (
 	"9minutes/email"
 	"9minutes/handler"
 	"9minutes/logging"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 //go:embed 9minutes.ini
@@ -35,23 +37,23 @@ var UploadPath = config.UploadPath
 var sessionStoreInfo = config.StoreInfoMemory
 
 var (
-	ListeningIP   string = "localhost"
-	ListeningPort string = "4416"
-	ServerHandler http.Handler
-
+	ListeningIP      string = "localhost"
+	ListeningPort    string = "4416"
 	ListeningAddress string
+
+	app *fiber.App
 )
 
 func firstRun() {
-	// db.Info = config.DatabaseInfoSQLite
+	db.Info = config.DatabaseInfoSQLite
 	// db.Info = config.DatabaseInfoMySQL
 	// db.Info = config.DatabaseInfoPgPublic
 	// db.Info = config.DatabaseInfoSqlServer
 
 	// db.Info = config.DatabaseInfoOracle
 	// db.InfoOracleAdmin = config.DatabaseInfoOracleSystem
-	db.Info = config.DatabaseInfoOracleCloud
-	db.InfoOracleAdmin = config.DatabaseInfoOracleCloudAdmin
+	// db.Info = config.DatabaseInfoOracleCloud
+	// db.InfoOracleAdmin = config.DatabaseInfoOracleCloudAdmin
 
 	email.Info = config.EmailServerDirect
 	// email.Info = config.EmailServerSMTP
@@ -210,9 +212,5 @@ func main() {
 
 	logging.Object.Log().Timestamp().Str("listen", ListeningIP+"\n").Send()
 	println("Listen", ListeningAddress)
-
-	err := http.ListenAndServe(ListeningAddress, ServerHandler)
-	if err != nil {
-		logging.Object.Warn().Err(err).Timestamp().Msg("Server start failed")
-	}
+	log.Fatal(app.Listen(ListeningAddress))
 }

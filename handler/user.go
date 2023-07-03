@@ -19,13 +19,14 @@ import (
 
 	"github.com/blockloop/scan"
 	"github.com/dchest/captcha"
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/mileusna/useragent"
 )
 
-func Login(c *router.Context) {
+func Login(c *fiber.Ctx) error {
 	failBody := `<meta http-equiv="refresh" content="2; url=/"></meta>`
 
 	destination := c.FormValue("destination")
@@ -37,8 +38,7 @@ func Login(c *router.Context) {
 	password := c.FormValue("password")
 
 	if username == "" || password == "" {
-		c.Html(http.StatusBadRequest, []byte(failBody+`Missing parameter`))
-		return
+		return c.Status(http.StatusBadRequest).SendString(failBody + `Missing parameter`)
 	}
 
 	var users []model.UserData
@@ -58,29 +58,25 @@ func Login(c *router.Context) {
 
 	rows, err := db.Con.Query(sql)
 	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`DB error or User may not exists`))
-		return
+		return c.Status(http.StatusBadRequest).SendString(failBody + `DB error or User may not exists`)
 	}
 	defer rows.Close()
 
 	err = scan.Rows(&users, rows)
 	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`User may not exists`))
-		return
+		return c.Status(http.StatusBadRequest).SendString(failBody + `User may not exists`)
 	}
 
 	if len(users) == 0 {
-		c.Html(http.StatusBadRequest, []byte(failBody+`User not exists`))
-		return
+		return c.Status(http.StatusBadRequest).SendString(failBody + `User not exists`)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password.String), []byte(password))
 	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`Check password`))
-		return
+		return c.Status(http.StatusBadRequest).SendString(failBody + `Check password`)
 	}
 
-	ua := useragent.Parse(c.Request.UserAgent())
+	ua := useragent.Parse(c.Get("User-Agent"))
 	deviceType := ""
 	switch true {
 	case ua.Desktop:
@@ -95,7 +91,7 @@ func Login(c *router.Context) {
 
 	authinfo := model.AuthInfo{
 		Name:       null.NewString(username, true),
-		IpAddr:     null.NewString(c.RemoteAddr, true),
+		IpAddr:     null.NewString(c.IP(), true),
 		Device:     null.NewString(ua.Device, true),
 		DeviceType: null.NewString(deviceType, true),
 		Os:         null.NewString(ua.OS, true),
@@ -107,8 +103,7 @@ func Login(c *router.Context) {
 	// auth.SetupCookieToken(c.ResponseWriter, authinfo)
 	auth.SetCookieSession(c, authinfo)
 
-	// c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
-	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=`+destination+`"></meta>`))
+	return c.Status(http.StatusOK).SendString(`<meta http-equiv="refresh" content="0; url=` + destination + `"></meta>`)
 }
 
 // Logout - Expire cookie

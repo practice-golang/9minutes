@@ -61,17 +61,17 @@ func LoadHTML(c *router.Context) ([]byte, error) {
 	}
 
 	if auth.SessionManager != nil && auth.SessionManager.Exists(c.Context(), "userid") {
-		ses, err := auth.GetCookieSession(c)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
-		}
-		c.AuthInfo = ses
-		if c.AuthInfo != nil {
-			authinfo := c.AuthInfo.(model.AuthInfo)
-			if authinfo.Name.Valid {
-				name = authinfo.Name.String
-			}
-		}
+		// ses, err := auth.GetCookieSession(c)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
+		// }
+		// c.AuthInfo = ses
+		// if c.AuthInfo != nil {
+		// 	authinfo := c.AuthInfo.(model.AuthInfo)
+		// 	if authinfo.Name.Valid {
+		// 		name = authinfo.Name.String
+		// 	}
+		// }
 	}
 
 	if name == "" {

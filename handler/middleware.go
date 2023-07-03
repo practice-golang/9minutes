@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"9minutes/auth"
-	"9minutes/crud"
 	"9minutes/router"
 )
 
@@ -20,30 +19,30 @@ func HelloMiddleware(next router.Handler) router.Handler {
 // AdminOrManagerMiddleware - Check if user is admin or manager
 func AdminOrManagerMiddleware(next router.Handler) router.Handler {
 	return func(c *router.Context) {
-		claim, err := auth.GetCookieSession(c)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
-			c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
+		// claim, err := auth.GetCookieSession(c)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
+		// 	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
 
-			return
-		}
+		// 	return
+		// }
 
-		userInfo, err := crud.GetUserByName(claim.Name.String)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
-			c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
+		// userInfo, err := crud.GetUserByName(claim.Name.String)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
+		// 	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
 
-			return
-		}
+		// 	return
+		// }
 
-		if userInfo.Grade.String != "admin" && userInfo.Grade.String != "manager" {
-			auth.ExpireCookie(c.ResponseWriter)
-			c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
+		// if userInfo.Grade.String != "admin" && userInfo.Grade.String != "manager" {
+		// 	auth.ExpireCookie(c.ResponseWriter)
+		// 	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
 
-			return
-		}
+		// 	return
+		// }
 
-		c.AuthInfo = claim
+		// c.AuthInfo = claim
 
 		next(c)
 	}
@@ -81,16 +80,16 @@ func AuthMiddleware(next router.Handler) router.Handler {
 // AuthSessionMiddleware - Check if user is logged in for session
 func AuthSessionMiddleware(next router.Handler) router.Handler {
 	return func(c *router.Context) {
-		claim, err := auth.GetCookieSession(c)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
+		// claim, err := auth.GetCookieSession(c)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
 
-			next(c)
+		// 	next(c)
 
-			return
-		}
+		// 	return
+		// }
 
-		c.AuthInfo = claim
+		// c.AuthInfo = claim
 
 		next(c)
 	}
@@ -99,17 +98,17 @@ func AuthSessionMiddleware(next router.Handler) router.Handler {
 // RestrictSessionMiddleware - Check if user is logged in for session
 func RestrictSessionMiddleware(next router.Handler) router.Handler {
 	return func(c *router.Context) {
-		claim, err := auth.GetCookieSession(c)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
+		// claim, err := auth.GetCookieSession(c)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
 
-			// c.Text(http.StatusUnauthorized, "Auth error")
-			c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/login.html"></meta>`))
+		// 	// c.Text(http.StatusUnauthorized, "Auth error")
+		// 	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/login.html"></meta>`))
 
-			return
-		}
+		// 	return
+		// }
 
-		c.AuthInfo = claim
+		// c.AuthInfo = claim
 
 		next(c)
 	}
@@ -117,17 +116,17 @@ func RestrictSessionMiddleware(next router.Handler) router.Handler {
 
 func AuthApiSessionMiddleware(next router.Handler) router.Handler {
 	return func(c *router.Context) {
-		claim, err := auth.GetCookieSession(c)
-		if err != nil {
-			auth.ExpireCookie(c.ResponseWriter)
-			// c.Text(http.StatusUnauthorized, "Auth error")
+		// claim, err := auth.GetCookieSession(c)
+		// if err != nil {
+		// 	auth.ExpireCookie(c.ResponseWriter)
+		// 	// c.Text(http.StatusUnauthorized, "Auth error")
 
-			next(c)
+		// 	next(c)
 
-			return
-		}
+		// 	return
+		// }
 
-		c.AuthInfo = claim
+		// c.AuthInfo = claim
 
 		next(c)
 	}
