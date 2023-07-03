@@ -3,6 +3,7 @@
 * [ ] Bug
     * [ ] Add user custom column not showing in admin page
     * [ ] Edit user custom column not showing in admin page
+* [ ] Move folders under static - admin, html, static..
 * [ ] Board list generation for menu items
 * [ ] Page, HTML - Use Svelte component
 * [ ] Show/Edit default and custom column in mypage
