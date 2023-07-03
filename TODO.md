@@ -1,14 +1,14 @@
 # Todo
 
-* [ ] Bug
-    * [ ] Add user custom column not showing in admin page
-    * [ ] Edit user custom column not showing in admin page
 * [ ] Move folders under static - admin, html, static..
 * [ ] Board list generation for menu items
 * [ ] Page, HTML - Use Svelte component
 * [ ] Show/Edit default and custom column in mypage
 * [ ] Change to go-fiber
-* [ ] Use or delete approval column
+* [ ] Choose use or delete approval column
+* [ ] User list
+    * [ ] Add user custom column not showing in admin page
+    * [ ] Edit user custom column not showing in admin page
 * [ ] Dump
     * [ ] DB dump, migration - Need to try to taste [goose](https://github.com/pressly/goose), [sql-migrate](https://github.com/rubenv/sql-migrate), [migrate](https://github.com/golang-migrate/migrate), [dbmate](https://github.com/amacneil/dbmate)
     * [ ] files dump, migration - No idea yet
