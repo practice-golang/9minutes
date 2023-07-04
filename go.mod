@@ -14,13 +14,13 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gobwas/ws v1.2.1
 	github.com/gofiber/fiber/v2 v2.47.0
+	github.com/gofiber/template/html/v2 v2.0.4
 	github.com/gomodule/redigo v1.8.9
 	github.com/lestrrat-go/jwx v1.2.26
 	github.com/lib/pq v1.10.9
 	github.com/microcosm-cc/bluemonday v1.0.24
 	github.com/mileusna/useragent v1.3.3
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/rs/cors v1.9.0
 	github.com/rs/zerolog v1.29.1
 	github.com/sijms/go-ora/v2 v2.7.8
 	github.com/stretchr/testify v1.8.4
@@ -43,6 +43,8 @@ require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/gofiber/template v1.8.2 // indirect
+	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect

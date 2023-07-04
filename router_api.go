@@ -9,36 +9,16 @@ import (
 
 func setAPIs(a *fiber.App) {
 	/* API */
-	g := a.Group("/api")
-	g.Get("/health", handler.HealthCheck)
-	g.Post("/login", handler.LoginAPI)
+	gapi := a.Group("/api")
+	gapi.Get("/health", handler.HealthCheck)
+	gapi.Post("/login", handler.LoginAPI)
+	gapi.Post("/signup", handler.SignupAPI)
 
-	// /* API myinfo */
-	// gmi := a.Group("/api/myinfo", handler.AuthApiSessionMiddleware)
-	gmi := a.Group("/api/myinfo") // Require add session middleware
-	gmi.Get("/", handler.GetMyInfo)
-	// gmi.PUT(`(/?)$`, handler.UpdateMyInfo)
-	// gmi.DELETE(`(/?)$`, handler.ResignUser)
-
-	// /* API File & Directory */
-	// g.POST(`/dir/list$`, handler.HandleGetDir)
-
-	// /* Captcha */
-	// g.GET(`/captcha/[^/]+\.png$`, handler.GetCaptchaImage)
-	// g.PATCH(`/captcha$`, handler.RenewCaptcha)
-}
-
-func setApiLogin(a *fiber.App) {
-	/* Login, Logout */
-	a.Post("/login", handler.Login)
-	// a.GET(`^/logout`, handler.Logout)
-	// a.POST(`/api/signup`, handler.Signup)
-
-	// /* Reset password */
-	// a.POST(`/password-reset$`, handler.ResetPassword)
-
-	// /* User verification - Should be moved at next time */
-	// a.GET(`/verify`, handler.UserVerification)
+	/* API myinfo */
+	gmyinfo := gapi.Group("/myinfo") // Require add session middleware
+	gmyinfo.Get("/", handler.GetMyInfo)
+	gmyinfo.Put("/", handler.UpdateMyInfo)
+	gmyinfo.Delete("/", handler.ResignUser)
 }
 
 func setApiUploader(r *router.App) {

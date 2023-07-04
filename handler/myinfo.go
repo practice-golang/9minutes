@@ -4,7 +4,6 @@ import (
 	"9minutes/consts"
 	"9minutes/crud"
 	"9minutes/model"
-	"9minutes/router"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -49,24 +48,28 @@ func GetMyInfo(c *fiber.Ctx) error {
 	}
 }
 
-func UpdateMyInfo(c *router.Context) {
+func UpdateMyInfo(c *fiber.Ctx) error {
 	var err error
 
-	if c.AuthInfo == nil {
-		c.Text(http.StatusForbidden, "Unauthorized")
-		return
-	}
-	userDataOLD, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+	sess, err := store.Get(c)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	name := sess.Get("name")
+	if name == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	userDataOLD, err := crud.GetUserByName(name.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	userDataNEW := make(map[string]interface{})
-	err = json.NewDecoder(c.Body).Decode(&userDataNEW)
+	err = json.Unmarshal(c.Body(), &userDataNEW)
 	if err != nil {
-		c.Text(http.StatusBadRequest, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
 	}
 
 	userDataNEW["idx"] = fmt.Sprint(userDataOLD.Idx.Int64)
@@ -74,14 +77,12 @@ func UpdateMyInfo(c *router.Context) {
 	if _, ok := userDataNEW["password"]; ok {
 		err = bcrypt.CompareHashAndPassword([]byte(userDataOLD.Password.String), []byte(userDataNEW["old-password"].(string)))
 		if err != nil {
-			c.Text(http.StatusBadRequest, "wrong password")
-			return
+			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
 		}
 
 		password, err := bcrypt.GenerateFromPassword([]byte(userDataNEW["password"].(string)), consts.BcryptCost)
 		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 		}
 
 		userDataNEW["password"] = string(password)
@@ -90,40 +91,42 @@ func UpdateMyInfo(c *router.Context) {
 
 	err = crud.UpdateUserMap(userDataNEW)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	result := map[string]string{
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-func ResignUser(c *router.Context) {
+func ResignUser(c *fiber.Ctx) error {
 	var err error
 
-	if c.AuthInfo == nil {
-		c.Text(http.StatusForbidden, "Unauthorized")
-		return
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	userData, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
+	name := sess.Get("name")
+	if name == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	userData, err := crud.GetUserByName(name.(string))
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	err = crud.ResignUser(userData.Idx.Int64)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	result := map[string]string{
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }

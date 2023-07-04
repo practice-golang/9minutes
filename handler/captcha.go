@@ -8,26 +8,30 @@ import (
 	"strings"
 
 	"github.com/dchest/captcha"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GetCaptchaImage(c *router.Context) {
-	captchaID := strings.TrimSuffix(filepath.Base(c.URL.Path), filepath.Ext(c.URL.Path))
+func GetCaptchaImage(c *fiber.Ctx) error {
+	var err error
+	captchaID := strings.TrimSuffix(filepath.Base(c.Path()), filepath.Ext(c.Path()))
 
-	if c.URL.Query().Has("reload") {
+	if c.Query("reload") != "" {
 		captcha.Reload(captchaID)
+		return nil
 	}
 
-	c.ResponseWriter.Header().Set("Content-Type", "image/png")
-	err := captcha.WriteImage(c.ResponseWriter, captchaID, captcha.StdWidth, captcha.StdHeight)
+	c.Response().Header.Set("Content-Type", "image/png")
+	err = captcha.WriteImage(c.Response().BodyWriter(), captchaID, captcha.StdWidth, captcha.StdHeight)
 	if err != nil {
 		log.Println(err)
 	}
+
+	return nil
 }
 
-func RenewCaptcha(c *router.Context) {
+func RenewCaptcha(c *fiber.Ctx) error {
 	captchaID := captcha.New()
-
-	c.Json(http.StatusOK, map[string]interface{}{"captcha-id": captchaID})
+	return c.Status(http.StatusOK).JSON(map[string]interface{}{"captcha-id": captchaID})
 }
 
 func VerifyCaptcha(c *router.Context) {

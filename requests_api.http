@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-
+@cookie = session_id=97d2b91f-8e71-4cb4-a37b-3577d2dea425;
 
 ### Group - health
 GET {{uri}}/api/health
@@ -18,26 +18,16 @@ Origin: {{uri}}
 GET {{uri}}/api/myinfo HTTP/1.1
 content-type: application/json
 Origin: {{uri}}
-Cookie: session_id=1e5318e7-9cc0-47a4-8a41-fad48c14fa38;
+Cookie: {{cookie}}
 
-
-
-### Group #4 - Restricted
-GET {{uri}}/api/restricted HTTP/1.1
-Authorization: Bearer eyJhbGciOiJSUzM4NCIsImtpZCI6InByYWN0aWNlLWdvbGFuZy85bSBzZWNyZXQiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NTU1NTkxMTAsImlhdCI6MTY1NDk1NDMxMCwiaXNzIjoiOW0iLCJzdWIiOiJhdXRoIHRva2VuIiwidG9rZW4iOnsibmFtZSI6Ikphc29uIiwiaXAtYWRkciI6IjEyNy4wLjAuMTo1ODc0MiIsInBsYXRmb3JtIjoiIiwiZHVyYXRpb24iOjYwNDgwMH19.y51l4hudC8TI8croCQobVLekUoGiRAd0PF3Jdxd1W1OS6330x3OSQ3QruutflIPDfBhHH8BAbkFS4X4o2LTTsQYsy8wVLwAZAq-fmkEQ-acdgnInTgh1XAJojA1vR8uYR63RnUp8ZAfZ-MayEg48fon_oscEJETRdE7JRvCAFx34JQUp0xnxOiH8kxpbIgwOdezMwFWQhAbT8tbOgiKi1l55ytWoi3c8YgvoKR6CUknqwPeA7gsBFl9hS1JX3lwe1G1AgC45FFi_sFSGaNj_HQQHkRovfgzWdvpYEcljXPoBouVREHVYurydRDEVAlZfEc3ER0GKmzyXLbjv82dQlg
-
-### Group #4-1 - Restricted
-GET {{uri}}/api/admin/restricted HTTP/1.1
-
-
-### File and directory #1
-POST {{uri}}/api/dir/list
+### Group - UpdateMyInfo
+PUT {{uri}}/api/myinfo HTTP/1.1
 content-type: application/json
 Origin: {{uri}}
+Cookie: {{cookie}}
 
 {
-    "path": "..",
-    "sort": "name",
-    "order": "asc"
+    "username": "admin",
+    "old-password": "admin",
+    "password": "admin"
 }
-

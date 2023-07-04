@@ -22,6 +22,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html/v2"
 	"github.com/gomodule/redigo/redis"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
@@ -321,39 +322,33 @@ func setupLogger() {
 }
 
 func setupRouter() {
-	// router.StaticPath = StaticPath
-	// router.UploadPath = UploadPath
-	// router.Content = Content
-	// router.EmbedStatic = EmbedStatic
-
-	// router.SetupStaticServer()
-
-	// r := router.New()
-
 	handler.NewSessionStore()
 
+	engine := html.New("./static1/html", ".html")
+	engine.Debug(true)
 	cfg := fiber.Config{
-		AppName:               "hello-fiber",
-		DisableStartupMessage: true,
+		AppName:               "9minutes",
+		DisableStartupMessage: false,
 		JSONEncoder:           json.Marshal,
 		JSONDecoder:           json.Unmarshal,
+		Views:                 engine,
 	}
 	app = fiber.New(cfg)
 
 	// setPAGEs(r)        // HTML, Assets, Login/Signup
 	// setPageAdmin(r)    // Admin
-	// setPageContent(app) // Content
 	// setPageMyPage(r)   // MyPage
-	// setPageHTMLs(app) // HTML for both user and anonymous
 	// setApiBoard(r)     // API Board
 	// setApiUploader(r)  // API Uploader
-	setApiLogin(app) // API Login, Logout, Signup
+
 	setApiAdmin(app) // API Admin
 	setAPIs(app)     // API
-	// setOthers(r)       // Others
+
+	// setOthers(r)     // Others - make live only ws
 	// setRouterNotUse(app) // Not use, should be removed at future
 
-	// ServerHandler = auth.SessionManager.LoadAndSave(cors.Default().Handler(r))
+	// setStatic(app)    // Content
+	setPage(app) // HTML for both user and anonymous
 }
 
 func doSetup() {

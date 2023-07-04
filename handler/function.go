@@ -11,9 +11,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
-
-	"html/template"
 
 	"9minutes/config"
 	"9minutes/crud"
@@ -49,15 +48,15 @@ var (
 
 var bm = bluemonday.UGCPolicy()
 
-func Index(c *router.Context) {
-	c.URL.Path = "/index.html"
-	HandleHTML(c)
-}
+// func Index(c *router.Context) {
+// 	c.URL.Path = "/index.html"
+// 	HandleHTML(c)
+// }
 
-func AdminIndex(c *router.Context) {
-	c.URL.Path = "/admin/index.html"
-	HandleHTML(c)
-}
+// func AdminIndex(c *router.Context) {
+// 	c.URL.Path = "/admin/index.html"
+// 	HandleHTML(c)
+// }
 
 func HealthCheck(c *fiber.Ctx) error {
 	return c.SendString("Ok")
@@ -111,14 +110,22 @@ func PostJson(c *router.Context) {
 	c.Json(http.StatusOK, user)
 }
 
-func HandleHTML(c *router.Context) {
-	h, err := LoadHTML(c)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+// HandleHTML - Handle HTML template layout
+func HandleHTML(c *fiber.Ctx) error {
+	name := c.Path()[1:]
+	if name == "" {
+		name = "index"
 	}
 
-	c.Html(http.StatusOK, h)
+	err := c.Render(name, fiber.Map{})
+	if err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			return c.Status(http.StatusNotFound).SendString("Page not Found")
+		}
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return nil
 }
 
 func HandleLogin(c *router.Context) {

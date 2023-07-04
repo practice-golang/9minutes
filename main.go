@@ -33,6 +33,7 @@ var StaticEmbed embed.FS
 
 var StaticPath = config.StaticPath
 var UploadPath = config.UploadPath
+var HtmlPath = config.HtmlPath
 
 var sessionStoreInfo = config.StoreInfoMemory
 
@@ -196,7 +197,6 @@ func main() {
 
 		switch *flagGet {
 		case "html":
-			// writeEmbedToDir("html")
 			exportStaticEmbed()
 			fmt.Println("done to export html files")
 		case "dkim":

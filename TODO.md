@@ -1,10 +1,10 @@
 # Todo
 
-* [ ] Move folders under static - admin, html, static..
+* [ ] Change to go-fiber
+* [ ] Move and clean up folders under static - admin, html, static..
 * [ ] Board list generation for menu items
 * [ ] Page, HTML - Use Svelte component
 * [ ] Show/Edit default and custom column in mypage
-* [ ] Change to go-fiber
 * [ ] Choose use or delete approval column
 * [ ] User list
     * [ ] Add user custom column not showing in admin page
