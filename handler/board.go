@@ -4,43 +4,42 @@ import (
 	"9minutes/crud"
 	"9minutes/db"
 	"9minutes/model"
-	"9minutes/router"
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/gofiber/fiber/v2"
 	"gopkg.in/guregu/null.v4"
 )
 
-func HandleBoardList(c *router.Context) {
+func HandleBoardList(c *fiber.Ctx) error {
 	var err error
 
-	queries := c.URL.Query()
+	// queries := c.URL.Query()
+	queries := c.Queries()
 
 	listingOptions := model.BoardListingOptions{}
-	listingOptions.Search = null.StringFrom(queries.Get("search"))
+	listingOptions.Search = null.StringFrom(queries["search"])
 
 	listingOptions.Page = null.IntFrom(1)
 	listingOptions.ListCount = null.IntFrom(100)
 
-	if queries.Get("count") != "" {
-		countPerPage, err := strconv.Atoi(queries.Get("count"))
+	if queries["count"] != "" {
+		countPerPage, err := strconv.Atoi(queries["count"])
 		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
 		}
 
 		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
 	}
 
-	if queries.Get("page") != "" {
-		page := queries.Get("page")
+	if queries["page"] != "" {
+		page := queries["page"]
 		pageNum, err := strconv.Atoi(page)
 		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
 		}
 
 		listingOptions.Page = null.IntFrom(int64(pageNum))
@@ -50,44 +49,41 @@ func HandleBoardList(c *router.Context) {
 
 	h, err := LoadHTML(c)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	list, err := crud.GetBoards(listingOptions)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	listJSON, _ := json.Marshal(list)
 	h = bytes.ReplaceAll(h, []byte("$BOARD_LIST$"), listJSON)
 
-	c.Html(http.StatusOK, h)
+	return c.Status(http.StatusOK).Send(h)
 }
 
 // GetBoards - API Get boards list
-func GetBoards(c *router.Context) {
-	queries := c.URL.Query()
+func GetBoards(c *fiber.Ctx) error {
+	queries := c.Queries()
 
 	listingOptions := model.BoardListingOptions{}
-	listingOptions.Search = null.StringFrom(queries.Get("search"))
+	listingOptions.Search = null.StringFrom(queries["search"])
 
 	listingOptions.Page = null.IntFrom(1)
 	listingOptions.ListCount = null.IntFrom(2)
 
-	if queries.Get("page") != "" {
-		page := queries.Get("page")
+	if queries["page"] != "" {
+		page := queries["page"]
 		pageNum, err := strconv.Atoi(page)
 		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
 		}
 
-		if queries.Get("count") != "" {
-			countPerPage, err := strconv.Atoi(queries.Get("count"))
+		if queries["count"] != "" {
+			countPerPage, err := strconv.Atoi(queries["count"])
 			if err != nil {
-				c.Text(http.StatusBadRequest, err.Error())
-				return
+				return c.Status(http.StatusBadRequest).SendString(err.Error())
 			}
 
 			listingOptions.ListCount = null.IntFrom(int64(countPerPage))
@@ -100,8 +96,7 @@ func GetBoards(c *router.Context) {
 
 	result, err := crud.GetBoards(listingOptions)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 	boardList := result.BoardList
 
@@ -111,85 +106,72 @@ func GetBoards(c *router.Context) {
 		if boardList[0].Fields != nil {
 			err = json.Unmarshal(boardList[0].Fields.([]byte), &fields)
 			if err != nil {
-				c.Text(http.StatusOK, err.Error())
-				return
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 			boardList[0].Fields = fields
 		}
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }
 
 // AddBoard - Add board
-func AddBoard(c *router.Context) {
+func AddBoard(c *fiber.Ctx) error {
 	var board model.Board
 
-	err := json.NewDecoder(c.Body).Decode(&board)
+	err := c.BodyParser(&board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
 	err = crud.AddBoard(board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = db.Obj.CreateBoard(board, false)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = db.Obj.CreateComment(board, false)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	result := map[string]string{
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateBoard(c *router.Context) {
+func UpdateBoard(c *fiber.Ctx) error {
 	var boardOLD, boardNEW model.Board
 
-	err := json.NewDecoder(c.Body).Decode(&boardNEW)
-	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
-	}
+	err := c.BodyParser(&boardNEW)
 
 	boardOLD, err = crud.GetBoardByIdx(boardNEW)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = crud.UpdateBoard(boardNEW)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	if boardOLD.BoardTable.String != boardNEW.BoardTable.String {
 		err = db.Obj.RenameBoard(boardOLD, boardNEW)
 		if err != nil {
-			c.Text(http.StatusOK, err.Error())
-			return
+			return c.Status(http.StatusInternalServerError).SendString(err.Error())
 		}
 	}
 
 	if boardOLD.CommentTable.String != boardNEW.CommentTable.String {
 		err = db.Obj.RenameComment(boardOLD, boardNEW)
 		if err != nil {
-			c.Text(http.StatusOK, err.Error())
-			return
+			return c.Status(http.StatusInternalServerError).SendString(err.Error())
 		}
 	}
 
@@ -197,44 +179,40 @@ func UpdateBoard(c *router.Context) {
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteBoard(c *router.Context) {
+func DeleteBoard(c *fiber.Ctx) error {
 	var board model.Board
 
-	uri := strings.Split(c.URL.Path, "/")
+	uri := strings.Split(c.Path(), "/")
 	idx, _ := strconv.Atoi(uri[len(uri)-1])
 
 	board.Idx = null.IntFrom(int64(idx))
 
 	board, err := crud.GetBoardByIdx(board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = crud.DeleteBoard(board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = db.Obj.DeleteBoard(board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	err = db.Obj.DeleteComment(board)
 	if err != nil {
-		c.Text(http.StatusOK, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	result := map[string]string{
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }

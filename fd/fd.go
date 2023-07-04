@@ -1,7 +1,6 @@
 package fd
 
 import (
-	"9minutes/router"
 	"io/fs"
 	"os"
 	"sort"
@@ -88,21 +87,22 @@ func Dir(path string, sortby, direction int) ([]fs.DirEntry, error) {
 
 	return files, nil
 }
+
 func CheckFileExists(path string, isEmbed bool) (result bool) {
 	result = false
 
-	switch isEmbed {
-	case true:
-		ef, err := fs.Stat(router.Content, path)
-		if err == nil && ef != nil {
-			result = true
-		}
-	case false:
-		f, err := os.Stat(path)
-		if err == nil && f != nil {
-			result = true
-		}
-	}
+	// switch isEmbed {
+	// case true:
+	// 	ef, err := fs.Stat(router.Content, path)
+	// 	if err == nil && ef != nil {
+	// 		result = true
+	// 	}
+	// case false:
+	// 	f, err := os.Stat(path)
+	// 	if err == nil && f != nil {
+	// 		result = true
+	// 	}
+	// }
 
 	return
 }

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"9minutes/auth"
 	"9minutes/db"
 	"9minutes/email"
 	"9minutes/model"
@@ -141,23 +140,23 @@ var DatabaseInfoOracleCloudAdmin = db.DBInfo{
 	FilePath:      "./wallet_admin",
 }
 
-var StoreInfoMemory = auth.SessionStoreInfo{
-	StoreType: auth.MEMSTORE,
-	Address:   "",
-	Port:      "",
-}
+// var StoreInfoMemory = auth.SessionStoreInfo{
+// 	StoreType: auth.MEMSTORE,
+// 	Address:   "",
+// 	Port:      "",
+// }
 
-var StoreInfoETCD = auth.SessionStoreInfo{
-	StoreType: auth.ETCD,
-	Address:   "localhost",
-	Port:      "2379",
-}
+// var StoreInfoETCD = auth.SessionStoreInfo{
+// 	StoreType: auth.ETCD,
+// 	Address:   "localhost",
+// 	Port:      "2379",
+// }
 
-var StoreInfoRedis = auth.SessionStoreInfo{
-	StoreType: auth.REDIS,
-	Address:   "localhost",
-	Port:      "6379",
-}
+// var StoreInfoRedis = auth.SessionStoreInfo{
+// 	StoreType: auth.REDIS,
+// 	Address:   "localhost",
+// 	Port:      "6379",
+// }
 
 var EmailServerDirect = email.Config{
 	UseEmail:   false,

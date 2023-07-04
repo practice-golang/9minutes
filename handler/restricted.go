@@ -1,270 +1,264 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
-	"9minutes/consts"
-	"9minutes/crud"
-	"9minutes/model"
-	"9minutes/router"
-
-	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/guregu/null.v4"
+	"github.com/gofiber/fiber/v2"
 )
 
-func RestrictedHello(c *router.Context) {
-	authinfo := c.AuthInfo.(model.AuthInfo)
-	c.Text(http.StatusOK, "Hello "+authinfo.Name.String)
-}
-
-func RestrictedApiAdminHello(c *router.Context) {
-	authinfo := c.AuthInfo.(model.AuthInfo)
-	c.Text(http.StatusOK, "Hello "+authinfo.Name.String)
-}
-
-func GetUserColumns(c *router.Context) {
-	result, err := crud.GetUserColumnsList()
+func RestrictedHello(c *fiber.Ctx) error {
+	sess, err := store.Get(c)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	c.Json(http.StatusOK, result)
+	name := sess.Get("name")
+	if name == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	return c.Status(http.StatusOK).Send([]byte("Hello " + name.(string)))
 }
 
-func AddUserColumn(c *router.Context) {
-	var userColumn model.UserColumn
+// func GetUserColumns(c *router.Context) {
+// 	result, err := crud.GetUserColumnsList()
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-	err := json.NewDecoder(c.Body).Decode(&userColumn)
-	if err != nil {
-		c.Text(http.StatusBadRequest, err.Error())
-		return
-	}
+// 	c.Json(http.StatusOK, result)
+// }
 
-	err = crud.AddUserColumn(userColumn)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
+// func AddUserColumn(c *router.Context) {
+// 	var userColumn model.UserColumn
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 	err := json.NewDecoder(c.Body).Decode(&userColumn)
+// 	if err != nil {
+// 		c.Text(http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	c.Json(http.StatusOK, result)
-}
+// 	err = crud.AddUserColumn(userColumn)
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-func UpdateUserColumn(c *router.Context) {
-	var userColumn model.UserColumn
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
 
-	err := json.NewDecoder(c.Body).Decode(&userColumn)
-	if err != nil {
-		c.Text(http.StatusBadRequest, err.Error())
-		return
-	}
+// 	c.Json(http.StatusOK, result)
+// }
 
-	err = crud.UpdateUserColumn(userColumn)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
+// func UpdateUserColumn(c *router.Context) {
+// 	var userColumn model.UserColumn
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 	err := json.NewDecoder(c.Body).Decode(&userColumn)
+// 	if err != nil {
+// 		c.Text(http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	c.Json(http.StatusOK, result)
-}
+// 	err = crud.UpdateUserColumn(userColumn)
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-func DeleteUserColumn(c *router.Context) {
-	var userColumn model.UserColumn
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
 
-	uri := strings.Split(c.URL.Path, "/")
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
+// 	c.Json(http.StatusOK, result)
+// }
 
-	userColumn.Idx = null.IntFrom(int64(idx))
+// func DeleteUserColumn(c *router.Context) {
+// 	var userColumn model.UserColumn
 
-	err := crud.DeleteUserColumn(userColumn)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
+// 	uri := strings.Split(c.URL.Path, "/")
+// 	idx, _ := strconv.Atoi(uri[len(uri)-1])
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 	userColumn.Idx = null.IntFrom(int64(idx))
 
-	c.Json(http.StatusOK, result)
-}
+// 	err := crud.DeleteUserColumn(userColumn)
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-func GetUsersList(c *router.Context) {
-	// Use struct with default columns or map with default and user defined columns
-	columnsCount, _ := crud.GetUserColumnsCount()
-	// columnsCount, _ := db.Obj.GetColumnCount(db.Info.UserTable)
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
 
-	queries := c.URL.Query()
-	search := queries.Get("search")
+// 	c.Json(http.StatusOK, result)
+// }
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		result, err := crud.GetUsersList(search)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
+// func GetUsersList(c *router.Context) {
+// 	// Use struct with default columns or map with default and user defined columns
+// 	columnsCount, _ := crud.GetUserColumnsCount()
+// 	// columnsCount, _ := db.Obj.GetColumnCount(db.Info.UserTable)
 
-		c.Json(http.StatusOK, result)
-	default:
-		result, err := crud.GetUsersListMap(search)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
+// 	queries := c.URL.Query()
+// 	search := queries.Get("search")
 
-		c.Json(http.StatusOK, result)
-	}
-}
+// 	switch columnsCount {
+// 	case model.UserDataFieldCount:
+// 		result, err := crud.GetUsersList(search)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-func AddUser(c *router.Context) {
-	var err error
+// 		c.Json(http.StatusOK, result)
+// 	default:
+// 		result, err := crud.GetUsersListMap(search)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-	now := time.Now().Format("20060102150405")
-	columnsCount, _ := crud.GetUserColumnsCount()
+// 		c.Json(http.StatusOK, result)
+// 	}
+// }
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		var userData model.UserData
+// func AddUser(c *router.Context) {
+// 	var err error
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
+// 	now := time.Now().Format("20060102150405")
+// 	columnsCount, _ := crud.GetUserColumnsCount()
 
-		password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-		userData.Password = null.StringFrom(string(password))
+// 	switch columnsCount {
+// 	case model.UserDataFieldCount:
+// 		var userData model.UserData
 
-		userData.RegDTTM = null.StringFrom(now)
+// 		err = json.NewDecoder(c.Body).Decode(&userData)
+// 		if err != nil {
+// 			c.Text(http.StatusBadRequest, err.Error())
+// 			return
+// 		}
 
-		err = crud.AddUser(userData)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-	default:
-		userData := make(map[string]interface{})
+// 		password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 		userData.Password = null.StringFrom(string(password))
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
+// 		userData.RegDTTM = null.StringFrom(now)
 
-		password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-		userData["password"] = string(password)
+// 		err = crud.AddUser(userData)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 	default:
+// 		userData := make(map[string]interface{})
 
-		userData["reg-dttm"] = now
+// 		err = json.NewDecoder(c.Body).Decode(&userData)
+// 		if err != nil {
+// 			c.Text(http.StatusBadRequest, err.Error())
+// 			return
+// 		}
 
-		err = crud.AddUserMap(userData)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
+// 		password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 		userData["password"] = string(password)
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 		userData["reg-dttm"] = now
 
-	c.Json(http.StatusOK, result)
-}
+// 		err = crud.AddUserMap(userData)
+// 		if err != nil {
+// 			c.Text(http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 	}
 
-func UpdateUser(c *router.Context) {
-	var err error
-	columnsCount, _ := crud.GetUserColumnsCount()
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		var userData model.UserData
+// 	c.Json(http.StatusOK, result)
+// }
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
+// func UpdateUser(c *router.Context) {
+// 	var err error
+// 	columnsCount, _ := crud.GetUserColumnsCount()
 
-		if userData.Password.Valid {
-			password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
-			if err != nil {
-				c.Text(http.StatusInternalServerError, err.Error())
-				return
-			}
-			userData.Password = null.StringFrom(string(password))
-		}
+// 	switch columnsCount {
+// 	case model.UserDataFieldCount:
+// 		var userData model.UserData
 
-		err = crud.UpdateUser(userData)
-	default:
-		userData := make(map[string]interface{})
+// 		err = json.NewDecoder(c.Body).Decode(&userData)
+// 		if err != nil {
+// 			c.Text(http.StatusBadRequest, err.Error())
+// 			return
+// 		}
 
-		err = json.NewDecoder(c.Body).Decode(&userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
+// 		if userData.Password.Valid {
+// 			password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
+// 			if err != nil {
+// 				c.Text(http.StatusInternalServerError, err.Error())
+// 				return
+// 			}
+// 			userData.Password = null.StringFrom(string(password))
+// 		}
 
-		if _, ok := userData["password"]; ok {
-			password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
-			if err != nil {
-				c.Text(http.StatusInternalServerError, err.Error())
-				return
-			}
-			userData["password"] = string(password)
-		}
+// 		err = crud.UpdateUser(userData)
+// 	default:
+// 		userData := make(map[string]interface{})
 
-		err = crud.UpdateUserMap(userData)
-	}
+// 		err = json.NewDecoder(c.Body).Decode(&userData)
+// 		if err != nil {
+// 			c.Text(http.StatusBadRequest, err.Error())
+// 			return
+// 		}
 
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
+// 		if _, ok := userData["password"]; ok {
+// 			password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
+// 			if err != nil {
+// 				c.Text(http.StatusInternalServerError, err.Error())
+// 				return
+// 			}
+// 			userData["password"] = string(password)
+// 		}
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 		err = crud.UpdateUserMap(userData)
+// 	}
 
-	c.Json(http.StatusOK, result)
-}
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-func DeleteUser(c *router.Context) {
-	var userData model.UserData
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
 
-	uri := strings.Split(c.URL.Path, "/")
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
+// 	c.Json(http.StatusOK, result)
+// }
 
-	userData.Idx = null.IntFrom(int64(idx))
+// func DeleteUser(c *router.Context) {
+// 	var userData model.UserData
 
-	err := crud.DeleteUser(userData)
-	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
+// 	uri := strings.Split(c.URL.Path, "/")
+// 	idx, _ := strconv.Atoi(uri[len(uri)-1])
 
-	result := map[string]string{
-		"result": "ok",
-	}
+// 	userData.Idx = null.IntFrom(int64(idx))
 
-	c.Json(http.StatusOK, result)
-}
+// 	err := crud.DeleteUser(userData)
+// 	if err != nil {
+// 		c.Text(http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
+
+// 	result := map[string]string{
+// 		"result": "ok",
+// 	}
+
+// 	c.Json(http.StatusOK, result)
+// }

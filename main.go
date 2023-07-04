@@ -36,8 +36,6 @@ var HtmlPath = config.HtmlPath
 var FilesPath = config.FilesPath
 var UploadPath = config.UploadPath
 
-var sessionStoreInfo = config.StoreInfoMemory
-
 var (
 	ListeningIP      string = "localhost"
 	ListeningPort    string = "4416"

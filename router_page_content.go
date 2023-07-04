@@ -2,20 +2,18 @@ package main
 
 import (
 	"9minutes/handler"
-	"9minutes/router"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-func setPageContent(r *router.App) {
+func setPageContent(a *fiber.App) {
 	/* Content - Read */
-	gbrdr := r.Group(`^/board`)
-	gbrdr.Use(handler.AuthSessionMiddleware)
-	// gbrdr.GET(`/(list|gallery).html(\?[^\?]+)?$`, handler.HandleContentList)
-	gbrdr.GET(`(\?[^\?]+)?$`, handler.HandleContentList)
-	gbrdr.GET(`/read.html(\?[^\?]+)?$`, handler.HandleReadContent)
+	gbread := a.Group(`^/board`) // Require add session middleware
+	gbread.Get("/", handler.HandleContentList)
+	gbread.Get("/read.html", handler.HandleReadContent)
 
 	/* Content - Edit, Write */
-	gbew := r.Group(`^/board`)
-	gbew.Use(handler.RestrictSessionMiddleware)
-	gbew.GET(`/write.html(\?[^\?]+)?$`, handler.HandleWriteContent)
-	gbew.GET(`/edit.html(\?[^\?]+)?$`, handler.HandleEditContent)
+	gbwrite := a.Group("/board") // Require add session middleware
+	gbwrite.Get("/write.html", handler.HandleWriteContent)
+	gbwrite.Get("/edit.html", handler.HandleEditContent)
 }

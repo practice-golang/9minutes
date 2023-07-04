@@ -7,24 +7,16 @@ import (
 	"os"
 	"time"
 
-	"9minutes/auth"
 	"9minutes/config"
 	"9minutes/db"
 	"9minutes/email"
-	"9minutes/fd"
 	"9minutes/handler"
 	"9minutes/logging"
 	"9minutes/model"
 	"9minutes/wsock"
 
-	"github.com/alexedwards/scs/etcdstore"
-	"github.com/alexedwards/scs/redisstore"
-	"github.com/alexedwards/scs/v2"
-	"github.com/alexedwards/scs/v2/memstore"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
-	"github.com/gomodule/redigo/redis"
-	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"gopkg.in/ini.v1"
 
@@ -75,25 +67,25 @@ func setupINI() {
 			handler.StoreRoot = cfg.Section("dirpaths").Key("HTML_PATH").String()
 		}
 
-		if cfg.Section("session").HasKey("STORE_TYPE") {
-			switch cfg.Section("session").Key("STORE_TYPE").String() {
-			case "etcd":
-				sessionStoreInfo.StoreType = auth.ETCD
-			case "redis":
-				sessionStoreInfo.StoreType = auth.REDIS
-			default:
-				sessionStoreInfo.StoreType = auth.MEMSTORE
-			}
+		// if cfg.Section("session").HasKey("STORE_TYPE") {
+		// 	switch cfg.Section("session").Key("STORE_TYPE").String() {
+		// 	case "etcd":
+		// 		sessionStoreInfo.StoreType = auth.ETCD
+		// 	case "redis":
+		// 		sessionStoreInfo.StoreType = auth.REDIS
+		// 	default:
+		// 		sessionStoreInfo.StoreType = auth.MEMSTORE
+		// 	}
 
-			if sessionStoreInfo.StoreType != auth.MEMSTORE {
-				if cfg.Section("session").HasKey("ADDRESS") {
-					sessionStoreInfo.Address = cfg.Section("session").Key("ADDRESS").String()
-				}
-				if cfg.Section("session").HasKey("PORT") {
-					sessionStoreInfo.Address = cfg.Section("session").Key("PORT").String()
-				}
-			}
-		}
+		// 	if sessionStoreInfo.StoreType != auth.MEMSTORE {
+		// 		if cfg.Section("session").HasKey("ADDRESS") {
+		// 			sessionStoreInfo.Address = cfg.Section("session").Key("ADDRESS").String()
+		// 		}
+		// 		if cfg.Section("session").HasKey("PORT") {
+		// 			sessionStoreInfo.Address = cfg.Section("session").Key("PORT").String()
+		// 		}
+		// 	}
+		// }
 
 		if cfg.Section("database").HasKey("DBTYPE") {
 			switch cfg.Section("database").Key("DBTYPE").String() {
@@ -202,48 +194,6 @@ func setupINI() {
 	}
 }
 
-func setupSession() {
-	auth.SessionManager = scs.New()
-
-	switch sessionStoreInfo.StoreType {
-	case auth.ETCD:
-		addr := config.StoreInfoETCD.Address + ":" + config.StoreInfoETCD.Port
-		cli, err := clientv3.New(clientv3.Config{
-			Endpoints:   []string{addr},
-			DialTimeout: 5 * time.Second,
-		})
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		auth.SessionManager.Store = etcdstore.New(cli)
-	case auth.REDIS:
-		addr := config.StoreInfoRedis.Address + ":" + config.StoreInfoRedis.Port
-		pool := &redis.Pool{
-			MaxIdle: 10,
-			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", addr)
-			},
-		}
-
-		auth.SessionManager.Store = redisstore.New(pool)
-	default:
-		auth.SessionManager.Store = memstore.New()
-	}
-
-	auth.SessionManager.Lifetime = 3 * time.Hour
-	auth.SessionManager.IdleTimeout = 20 * time.Minute
-	auth.SessionManager.Cookie.Name = "session_id"
-
-	// auth.SessionManager.Cookie.Domain = "example.com"
-	// auth.SessionManager.Cookie.HttpOnly = true
-	// auth.SessionManager.Cookie.Path = "/example/"
-	// auth.SessionManager.Cookie.Persist = true
-	// auth.SessionManager.Cookie.SameSite = http.SameSiteStrictMode
-	// auth.SessionManager.Cookie.Secure = true
-}
-
 func setupDB() {
 	var err error
 
@@ -282,23 +232,23 @@ func setupDB() {
 	}
 }
 
-func setupKey() {
-	auth.Secret = "practice-golang/9m secret"
+// func setupKey() {
+// 	secret := "practice-golang/9m secret"
 
-	privKeyExist := fd.CheckFileExists(auth.JwtPrivateKeyFileName, false)
-	pubKeyExist := fd.CheckFileExists(auth.JwtPublicKeyFileName, false)
-	if privKeyExist && pubKeyExist {
-		auth.LoadRsaKeys()
-	} else {
-		auth.GenerateRsaKeys()
-		auth.SaveRsaKeys()
-	}
+// 	privKeyExist := fd.CheckFileExists(auth.JwtPrivateKeyFileName, false)
+// 	pubKeyExist := fd.CheckFileExists(auth.JwtPublicKeyFileName, false)
+// 	if privKeyExist && pubKeyExist {
+// 		auth.LoadRsaKeys()
+// 	} else {
+// 		auth.GenerateRsaKeys()
+// 		auth.SaveRsaKeys()
+// 	}
 
-	err := auth.GenerateKeySet()
-	if err != nil {
-		panic(err)
-	}
-}
+// 	err := auth.GenerateKeySet()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
 
 func setupLogger() {
 	logging.SetupLogger()
@@ -356,9 +306,9 @@ func doSetup() {
 	_ = os.Mkdir(UploadPath, os.ModePerm)
 	_ = os.Mkdir(config.HtmlPath, os.ModePerm)
 
-	setupSession()
+	// setupSession()
 	setupDB()
-	setupKey()
+	// setupKey()
 	setupLogger()
 	setupRouter()
 
