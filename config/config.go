@@ -17,8 +17,9 @@ var (
 
 var (
 	StaticPath = "static"
-	UploadPath = "upload"
 	HtmlPath   = "static/html"
+	FilesPath  = "static/files"
+	UploadPath = "upload"
 )
 
 var (

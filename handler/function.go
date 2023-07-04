@@ -113,8 +113,14 @@ func PostJson(c *router.Context) {
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
 	name := c.Path()[1:]
-	if name == "" {
+
+	switch true {
+	case name == "":
 		name = "index"
+	case name == "admin":
+		name = "admin/index"
+	case strings.Contains(name, "admin"):
+		name = "template_" + name
 	}
 
 	err := c.Render(name, fiber.Map{})

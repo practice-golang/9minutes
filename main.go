@@ -32,8 +32,9 @@ var EmbedStatic embed.FS // should be removed
 var StaticEmbed embed.FS
 
 var StaticPath = config.StaticPath
-var UploadPath = config.UploadPath
 var HtmlPath = config.HtmlPath
+var FilesPath = config.FilesPath
+var UploadPath = config.UploadPath
 
 var sessionStoreInfo = config.StoreInfoMemory
 

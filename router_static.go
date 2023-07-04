@@ -6,5 +6,5 @@ import (
 
 // setStatic - Set static
 func setStatic(a *fiber.App) {
-	a.Static("/files", HtmlPath)
+	a.Static("/files", FilesPath)
 }
