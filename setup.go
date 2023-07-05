@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"9minutes/config"
 	"9minutes/db"
 	"9minutes/email"
 	"9minutes/handler"
-	"9minutes/logging"
 	"9minutes/model"
 	"9minutes/wsock"
 
@@ -250,27 +248,6 @@ func setupDB() {
 // 	}
 // }
 
-func setupLogger() {
-	logging.SetupLogger()
-
-	go func() {
-		now := time.Now()
-		zone, i := now.Zone()
-		nextDay := now.AddDate(0, 0, 1).In(time.FixedZone(zone, i))
-		nextDay = time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 0, 0, 0, 0, nextDay.Location())
-		restTimeNextDay := time.Until(nextDay)
-		time.Sleep(restTimeNextDay)
-		for {
-			if time.Now().Format("15") == "00" {
-				logging.RenewLogger()
-				time.Sleep(24 * time.Hour)
-			} else {
-				time.Sleep(time.Second)
-			}
-		}
-	}()
-}
-
 func setupRouter() {
 	handler.NewSessionStore()
 
@@ -309,7 +286,6 @@ func doSetup() {
 	// setupSession()
 	setupDB()
 	// setupKey()
-	setupLogger()
 	setupRouter()
 
 	wsock.InitWebSocketChat()

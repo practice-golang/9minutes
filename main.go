@@ -14,7 +14,6 @@ import (
 	"9minutes/db"
 	"9minutes/email"
 	"9minutes/handler"
-	"9minutes/logging"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,7 +24,7 @@ var sampleINI string
 //go:embed static/html/*
 var Content embed.FS
 
-//go:embed embed/*
+//go:embed static/embed/*
 var EmbedStatic embed.FS // should be removed
 
 //go:embed static/*
@@ -209,7 +208,6 @@ func main() {
 	firstRun()
 	doSetup()
 
-	logging.Object.Log().Timestamp().Str("listen", ListeningIP+"\n").Send()
 	println("Listen", ListeningAddress)
 	log.Fatal(app.Listen(ListeningAddress))
 }
