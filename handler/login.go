@@ -48,6 +48,21 @@ func LoginAPI(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
+func LogoutAPI(c *fiber.Ctx) error {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	sess.Destroy()
+
+	result := map[string]string{
+		"msg": "Signout success",
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
 // Signup - Create new user
 func SignupAPI(c *fiber.Ctx) error {
 	var err error

@@ -302,9 +302,9 @@ func setupRouter() {
 }
 
 func doSetup() {
-	_ = os.Mkdir(StaticPath, os.ModePerm)
+	// _ = os.Mkdir(StaticPath, os.ModePerm)
+	// _ = os.Mkdir(config.HtmlPath, os.ModePerm)
 	_ = os.Mkdir(UploadPath, os.ModePerm)
-	_ = os.Mkdir(config.HtmlPath, os.ModePerm)
 
 	// setupSession()
 	setupDB()

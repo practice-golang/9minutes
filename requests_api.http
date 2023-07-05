@@ -1,29 +1,43 @@
 @uri = http://localhost:5525
-@cookie = session_id=97d2b91f-8e71-4cb4-a37b-3577d2dea425;
+@cookie = session_id=a7b03128-68d3-4190-b131-43a8c1ce1152;
 
-### Group - health
+### health
 GET {{uri}}/api/health
 
-### Group - Login
+### Login
 POST {{uri}}/api/login HTTP/1.1
 content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
-    "password": "admin"
+    "name": "bab2",
+    "password": "bab2"
 }
 
-### Group - Login, Myinfo
-GET {{uri}}/api/myinfo HTTP/1.1
+### Logout
+GET {{uri}}/api/logout HTTP/1.1
 content-type: application/json
-Origin: {{uri}}
 Cookie: {{cookie}}
 
-### Group - UpdateMyInfo
-PUT {{uri}}/api/myinfo HTTP/1.1
+### Signup
+POST {{uri}}/api/signup HTTP/1.1
 content-type: application/json
 Origin: {{uri}}
+
+{
+    "username": "bab2",
+    "email": "edp1096@naver.com",
+    "password": "bab2"
+}
+
+### Myinfo
+GET {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+### Update
+PUT {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
 Cookie: {{cookie}}
 
 {
@@ -31,3 +45,8 @@ Cookie: {{cookie}}
     "old-password": "admin",
     "password": "admin"
 }
+
+### Delete
+DELETE {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}

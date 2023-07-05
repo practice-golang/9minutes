@@ -11,6 +11,7 @@ func setAPIs(a *fiber.App) {
 	gapi := a.Group("/api")
 	gapi.Get("/health", handler.HealthCheck)
 	gapi.Post("/login", handler.LoginAPI)
+	gapi.Get("/logout", handler.LogoutAPI)
 	gapi.Post("/signup", handler.SignupAPI)
 
 	/* API myinfo */
