@@ -1,7 +1,6 @@
 package fd
 
 import (
-	"9minutes/router"
 	"embed"
 	"io/fs"
 	"os"
@@ -361,7 +360,7 @@ func TestCheckFileExists(t *testing.T) {
 			isEmbed := false
 			if tt.name == "CheckFileExists_embed" {
 				isEmbed = true
-				router.Content = fncEMBED
+				// router.Content = fncEMBED
 			}
 
 			if gotResult := CheckFileExists(tt.args.path, isEmbed); gotResult != tt.wantResult {

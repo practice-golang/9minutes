@@ -3,14 +3,12 @@ package handler
 import (
 	"9minutes/consts"
 	"9minutes/crud"
-	"9minutes/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/guregu/null.v4"
 )
 
 func GetMyInfo(c *fiber.Ctx) error {
@@ -24,28 +22,36 @@ func GetMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	columnsCount, _ := crud.GetUserColumnsCount()
+	// columnsCount, _ := crud.GetUserColumnsCount()
+	// switch columnsCount {
+	// case model.UserDataFieldCount:
+	// 	user, err := crud.GetUserByName(name.(string))
+	// 	if err != nil {
+	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	// 	}
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		user, err := crud.GetUserByName(name.(string))
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-		}
+	// 	user.Password = null.NewString("", false)
 
-		user.Password = null.NewString("", false)
+	// 	return c.Status(http.StatusOK).JSON(user)
+	// default:
+	// 	user, err := crud.GetUserByNameMap(name.(string))
+	// 	if err != nil {
+	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	// 	}
 
-		return c.Status(http.StatusOK).JSON(user)
-	default:
-		user, err := crud.GetUserByNameMap(name.(string))
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-		}
+	// 	delete(user.(map[string]interface{}), "password")
 
-		delete(user.(map[string]interface{}), "password")
+	// 	return c.Status(http.StatusOK).JSON(user)
+	// }
 
-		return c.Status(http.StatusOK).JSON(user)
+	user, err := crud.GetUserByNameMap(name.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
+
+	delete(user.(map[string]interface{}), "password")
+
+	return c.Status(http.StatusOK).JSON(user)
 }
 
 func UpdateMyInfo(c *fiber.Ctx) error {

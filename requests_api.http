@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=a7b03128-68d3-4190-b131-43a8c1ce1152;
+@cookie = session_id=a741ee7a-205b-4456-9885-e6f0d9c7ae1a;
 
 ### health
 GET {{uri}}/api/health

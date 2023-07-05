@@ -54,6 +54,11 @@ func LogoutAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
+	name := sess.Get("name")
+	if name == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
 	sess.Destroy()
 
 	result := map[string]string{
