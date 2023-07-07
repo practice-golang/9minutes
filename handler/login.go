@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -35,8 +34,7 @@ func LoginAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	log.Println(user, err)
-
+	sess.Set("idx", user.(map[string]interface{})["idx"])
 	sess.Set("name", signin.Name.String)
 	sess.Set("ip", c.IP())
 	sess.Set("user-agent", c.Get("User-Agent"))
