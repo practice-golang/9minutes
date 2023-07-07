@@ -1,8 +1,6 @@
 package model
 
 import (
-	"reflect"
-
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -35,19 +33,6 @@ type UserColumn struct {
 	ColumnName  null.String `json:"column-name"  db:"COLUMN_NAME"`
 	SortOrder   null.Int    `json:"sort-order"   db:"SORT_ORDER"   npskip:"insert"`
 }
-
-// UserData - User data
-type UserData struct {
-	Idx      null.Int    `json:"idx"      db:"IDX"      npskip:"insert, update"`
-	UserName null.String `json:"username" db:"USERNAME"`
-	Password null.String `json:"password,omitempty" db:"PASSWORD"`
-	Email    null.String `json:"email"    db:"EMAIL"`
-	Grade    null.String `json:"grade"    db:"GRADE"`
-	Approval null.String `json:"approval" db:"APPROVAL"`
-	RegDTTM  null.String `json:"reg-dttm" db:"REG_DTTM" npskip:"update"`
-}
-
-var UserDataFieldCount = reflect.TypeOf(UserData{}).NumField()
 
 type SignIn struct {
 	Name     null.String `json:"name"     form:"username"`

@@ -40,16 +40,22 @@ func main() {
 	np.TagName = "db"
 	np.Separator = ","
 
-	colString := np.MakeString(john)
+	colString := np.CreateString(john, "mysql", "", false)
 
 	selectQuery := "SELECT " + colString.Names + " FROM table_name;"
 	insertQuery := "INSERT INTO table_name (" + colString.Names + ") VALUES(" + colString.Values + ");"
 
 	fmt.Println(selectQuery)
 	fmt.Println(insertQuery)
+
+	whereString := np.CreateWhereString(john, "mysql", "", false)
+	whereQuery := whereString
+
+	fmt.Println(whereQuery)
 }
 
 // Result:
 // SELECT NAME,AGE,EMAIL_ADDRESS FROM table_name;
 // INSERT INTO table_name (NAME,AGE,EMAIL_ADDRESS) VALUES(John,777,john@human.io)
+// WHERE `NAME`='John' AND `AGE`='777' AND `EMAIL_ADDRESS`='john@human.io'
 ```

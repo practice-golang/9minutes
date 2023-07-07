@@ -178,6 +178,24 @@ func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) Colu
 	return result
 }
 
+// CreateWhereString - create string from struct, map
+func CreateWhereString(o interface{}, dbtype, operator, skipValue string, checkValid bool) (result string) {
+	created := CreateString(o, dbtype, skipValue, checkValid)
+
+	names := strings.Split(created.Names, ",")
+	values := strings.Split(created.Values, ",")
+	for i, name := range names {
+		value := values[i]
+		if i == 0 {
+			result += " WHERE " + name + " " + operator + " " + value
+		} else {
+			result += " AND " + name + " " + operator + " " + value
+		}
+	}
+
+	return result
+}
+
 // CreateMapSlice
 // create map which contains slice interface of names and values
 // from struct or map

@@ -1,95 +1,84 @@
 package handler
 
-import (
-	"9minutes/db"
-	"9minutes/model"
-	"9minutes/np"
-	"net/http"
+// func Login(c *fiber.Ctx) error {
+// 	failBody := `<meta http-equiv="refresh" content="2; url=/"></meta>`
 
-	"github.com/blockloop/scan"
-	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
-)
+// 	destination := c.FormValue("destination")
+// 	if destination == "" {
+// 		destination = "/"
+// 	}
 
-func Login(c *fiber.Ctx) error {
-	failBody := `<meta http-equiv="refresh" content="2; url=/"></meta>`
+// 	username := c.FormValue("username")
+// 	password := c.FormValue("password")
 
-	destination := c.FormValue("destination")
-	if destination == "" {
-		destination = "/"
-	}
+// 	if username == "" || password == "" {
+// 		return c.Status(http.StatusBadRequest).SendString(failBody + `Missing parameter`)
+// 	}
 
-	username := c.FormValue("username")
-	password := c.FormValue("password")
+// 	var users []model.UserData
+// 	table := db.GetFullTableName(db.Info.UserTable)
+// 	dbtype := db.GetDatabaseTypeString()
 
-	if username == "" || password == "" {
-		return c.Status(http.StatusBadRequest).SendString(failBody + `Missing parameter`)
-	}
+// 	column := np.CreateString(model.UserData{}, dbtype, "", false)
+// 	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+// 	whereAND := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
-	var users []model.UserData
-	table := db.GetFullTableName(db.Info.UserTable)
-	dbtype := db.GetDatabaseTypeString()
+// 	sql := `
+// 	SELECT
+// 		` + column.Names + `
+// 	FROM ` + table + `
+// 	WHERE ` + where.Names + `='` + username + `'
+// 		AND ` + whereAND.Names + `!='` + "resigned_user" + `'`
 
-	column := np.CreateString(model.UserData{}, dbtype, "", false)
-	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
-	whereAND := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
+// 	rows, err := db.Con.Query(sql)
+// 	if err != nil {
+// 		return c.Status(http.StatusBadRequest).SendString(failBody + `DB error or User may not exists`)
+// 	}
+// 	defer rows.Close()
 
-	sql := `
-	SELECT
-		` + column.Names + `
-	FROM ` + table + `
-	WHERE ` + where.Names + `='` + username + `'
-		AND ` + whereAND.Names + `!='` + "resigned_user" + `'`
+// 	err = scan.Rows(&users, rows)
+// 	if err != nil {
+// 		return c.Status(http.StatusBadRequest).SendString(failBody + `User may not exists`)
+// 	}
 
-	rows, err := db.Con.Query(sql)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(failBody + `DB error or User may not exists`)
-	}
-	defer rows.Close()
+// 	if len(users) == 0 {
+// 		return c.Status(http.StatusBadRequest).SendString(failBody + `User not exists`)
+// 	}
 
-	err = scan.Rows(&users, rows)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(failBody + `User may not exists`)
-	}
+// 	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password.String), []byte(password))
+// 	if err != nil {
+// 		return c.Status(http.StatusBadRequest).SendString(failBody + `Check password`)
+// 	}
 
-	if len(users) == 0 {
-		return c.Status(http.StatusBadRequest).SendString(failBody + `User not exists`)
-	}
+// 	// ua := useragent.Parse(c.Get("User-Agent"))
+// 	// deviceType := ""
+// 	// switch true {
+// 	// case ua.Desktop:
+// 	// 	deviceType = "desktop"
+// 	// case ua.Mobile:
+// 	// 	deviceType = "mobile"
+// 	// case ua.Tablet:
+// 	// 	deviceType = "tablet"
+// 	// case ua.Bot:
+// 	// 	deviceType = "bot"
+// 	// }
 
-	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password.String), []byte(password))
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(failBody + `Check password`)
-	}
+// 	// authinfo := model.AuthInfo{
+// 	// 	Name:       null.NewString(username, true),
+// 	// 	IpAddr:     null.NewString(c.IP(), true),
+// 	// 	Device:     null.NewString(ua.Device, true),
+// 	// 	DeviceType: null.NewString(deviceType, true),
+// 	// 	Os:         null.NewString(ua.OS, true),
+// 	// 	Browser:    null.NewString(ua.Name, true),
+// 	// 	Duration:   null.NewInt(60*60*24*7, true),
+// 	// 	// Duration: null.NewInt(10, true), // 10 seconds test
+// 	// }
 
-	// ua := useragent.Parse(c.Get("User-Agent"))
-	// deviceType := ""
-	// switch true {
-	// case ua.Desktop:
-	// 	deviceType = "desktop"
-	// case ua.Mobile:
-	// 	deviceType = "mobile"
-	// case ua.Tablet:
-	// 	deviceType = "tablet"
-	// case ua.Bot:
-	// 	deviceType = "bot"
-	// }
+// 	// auth.SetupCookieToken(c.ResponseWriter, authinfo)
+// 	// auth.SetCookieSession(c, authinfo)
 
-	// authinfo := model.AuthInfo{
-	// 	Name:       null.NewString(username, true),
-	// 	IpAddr:     null.NewString(c.IP(), true),
-	// 	Device:     null.NewString(ua.Device, true),
-	// 	DeviceType: null.NewString(deviceType, true),
-	// 	Os:         null.NewString(ua.OS, true),
-	// 	Browser:    null.NewString(ua.Name, true),
-	// 	Duration:   null.NewInt(60*60*24*7, true),
-	// 	// Duration: null.NewInt(10, true), // 10 seconds test
-	// }
-
-	// auth.SetupCookieToken(c.ResponseWriter, authinfo)
-	// auth.SetCookieSession(c, authinfo)
-
-	return c.Status(http.StatusOK).SendString(`<meta http-equiv="refresh" content="0; url=` + destination + `"></meta>`)
-}
+// 	return c.Status(http.StatusOK).SendString(`<meta http-equiv="refresh" content="0; url=` + destination + `"></meta>`)
+// }
 
 // // Logout - Expire cookie
 // func Logout(c *router.Context) {

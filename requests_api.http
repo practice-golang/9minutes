@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=a741ee7a-205b-4456-9885-e6f0d9c7ae1a;
+@cookie = session_id=032aaf58-cf63-4eeb-80ad-b8d2230e6a21; 
 
 ### health
 GET {{uri}}/api/health
@@ -10,8 +10,8 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "bab2",
-    "password": "bab2"
+    "name": "admin",
+    "password": "admin"
 }
 
 ### Logout

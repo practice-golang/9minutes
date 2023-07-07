@@ -67,10 +67,11 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userDataOLD, err := crud.GetUserByName(name.(string))
+	userDataOldRaw, err := crud.GetUserByNameMap(name.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
+	userDataOld := userDataOldRaw.(map[string]interface{})
 
 	userDataNEW := make(map[string]interface{})
 	err = json.Unmarshal(c.Body(), &userDataNEW)
@@ -78,10 +79,10 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
 	}
 
-	userDataNEW["idx"] = fmt.Sprint(userDataOLD.Idx.Int64)
+	userDataNEW["idx"] = fmt.Sprint(userDataOld["idx"].(int64))
 
 	if _, ok := userDataNEW["password"]; ok {
-		err = bcrypt.CompareHashAndPassword([]byte(userDataOLD.Password.String), []byte(userDataNEW["old-password"].(string)))
+		err = bcrypt.CompareHashAndPassword([]byte(userDataOld["password"].(string)), []byte(userDataNEW["old-password"].(string)))
 		if err != nil {
 			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
 		}
@@ -120,12 +121,13 @@ func ResignUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userData, err := crud.GetUserByName(name.(string))
+	userDataRaw, err := crud.GetUserByNameMap(name.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
+	userData := userDataRaw.(map[string]interface{})
 
-	err = crud.ResignUser(userData.Idx.Int64)
+	err = crud.ResignUser(userData["idx"].(int64))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}

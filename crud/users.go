@@ -8,42 +8,59 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/blockloop/scan"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetUserByNameAndEmail(username, email string) (model.UserData, error) {
-	result := model.UserData{}
+func GetUserByUsernameAndPassword(name, password string) (interface{}, error) {
+	var result interface{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
-	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
-	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
-	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
-	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
+
+	columns := ""
+	wheres := np.CreateWhereString(map[string]interface{}{"USERNAME": name}, dbtype, "=", "", false)
+
+	columnList, _ := GetUserColumnsList()
+	for _, column := range columnList {
+		if column.ColumnName.Valid {
+			columns += column.ColumnName.String + ","
+		}
+	}
+
+	columns = strings.TrimSuffix(columns, ",")
 
 	sql := `
 	SELECT
 		` + columns + `
-	FROM ` + tablename + `
-	WHERE ` + whereUsername.Names + ` = '` + username + `'
-		AND ` + whereEmail.Names + ` = '` + email + `'
-		AND ` + whereGrade.Names + ` != '` + "resigned_user" + `'`
+	FROM ` + tablename +
+		wheres
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	defer r.Close()
 
-	err = scan.Row(&result, r)
-	if err != nil {
-		return result, err
+	users := []map[string]interface{}{}
+	for r.Next() {
+		scanedRow, _ := scanMap(r)
+		users = append(users, scanedRow)
 	}
 
+	if len(users) == 0 {
+		return nil, errors.New("user not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(users[0]["password"].(string)), []byte(password))
+	if err != nil {
+		return nil, errors.New("invalid username or password")
+	}
+
+	result = users[0]
 	return result, nil
 }
 
@@ -96,30 +113,6 @@ func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	return result, nil
 }
 
-func GetUserByName(username string) (model.UserData, error) {
-	result := model.UserData{}
-
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
-	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
-
-	sql := `SELECT ` + columns + ` FROM ` + tablename + ` WHERE ` + where.Names + ` = '` + username + `'`
-
-	r, err := db.Con.Query(sql)
-	if err != nil {
-		return result, err
-	}
-	defer r.Close()
-
-	err = scan.Row(&result, r)
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
-}
-
 func GetUserByNameMap(username string) (interface{}, error) {
 	var result interface{}
 
@@ -158,163 +151,6 @@ func GetUserByNameMap(username string) (interface{}, error) {
 
 	if len(users) > 0 {
 		result = users[0]
-	}
-
-	return result, nil
-}
-
-func VerifyAndUpdateUser(username, useremail, token string) (bool, error) {
-	result := false
-
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-	tablenameVerification := db.GetFullTableName(consts.TableUsers + "_verification")
-
-	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
-	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
-	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
-
-	whereUserIdx := np.CreateString(map[string]interface{}{"USER_IDX": nil}, dbtype, "", false)
-	whereToken := np.CreateString(map[string]interface{}{"TOKEN": nil}, dbtype, "", false)
-
-	whereIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
-	whereApproval := np.CreateString(map[string]interface{}{"APPROVAL": nil}, dbtype, "", false)
-
-	sql := `
-	SELECT
-		` + columns + `
-	FROM ` + tablename + `
-	WHERE ` + whereUsername.Names + ` = '` + username + `'
-		AND ` + whereEmail.Names + ` = '` + useremail + `'`
-
-	r, err := db.Con.Query(sql)
-	if err != nil {
-		return false, err
-	}
-	defer r.Close()
-
-	var user model.UserData
-	err = scan.Row(&user, r)
-	if err != nil {
-		return false, err
-	}
-
-	if user.Email.String != useremail {
-		return false, errors.New("user not found")
-	}
-
-	sql = `
-	SELECT
-		COUNT(*) AS COUNT
-	FROM ` + tablenameVerification + `
-	WHERE ` + whereUserIdx.Names + ` = '` + fmt.Sprint(user.Idx.Int64) + `'
-		AND ` + whereToken.Names + ` = '` + token + `'`
-
-	r, err = db.Con.Query(sql)
-	if err != nil {
-		return false, err
-	}
-	defer r.Close()
-
-	var count int64
-	err = scan.Row(&count, r)
-	if err != nil {
-		return false, err
-	}
-
-	if count == 0 {
-		return false, errors.New("verification key not found")
-	}
-
-	gradeChange := ""
-	gradeChange = whereGrade.Names + ` = 'regular_user'`
-
-	sql = `
-	UPDATE ` + tablename + ` SET
-		` + whereApproval.Names + ` = 'Y',
-		` + gradeChange + `
-	WHERE ` + whereIdx.Names + ` = '` + fmt.Sprint(user.Idx.Int64) + `'
-		AND ` + whereApproval.Names + ` = 'N'`
-
-	_, err = db.Con.Exec(sql)
-	if err != nil {
-		return false, err
-	}
-
-	result = true
-	return result, nil
-}
-
-// GetUsers - Get Users List
-func GetUsers(options model.UserListingOptions) (model.UserPageData, error) {
-	result := model.UserPageData{}
-
-	dbtype := db.GetDatabaseTypeString()
-	tableName := db.GetFullTableName(consts.TableUsers)
-
-	// Use struct with default column
-	column := np.CreateString(model.UserData{}, dbtype, "", false)
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
-	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
-
-	sqlSearch := ""
-
-	if options.Search.Valid && options.Search.String != "" {
-		sqlSearch = `
-		WHERE ` + columnUsername.Names + ` LIKE '%` + options.Search.String + `%'
-			OR ` + columnEmail.Names + ` LIKE '%` + options.Search.String + `%'`
-	}
-
-	paging := ``
-	if options.Page.Valid && options.ListCount.Valid {
-		paging = db.Obj.GetPagingQuery(int(options.Page.Int64*options.ListCount.Int64), int(options.ListCount.Int64))
-	}
-
-	sql := `
-	SELECT
-		` + column.Names + `
-	FROM ` + tableName + `
-	` + sqlSearch + `
-	ORDER BY ` + columnIdx.Names + ` ASC
-	` + paging
-
-	r, err := db.Con.Query(sql)
-	if err != nil {
-		return result, err
-	}
-	defer r.Close()
-
-	var users []model.UserData
-	err = scan.Rows(&users, r)
-	if err != nil {
-		return result, err
-	}
-
-	var totalCount int64
-	sql = `
-	SELECT
-		COUNT(` + columnIdx.Names + `)
-	FROM ` + tableName + ` ` + sqlSearch
-
-	r, err = db.Con.Query(sql)
-	if err != nil {
-		return result, err
-	}
-	defer r.Close()
-
-	err = scan.Row(&totalCount, r)
-	if err != nil {
-		return result, err
-	}
-
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
-
-	result = model.UserPageData{
-		UserList:    users,
-		CurrentPage: int(options.Page.Int64) + 1,
-		TotalPage:   int(totalPage),
 	}
 
 	return result, nil
@@ -408,44 +244,6 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 	return result, nil
 }
 
-// GetUsersList - API Get Users List
-func GetUsersList(search string) ([]model.UserData, error) {
-	result := []model.UserData{}
-
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-
-	// Use struct with default columns
-	columns := np.CreateString(model.UserData{}, dbtype, "", false).Names
-	sqlSearch := ""
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
-	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
-
-	if search != "" {
-		sqlSearch = `
-		WHERE LOWER(` + columnUsername.Names + `) LIKE LOWER('%` + search + `%')
-			OR LOWER(` + columnEmail.Names + `) LIKE LOWER('%` + search + `%')`
-	}
-
-	sql := `
-	SELECT
-		` + columns + `
-	FROM ` + tablename + `
-	` + sqlSearch
-
-	r, err := db.Con.Query(sql)
-	if err != nil {
-		return nil, err
-	}
-
-	err = scan.Rows(&result, r)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 // GetUsersListMap - API Get Users List map
 func GetUsersListMap(search string) ([]map[string]interface{}, error) {
 	result := []map[string]interface{}{}
@@ -492,28 +290,6 @@ func GetUsersListMap(search string) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
-func AddUser(userColumn model.UserData) error {
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-
-	column := np.CreateString(userColumn, dbtype, "insert", false)
-
-	// sql := `INSERT INTO ` + tablename + ` (` + columns + `) VALUES (` + values + `)`
-	sql := `
-	INSERT INTO ` + tablename + ` (
-		` + column.Names + `
-	) VALUES (
-		` + column.Values + `
-	)`
-
-	_, err := db.Con.Exec(sql)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func AddUserMap(userMap map[string]interface{}) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
@@ -555,37 +331,6 @@ func AddUserVerification(verificationData map[string]string) error {
 	return nil
 }
 
-func UpdateUser(userColumn model.UserData) error {
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-
-	column := np.CreateString(userColumn, dbtype, "update", true)
-	idx := strconv.Itoa(int(userColumn.Idx.Int64))
-
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
-	holder := ""
-
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-
-	for i := 0; i < len(colNames); i++ {
-		holder += colNames[i] + " = " + colValues[i] + ", "
-	}
-	holder = strings.TrimSuffix(holder, ", ")
-
-	sql := `
-	UPDATE ` + tablename + ` SET
-		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
-
-	_, err := db.Con.Exec(sql)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func UpdateUserMap(userMap map[string]interface{}) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
@@ -617,24 +362,6 @@ func UpdateUserMap(userMap map[string]interface{}) error {
 	WHERE ` + columnIdx.Names + ` = ` + idx
 
 	_, err := db.Con.Exec(sql, valuesi...)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteUser(userColumn model.UserData) error {
-	tablename := db.GetFullTableName(consts.TableUsers)
-
-	idx := strconv.Itoa(int(userColumn.Idx.Int64))
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
-
-	sql := `
-	DELETE FROM ` + tablename + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
-
-	_, err := db.Con.Exec(sql)
 	if err != nil {
 		return err
 	}
