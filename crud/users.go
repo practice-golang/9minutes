@@ -250,7 +250,13 @@ func GetUsersListMap(search string) ([]map[string]interface{}, error) {
 
 	tablename := db.GetFullTableName(consts.TableUsers)
 	columns := np.CreateString(
-		map[string]interface{}{"USERNAME": nil, "EMAIL": nil},
+		map[string]interface{}{
+			"IDX":      nil,
+			"USERNAME": nil,
+			"EMAIL":    nil,
+			"GRADE":    nil,
+			"REG_DTTM": nil,
+		},
 		db.GetDatabaseTypeString(), "", false,
 	).Names
 
@@ -322,18 +328,22 @@ func AddUserVerification(verificationData map[string]string) error {
 	return nil
 }
 
-func UpdateUserMap(userMap map[string]interface{}) error {
+func UpdateUserMap(userDataMap map[string]interface{}) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
-	idx := userMap["idx"].(string)
-	delete(userMap, "idx")
+	userData := map[string]interface{}{}
+	for k, v := range userDataMap {
+		userData[k] = v
+	}
 
-	column := np.CreateString(userMap, dbtype, "", false)
+	idx := userData["idx"].(string)
+	delete(userData, "idx")
+
+	column := np.CreateString(userData, dbtype, "", false)
 	directive, _, _ := np.CreateAssignHolders(dbtype, column.Names, 0)
 
 	values := strings.Split(column.Values, ",")
-	// values = append(values, idx)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 
@@ -352,9 +362,18 @@ func UpdateUserMap(userMap map[string]interface{}) error {
 		` + directive + `
 	WHERE ` + columnIdx.Names + ` = ` + idx
 
-	_, err := db.Con.Exec(sql, valuesi...)
+	r, err := db.Con.Exec(sql, valuesi...)
 	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("nothing to update")
 	}
 
 	return nil

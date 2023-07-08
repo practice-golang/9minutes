@@ -30,5 +30,30 @@ Cookie: {{cookie}}
 {
     "username": "user",
     "email": "user@example.com",
-    "password": "user"
+    "password": "user",
+    "grade": ""
 }
+
+### Edit user
+PUT {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    {
+        "idx": "15",
+        "username": "userb",
+        "email": "userb@example.com",
+        "grade": "pending_user"
+    }
+]
+
+### Delete user
+DELETE {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": "15" },
+    { "idx": "17" }
+]

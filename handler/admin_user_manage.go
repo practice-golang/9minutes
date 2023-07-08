@@ -4,6 +4,7 @@ import (
 	"9minutes/consts"
 	"9minutes/crud"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -57,6 +58,8 @@ func UpdateUser(c *fiber.Ctx) error {
 	var err error
 
 	userDatas := []map[string]interface{}{}
+	userDatasSuccess := []map[string]interface{}{}
+	userDatasFailed := []map[string]interface{}{}
 
 	err = c.BodyParser(&userDatas)
 	if err != nil {
@@ -74,12 +77,18 @@ func UpdateUser(c *fiber.Ctx) error {
 
 		err = crud.UpdateUserMap(userData)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			userData["error"] = err.Error()
+			userDatasFailed = append(userDatasFailed, userData)
+			continue
 		}
+		userDatasSuccess = append(userDatasSuccess, userData)
 	}
 
-	result := map[string]string{
-		"result": "ok",
+	result := map[string]interface{}{"result": "ok"}
+	if len(userDatasFailed) > 0 {
+		result["result"] = "failed"
+		result["failed-userdata"] = userDatasFailed
+		result["success-userdata"] = userDatasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
@@ -87,6 +96,8 @@ func UpdateUser(c *fiber.Ctx) error {
 
 func DeleteUser(c *fiber.Ctx) error {
 	userDatas := []map[string]interface{}{}
+	userDatasSuccess := []map[string]interface{}{}
+	userDatasFailed := []map[string]interface{}{}
 
 	err := c.BodyParser(&userDatas)
 	if err != nil {
@@ -94,14 +105,25 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	for _, userData := range userDatas {
-		err = crud.ResignUser(userData["id"].(int64))
+		idx, err := strconv.Atoi(userData["idx"].(string))
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
 		}
+
+		err = crud.ResignUser(int64(idx))
+		if err != nil {
+			userData["error"] = err.Error()
+			userDatasFailed = append(userDatasFailed, userData)
+			continue
+		}
+		userDatasSuccess = append(userDatasSuccess, userData)
 	}
 
-	result := map[string]string{
-		"result": "ok",
+	result := map[string]interface{}{"result": "ok"}
+	if len(userDatasFailed) > 0 {
+		result["result"] = "failed"
+		result["failed-userdata"] = userDatasFailed
+		result["success-userdata"] = userDatasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
