@@ -1,0 +1,34 @@
+@uri = http://localhost:5525
+@cookie = session_id=a7786d4d-fb19-44d8-8016-15ea2662f10d; 
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "name": "admin",
+    "password": "admin"
+}
+
+### User list
+GET {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### User list - search
+GET {{uri}}/api/admin/user/dmi
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Add user
+POST {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "username": "user",
+    "email": "user@example.com",
+    "password": "user"
+}

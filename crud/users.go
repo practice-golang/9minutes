@@ -22,7 +22,7 @@ func GetUserByUsernameAndPassword(name, password string) (interface{}, error) {
 	tablename := db.GetFullTableName(consts.TableUsers)
 
 	columns := ""
-	wheres := np.CreateWhereString(map[string]interface{}{"USERNAME": name}, dbtype, "=", "", false)
+	wheres := np.CreateWhereString(map[string]interface{}{"USERNAME": name}, dbtype, "=", "AND", "", false)
 
 	columnList, _ := GetUserColumnsList()
 	for _, column := range columnList {
@@ -249,33 +249,24 @@ func GetUsersListMap(search string) ([]map[string]interface{}, error) {
 	result := []map[string]interface{}{}
 
 	tablename := db.GetFullTableName(consts.TableUsers)
-	columns := ""
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
-	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
+	columns := np.CreateString(
+		map[string]interface{}{"USERNAME": nil, "EMAIL": nil},
+		db.GetDatabaseTypeString(), "", false,
+	).Names
 
-	// Use map with default and user defined columns
-	columnList, _ := GetUserColumnsList()
-	for _, column := range columnList {
-		if column.ColumnName.Valid {
-			columns += column.ColumnName.String + ","
-			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
-		}
-	}
-
-	columns = strings.TrimSuffix(columns, ",")
-	sqlSearch := ""
-
+	wheres := ""
 	if search != "" {
-		sqlSearch = `
-		WHERE ` + columnUsername.Names + ` LIKE '%` + search + `%'
-			OR ` + columnEmail.Names + ` LIKE '%` + search + `%'`
+		wheres += np.CreateWhereString(
+			map[string]interface{}{"USERNAME": search, "EMAIL": search},
+			db.GetDatabaseTypeString(), "LIKE", "OR", "", false,
+		)
 	}
 
 	sql := `
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	` + sqlSearch
+	` + wheres
 
 	r, err := db.Con.Query(sql)
 	if err != nil {

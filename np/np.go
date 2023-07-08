@@ -179,17 +179,21 @@ func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) Colu
 }
 
 // CreateWhereString - create string from struct, map
-func CreateWhereString(o interface{}, dbtype, operator, skipValue string, checkValid bool) (result string) {
+func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue string, checkValid bool) (result string) {
 	created := CreateString(o, dbtype, skipValue, checkValid)
 
 	names := strings.Split(created.Names, ",")
 	values := strings.Split(created.Values, ",")
 	for i, name := range names {
 		value := values[i]
+		if opValue == "LIKE" {
+			value = value[0:1] + "%" + value[1:len(value)-1] + "%" + value[len(value)-1:]
+		}
+
 		if i == 0 {
-			result += " WHERE " + name + " " + operator + " " + value
+			result += " WHERE " + name + " " + opValue + " " + value
 		} else {
-			result += " AND " + name + " " + operator + " " + value
+			result += " " + opCombine + " " + name + " " + opValue + " " + value
 		}
 	}
 

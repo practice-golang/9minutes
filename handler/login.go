@@ -77,100 +77,12 @@ func SignupAPI(c *fiber.Ctx) error {
 	var err error
 
 	now := time.Now().Format("20060102150405")
-	// columnsCount, _ := crud.GetUserColumnsCount()
 
 	userIDX := ""
 	username := ""
 	useremail := ""
 
 	rbody := c.Request().Body()
-
-	// switch columnsCount {
-	// case model.UserDataFieldCount:
-	// 	var userData model.UserData
-
-	// 	// err = json.NewDecoder(c.Body).Decode(&userData)
-	// 	err = json.Unmarshal(rbody, &userData)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
-	// 	}
-
-	// 	password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-	// 	userData.Password = null.StringFrom(string(password))
-	// 	userData.RegDTTM = null.StringFrom(now)
-	// 	userData.Grade = null.StringFrom("pending_user")
-	// 	userData.Approval = null.StringFrom("N")
-
-	// 	switch true {
-	// 	case userData.UserName.String == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Username is empty"))
-	// 	case userData.Email.String == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
-	// 	case userData.Password.String == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Password is empty"))
-	// 	}
-
-	// 	err = crud.AddUser(userData)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-
-	// 	username = userData.UserName.String
-	// 	useremail = userData.Email.String
-
-	// 	userInsertResult, err := crud.GetUserByNameAndEmail(username, useremail)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-
-	// 	userIDX = fmt.Sprint(userInsertResult.Idx.Int64)
-
-	// default:
-	// 	userData := make(map[string]interface{})
-
-	// 	// err = json.NewDecoder(c.Body).Decode(&userData)
-	// 	err = json.Unmarshal(rbody, &userData)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
-	// 	}
-
-	// 	password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-
-	// 	userData["password"] = string(password)
-	// 	userData["reg-dttm"] = now
-	// 	userData["grade"] = "pending_user"
-	// 	userData["approval"] = "N"
-
-	// 	switch true {
-	// 	case userData["username"].(string) == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Username is empty"))
-	// 	case userData["email"].(string) == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
-	// 	case userData["password"].(string) == "":
-	// 		return c.Status(http.StatusBadRequest).Send([]byte("Password is empty"))
-	// 	}
-
-	// 	err = crud.AddUserMap(userData)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-
-	// 	username = userData["username"].(string)
-	// 	useremail = userData["email"].(string)
-
-	// 	userInsertResult, err := crud.GetUserByNameAndEmailMap(username, useremail)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// 	}
-
-	// 	userIDX = userInsertResult.(map[string]interface{})["IDX"].(string)
-	// }
 
 	userData := make(map[string]interface{})
 

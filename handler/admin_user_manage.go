@@ -11,8 +11,7 @@ import (
 )
 
 func GetUsersList(c *fiber.Ctx) error {
-	queries := c.Queries()
-	search := queries["search"]
+	search := c.Params("search")
 
 	result, err := crud.GetUsersListMap(search)
 	if err != nil {
