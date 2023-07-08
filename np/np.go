@@ -200,6 +200,23 @@ func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue stri
 	return result
 }
 
+func CreateUpdateString(o interface{}, dbtype, skipValue string, checkValid bool) (result string) {
+	created := CreateString(o, dbtype, skipValue, checkValid)
+
+	names := strings.Split(created.Names, ",")
+	values := strings.Split(created.Values, ",")
+	for i, name := range names {
+		value := values[i]
+		if i == 0 {
+			result += " SET " + name + " = " + value
+		} else {
+			result += " , " + name + " = " + value
+		}
+	}
+
+	return result
+}
+
 // CreateMapSlice
 // create map which contains slice interface of names and values
 // from struct or map

@@ -6,13 +6,11 @@ import (
 	"9minutes/model"
 	"9minutes/np"
 	"errors"
-	"fmt"
 	"math"
 	"strings"
 
 	"github.com/blockloop/scan"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/guregu/null.v4"
 )
 
 func GetUserByUsernameAndPassword(name, password string) (interface{}, error) {
@@ -245,7 +243,7 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 }
 
 // GetUsersListMap - API Get Users List map
-func GetUsersListMap(search string) ([]map[string]interface{}, error) {
+func GetUsersListMap(search string, page int) ([]map[string]interface{}, error) {
 	result := []map[string]interface{}{}
 
 	tablename := db.GetFullTableName(consts.TableUsers)
@@ -371,7 +369,6 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	if rowsAffected == 0 {
 		return errors.New("nothing to update")
 	}
@@ -383,36 +380,31 @@ func ResignUser(idx int64) error {
 	dbType := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
-	type resignUserColumns struct {
-		Grade    null.String `db:"GRADE"`
-		Approval null.String `db:"APPROVAL"`
-	}
+	updateset := np.CreateUpdateString(
+		map[string]interface{}{
+			"GRADE":    "resigned_user",
+			"APPROVAL": "N",
+		},
+		dbType, "", false,
+	)
+	wheres := np.CreateWhereString(
+		map[string]interface{}{"IDX": idx},
+		dbType, "=", "AND", "", false,
+	)
 
-	columnsStruct := resignUserColumns{
-		Grade:    null.StringFrom("resigned_user"),
-		Approval: null.StringFrom("N"),
-	}
+	sql := `UPDATE ` + tablename + updateset + wheres
 
-	column := np.CreateString(columnsStruct, dbType, "", false)
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
-
-	holder := ""
-	for i := 0; i < len(colNames); i++ {
-		holder += colNames[i] + " = " + colValues[i] + ", "
-	}
-	holder = strings.TrimSuffix(holder, ", ")
-
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbType, "", false)
-
-	sql := `
-	UPDATE ` + tablename + ` SET
-		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + fmt.Sprint(idx)
-
-	_, err := db.Con.Exec(sql)
+	r, err := db.Con.Exec(sql)
 	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("nothing to update")
 	}
 
 	return nil

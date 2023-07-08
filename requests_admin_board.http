@@ -12,13 +12,13 @@ Origin: {{uri}}
     "password": "admin"
 }
 
-### User list
-GET {{uri}}/api/admin/user
+### Board list
+GET {{uri}}/api/admin/boards
 Content-Type: application/json
 Cookie: {{cookie}}
 
-### User list - search
-GET {{uri}}/api/admin/user?search=a
+### Board list - search
+GET {{uri}}/api/admin/boards?search=misc1
 Content-Type: application/json
 Cookie: {{cookie}}
 

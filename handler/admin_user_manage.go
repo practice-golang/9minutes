@@ -5,6 +5,7 @@ import (
 	"9minutes/crud"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,9 +13,14 @@ import (
 )
 
 func GetUsersList(c *fiber.Ctx) error {
-	search := c.Params("search")
+	queries := c.Queries()
+	search := strings.TrimSpace(queries["search"])
+	page := 1
+	if queries["page"] != "" {
+		page, _ = strconv.Atoi(queries["page"])
+	}
 
-	result, err := crud.GetUsersListMap(search)
+	result, err := crud.GetUsersListMap(search, page)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
