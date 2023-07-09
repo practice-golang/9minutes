@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=032aaf58-cf63-4eeb-80ad-b8d2230e6a21; 
+@cookie = session_id=ce217678-9322-4bfb-972d-d0d501be5818; 
 
 ### health
 GET {{uri}}/api/health
@@ -10,7 +10,7 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
+    "userid": "admin",
     "password": "admin"
 }
 
@@ -25,7 +25,7 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "username": "bab2",
+    "userid": "bab2",
     "email": "edp1096@naver.com",
     "password": "bab2"
 }
@@ -41,7 +41,7 @@ content-type: application/json
 Cookie: {{cookie}}
 
 {
-    "username": "admin",
+    "userid": "admin",
     "old-password": "admin",
     "password": "admin"
 }

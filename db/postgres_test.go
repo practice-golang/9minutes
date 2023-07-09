@@ -37,7 +37,7 @@ func TestPostgres_Exec(t *testing.T) {
 		{
 			name: "POSTGRES",
 			args: args{
-				sql:       `INSERT INTO ` + GetFullTableName(Info.TableName) + ` ("USERNAME","PASSWORD") VALUES ($1,$2)`,
+				sql:       `INSERT INTO ` + GetFullTableName(Info.TableName) + ` ("USERID","PASSWORD") VALUES ($1,$2)`,
 				colValues: []interface{}{"test2", "test3"},
 				options:   "IDX",
 			},

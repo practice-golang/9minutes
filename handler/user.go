@@ -8,10 +8,10 @@ package handler
 // 		destination = "/"
 // 	}
 
-// 	username := c.FormValue("username")
+// 	userid := c.FormValue("userid")
 // 	password := c.FormValue("password")
 
-// 	if username == "" || password == "" {
+// 	if userid == "" || password == "" {
 // 		return c.Status(http.StatusBadRequest).SendString(failBody + `Missing parameter`)
 // 	}
 
@@ -27,7 +27,7 @@ package handler
 // 	SELECT
 // 		` + column.Names + `
 // 	FROM ` + table + `
-// 	WHERE ` + where.Names + `='` + username + `'
+// 	WHERE ` + where.Names + `='` + userid + `'
 // 		AND ` + whereAND.Names + `!='` + "resigned_user" + `'`
 
 // 	rows, err := db.Con.Query(sql)
@@ -64,7 +64,7 @@ package handler
 // 	// }
 
 // 	// authinfo := model.AuthInfo{
-// 	// 	Name:       null.NewString(username, true),
+// 	// 	Name:       null.NewString(userid, true),
 // 	// 	IpAddr:     null.NewString(c.IP(), true),
 // 	// 	Device:     null.NewString(ua.Device, true),
 // 	// 	DeviceType: null.NewString(deviceType, true),
@@ -101,7 +101,7 @@ package handler
 // 	columnsCount, _ := crud.GetUserColumnsCount()
 
 // 	userIDX := ""
-// 	username := ""
+// 	userid := ""
 // 	useremail := ""
 
 // 	rbody, err := io.ReadAll(c.Body)
@@ -146,7 +146,7 @@ package handler
 // 		userData.Approval = null.StringFrom("N")
 
 // 		if userData.UserName.String == "" {
-// 			c.Text(http.StatusBadRequest, "Username is empty")
+// 			c.Text(http.StatusBadRequest, "UserId is empty")
 // 			return
 // 		}
 // 		if userData.Email.String == "" {
@@ -164,10 +164,10 @@ package handler
 // 			return
 // 		}
 
-// 		username = userData.UserName.String
+// 		userid = userData.UserName.String
 // 		useremail = userData.Email.String
 
-// 		userInsertResult, err := crud.GetUserByNameAndEmail(username, useremail)
+// 		userInsertResult, err := crud.GetUserByNameAndEmail(userid, useremail)
 // 		if err != nil {
 // 			c.Text(http.StatusInternalServerError, err.Error())
 // 			return
@@ -195,8 +195,8 @@ package handler
 // 		userData["grade"] = "pending_user"
 // 		userData["approval"] = "N"
 
-// 		if userData["username"].(string) == "" {
-// 			c.Text(http.StatusBadRequest, "Username is empty")
+// 		if userData["userid"].(string) == "" {
+// 			c.Text(http.StatusBadRequest, "UserId is empty")
 // 			return
 // 		}
 // 		if userData["email"].(string) == "" {
@@ -214,10 +214,10 @@ package handler
 // 			return
 // 		}
 
-// 		username = userData["username"].(string)
+// 		userid = userData["userid"].(string)
 // 		useremail = userData["email"].(string)
 
-// 		userInsertResult, err := crud.GetUserByNameAndEmailMap(username, useremail)
+// 		userInsertResult, err := crud.GetUserByNameAndEmailMap(userid, useremail)
 // 		if err != nil {
 // 			c.Text(http.StatusInternalServerError, err.Error())
 // 			return
@@ -244,12 +244,12 @@ package handler
 // 		Service:          email.Info.Service,
 // 		AppendFromToName: false,
 // 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
-// 		To:               email.To{Email: useremail, Name: username},
+// 		To:               email.To{Email: useremail, Name: userid},
 // 		Subject:          "EnjoyTools - Email Verification",
 // 		Body: `
 // 		Please click the link below to verify your email address.
 // 		<br />
-// 		<a href='` + domain + `/verify?username=` + username + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
+// 		<a href='` + domain + `/verify?userid=` + userid + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
 // 		BodyType: email.HTML,
 // 	}
 
@@ -272,16 +272,16 @@ package handler
 // 	var err error
 
 // 	queries := c.URL.Query()
-// 	username := queries.Get("username")
+// 	userid := queries.Get("userid")
 // 	useremail := queries.Get("email")
 // 	token := queries.Get("token")
 
-// 	if username == "" || useremail == "" || token == "" {
+// 	if userid == "" || useremail == "" || token == "" {
 // 		c.Text(http.StatusBadRequest, "Not enough parameters")
 // 		return
 // 	}
 
-// 	result, err := crud.VerifyAndUpdateUser(username, useremail, token)
+// 	result, err := crud.VerifyAndUpdateUser(userid, useremail, token)
 // 	if err != nil {
 // 		c.Text(http.StatusInternalServerError, err.Error())
 // 		return
@@ -305,11 +305,11 @@ package handler
 
 // 	columnsCount, _ := crud.GetUserColumnsCount()
 
-// 	username := c.FormValue("username")
+// 	userid := c.FormValue("userid")
 // 	useremail := c.FormValue("email")
 
-// 	if username == "" {
-// 		c.Text(http.StatusBadRequest, "Username is empty")
+// 	if userid == "" {
+// 		c.Text(http.StatusBadRequest, "UserId is empty")
 // 		return
 // 	}
 // 	if useremail == "" {
@@ -326,7 +326,7 @@ package handler
 
 // 	switch columnsCount {
 // 	case model.UserDataFieldCount:
-// 		user, err := crud.GetUserByNameAndEmail(username, useremail)
+// 		user, err := crud.GetUserByNameAndEmail(userid, useremail)
 // 		if err != nil {
 // 			// c.Text(http.StatusInternalServerError, err.Error())
 // 			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
@@ -337,7 +337,7 @@ package handler
 // 		crud.UpdateUser(user)
 
 // 	default:
-// 		user, err := crud.GetUserByNameAndEmailMap(username, useremail)
+// 		user, err := crud.GetUserByNameAndEmailMap(userid, useremail)
 // 		if err != nil {
 // 			// c.Text(http.StatusInternalServerError, err.Error())
 // 			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
@@ -353,7 +353,7 @@ package handler
 // 		Service:          email.Info.Service,
 // 		AppendFromToName: false,
 // 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
-// 		To:               email.To{Email: useremail, Name: username},
+// 		To:               email.To{Email: useremail, Name: userid},
 // 		Subject:          "EnjoyTools - Password changed",
 // 		Body: `
 // 		The password for your account was changed on ` + time.Now().UTC().Format("2006-01-02 15:04:05 UTC") + `

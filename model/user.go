@@ -35,7 +35,7 @@ type UserColumn struct {
 }
 
 type SignIn struct {
-	Name     null.String `json:"name"     form:"username"`
+	UserID   null.String `json:"userid"   form:"userid"`
 	Password null.String `json:"password" form:"password"`
 }
 

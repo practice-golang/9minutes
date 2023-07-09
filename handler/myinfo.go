@@ -17,8 +17,8 @@ func GetMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	name := sess.Get("name")
-	if name == nil {
+	userid := sess.Get("userid")
+	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
@@ -44,7 +44,7 @@ func GetMyInfo(c *fiber.Ctx) error {
 	// 	return c.Status(http.StatusOK).JSON(user)
 	// }
 
-	user, err := crud.GetUserByNameMap(name.(string))
+	user, err := crud.GetUserByNameMap(userid.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
@@ -62,12 +62,12 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	name := sess.Get("name")
-	if name == nil {
+	userid := sess.Get("userid")
+	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userDataOldRaw, err := crud.GetUserByNameMap(name.(string))
+	userDataOldRaw, err := crud.GetUserByNameMap(userid.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}

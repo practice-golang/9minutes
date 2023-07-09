@@ -27,7 +27,7 @@ func GetContentList(board model.Board, options model.ContentListingOptions) (mod
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnTitle := np.CreateString(map[string]interface{}{"TITLE": nil}, dbtype, "", false)
 	columnContent := np.CreateString(map[string]interface{}{"CONTENT": nil}, dbtype, "", false)
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnBoardIdx := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
 	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
 	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
@@ -49,7 +49,7 @@ func GetContentList(board model.Board, options model.ContentListingOptions) (mod
 		` + column.Names + `,
 		(
 			SELECT
-				` + columnUsername.Names + `
+				` + columnUserId.Names + `
 			FROM ` + userTableName + `
 			WHERE ` + columnIdx.Names + ` = A.` + columnAuthorIdx.Names + `
 		) AS ` + columnAuthorName.Names + `,
@@ -111,7 +111,7 @@ func GetContent(board model.Board, idx string) (model.Content, error) {
 	userTableName := db.GetFullTableName(db.Info.UserTable)
 
 	column := np.CreateString(model.Content{}, dbtype, "select", false)
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
 	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
@@ -121,7 +121,7 @@ func GetContent(board model.Board, idx string) (model.Content, error) {
 		` + column.Names + `,
 		(
 			SELECT
-				` + columnUsername.Names + `
+				` + columnUserId.Names + `
 			FROM ` + userTableName + `
 			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
 		) AS ` + columnAuthorName.Names + `
@@ -188,7 +188,7 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnBoardIdx := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
 	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
 	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
@@ -231,7 +231,7 @@ func GetComments(board model.Board, content model.Content, options model.Comment
 		` + column.Names + `,
 		(
 			SELECT
-				` + columnUsername.Names + `
+				` + columnUserId.Names + `
 			FROM ` + userTableName + `
 			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
 		) AS ` + columnAuthorName.Names + `

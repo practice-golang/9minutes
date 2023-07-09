@@ -9,23 +9,38 @@
 </head>
 
 <body>
-    <form method="post" action="/login">
-        <input type="hidden" name="destination" value="" />
+    <input type="hidden" name="destination" value="" />
 
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" tabindex="1" required />
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" tabindex="1" required />
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" tabindex="2" required />
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" tabindex="2" required />
 
-        <input type="submit" tabindex="3" value="Login" />
-        <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset.html'" />
-        <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup.html'" />
-    </form>
+    <input type="submit" tabindex="3" value="Login" onclick="login()" />
+    <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset.html'" />
+    <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup.html'" />
 </body>
 
 <script>
     document.querySelector("input[name='destination']").value = document.referrer
+
+    async function login() {
+        const username = document.querySelector("input[name='username']").value
+        const password = document.querySelector("input[name='password']").value
+
+        const response = await fetch('/api/login', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: username, password: password }),
+        })
+
+        if (response.ok) {
+            location.href = "/"
+        } else {
+            alert(await response.text())
+        }
+    }
 </script>
 
 </html>

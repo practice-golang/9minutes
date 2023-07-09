@@ -29,13 +29,13 @@ func LoginAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	user, err := crud.GetUserByUsernameAndPassword(signin.Name.String, signin.Password.String)
+	user, err := crud.GetUserByUserIdAndPassword(signin.UserID.String, signin.Password.String)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	sess.Set("idx", user.(map[string]interface{})["idx"])
-	sess.Set("name", signin.Name.String)
+	sess.Set("userid", signin.UserID.String)
 	sess.Set("ip", c.IP())
 	sess.Set("user-agent", c.Get("User-Agent"))
 	sess.Set("duration", 60*60*24*7)
@@ -79,7 +79,7 @@ func SignupAPI(c *fiber.Ctx) error {
 	now := time.Now().Format("20060102150405")
 
 	userIDX := ""
-	username := ""
+	userid := ""
 	useremail := ""
 
 	rbody := c.Request().Body()
@@ -103,8 +103,8 @@ func SignupAPI(c *fiber.Ctx) error {
 	userData["approval"] = "N"
 
 	switch true {
-	case userData["username"].(string) == "":
-		return c.Status(http.StatusBadRequest).Send([]byte("Username is empty"))
+	case userData["userid"].(string) == "":
+		return c.Status(http.StatusBadRequest).Send([]byte("User id is empty"))
 	case userData["email"].(string) == "":
 		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
 	case userData["password"].(string) == "":
@@ -116,10 +116,10 @@ func SignupAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	username = userData["username"].(string)
+	userid = userData["userid"].(string)
 	useremail = userData["email"].(string)
 
-	userInsertResult, err := crud.GetUserByNameAndEmailMap(username, useremail)
+	userInsertResult, err := crud.GetUserByNameAndEmailMap(userid, useremail)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
@@ -143,12 +143,12 @@ func SignupAPI(c *fiber.Ctx) error {
 		Service:          email.Info.Service,
 		AppendFromToName: false,
 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
-		To:               email.To{Email: useremail, Name: username},
+		To:               email.To{Email: useremail, Name: userid},
 		Subject:          "EnjoyTools - Email Verification",
 		Body: `
 		Please click the link below to verify your email address.
 		<br />
-		<a href='` + domain + `/verify?username=` + username + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
+		<a href='` + domain + `/verify?userid=` + userid + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
 		BodyType: email.HTML,
 	}
 

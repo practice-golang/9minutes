@@ -41,16 +41,6 @@ var (
 
 var bm = bluemonday.UGCPolicy()
 
-// func Index(c *router.Context) {
-// 	c.URL.Path = "/index.html"
-// 	HandleHTML(c)
-// }
-
-// func AdminIndex(c *router.Context) {
-// 	c.URL.Path = "/admin/index.html"
-// 	HandleHTML(c)
-// }
-
 func HealthCheck(c *fiber.Ctx) error {
 	return c.SendString("Ok")
 }
@@ -73,6 +63,21 @@ func HandleHTML(c *fiber.Ctx) error {
 	case name == "":
 		name = "index"
 
+		sess, err := store.Get(c)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		}
+
+		useridInterface := sess.Get("name")
+		userid := "anonymous"
+
+		if useridInterface != nil {
+			userid = useridInterface.(string)
+		}
+
+		templateMap["Title"] = "9minutes"
+		templateMap["UserId"] = strings.TrimSpace(userid)
+
 		if params["hello"] != "" {
 			log.Printf("Hello: %s", params["hello"])
 		}
@@ -86,6 +91,7 @@ func HandleHTML(c *fiber.Ctx) error {
 			log.Println(name)
 		case "admin/user-columns":
 			log.Println(name)
+
 		case "admin/user-list":
 			log.Println(name)
 		}

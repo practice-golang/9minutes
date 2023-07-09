@@ -94,7 +94,7 @@ var DatabaseInfoOracle = db.DBInfo{
 	Port:          "1521",
 	DatabaseName:  "XE",         // physical&on-premise: database name, cloud: service name
 	SchemaName:    "",           // not use
-	GrantID:       "myaccount",  // physical&on-premise: username only, cloud: username and database name
+	GrantID:       "myaccount",  // physical&on-premise: userid only, cloud: userid and database name
 	GrantPassword: "mypassword", // password
 	FilePath:      "",           // wallet file path for cloud using
 }

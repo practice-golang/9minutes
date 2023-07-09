@@ -35,7 +35,7 @@ func TestMysql_Exec(t *testing.T) {
 		{
 			name: "MYSQL_INSERT",
 			args: args{
-				sql:       "INSERT INTO " + GetFullTableName(Info.UserTable) + " (USERNAME,PASSWORD) VALUES (?,?)",
+				sql:       "INSERT INTO " + GetFullTableName(Info.UserTable) + " (USERID,PASSWORD) VALUES (?,?)",
 				colValues: []interface{}{"test2", "test3"},
 				options:   "",
 			},

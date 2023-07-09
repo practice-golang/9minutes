@@ -12,10 +12,13 @@
     <div>
         <a href="/">Front page</a>
         <div>
-            Good day, $USERNAME$.
-            $LinkLogin$<a href="/login">Login</a>
+            {{if ne .Username ""}}
+            Good day, {{.Username}}.
             $LinkLogout$<a href="/logout">Logout</a>
             $LinkMyPage$<a href="/mypage">My page</a>
             $LinkAdmin$<a href="/admin">Admin</a>
+            {{else}}
+            $LinkLogin$<a href="/login">Login</a>
+            {{end}}
         </div>
         <hr />

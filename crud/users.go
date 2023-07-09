@@ -13,14 +13,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserByUsernameAndPassword(name, password string) (interface{}, error) {
+func GetUserByUserIdAndPassword(name, password string) (interface{}, error) {
 	var result interface{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
 	columns := ""
-	wheres := np.CreateWhereString(map[string]interface{}{"USERNAME": name}, dbtype, "=", "AND", "", false)
+	wheres := np.CreateWhereString(map[string]interface{}{"USERID": name}, dbtype, "=", "AND", "", false)
 
 	columnList, _ := GetUserColumnsList()
 	for _, column := range columnList {
@@ -55,21 +55,21 @@ func GetUserByUsernameAndPassword(name, password string) (interface{}, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(users[0]["password"].(string)), []byte(password))
 	if err != nil {
-		return nil, errors.New("invalid username or password")
+		return nil, errors.New("invalid userid or password")
 	}
 
 	result = users[0]
 	return result, nil
 }
 
-func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
+func GetUserByNameAndEmailMap(userid, email string) (interface{}, error) {
 	var result interface{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
 	columns := ""
-	whereUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
+	whereUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
 	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
@@ -88,7 +88,7 @@ func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	WHERE ` + whereUsername.Names + ` = '` + username + `'
+	WHERE ` + whereUserId.Names + ` = '` + userid + `'
 		AND ` + whereEmail.Names + ` = '` + email + `'
 		AND ` + whereGrade.Names + ` != '` + "resigned_user" + `'`
 
@@ -111,12 +111,12 @@ func GetUserByNameAndEmailMap(username, email string) (interface{}, error) {
 	return result, nil
 }
 
-func GetUserByNameMap(username string) (interface{}, error) {
+func GetUserByNameMap(userid string) (interface{}, error) {
 	var result interface{}
 
 	tablename := db.GetFullTableName(consts.TableUsers)
 	columns := ""
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, db.GetDatabaseTypeString(), "", false)
 
 	// Use map with default and user defined columns
 	columnList, _ := GetUserColumnsList()
@@ -133,7 +133,7 @@ func GetUserByNameMap(username string) (interface{}, error) {
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	WHERE ` + columnUsername.Names + ` = '` + username + `'`
+	WHERE ` + columnUserId.Names + ` = '` + userid + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -160,7 +160,7 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 
 	tableName := db.GetFullTableName(consts.TableUsers)
 	// columns := ""
-	columnUsername := np.CreateString(map[string]interface{}{"USERNAME": nil}, db.GetDatabaseTypeString(), "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, db.GetDatabaseTypeString(), "", false)
 	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
 
@@ -185,7 +185,7 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 
 	if options.Search.Valid && options.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + columnUsername.Names + ` LIKE '%` + options.Search.String + `%'
+		WHERE ` + columnUserId.Names + ` LIKE '%` + options.Search.String + `%'
 			OR ` + columnEmail.Names + ` LIKE '%` + options.Search.String + `%'`
 	}
 
@@ -250,7 +250,7 @@ func GetUsersListMap(search string, page int) ([]map[string]interface{}, error) 
 	columns := np.CreateString(
 		map[string]interface{}{
 			"IDX":      nil,
-			"USERNAME": nil,
+			"USERID":   nil,
 			"EMAIL":    nil,
 			"GRADE":    nil,
 			"REG_DTTM": nil,
@@ -261,7 +261,7 @@ func GetUsersListMap(search string, page int) ([]map[string]interface{}, error) 
 	wheres := ""
 	if search != "" {
 		wheres += np.CreateWhereString(
-			map[string]interface{}{"USERNAME": search, "EMAIL": search},
+			map[string]interface{}{"USERID": search, "EMAIL": search},
 			db.GetDatabaseTypeString(), "LIKE", "OR", "", false,
 		)
 	}

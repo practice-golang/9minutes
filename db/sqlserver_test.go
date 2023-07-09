@@ -37,7 +37,7 @@ func TestSqlServer_Exec(t *testing.T) {
 		{
 			name: "SQLSERVER",
 			args: args{
-				sql:       "INSERT INTO " + GetFullTableName(Info.UserTable) + " (USERNAME,PASSWORD) VALUES (@p1,@p2)",
+				sql:       "INSERT INTO " + GetFullTableName(Info.UserTable) + " (USERID,PASSWORD) VALUES (@p1,@p2)",
 				colValues: []interface{}{"test2", "test3"},
 			},
 		},

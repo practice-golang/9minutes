@@ -50,9 +50,9 @@ func (d *Oracle) createAccount() {
 	}
 
 	sql = `
-	SELECT COUNT(USERNAME) AS COUNT
+	SELECT COUNT(USERID) AS COUNT
 	FROM ALL_USERS
-	WHERE USERNAME = '` + strings.ToUpper(Info.GrantID) + `'`
+	WHERE USERID = '` + strings.ToUpper(Info.GrantID) + `'`
 
 	var count int64
 	_ = conn.QueryRow(sql).Scan(&count)
@@ -247,7 +247,7 @@ func (d *Oracle) CreateUserTable() error {
 	sql = `
 	CREATE TABLE ` + userTable + ` (
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
-		USERNAME    VARCHAR(128),
+		USERID    VARCHAR(128),
 		PASSWORD    VARCHAR(128),
 		EMAIL       VARCHAR(128),
 		GRADE       VARCHAR(24),
@@ -255,7 +255,7 @@ func (d *Oracle) CreateUserTable() error {
 		REG_DTTM    VARCHAR(14),
 
 		CONSTRAINT "` + Info.UserTable + `_idx" PRIMARY KEY ("IDX"),
-		CONSTRAINT "` + Info.UserTable + `_userconstraint" UNIQUE ("USERNAME", "EMAIL")
+		CONSTRAINT "` + Info.UserTable + `_userconstraint" UNIQUE ("USERID", "EMAIL")
 	)`
 
 	_, err = Con.Exec(sql)
@@ -273,11 +273,11 @@ func (d *Oracle) CreateUserTable() error {
 
 	sql = `
 	INSERT INTO ` + userTable + ` (
-		"USERNAME", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
+		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
 	)
 	SELECT 'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	FROM DUAL
-	WHERE NOT EXISTS (SELECT * FROM ` + userTable + ` WHERE "USERNAME" = 'admin')`
+	WHERE NOT EXISTS (SELECT * FROM ` + userTable + ` WHERE "USERID" = 'admin')`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -307,7 +307,7 @@ func (d *Oracle) CreateUserTable() error {
 	sql = `
 	INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
 	SELECT 'Idx' AS "DISPLAY_NAME", 'idx' AS "COLUMN_CODE", 'integer' AS "COLUMN_TYPE", 'IDX' AS "COLUMN_NAME", 1 AS "SORT_ORDER" FROM DUAL UNION ALL
-	SELECT 'Username' AS "DISPLAY_NAME", 'username' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'USERNAME' AS "COLUMN_NAME", 2 AS "SORT_ORDER" FROM DUAL UNION ALL
+	SELECT 'UserId' AS "DISPLAY_NAME", 'userid' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'USERID' AS "COLUMN_NAME", 2 AS "SORT_ORDER" FROM DUAL UNION ALL
 	SELECT 'Password' AS "DISPLAY_NAME", 'password' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'PASSWORD' AS "COLUMN_NAME", 3 AS "SORT_ORDER" FROM DUAL UNION ALL
 	SELECT 'Email' AS "DISPLAY_NAME", 'email' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'EMAIL' AS "COLUMN_NAME", 4 AS "SORT_ORDER" FROM DUAL UNION ALL
 	SELECT 'Grade' AS "DISPLAY_NAME", 'grade' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'GRADE' AS "COLUMN_NAME", 5 AS "SORT_ORDER" FROM DUAL UNION ALL

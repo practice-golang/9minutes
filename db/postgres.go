@@ -127,14 +127,14 @@ func (d *Postgres) CreateUserTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + ` (
 		"IDX"      SERIAL       PRIMARY KEY,
-		"USERNAME" VARCHAR(128) UNIQUE NULL DEFAULT NULL,
+		"USERID" VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"PASSWORD" VARCHAR(128) NULL DEFAULT NULL,
 		"EMAIL"    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"GRADE"    VARCHAR(24)  NULL DEFAULT NULL,
 		"APPROVAL" VARCHAR(2)   NULL DEFAULT NULL,
 		"REG_DTTM" VARCHAR(14)  NULL DEFAULT NULL,
 
-		CONSTRAINT "USERS_UQ" UNIQUE ("USERNAME", "EMAIL")
+		CONSTRAINT "USERS_UQ" UNIQUE ("USERID", "EMAIL")
 	);`
 
 	_, err := Con.Exec(sql)
@@ -152,7 +152,7 @@ func (d *Postgres) CreateUserTable() error {
 
 	sql = `
 	INSERT INTO ` + Info.SchemaName + `.` + Info.UserTable + ` (
-		"USERNAME", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
+		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
 	) VALUES (
 		'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	)
@@ -187,7 +187,7 @@ func (d *Postgres) CreateUserTable() error {
 		("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
 	VALUES
 		('Idx', 'idx', 'integer', 'IDX', 1),
-		('Username', 'username', 'text', 'USERNAME', 2),
+		('UserId', 'userid', 'text', 'USERID', 2),
 		('Password', 'password', 'text', 'PASSWORD', 3),
 		('Email', 'email', 'text', 'EMAIL', 4),
 		('Grade', 'grade', 'text', 'GRADE', 5),

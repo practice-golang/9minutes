@@ -111,7 +111,7 @@ func (d *SQLite) CreateUserTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.UserTable + `" (
 		"IDX"      INTEGER,
-		"USERNAME" TEXT UNIQUE,
+		"USERID" TEXT UNIQUE,
 		"PASSWORD" TEXT,
 		"EMAIL"    TEXT UNIQUE,
 		"GRADE"    TEXT,
@@ -131,7 +131,7 @@ func (d *SQLite) CreateUserTable() error {
 
 	sql += `
 	INSERT OR IGNORE INTO "` + Info.UserTable + `" (
-		USERNAME, PASSWORD, EMAIL, GRADE, APPROVAL, REG_DTTM
+		USERID, PASSWORD, EMAIL, GRADE, APPROVAL, REG_DTTM
 	) VALUES (
 		"admin", "` + string(adminPassword) + `", "admin@please.modify", "admin", "Y", "` + now + `"
 	)`
@@ -164,7 +164,7 @@ func (d *SQLite) CreateUserTable() error {
 		(DISPLAY_NAME, COLUMN_CODE, COLUMN_TYPE, COLUMN_NAME, SORT_ORDER)
 	VALUES
 		("Idx", "idx", "integer", "IDX", 1),
-		("Username", "username", "text", "USERNAME", 2),
+		("UserId", "userid", "text", "USERID", 2),
 		("Password", "password", "text", "PASSWORD", 3),
 		("Email", "email", "text", "EMAIL", 4),
 		("Grade", "grade", "text", "GRADE", 5),

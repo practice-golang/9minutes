@@ -149,7 +149,7 @@ func (d *SqlServer) CreateUserTable() error {
 	IF OBJECT_ID(N'` + Info.UserTable + `', N'U') IS NULL
 	CREATE TABLE "` + Info.UserTable + `" (
 		IDX      INT       NOT NULL IDENTITY PRIMARY KEY,
-		USERNAME VARCHAR(128) UNIQUE NULL DEFAULT NULL,
+		USERID VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		PASSWORD VARCHAR(128) NULL DEFAULT NULL,
 		EMAIL    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		GRADE    VARCHAR(24)  NULL DEFAULT NULL,
@@ -172,9 +172,9 @@ func (d *SqlServer) CreateUserTable() error {
 
 	sql = `
 	USE "` + Info.DatabaseName + `"
-	IF NOT EXISTS (SELECT TOP 1 * FROM "` + Info.UserTable + `" WHERE USERNAME = 'admin')
+	IF NOT EXISTS (SELECT TOP 1 * FROM "` + Info.UserTable + `" WHERE USERID = 'admin')
 	INSERT INTO "` + Info.UserTable + `" (
-		USERNAME, "PASSWORD", EMAIL, "GRADE", APPROVAL, REG_DTTM
+		USERID, "PASSWORD", EMAIL, "GRADE", APPROVAL, REG_DTTM
 	) VALUES (
 		'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	)`
@@ -208,7 +208,7 @@ func (d *SqlServer) CreateUserTable() error {
 		(DISPLAY_NAME, COLUMN_CODE, COLUMN_TYPE, COLUMN_NAME, SORT_ORDER)
 	VALUES
 		('Idx', 'idx', 'integer', 'IDX', 1),
-		('Username', 'username', 'text', 'USERNAME', 2),
+		('UserId', 'userid', 'text', 'USERID', 2),
 		('Password', 'password', 'text', 'PASSWORD', 3),
 		('Email', 'email', 'text', 'EMAIL', 4),
 		('Grade', 'grade', 'text', 'GRADE', 5),
