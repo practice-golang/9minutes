@@ -41,7 +41,7 @@ Cookie: {{cookie}}
 
 [
     {
-        "idx": "15",
+        "idx": "17",
         "username": "userb",
         "email": "userb@example.com",
         "grade": "pending_user"

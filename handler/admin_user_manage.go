@@ -83,18 +83,19 @@ func UpdateUser(c *fiber.Ctx) error {
 
 		err = crud.UpdateUserMap(userData)
 		if err != nil {
-			userData["error"] = err.Error()
-			userDatasFailed = append(userDatasFailed, userData)
+			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
+			userDatasFailed = append(userDatasFailed, responseData)
 			continue
 		}
-		userDatasSuccess = append(userDatasSuccess, userData)
+		responseData := map[string]interface{}{"data": userData, "error": ""}
+		userDatasSuccess = append(userDatasSuccess, responseData)
 	}
 
 	result := map[string]interface{}{"result": "ok"}
 	if len(userDatasFailed) > 0 {
 		result["result"] = "failed"
-		result["failed-userdata"] = userDatasFailed
-		result["success-userdata"] = userDatasSuccess
+		result["failed"] = userDatasFailed
+		result["success"] = userDatasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
@@ -113,23 +114,26 @@ func DeleteUser(c *fiber.Ctx) error {
 	for _, userData := range userDatas {
 		idx, err := strconv.Atoi(userData["idx"].(string))
 		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
+			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
+			userDatasFailed = append(userDatasFailed, responseData)
+			continue
 		}
 
 		err = crud.ResignUser(int64(idx))
 		if err != nil {
-			userData["error"] = err.Error()
-			userDatasFailed = append(userDatasFailed, userData)
+			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
+			userDatasFailed = append(userDatasFailed, responseData)
 			continue
 		}
-		userDatasSuccess = append(userDatasSuccess, userData)
+		responseData := map[string]interface{}{"data": userData, "error": ""}
+		userDatasSuccess = append(userDatasSuccess, responseData)
 	}
 
 	result := map[string]interface{}{"result": "ok"}
 	if len(userDatasFailed) > 0 {
 		result["result"] = "failed"
-		result["failed-userdata"] = userDatasFailed
-		result["success-userdata"] = userDatasSuccess
+		result["failed"] = userDatasFailed
+		result["success"] = userDatasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)

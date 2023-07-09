@@ -28,11 +28,11 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "board-name": "misc2",
-    "board-code": "misc2",
+    "board-name": "misc1",
+    "board-code": "misc1",
     "board-type": "board",
-    "board-table": "board_misc2",
-    "comment-table": "comment_misc2",
+    "board-table": "board_misc1",
+    "comment-table": "comment_misc1",
     "grant-read": "guest",
     "grant-write": "regular_user",
     "grant-comment": "regular_user",
@@ -41,25 +41,32 @@ Cookie: {{cookie}}
 }
 
 ### Edit board
-PUT {{uri}}/api/admin/user
+PUT {{uri}}/api/admin/boards
 Content-Type: application/json
 Cookie: {{cookie}}
 
 [
     {
-        "idx": "15",
-        "username": "userb",
-        "email": "userb@example.com",
-        "grade": "pending_user"
+        "idx": "1",
+        "board-name": "misc1",
+        "board-code": "misc1",
+        "board-type": "board",
+        "board-table": "board_misca1",
+        "comment-table": "comment_misca1",
+        "grant-read": "guest",
+        "grant-write": "regular_user",
+        "grant-comment": "regular_user",
+        "grant-upload": "regular_user",
+        "fields": null
     }
 ]
 
-### Delete user - Just update grade as resigned status
-DELETE {{uri}}/api/admin/user
+### Delete board
+DELETE {{uri}}/api/admin/boards
 Content-Type: application/json
 Cookie: {{cookie}}
 
 [
-    { "idx": "15" },
-    { "idx": "17" }
+    { "idx": "1" },
+    { "idx": "9" }
 ]

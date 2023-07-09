@@ -338,29 +338,15 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 	idx := userData["idx"].(string)
 	delete(userData, "idx")
 
-	column := np.CreateString(userData, dbtype, "", false)
-	directive, _, _ := np.CreateAssignHolders(dbtype, column.Names, 0)
+	updateset := np.CreateUpdateString(userData, dbtype, "", false)
+	wheres := np.CreateWhereString(
+		map[string]interface{}{"IDX": idx},
+		dbtype, "=", "AND", "", false,
+	)
 
-	values := strings.Split(column.Values, ",")
+	sql := `UPDATE ` + tablename + updateset + wheres
 
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-
-	valuesi := make([]interface{}, len(values))
-	for i, v := range values {
-		switch len(v) {
-		case 1:
-			valuesi[i] = v
-		default:
-			valuesi[i] = v[1 : len(v)-1]
-		}
-	}
-
-	sql := `
-	UPDATE ` + tablename + ` SET
-		` + directive + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
-
-	r, err := db.Con.Exec(sql, valuesi...)
+	r, err := db.Con.Exec(sql)
 	if err != nil {
 		return err
 	}
@@ -370,7 +356,7 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		return errors.New("nothing to update")
+		return errors.New("affected nothing")
 	}
 
 	return nil
@@ -404,7 +390,7 @@ func ResignUser(idx int64) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		return errors.New("nothing to update")
+		return errors.New("affected nothing")
 	}
 
 	return nil

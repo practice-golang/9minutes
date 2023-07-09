@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"gopkg.in/guregu/null.v4"
@@ -147,71 +146,141 @@ func AddBoard(c *fiber.Ctx) error {
 }
 
 func UpdateBoard(c *fiber.Ctx) error {
-	var boardOLD, boardNEW model.Board
+	var err error
 
-	err := c.BodyParser(&boardNEW)
+	boardDatas := []map[string]interface{}{}
+	boardDatasSucess := []map[string]interface{}{}
+	boardDatasFailed := []map[string]interface{}{}
 
-	boardOLD, err = crud.GetBoardByIdx(boardNEW)
+	err = c.BodyParser(&boardDatas)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = crud.UpdateBoard(boardNEW)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
+	for _, boardData := range boardDatas {
+		var boardOLD, boardNEW model.Board
 
-	if boardOLD.BoardTable.String != boardNEW.BoardTable.String {
-		err = db.Obj.RenameBoard(boardOLD, boardNEW)
+		idx, err := strconv.Atoi(boardData["idx"].(string))
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
 		}
-	}
 
-	if boardOLD.CommentTable.String != boardNEW.CommentTable.String {
-		err = db.Obj.RenameComment(boardOLD, boardNEW)
+		boardNEW = model.Board{
+			Idx:          null.IntFrom(int64(idx)),
+			BoardName:    null.StringFrom(boardData["board-name"].(string)),
+			BoardCode:    null.StringFrom(boardData["board-code"].(string)),
+			BoardType:    null.StringFrom(boardData["board-type"].(string)),
+			BoardTable:   null.StringFrom(boardData["board-table"].(string)),
+			CommentTable: null.StringFrom(boardData["comment-table"].(string)),
+			GrantRead:    null.StringFrom(boardData["grant-read"].(string)),
+			GrantWrite:   null.StringFrom(boardData["grant-write"].(string)),
+			GrantComment: null.StringFrom(boardData["grant-comment"].(string)),
+			GrantUpload:  null.StringFrom(boardData["grant-upload"].(string)),
+			Fields:       boardData["fields"],
+		}
+
+		boardOLD, err = crud.GetBoardByIdx(boardNEW)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
 		}
+
+		err = crud.UpdateBoard(boardNEW)
+		if err != nil {
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
+		}
+
+		if boardOLD.BoardTable.String != boardNEW.BoardTable.String {
+			err = db.Obj.RenameBoard(boardOLD, boardNEW)
+			if err != nil {
+				responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+				boardDatasFailed = append(boardDatasFailed, responseData)
+				continue
+			}
+		}
+
+		if boardOLD.CommentTable.String != boardNEW.CommentTable.String {
+			err = db.Obj.RenameComment(boardOLD, boardNEW)
+			if err != nil {
+				responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+				boardDatasFailed = append(boardDatasFailed, responseData)
+				continue
+			}
+		}
+
+		responseData := map[string]interface{}{"data": boardData, "error": ""}
+		boardDatasSucess = append(boardDatasSucess, responseData)
 	}
 
-	result := map[string]string{
-		"result": "ok",
+	result := map[string]interface{}{"result": "ok"}
+	if len(boardDatasFailed) > 0 {
+		result["result"] = "fail"
+		result["failed"] = boardDatasFailed
+		result["success"] = boardDatasSucess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
 }
 
 func DeleteBoard(c *fiber.Ctx) error {
-	var board model.Board
+	boardDatas := []map[string]interface{}{}
+	boardDatasSuccess := []map[string]interface{}{}
+	boardDatasFailed := []map[string]interface{}{}
 
-	uri := strings.Split(c.Path(), "/")
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
-
-	board.Idx = null.IntFrom(int64(idx))
-
-	board, err := crud.GetBoardByIdx(board)
+	err := c.BodyParser(&boardDatas)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = crud.DeleteBoard(board)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	for _, boardData := range boardDatas {
+		var board model.Board
+
+		idx, _ := strconv.Atoi(boardData["idx"].(string))
+
+		board.Idx = null.IntFrom(int64(idx))
+
+		board, err := crud.GetBoardByIdx(board)
+		if err != nil {
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
+		}
+
+		err = crud.DeleteBoard(board)
+		if err != nil {
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
+		}
+
+		err = db.Obj.DeleteBoard(board)
+		if err != nil {
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
+		}
+
+		err = db.Obj.DeleteComment(board)
+		if err != nil {
+			responseData := map[string]interface{}{"data": boardData, "error": err.Error()}
+			boardDatasFailed = append(boardDatasFailed, responseData)
+			continue
+		}
+
+		responseData := map[string]interface{}{"data": boardData, "error": ""}
+		boardDatasSuccess = append(boardDatasSuccess, responseData)
 	}
 
-	err = db.Obj.DeleteBoard(board)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	err = db.Obj.DeleteComment(board)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	result := map[string]string{
-		"result": "ok",
+	result := map[string]interface{}{"result": "ok"}
+	if len(boardDatasFailed) > 0 {
+		result["result"] = "failed"
+		result["failed"] = boardDatasFailed
+		result["success"] = boardDatasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
