@@ -18,23 +18,29 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 ### Board list - search
-GET {{uri}}/api/admin/boards?search=misc1
+GET {{uri}}/api/admin/boards?search=mis
 Content-Type: application/json
 Cookie: {{cookie}}
 
-### Add user
-POST {{uri}}/api/admin/user
+### Add board
+POST {{uri}}/api/admin/boards
 Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "username": "user",
-    "email": "user@example.com",
-    "password": "user",
-    "grade": ""
+    "board-name": "misc2",
+    "board-code": "misc2",
+    "board-type": "board",
+    "board-table": "board_misc1",
+    "comment-table": "comment_misc1",
+    "grant-read": "guest",
+    "grant-write": "regular_user",
+    "grant-comment": "regular_user",
+    "grant-upload": "regular_user",
+    "fields": null
 }
 
-### Edit user
+### Edit board
 PUT {{uri}}/api/admin/user
 Content-Type: application/json
 Cookie: {{cookie}}
