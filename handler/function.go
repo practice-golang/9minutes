@@ -76,8 +76,19 @@ func HandleHTML(c *fiber.Ctx) error {
 		if params["hello"] != "" {
 			log.Printf("Hello: %s", params["hello"])
 		}
-	case name == "admin":
-		name = "admin/index"
+	case strings.HasPrefix(name, "board"):
+
+	case strings.HasPrefix(name, "admin"):
+		switch name {
+		case "admin":
+			name = "admin/index"
+		case "admin/board-list":
+			log.Println(name)
+		case "admin/user-columns":
+			log.Println(name)
+		case "admin/user-list":
+			log.Println(name)
+		}
 	}
 
 	err := c.Render(name, templateMap)
