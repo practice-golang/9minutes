@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -64,18 +65,22 @@ func HelloParam(c *fiber.Ctx) error {
 
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
-	name := c.Path()[1:]
+	name := strings.TrimSuffix(c.Path()[1:], "/")
+	params := c.Queries()
+	templateMap := fiber.Map{}
 
 	switch true {
 	case name == "":
 		name = "index"
+
+		if params["hello"] != "" {
+			log.Printf("Hello: %s", params["hello"])
+		}
 	case name == "admin":
 		name = "admin/index"
-	case strings.Contains(name, "admin"):
-		name = "template_" + name
 	}
 
-	err := c.Render(name, fiber.Map{})
+	err := c.Render(name, templateMap)
 	if err != nil {
 		if strings.Contains(err.Error(), "does not exist") {
 			return c.Status(http.StatusNotFound).SendString("Page not Found")

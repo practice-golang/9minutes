@@ -1,4 +1,4 @@
-@INCLUDE@board/include/header.html
+{{template "board/include/header"}}
 
 <script>
     document.title = "Contents list"
@@ -36,7 +36,7 @@
 
     {{if eq $i 0}}
     <a href="/board?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
-    <a href="/board?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
+    <a href="/board?code=$CODE$&page={{.jump_to_before $o}}$SEARCH$">&lt;</a>
     ..
     {{end}}
 
@@ -46,9 +46,9 @@
     <a href="/board?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
     {{end}}
 
-    {{if and (ne $o $.TotalPage) (is_last_index $i)}}
+    {{if and (ne $o $.TotalPage) (.is_last_index $i)}}
     ..
-    <a href="/board?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
+    <a href="/board?code=$CODE$&page={{.jump_to_after $o}}$SEARCH$">&gt;</a>
     <a href="/board?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
     {{end}}
 
@@ -174,4 +174,4 @@
     }
 </style>
 
-@INCLUDE@board/include/footer.html
+{{template "board/include/footer"}}

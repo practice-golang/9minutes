@@ -43,13 +43,13 @@
     <tbody id="users-list-body" lr-loop="usersList">
         <tr lr-if="userEditIndex != $index">
             <td><input type="checkbox" name="select$index" placeholder="Select" /></td>
-            <td>{{idx}}</td>
-            <td>{{username}}</td>
+            <td>{{.idx}}</td>
+            <td>{{.username}}</td>
             <td>-</td>
-            <td>{{email}}</td>
-            <!-- <td>{{phone}}</td> -->
-            <td>{{grade}}</td>
-            <td>{{approval}}</td>
+            <td>{{.email}}</td>
+            <!-- <td>{{.phone}}</td> -->
+            <td>{{.grade}}</td>
+            <td>{{.approval}}</td>
             <td>
                 <button type="button" lr-click="openEdit($index)">Edit</button>
                 <button type="button" lr-click="deleteUser($index)">Delete</button>
@@ -58,15 +58,15 @@
         <tr lr-if="userEditIndex == $index">
             <td>&nbsp;</td>
             <td>
-                <input type="hidden" name="idx" value="{{idx}}" placeholder="Index" />
-                <span>{{idx}}</span>
+                <input type="hidden" name="idx" value="{{.idx}}" placeholder="Index" />
+                <span>{{.idx}}</span>
             </td>
-            <td><input type="text" name="username" value="{{username}}" placeholder="Username" /></td>
+            <td><input type="text" name="username" value="{{.username}}" placeholder="Username" /></td>
             <td><input type="password" name="password" value="" placeholder="Password" /></td>
-            <td><input type="text" name="email" value="{{email}}" placeholder="Email" /></td>
-            <!-- <td><input type="text" name="phone" value="{{phone}}" placeholder="Phone" /></td> -->
-            <td><input type="text" name="grade" onchange="restrictDatalist(this)" list="grade-list" value="{{grade}}" placeholder="Grade" /></td>
-            <td><input type="text" name="approval" onchange="restrictDatalist(this)" list="yn-list" value="{{approval}}" autocomplete="off" placeholder="Approval" /></td>
+            <td><input type="text" name="email" value="{{.email}}" placeholder="Email" /></td>
+            <!-- <td><input type="text" name="phone" value="{{.phone}}" placeholder="Phone" /></td> -->
+            <td><input type="text" name="grade" onchange="restrictDatalist(this)" list="grade-list" value="{{.grade}}" placeholder="Grade" /></td>
+            <td><input type="text" name="approval" onchange="restrictDatalist(this)" list="yn-list" value="{{.approval}}" autocomplete="off" placeholder="Approval" /></td>
             <td>
                 <button type="button" onclick="closeEdit()">Cancel</button>
                 <button type="button" onclick="updateUser()">Save</button>
@@ -94,8 +94,8 @@
         <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
         <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
 
-        <b lr-if="page == usersData['current-page']"><a onclick="location.href='{{link}}'">{{page}}</a></b>
-        <a lr-if="page != usersData['current-page']" onclick="location.href='{{link}}'">{{page}}</a>
+        <b lr-if="page == usersData['current-page']"><a onclick="location.href='{{.link}}'">{{.page}}</a></b>
+        <a lr-if="page != usersData['current-page']" onclick="location.href='{{.link}}'">{{.page}}</a>
 
         <span lr-if="page < usersData['total-page'] && $index == (pages.length - 1)">&gt;</span>
         <span lr-if="page < usersData['total-page'] && $index == (pages.length - 1)">&raquo;</span>

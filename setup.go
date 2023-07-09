@@ -251,7 +251,7 @@ func setupDB() {
 func setupRouter() {
 	handler.NewSessionStore()
 
-	engine := html.New("./static1/html", ".html")
+	engine := html.New("./static/html", ".html")
 	engine.Debug(true)
 	cfg := fiber.Config{
 		AppName:               "9minutes",
@@ -262,10 +262,10 @@ func setupRouter() {
 	}
 	app = fiber.New(cfg)
 
-	// setPAGEs(r)        // HTML, Assets, Login/Signup
+	// setPAGEs(r) // HTML, Assets, Login/Signup
 	// setPageMyPage(r)   // MyPage
 	// setApiBoard(r)     // API Board
-	// setApiUploader(r)  // API Uploader
+	// setApiUploader(r) // API Uploader
 
 	setApiAdmin(app) // API Admin
 	setAPIs(app)     // API

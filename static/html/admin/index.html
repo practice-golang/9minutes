@@ -1,4 +1,4 @@
-@INCLUDE@admin/include/header.html
+{{template "admin/include/header"}}
 
 <script>
     document.title = "Admin page"
@@ -23,4 +23,4 @@
     document.querySelector("#logout").style.display = isLoggedIn ? "block" : "none"
 </script>
 
-@INCLUDE@admin/include/footer.html
+{{template "admin/include/footer"}}

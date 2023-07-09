@@ -31,11 +31,11 @@
     <ul lr-loop="filelist">
         <li>
             <span lr-if="deletelist[$index] == undefined">
-                <a href="{{link}}" target="_blank">{{filename}}</a>
+                <a href="{{.link}}" target="_blank">{{.filename}}</a>
                 <button lr-click="setFileToDelete($index)">X</button>
             </span>
             <span lr-if="deletelist[$index] != undefined">
-                <s><a href="{{link}}" target="_blank">{{filename}}</a></s>
+                <s><a href="{{.link}}" target="_blank">{{.filename}}</a></s>
                 <button lr-click="unsetFileFromDelete($index)">Undo</button>
             </span>
         </li>

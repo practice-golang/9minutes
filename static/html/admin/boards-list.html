@@ -51,16 +51,16 @@
     <tbody id="boards-list-body" lr-loop="boardsList">
         <tr lr-if="boardEditIndex != $index">
             <!-- <td><input type="checkbox" name="select$index" placeholder="Select" /></td> -->
-            <td>{{idx}}</td>
-            <td>{{board-name}}</td>
-            <td>{{board-code}}</td>
-            <td>{{board-type}}</td>
-            <td>{{board-table}}</td>
-            <td>{{comment-table}}</td>
-            <td>{{grant-read}}</td>
-            <td>{{grant-write}}</td>
-            <td>{{grant-comment}}</td>
-            <td>{{grant-upload}}</td>
+            <td>idx</td>
+            <td>board-name</td>
+            <td>board-code</td>
+            <td>board-type</td>
+            <td>board-table</td>
+            <td>comment-table</td>
+            <td>grant-read</td>
+            <td>grant-write</td>
+            <td>grant-comment</td>
+            <td>grant-upload</td>
             <td>
                 <button type="button" lr-click="moveToListView($index)">View</button>
                 <button type="button" lr-click="openEdit($index)">Edit</button>
@@ -70,18 +70,18 @@
         <tr lr-if="boardEditIndex == $index">
             <!-- <td>&nbsp;</td> -->
             <td>
-                <input type="hidden" name="idx" value="{{idx}}" placeholder="Index" />
-                <span>{{idx}}</span>
+                <input type="hidden" name="idx" value="idx" placeholder="Index" />
+                <span>idx</span>
             </td>
-            <td><input type="text" name="board-name" value="{{board-name}}" placeholder="Board name" /></td>
-            <td><input type="text" name="board-code" value="{{board-code}}" placeholder="Board code" /></td>
-            <td><input type="text" name="board-type" list="board-types" value="{{board-type}}" autocomplete="off" placeholder="Board type" onchange="restrictDatalist(this)" /></td>
-            <td><input type="text" name="board-table" value="{{board-table}}" placeholder="Board table" disabled /></td>
-            <td><input type="text" name="comment-table" value="{{comment-table}}" placeholder="Comment table" disabled /></td>
-            <td><input type="text" name="grant-read" list="grant-list" value="{{grant-read}}" autocomplete="off" placeholder="Grant read" onchange="restrictDatalist(this)" /></td>
-            <td><input type="text" name="grant-write" list="grant-list" value="{{grant-write}}" autocomplete="off" placeholder="Grant write" onchange="restrictDatalist(this)" /></td>
-            <td><input type="text" name="grant-comment" list="grant-list" value="{{grant-comment}}" autocomplete="off" placeholder="Grant comment" onchange="restrictDatalist(this)" /></td>
-            <td><input type="text" name="grant-upload" list="grant-list" value="{{grant-upload}}" autocomplete="off" placeholder="Grant upload" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="board-name" value="{{.boardName}}" placeholder="Board name" /></td>
+            <td><input type="text" name="board-code" value="{{.boardCode}}" placeholder="Board code" /></td>
+            <td><input type="text" name="board-type" list="board-types" value="{{.boardType}}" autocomplete="off" placeholder="Board type" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="board-table" value="{{.boardTable}}" placeholder="Board table" disabled /></td>
+            <td><input type="text" name="comment-table" value="{{.commentTable}}" placeholder="Comment table" disabled /></td>
+            <td><input type="text" name="grant-read" list="grant-list" value="{{.grantRead}}" autocomplete="off" placeholder="Grant read" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-write" list="grant-list" value="{{.grantWrite}}" autocomplete="off" placeholder="Grant write" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-comment" list="grant-list" value="{{.grantComment}}" autocomplete="off" placeholder="Grant comment" onchange="restrictDatalist(this)" /></td>
+            <td><input type="text" name="grant-upload" list="grant-list" value="{{.grantUpload}}" autocomplete="off" placeholder="Grant upload" onchange="restrictDatalist(this)" /></td>
             <td>
                 <button type="button" onclick="closeEdit()">Cancel</button>
                 <button type="button" onclick="updateBoard()">Save</button>
@@ -109,8 +109,8 @@
         <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
         <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
 
-        <b lr-if="page == boardsData['current-page']"><a onclick="location.href='{{link}}'">{{page}}</a></b>
-        <a lr-if="page != boardsData['current-page']" onclick="location.href='{{link}}'">{{page}}</a>
+        <b lr-if="page == boardsData['current-page']"><a onclick="location.href='{{.link}}'">{{.page}}</a></b>
+        <a lr-if="page != boardsData['current-page']" onclick="location.href='{{.link}}'">{{.page}}</a>
 
         <span lr-if="page < boardsData['total-page'] && $index == (pages.length - 1)">&gt;</span>
         <span lr-if="page < boardsData['total-page'] && $index == (pages.length - 1)">&raquo;</span>
