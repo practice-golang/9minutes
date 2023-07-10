@@ -14,6 +14,7 @@ import (
 	"9minutes/wsock"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html/v2"
 
 	"gopkg.in/ini.v1"
@@ -261,6 +262,7 @@ func setupRouter() {
 		Views:                 engine,
 	}
 	app = fiber.New(cfg)
+	app.Use(recover.New())
 
 	// setPAGEs(r) // HTML, Assets, Login/Signup
 	// setPageMyPage(r)   // MyPage
