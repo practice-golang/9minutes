@@ -87,8 +87,15 @@ func HandleHTML(c *fiber.Ctx) error {
 			log.Printf("Hello: %s", params["hello"])
 		}
 	case strings.HasPrefix(name, "board"):
+		if userid == "" {
+			return c.Status(http.StatusUnauthorized).SendString("Unauthorized")
+		}
 
 	case strings.HasPrefix(name, "admin"):
+		if userid == "" {
+			return c.Status(http.StatusUnauthorized).SendString("Unauthorized")
+		}
+
 		switch name {
 		case "admin":
 			name = "admin/index"

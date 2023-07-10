@@ -10,14 +10,21 @@
     <link rel="stylesheet" href="/assets/css/modal.css">
     <script src="/assets/js/list-renderer.js"></script>
 </head>
+
 <body>
     <div>
         <a href="/">Front page</a>
         <div>
-            Good day, $USERNAME$.
-            $LinkLogin$<a href="/login">Login</a>
-            $LinkLogout$<a href="/logout">Logout</a>
-            $LinkMyPage$<a href="/mypage">My page</a>
-            $LinkAdmin$<a href="/admin">Admin</a>
+            Good day, {{.UserId}}.
+            <a href="/login">Login</a>
+            {{if ne .UserId ""}}
+            <a href="/logout">Logout</a>
+            <a href="/mypage">My page</a>
+
+            {{if eq .Grade "admin"}}
+            <a href="/admin">Admin</a>
+            {{end}}
+
+            {{end}}
         </div>
         <hr />

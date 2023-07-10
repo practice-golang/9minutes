@@ -16,10 +16,9 @@
         <div>
             <a href="/">Front page</a>
             <br />
-            Good day, $USERNAME$.
-            $LinkLogin$<a href="/login">Login</a>
-            $LinkLogout$<a href="/logout">Logout</a>
-            $LinkMyPage$<a href="/mypage">My page</a>
-            $LinkAdmin$<a href="/admin">Admin</a>
+            Good day, {{.UserId}}.
+            <a href="/logout">Logout</a>
+            <a href="/mypage">My page</a>
+            <a href="/admin">Admin</a>
         </div>
         <hr />

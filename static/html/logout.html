@@ -1,0 +1,24 @@
+<html>
+
+<head></head>
+
+<body></body>
+
+<script>
+    addEventListener("DOMContentLoaded", async function () {
+        const uri = "/api/logout"
+
+        const response = await fetch(uri, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include"
+        })
+
+        if (!response.ok) { alert("Failed to logout") }
+        location.href = "/"
+
+        return false
+    })
+</script>
+
+</html>
