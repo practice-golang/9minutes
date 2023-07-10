@@ -11,8 +11,8 @@
 <body>
     <input type="hidden" name="destination" value="" />
 
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username" tabindex="1" required />
+    <label for="userid">Username</label>
+    <input type="text" id="userid" name="userid" tabindex="1" required />
 
     <label for="password">Password</label>
     <input type="password" id="password" name="password" tabindex="2" required />
@@ -26,13 +26,13 @@
     document.querySelector("input[name='destination']").value = document.referrer
 
     async function login() {
-        const username = document.querySelector("input[name='username']").value
+        const userid = document.querySelector("input[name='userid']").value
         const password = document.querySelector("input[name='password']").value
 
         const response = await fetch('/api/login', {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: username, password: password }),
+            body: JSON.stringify({ userid: userid, password: password }),
         })
 
         if (response.ok) {

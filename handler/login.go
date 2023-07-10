@@ -36,6 +36,7 @@ func LoginAPI(c *fiber.Ctx) error {
 
 	sess.Set("idx", user.(map[string]interface{})["idx"])
 	sess.Set("userid", signin.UserID.String)
+	sess.Set("grade", user.(map[string]interface{})["grade"])
 	sess.Set("ip", c.IP())
 	sess.Set("user-agent", c.Get("User-Agent"))
 	sess.Set("duration", 60*60*24*7)
@@ -58,8 +59,8 @@ func LogoutAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	name := sess.Get("name")
-	if name == nil {
+	userid := sess.Get("userid")
+	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 

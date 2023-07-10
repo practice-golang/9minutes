@@ -59,24 +59,29 @@ func HandleHTML(c *fiber.Ctx) error {
 	params := c.Queries()
 	templateMap := fiber.Map{}
 
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := ""
+	useridInterface := sess.Get("userid")
+	if useridInterface != nil {
+		userid = useridInterface.(string)
+	}
+	grade := ""
+	gradeInterface := sess.Get("grade")
+	if gradeInterface != nil {
+		grade = gradeInterface.(string)
+	}
+
+	templateMap["Title"] = "9minutes"
+	templateMap["UserId"] = userid
+	templateMap["Grade"] = grade
+
 	switch true {
 	case name == "":
 		name = "index"
-
-		sess, err := store.Get(c)
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).SendString(err.Error())
-		}
-
-		useridInterface := sess.Get("name")
-		userid := "anonymous"
-
-		if useridInterface != nil {
-			userid = useridInterface.(string)
-		}
-
-		templateMap["Title"] = "9minutes"
-		templateMap["UserId"] = strings.TrimSpace(userid)
 
 		if params["hello"] != "" {
 			log.Printf("Hello: %s", params["hello"])
@@ -91,13 +96,12 @@ func HandleHTML(c *fiber.Ctx) error {
 			log.Println(name)
 		case "admin/user-columns":
 			log.Println(name)
-
 		case "admin/user-list":
 			log.Println(name)
 		}
 	}
 
-	err := c.Render(name, templateMap)
+	err = c.Render(name, templateMap)
 	if err != nil {
 		if strings.Contains(err.Error(), "does not exist") {
 			return c.Status(http.StatusNotFound).SendString("Page not Found")

@@ -14,12 +14,12 @@ func RestrictedHello(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	name := sess.Get("name")
-	if name == nil {
+	userid := sess.Get("userid")
+	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	return c.Status(http.StatusOK).Send([]byte("Hello " + name.(string)))
+	return c.Status(http.StatusOK).Send([]byte("Hello " + userid.(string)))
 }
 
 func GetUserColumns(c *fiber.Ctx) error {

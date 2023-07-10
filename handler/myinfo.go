@@ -116,12 +116,12 @@ func ResignUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	name := sess.Get("name")
-	if name == nil {
+	userid := sess.Get("userid")
+	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userDataRaw, err := crud.GetUserByNameMap(name.(string))
+	userDataRaw, err := crud.GetUserByNameMap(userid.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}

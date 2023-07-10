@@ -5,18 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
 
-    <title>Page template</title>
+    <title>{{.Title}} - Page template</title>
 </head>
 
 <body>
     <div>
         <a href="/">Front page</a>
+        {{.UserId}}
         <div>
-            {{if ne .Username ""}}
-            Good day, {{.Username}}.
-            $LinkLogout$<a href="/logout">Logout</a>
-            $LinkMyPage$<a href="/mypage">My page</a>
-            $LinkAdmin$<a href="/admin">Admin</a>
+            {{if ne .UserId ""}}
+            Good day, {{.UserId}}.
+            <a href="/logout">Logout</a>
+            <a href="/mypage">My page</a>
+
+            {{if eq .Grade "admin"}}
+            <a href="/admin">Admin</a>
+            {{end}}
+
+            {{else if eq .UserId "admin"}}
+            Good day, admin.
             {{else}}
             $LinkLogin$<a href="/login">Login</a>
             {{end}}

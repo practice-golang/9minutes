@@ -1,10 +1,5 @@
-{{template "include/header"}}
+{{template "include/header" .}}
 
-<script>
-    document.title = "Front page"
-</script>
-
-{{.Title}}
 It works!!
 <div>
     $YouArePending$
@@ -13,4 +8,4 @@ It works!!
 <hr />
 <a href="/hello">Hello</a>
 
-{{template "include/footer"}}
+{{template "include/footer" .}}

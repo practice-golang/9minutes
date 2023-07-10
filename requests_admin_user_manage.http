@@ -28,7 +28,7 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "username": "user",
+    "userid": "user",
     "email": "user@example.com",
     "password": "user",
     "grade": ""
@@ -42,7 +42,7 @@ Cookie: {{cookie}}
 [
     {
         "idx": "17",
-        "username": "userb",
+        "userid": "userb",
         "email": "userb@example.com",
         "grade": "pending_user"
     }
