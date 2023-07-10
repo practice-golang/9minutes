@@ -35,11 +35,13 @@
     <tbody id="column-list-body" lr-loop="columnList">
         <tr lr-if="columnEditIndex != $index">
             <td><input type="checkbox" name="select$index" placeholder="Select" /></td>
-            <td>{{.displayName}}</td>
-            <td>{{.columnCode}}</td>
-            <td>{{.columnType}}</td>
-            <td>{{.columnName}}</td>
-            <td>{{.sortOrder}}</td>
+            <td>
+                {{"{{displayName}}"}}
+            </td>
+            <td>{{"columnCode"}}</td>
+            <td>{{"columnType"}}</td>
+            <td>{{"columnName"}}</td>
+            <td>{{"sortOrder"}}</td>
             <td lr-if="$index <= 6">&nbsp;</td>
             <td lr-if="$index > 6">
                 <button type="button" lr-click="openEdit($index)">Edit</button>
@@ -48,13 +50,13 @@
         </tr>
         <tr lr-if="columnEditIndex == $index">
             <td>&nbsp;</td>
-            <td><input type="text" name="display-name" value="{{.displayName}}" placeholder="Display name" /></td>
-            <td><input type="text" name="column-code" value="{{.columnCode}}" placeholder="Column code" /></td>
-            <td><input type="text" name="column-type" value="{{.columnType}}" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" disabled /></td>
-            <td><input type="text" name="column-name" value="{{.columnName}}" placeholder="Column name" /></td>
+            <td><input type="text" name="display-name" value="{{`{{displayName}}`}}" placeholder="Display name" /></td>
+            <td><input type="text" name="column-code" value="{{`{{columnCode}}`}}" placeholder="Column code" /></td>
+            <td><input type="text" name="column-type" value="{{`{{columnType}}`}}" onchange="restrictDatalist(this)" list="column-types" placeholder="Column type" disabled /></td>
+            <td><input type="text" name="column-name" value="{{`{{columnName}}`}}" placeholder="Column name" /></td>
             <td>
-                <input type="hidden" name="sort-order" value="{{.sortOrder}}" />
-                <span>{{.sortOrder}}</span>
+                <input type="hidden" name="sort-order" value="{{`{{sortOrder}}`}}" />
+                <span>{{`{{sortOrder}}`}}</span>
             </td>
             <td>
                 <button type="button" onclick="closeEdit()">Cancel</button>
@@ -81,9 +83,10 @@
     }
 
     async function fetchRestricted() {
+        return false
         columnEditIndex = -1
 
-        const uri = "/api/admin/user-columns/list"
+        const uri = "/api/admin/user-columns"
         const r = await fetch(uri, {
             method: 'GET',
             headers: { "Content-Type": "application/json" }
@@ -116,7 +119,7 @@
             "column-name": columnName,
         }
 
-        const uri = "/api/admin/user-columns/column"
+        const uri = "/api/admin/user-columns"
         const r = await fetch(uri, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -173,7 +176,7 @@
     const lrColumnList = new ListRenderer(document.querySelector("#column-list-container"))
     lrColumnList.render()
 
-    document.addEventListener("DOMContentLoaded", () => { fetchRestricted() })
+    // document.addEventListener("DOMContentLoaded", () => { fetchRestricted() })
 </script>
 
 <style>

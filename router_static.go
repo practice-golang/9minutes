@@ -4,7 +4,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// setStatic - Set static
-func setStatic(a *fiber.App) {
+// setStaticFiles - Set static files
+func setStaticFiles(a *fiber.App) {
 	a.Static("/files", FilesPath)
+}
+
+// setStaticAssets - Set static js, css
+func setStaticAssets(a *fiber.App) {
+	a.Static("/assets/", HtmlPath+"/assets")
 }

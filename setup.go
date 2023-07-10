@@ -273,8 +273,9 @@ func setupRouter() {
 	// setOthers(r)     // Others - make live only ws
 	// setRouterNotUse(app) // Not use, should be removed at future
 
-	setStatic(app) // Content
-	setPage(app)   // HTML for both user and anonymous
+	setStaticFiles(app)  // Files
+	setStaticAssets(app) // Assets
+	setPage(app)         // HTML templates
 }
 
 func doSetup() {

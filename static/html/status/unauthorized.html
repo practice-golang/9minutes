@@ -14,10 +14,13 @@
 
 <script>
     addEventListener("DOMContentLoaded", function () {
-        let seconds = 5
-        setTimeout(function () {
+        let seconds = 3
+        const countdown = document.getElementById("countdown")
+        countdown.innerHTML = seconds
+
+        setInterval(function () {
             seconds--
-            document.querySelector("#countdown").innerHTML = seconds
+            countdown.innerHTML = seconds
 
             if (seconds <= 0) {
                 window.location.href = "/"
