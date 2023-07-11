@@ -4,10 +4,9 @@
     export let data;
     $: columns = data.columns;
 
-    const lastDefaultColIndex = 7;
+    const lastDefaultColIDX = 7;
 
-    $: selectAll =
-        selectedIndices.length == columns.length - lastDefaultColIndex;
+    $: selectAll = selectedIndices.length == columns.length - lastDefaultColIDX;
     let selectedIndices = [];
 
     let editIDX = -1;
@@ -27,7 +26,7 @@
             selectedIndices = [];
         } else {
             selectedIndices = columns
-                .filter((col) => col["idx"] > lastDefaultColIndex)
+                .filter((col) => col["idx"] > lastDefaultColIDX)
                 .map((col) => col["idx"]);
         }
     }

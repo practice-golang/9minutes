@@ -1,5 +1,10 @@
 <script>
+    import { invalidateAll } from "$app/navigation";
+
     export let data;
+
+    const columns = data.columns;
+    $: users = data.users;
 </script>
 
 <h1>Admin / User list</h1>
@@ -21,25 +26,17 @@
     <thead>
         <tr>
             <td>
-                <input
-                    type="checkbox"
-                    name="select-all"
-                    placeholder="Select all"
-                />
+                <input type="checkbox" />
             </td>
-            <th>Index</th>
-            <th>Userid</th>
-            <th>Password</th>
-            <th>Email</th>
-            <!-- <th>Phone</th> -->
-            <th>Grade</th>
-            <th>Approval</th>
+            {#each columns as col}
+                <th>{col["display-name"]}</th>
+            {/each}
             <th>Control</th>
         </tr>
     </thead>
     <tr id="add-user">
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
+        <td />
+        <td />
         <td>
             <input type="text" name="userid" value="" placeholder="Userid" />
         </td>
@@ -79,31 +76,9 @@
             <button type="button" onclick="addUser()">Save</button>
         </td>
     </tr>
-    <tbody id="users-list-body" lr-loop="usersList">
-        <tr lr-if="userEditIndex != $index">
-            <td>
-                <input
-                    type="checkbox"
-                    name="select$index"
-                    placeholder="Select"
-                />
-            </td>
-            <td>{data.idx}</td>
-            <td>{data.userid}</td>
-            <td>-</td>
-            <td>{data.email}</td>
-            <!-- <td>{{.phone}}</td> -->
-            <td>{data.grade}</td>
-            <td>{data.approval}</td>
-            <td>
-                <button type="button" lr-click="openEdit($index)">Edit</button>
-                <button type="button" lr-click="deleteUser($index)">
-                    Delete
-                </button>
-            </td>
-        </tr>
-        <tr lr-if="userEditIndex == $index">
-            <td>&nbsp;</td>
+    <tbody id="users-list-body">
+        <tr>
+            <td />
             <td>
                 <input
                     type="hidden"
@@ -164,6 +139,24 @@
                 <button type="button" onclick="updateUser()">Save</button>
             </td>
         </tr>
+        {#each users as user}
+            <tr>
+                <td>
+                    <input type="checkbox" />
+                </td>
+                {#each columns as col}
+                    <td>{user[col["column-code"]]}</td>
+                {/each}
+                <td>
+                    <button type="button" lr-click="openEdit($index)">
+                        Edit
+                    </button>
+                    <button type="button" lr-click="deleteUser($index)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        {/each}
     </tbody>
 </table>
 

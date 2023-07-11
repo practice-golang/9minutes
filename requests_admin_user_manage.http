@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=a7786d4d-fb19-44d8-8016-15ea2662f10d; 
+@cookie = session_id=abca6811-3569-43be-92e9-e62a046664f4; 
 
 
 ### Login
@@ -8,7 +8,7 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
+    "userid": "admin",
     "password": "admin"
 }
 

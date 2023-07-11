@@ -21,7 +21,7 @@
  */
 
 export const load = async ({ fetch }) => {
-    let columns = {}
+    let columns = []
 
     const r = await fetch("/api/admin/user-columns", {
         method: "GET",

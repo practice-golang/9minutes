@@ -154,7 +154,7 @@ func (d *SqlServer) CreateUserTable() error {
 		EMAIL    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		GRADE    VARCHAR(24)  NULL DEFAULT NULL,
 		APPROVAL VARCHAR(2)   NULL DEFAULT NULL,
-		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+		REGDATE VARCHAR(14)  NULL DEFAULT NULL,
 	)`
 
 	_, err := Con.Exec(sql)
@@ -174,7 +174,7 @@ func (d *SqlServer) CreateUserTable() error {
 	USE "` + Info.DatabaseName + `"
 	IF NOT EXISTS (SELECT TOP 1 * FROM "` + Info.UserTable + `" WHERE USERID = 'admin')
 	INSERT INTO "` + Info.UserTable + `" (
-		USERID, "PASSWORD", EMAIL, "GRADE", APPROVAL, REG_DTTM
+		USERID, "PASSWORD", EMAIL, "GRADE", APPROVAL, REGDATE
 	) VALUES (
 		'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	)`
@@ -213,7 +213,7 @@ func (d *SqlServer) CreateUserTable() error {
 		('Email', 'email', 'text', 'EMAIL', 4),
 		('Grade', 'grade', 'text', 'GRADE', 5),
 		('Approval', 'approval', 'text', 'APPROVAL', 6),
-		('Registered datetime', 'regdate', 'text', 'REG_DTTM', 7)`
+		('RegDate', 'regdate', 'text', 'REGDATE', 7)`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -234,7 +234,7 @@ func (d *SqlServer) CreateUserVerificationTable() error {
 		IDX      INT          NOT NULL IDENTITY PRIMARY KEY,
 		USER_IDX INT          NULL DEFAULT NULL,
 		TOKEN    VARCHAR(128) NULL DEFAULT NULL,
-		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+		REGDATE VARCHAR(14)  NULL DEFAULT NULL,
 	)`
 
 	_, err := Con.Exec(sql)
@@ -332,7 +332,7 @@ func (d *SqlServer) CreateBoard(tableInfo model.Board, recreate bool) error {
 		AUTHOR_IDX  BIGINT NULL DEFAULT NULL,
 		FILES       TEXT NULL DEFAULT NULL,
 		VIEWS       VARCHAR(11) NULL DEFAULT NULL,
-		REG_DTTM    VARCHAR(14) NULL DEFAULT NULL,
+		REGDATE    VARCHAR(14) NULL DEFAULT NULL,
 	)
 	--GO`
 
@@ -372,7 +372,7 @@ func (d *SqlServer) CreateComment(tableInfo model.Board, recreate bool) error {
 		AUTHOR_IDX  BIGINT NULL DEFAULT NULL,
 		FILES       TEXT NULL DEFAULT NULL,
 		VIEWS       VARCHAR(11) NULL DEFAULT NULL,
-		REG_DTTM    VARCHAR(14) NULL DEFAULT NULL,
+		REGDATE    VARCHAR(14) NULL DEFAULT NULL,
 	)
 	--GO`
 

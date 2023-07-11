@@ -252,7 +252,7 @@ func (d *Oracle) CreateUserTable() error {
 		EMAIL       VARCHAR(128),
 		GRADE       VARCHAR(24),
 		APPROVAL    VARCHAR(2),
-		REG_DTTM    VARCHAR(14),
+		REGDATE    VARCHAR(14),
 
 		CONSTRAINT "` + Info.UserTable + `_idx" PRIMARY KEY ("IDX"),
 		CONSTRAINT "` + Info.UserTable + `_userconstraint" UNIQUE ("USERID", "EMAIL")
@@ -273,7 +273,7 @@ func (d *Oracle) CreateUserTable() error {
 
 	sql = `
 	INSERT INTO ` + userTable + ` (
-		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
+		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REGDATE"
 	)
 	SELECT 'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	FROM DUAL
@@ -312,7 +312,7 @@ func (d *Oracle) CreateUserTable() error {
 	SELECT 'Email' AS "DISPLAY_NAME", 'email' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'EMAIL' AS "COLUMN_NAME", 4 AS "SORT_ORDER" FROM DUAL UNION ALL
 	SELECT 'Grade' AS "DISPLAY_NAME", 'grade' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'GRADE' AS "COLUMN_NAME", 5 AS "SORT_ORDER" FROM DUAL UNION ALL
 	SELECT 'Approval' AS "DISPLAY_NAME", 'approval' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'APPROVAL' AS "COLUMN_NAME", 6 AS "SORT_ORDER" FROM DUAL UNION ALL
-	SELECT 'Registered datetime' AS "DISPLAY_NAME", 'regdate' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'REG_DTTM' AS "COLUMN_NAME", 7 AS "SORT_ORDER" FROM DUAL`
+	SELECT 'RegDate' AS "DISPLAY_NAME", 'regdate' AS "COLUMN_CODE", 'text' AS "COLUMN_TYPE", 'REGDATE' AS "COLUMN_NAME", 7 AS "SORT_ORDER" FROM DUAL`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -348,7 +348,7 @@ func (d *Oracle) CreateUserVerificationTable() error {
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		USER_IDX    NUMBER(11),
 		TOKEN       VARCHAR(128),
-		REG_DTTM    VARCHAR(14),
+		REGDATE    VARCHAR(14),
 
 		UNIQUE("IDX")
 	)`
@@ -444,7 +444,7 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 		AUTHOR_IDX  NUMBER(11),
 		FILES       NCLOB,
 		VIEWS       VARCHAR(11),
-		REG_DTTM    VARCHAR(14),
+		REGDATE    VARCHAR(14),
 
 		UNIQUE("IDX")
 	)`
@@ -477,7 +477,7 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
 		FILES       NCLOB,
-		REG_DTTM    VARCHAR(14),
+		REGDATE    VARCHAR(14),
 		
 		UNIQUE("IDX")
 	)`

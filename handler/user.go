@@ -191,7 +191,7 @@ package handler
 // 		}
 
 // 		userData["password"] = string(password)
-// 		userData["reg-dttm"] = now
+// 		userData["regdate"] = now
 // 		userData["grade"] = "pending_user"
 // 		userData["approval"] = "N"
 

@@ -20,9 +20,23 @@ func GetUsersList(c *fiber.Ctx) error {
 		page, _ = strconv.Atoi(queries["page"])
 	}
 
-	result, err := crud.GetUsersListMap(search, page)
+	/* Todo: Move to setup */
+	columnNames, _ := crud.GetUserColumnsList()
+	selectUserColumnsMap := map[string]interface{}{}
+	for _, c := range columnNames {
+		if c.ColumnName.Valid && c.ColumnName.String != "PASSWORD" {
+			selectUserColumnsMap[c.ColumnName.String] = nil
+		}
+	}
+	/* Todo: Move to setup */
+
+	result, err := crud.GetUsersListMap(selectUserColumnsMap, search, page)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	for i, _ := range result {
+		result[i]["password"] = ""
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
@@ -46,7 +60,7 @@ func AddUser(c *fiber.Ctx) error {
 	}
 
 	userData["password"] = string(password)
-	userData["reg-dttm"] = now
+	userData["regdate"] = now
 
 	err = crud.AddUserMap(userData)
 	if err != nil {

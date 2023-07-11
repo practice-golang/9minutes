@@ -27,7 +27,7 @@ type ContentList struct {
 	AuthorName   null.String `json:"author-name"   db:"AUTHOR_NAME"   npskip:"insert, update, select, read"`
 	CommentCount null.String `json:"comment-count" db:"COMMENT_COUNT" npskip:"insert, update, select, read"`
 	Views        null.Int    `json:"views"         db:"VIEWS"`
-	RegDTTM      null.String `json:"reg-dttm"      db:"REG_DTTM"`
+	RegDate      null.String `json:"regdate"       db:"REGDATE"`
 }
 
 type Content struct {
@@ -39,7 +39,7 @@ type Content struct {
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read, viewcount"`
 	Files      null.String `json:"files"       db:"FILES"       npskip:"viewcount"`
 	Views      null.Int    `json:"views"       db:"VIEWS"       npskip:"update"`
-	RegDTTM    null.String `json:"reg-dttm"    db:"REG_DTTM"    npskip:"update, viewcount"`
+	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update, viewcount"`
 }
 
 type FilesToDelete struct {
@@ -47,7 +47,7 @@ type FilesToDelete struct {
 }
 
 type File struct {
-	FileName  null.String `json:"filename" db:"FILE_NAME"`
+	FileName  null.String `json:"filename"  db:"FILE_NAME"`
 	StoreName null.String `json:"storename" db:"STORAGE_NAME"`
 }
 
@@ -74,5 +74,5 @@ type Comment struct {
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read"`
 	Files      null.String `json:"files"       db:"FILES"`
-	RegDTTM    null.String `json:"reg-dttm"    db:"REG_DTTM"`
+	RegDate    null.String `json:"regdate"     db:"REGDATE"`
 }

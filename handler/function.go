@@ -623,7 +623,7 @@ func WriteContent(c *fiber.Ctx) error {
 	// content.AuthorIdx = userInfo.Idx
 
 	now := time.Now().Format("20060102150405")
-	content.RegDTTM = null.StringFrom(now)
+	content.RegDate = null.StringFrom(now)
 
 	content.Views = null.IntFrom(0)
 
@@ -941,7 +941,7 @@ func WriteComment(c *fiber.Ctx) error {
 	// comment.AuthorIdx = userInfo.Idx
 
 	now := time.Now().Format("20060102150405")
-	comment.RegDTTM = null.StringFrom(now)
+	comment.RegDate = null.StringFrom(now)
 
 	err = crud.WriteComment(board, comment)
 	if err != nil {

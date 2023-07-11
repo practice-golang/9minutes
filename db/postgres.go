@@ -132,7 +132,7 @@ func (d *Postgres) CreateUserTable() error {
 		"EMAIL"    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"GRADE"    VARCHAR(24)  NULL DEFAULT NULL,
 		"APPROVAL" VARCHAR(2)   NULL DEFAULT NULL,
-		"REG_DTTM" VARCHAR(14)  NULL DEFAULT NULL,
+		"REGDATE" VARCHAR(14)  NULL DEFAULT NULL,
 
 		CONSTRAINT "USERS_UQ" UNIQUE ("USERID", "EMAIL")
 	);`
@@ -152,7 +152,7 @@ func (d *Postgres) CreateUserTable() error {
 
 	sql = `
 	INSERT INTO ` + Info.SchemaName + `.` + Info.UserTable + ` (
-		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REG_DTTM"
+		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REGDATE"
 	) VALUES (
 		'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
 	)
@@ -192,7 +192,7 @@ func (d *Postgres) CreateUserTable() error {
 		('Email', 'email', 'text', 'EMAIL', 4),
 		('Grade', 'grade', 'text', 'GRADE', 5),
 		('Approval', 'approval', 'text', 'APPROVAL', 6),
-		('Registered datetime', 'regdate', 'text', 'REG_DTTM', 7)
+		('RegDate', 'regdate', 'text', 'REGDATE', 7)
 	ON CONFLICT ON CONSTRAINT "COLUMN_NAME_UQ" DO NOTHING;`
 
 	_, err = Con.Exec(sql)
@@ -210,7 +210,7 @@ func (d *Postgres) CreateUserVerificationTable() error {
 		"IDX"      SERIAL       PRIMARY KEY,
 		"USER_IDX" INTEGER      NULL DEFAULT NULL,
 		"TOKEN"    VARCHAR(128) NULL DEFAULT NULL,
-		"REG_DTTM" VARCHAR(14)  NULL DEFAULT NULL
+		"REGDATE" VARCHAR(14)  NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
@@ -290,7 +290,7 @@ func (d *Postgres) CreateBoard(tableInfo model.Board, recreate bool) error {
 		"AUTHOR_IDX"   BIGINT NULL DEFAULT NULL,
 		"FILES"        TEXT NULL DEFAULT NULL,
 		"VIEWS"        VARCHAR(11) NULL DEFAULT NULL,
-		"REG_DTTM"     VARCHAR(14) NULL DEFAULT NULL
+		"REGDATE"     VARCHAR(14) NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
@@ -316,7 +316,7 @@ func (d *Postgres) CreateComment(tableInfo model.Board, recreate bool) error {
 		"CONTENT"    TEXT NULL DEFAULT NULL,
 		"AUTHOR_IDX" BIGINT NULL DEFAULT NULL,
 		"FILES"      TEXT NULL DEFAULT NULL,
-		"REG_DTTM"   VARCHAR(14) NULL DEFAULT NULL
+		"REGDATE"   VARCHAR(14) NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)

@@ -116,7 +116,7 @@ func (d *SQLite) CreateUserTable() error {
 		"EMAIL"    TEXT UNIQUE,
 		"GRADE"    TEXT,
 		"APPROVAL" TEXT,
-		"REG_DTTM" TEXT,
+		"REGDATE" TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
@@ -131,7 +131,7 @@ func (d *SQLite) CreateUserTable() error {
 
 	sql += `
 	INSERT OR IGNORE INTO "` + Info.UserTable + `" (
-		USERID, PASSWORD, EMAIL, GRADE, APPROVAL, REG_DTTM
+		USERID, PASSWORD, EMAIL, GRADE, APPROVAL, REGDATE
 	) VALUES (
 		"admin", "` + string(adminPassword) + `", "admin@please.modify", "admin", "Y", "` + now + `"
 	)`
@@ -169,7 +169,7 @@ func (d *SQLite) CreateUserTable() error {
 		("Email", "email", "text", "EMAIL", 4),
 		("Grade", "grade", "text", "GRADE", 5),
 		("Approval", "approval", "text", "APPROVAL", 6),
-		("Registered datetime", "regdate", "text", "REG_DTTM", 7);`
+		("RegDate", "regdate", "text", "REGDATE", 7);`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -186,7 +186,7 @@ func (d *SQLite) CreateUserVerificationTable() error {
 		"IDX"      INTEGER,
 		"USER_IDX" INTEGER,
 		"TOKEN"    TEXT,
-		"REG_DTTM" TEXT,
+		"REGDATE" TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
@@ -267,7 +267,7 @@ func (d *SQLite) CreateBoard(tableInfo model.Board, recreate bool) error {
 		"AUTHOR_IDX"  INTEGER,
 		"FILES"       TEXT,
 		"VIEWS"       TEXT,
-		"REG_DTTM"    TEXT,
+		"REGDATE"    TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
@@ -294,7 +294,7 @@ func (d *SQLite) CreateComment(tableInfo model.Board, recreate bool) error {
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
 		"FILES"       TEXT,
-		"REG_DTTM"    TEXT,
+		"REGDATE"    TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 

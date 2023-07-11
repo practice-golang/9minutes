@@ -134,7 +134,7 @@ func (d *Mysql) CreateUserTable() error {
 		EMAIL    VARCHAR(128) NULL DEFAULT NULL,
 		GRADE    VARCHAR(24)  NULL DEFAULT NULL,
 		APPROVAL VARCHAR(2)   NULL DEFAULT NULL,
-		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+		REGDATE VARCHAR(14)  NULL DEFAULT NULL,
 
 		PRIMARY  KEY(IDX),
 		UNIQUE   INDEX USERID (USERID),
@@ -159,7 +159,7 @@ func (d *Mysql) CreateUserTable() error {
 
 	sql = `
 	INSERT IGNORE INTO ` + Info.DatabaseName + `.` + Info.UserTable + ` (
-		USERID, ` + "`PASSWORD`" + `, EMAIL, ` + "`GRADE`" + `, APPROVAL, REG_DTTM
+		USERID, ` + "`PASSWORD`" + `, EMAIL, ` + "`GRADE`" + `, APPROVAL, REGDATE
 	) VALUES (
 		"admin", "` + string(adminPassword) + `", "admin@please.modify", "admin", "Y", "` + now + `"
 	);`
@@ -201,7 +201,7 @@ func (d *Mysql) CreateUserTable() error {
 		("Email", "email", "text", "EMAIL", 4),
 		("Grade", "grade", "text", "GRADE", 5),
 		("Approval", "approval", "text", "APPROVAL", 6),
-		("Registered datetime", "regdate", "text", "REG_DTTM", 7);`
+		("RegDate", "regdate", "text", "REGDATE", 7);`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -218,7 +218,7 @@ func (d *Mysql) CreateUserVerificationTable() error {
 		IDX      INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
 		USER_IDX INT(11)      NULL DEFAULT NULL,
 		TOKEN    VARCHAR(128) NULL DEFAULT NULL,
-		REG_DTTM VARCHAR(14)  NULL DEFAULT NULL,
+		REGDATE VARCHAR(14)  NULL DEFAULT NULL,
 
 		PRIMARY  KEY(IDX),
 		INDEX    IDX (IDX)
@@ -304,7 +304,7 @@ func (d *Mysql) CreateBoard(tableInfo model.Board, recreate bool) error {
 		AUTHOR_IDX  INT(11) NULL DEFAULT NULL,
 		FILES       TEXT NULL  DEFAULT NULL,
 		VIEWS       VARCHAR(11) NULL DEFAULT NULL,
-		REG_DTTM    VARCHAR(14) NULL DEFAULT NULL,
+		REGDATE    VARCHAR(14) NULL DEFAULT NULL,
 
 		PRIMARY KEY(IDX),
 		INDEX IDX (IDX)
@@ -333,7 +333,7 @@ func (d *Mysql) CreateComment(tableInfo model.Board, recreate bool) error {
 		CONTENT     TEXT NULL DEFAULT NULL,
 		AUTHOR_IDX  INT(11) NULL DEFAULT NULL,
 		FILES       TEXT NULL  DEFAULT NULL,
-		REG_DTTM    VARCHAR(14) NULL DEFAULT NULL,
+		REGDATE    VARCHAR(14) NULL DEFAULT NULL,
 
 		PRIMARY KEY(IDX),
 		INDEX IDX (IDX)

@@ -11,15 +11,18 @@
 <body>
     <input type="hidden" name="destination" value="" />
 
-    <label for="userid">Username</label>
-    <input type="text" id="userid" name="userid" tabindex="1" required />
+    <div id="login-container">
+        <label for="userid">Username</label>
+        <input type="text" id="userid" name="userid" tabindex="1" required />
 
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" tabindex="2" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" tabindex="2" required />
 
-    <input type="submit" tabindex="3" value="Login" onclick="login()" />
-    <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset.html'" />
-    <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup.html'" />
+        <input type="submit" tabindex="3" value="Login" onclick="login()" />
+        <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset.html'" />
+        <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup.html'" />
+    </div>
+
 </body>
 
 <script>
@@ -28,6 +31,17 @@
     async function login() {
         const userid = document.querySelector("input[name='userid']").value
         const password = document.querySelector("input[name='password']").value
+
+        if (userid == "") {
+            alert("Please fill user id")
+            document.querySelector("#userid").focus()
+            return
+        }
+        if (password == "") {
+            alert("Please fill password")
+            document.querySelector("#password").focus()
+            return
+        }
 
         const response = await fetch('/api/login', {
             method: 'post',
@@ -41,6 +55,12 @@
             alert(await response.text())
         }
     }
+
+    function pressEnter(e) {
+        if (e.key == "Enter") { login() }
+    }
+
+    document.querySelector("#login-container").addEventListener("keyup", pressEnter)
 </script>
 
 </html>

@@ -28,7 +28,6 @@ func setApiAdmin(a *fiber.App) {
 	gadmin := a.Group("/api/admin")
 	gadmin.Use(checkAdmin)
 	gadmin.Get("/health", handler.HealthCheck)
-	// ad.POST(`/signin$`, handler.SigninAPI)
 
 	/* API Admin - User fileds */
 	gauserfield := gadmin.Group("/user-columns") // required add auth middleware

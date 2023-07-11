@@ -243,20 +243,22 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 }
 
 // GetUsersListMap - API Get Users List map
-func GetUsersListMap(search string, page int) ([]map[string]interface{}, error) {
+func GetUsersListMap(columnsMap map[string]interface{}, search string, page int) ([]map[string]interface{}, error) {
 	result := []map[string]interface{}{}
 
+	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
-	columns := np.CreateString(
-		map[string]interface{}{
-			"IDX":      nil,
-			"USERID":   nil,
-			"EMAIL":    nil,
-			"GRADE":    nil,
-			"REG_DTTM": nil,
-		},
-		db.GetDatabaseTypeString(), "", false,
-	).Names
+	// columns := np.CreateString(
+	// 	map[string]interface{}{
+	// 		"IDX":      nil,
+	// 		"USERID":   nil,
+	// 		"EMAIL":    nil,
+	// 		"GRADE":    nil,
+	// 		"REGDATE": nil,
+	// 	},
+	// 	dbtype, "", false,
+	// ).Names
+	columns := np.CreateString(columnsMap, dbtype, "", false).Names
 
 	wheres := ""
 	if search != "" {
