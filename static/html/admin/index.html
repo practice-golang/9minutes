@@ -1,26 +1,37 @@
-{{template "admin/include/header" .}}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="/admin/favicon.png" />
+		<meta name="viewport" content="width=device-width" />
+		
+		<link rel="modulepreload" href="/admin/_app/immutable/entry/start.22c2742e.js">
+		<link rel="modulepreload" href="/admin/_app/immutable/chunks/scheduler.e108d1fd.js">
+		<link rel="modulepreload" href="/admin/_app/immutable/chunks/singletons.03cd1a90.js">
+		<link rel="modulepreload" href="/admin/_app/immutable/chunks/paths.26e6568f.js">
+		<link rel="modulepreload" href="/admin/_app/immutable/entry/app.727658f1.js">
+		<link rel="modulepreload" href="/admin/_app/immutable/chunks/index.c5af3f48.js">
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">
+			<script>
+				{
+					__sveltekit_1m8qnz0 = {
+						assets: "/admin",
+						base: "/admin",
+						env: {}
+					};
 
-<script>
-    document.title = "Admin page"
-</script>
+					const element = document.currentScript.parentElement;
 
-    <input type="hidden" id="is-loggedin" value=$ISLOGGEDIN$ />
-
-    <a id="login" href="/login">Login</a>
-    <a id="logout" href="/logout">Logout</a>
-    <hr />
-    <a href="/admin/board-list">Boards</a>
-    <a href="/admin/user-columns">User columns</a>
-    <a href="/admin/users-list">User list</a>
-
-    <!-- <img width="480" src="/static/gopher.png" alt="logo" /> -->
-    <!-- <img width="480" src="/static/panic.png" alt="logo" /> -->
-
-<script>
-    const isLoggedIn = document.querySelector("#is-loggedin").value
-
-    document.querySelector("#login").style.display = isLoggedIn ? "none" : "block"
-    document.querySelector("#logout").style.display = isLoggedIn ? "block" : "none"
-</script>
-
-{{template "admin/include/footer" .}}
+					Promise.all([
+						import("/admin/_app/immutable/entry/start.22c2742e.js"),
+						import("/admin/_app/immutable/entry/app.727658f1.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>

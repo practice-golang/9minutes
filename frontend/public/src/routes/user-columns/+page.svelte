@@ -1,9 +1,5 @@
 <script>
     export let data;
-
-    function sayHello(who) {
-        alert(`Hello ${who}!`);
-    }
 </script>
 
 <h1>Admin / User columns</h1>
@@ -68,10 +64,8 @@
         </td>
         <td>&nbsp;</td>
         <td>
-            <button type="button" on:click={() => sayHello("John")}
-                >Cancel</button
-            >
-            <button type="button" on:click={() => sayHello("Jane")}>Save</button>
+            <button type="button" onclick="closeAdd()">Cancel</button>
+            <button type="button" onclick="addColumn()">Save</button>
         </td>
     </tr>
     <tbody id="column-list-body" lr-loop="columnList">

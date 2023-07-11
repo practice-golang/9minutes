@@ -91,6 +91,7 @@ func HandleHTML(c *fiber.Ctx) error {
 	case strings.HasPrefix(name, "admin"):
 		if userid == "" {
 			name = "status/unauthorized"
+			break
 		}
 
 		switch name {
@@ -103,6 +104,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		case "admin/user-list":
 			log.Println(name)
 		}
+
+		name = "admin/index"
 	}
 
 	err = c.Render(name, templateMap)

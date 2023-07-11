@@ -12,4 +12,5 @@ func setStaticFiles(a *fiber.App) {
 // setStaticAssets - Set static js, css
 func setStaticAssets(a *fiber.App) {
 	a.Static("/assets/", HtmlPath+"/assets")
+	a.Static("/admin/_app/", HtmlPath+"/admin/_app")
 }

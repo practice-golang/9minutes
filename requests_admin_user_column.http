@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=1bb8d238-f347-4fa5-960f-b4c5a9903fdd;
+@cookie = session_id=be5c9e24-13e4-4c3a-9345-bfd896b70006; 
 
 
 ### Login
@@ -8,13 +8,14 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
+    "userid": "admin",
     "password": "admin"
 }
 
 
 ### Get user column list
 GET {{uri}}/api/admin/user-columns
+Cookie: {{cookie}}
 
 ### Add user column
 POST {{uri}}/api/admin/user-columns
