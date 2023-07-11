@@ -1,8 +1,49 @@
 <script>
     export let data;
+    const { columns } = data;
 
-    function sayHello(who) {
-        alert(`Hello ${who}!`);
+    let editIDX = -1;
+    let showNewCOL = false;
+    const newCOL = {
+        "display-name": "",
+        "column-code": "",
+        "column-type": "",
+        "column-name": "",
+    };
+    const editCOL = {
+        "display-name": "",
+        "column-code": "",
+        "column-type": "",
+        "column-name": "",
+    };
+
+    function closeNewColumn() {
+        newCOL["display-name"] = "";
+        newCOL["column-code"] = "";
+        newCOL["column-type"] = "";
+        newCOL["column-name"] = "";
+
+        showNewCOL = false;
+    }
+
+    function saveNewColumn() {
+        closeNewColumn();
+    }
+
+    function closeEditColumn() {
+        editCOL["display-name"] = "";
+        editCOL["column-code"] = "";
+        editCOL["column-type"] = "";
+        editCOL["column-name"] = "";
+
+        editIDX = -1;
+    }
+    function saveEditColumn() {
+        closeEditColumn();
+    }
+
+    function deleteColumn(idx) {
+        console.log(columns[idx]);
     }
 </script>
 
@@ -10,7 +51,12 @@
 
 <h1>User fields</h1>
 
-<button type="button" onclick="openAdd()">Add column</button>
+<button
+    type="button"
+    on:click={() => {
+        showNewCOL = true;
+    }}>Add column</button
+>
 
 <table id="column-list-container">
     <thead>
@@ -30,81 +76,15 @@
             <th>Control</th>
         </tr>
     </thead>
-    <tr id="add-column">
-        <td>&nbsp;</td>
-        <td>
-            <input
-                type="text"
-                name="display-name"
-                value=""
-                placeholder="Display name"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="column-code"
-                value=""
-                placeholder="Column code"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="column-type"
-                value=""
-                onchange="restrictDatalist(this)"
-                list="column-types"
-                placeholder="Column type"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="column-name"
-                value=""
-                placeholder="Column name"
-            />
-        </td>
-        <td>&nbsp;</td>
-        <td>
-            <button type="button" on:click={() => sayHello("John")}
-                >Cancel</button
-            >
-            <button type="button" on:click={() => sayHello("Jane")}>Save</button>
-        </td>
-    </tr>
-    <tbody id="column-list-body" lr-loop="columnList">
-        <tr lr-if="columnEditIndex != $index">
-            <td>
-                <input
-                    type="checkbox"
-                    name="select$index"
-                    placeholder="Select"
-                />
-            </td>
-            <td>
-                {data.displayName}
-            </td>
-            <td>{data.columnCode}</td>
-            <td>{data.columnType}</td>
-            <td>{data.columnName}</td>
-            <td>{data.sortOrder}</td>
-            <td lr-if="$index <= 6">&nbsp;</td>
-            <td lr-if="$index > 6">
-                <button type="button" lr-click="openEdit($index)">Edit</button>
-                <button type="button" lr-click="deleteColumn($index)">
-                    Delete
-                </button>
-            </td>
-        </tr>
-        <tr lr-if="columnEditIndex == $index">
+
+    {#if showNewCOL}
+        <tr id="add-column">
             <td>&nbsp;</td>
             <td>
                 <input
                     type="text"
                     name="display-name"
-                    value={data.displayName}
+                    bind:value={newCOL["display-name"]}
                     placeholder="Display name"
                 />
             </td>
@@ -112,7 +92,7 @@
                 <input
                     type="text"
                     name="column-code"
-                    value={data.columnCode}
+                    bind:value={newCOL["column-code"]}
                     placeholder="Column code"
                 />
             </td>
@@ -120,30 +100,133 @@
                 <input
                     type="text"
                     name="column-type"
-                    value={data.columnType}
+                    bind:value={newCOL["column-type"]}
                     onchange="restrictDatalist(this)"
                     list="column-types"
                     placeholder="Column type"
-                    disabled
                 />
             </td>
             <td>
                 <input
                     type="text"
                     name="column-name"
-                    value={data.columnName}
+                    bind:value={newCOL["column-name"]}
                     placeholder="Column name"
                 />
             </td>
+            <td>&nbsp;</td>
             <td>
-                <input type="hidden" name="sort-order" value={data.sortOrder} />
-                <span>{data.sortOrder}</span>
-            </td>
-            <td>
-                <button type="button" onclick="closeEdit()">Cancel</button>
-                <button type="button" onclick="updateColumn()">Save</button>
+                <button type="button" on:click={closeNewColumn}>
+                    Cancel
+                </button>
+                <button type="button" on:click={saveNewColumn}> Save </button>
             </td>
         </tr>
+    {/if}
+
+    <tbody id="column-list-body">
+        {#each columns as col, idx}
+            {#if editIDX != idx}
+                <tr lr-if="columnEditIndex != $index">
+                    {#if idx <= 6}
+                        <td />
+                    {:else}
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="select$index"
+                                placeholder="Select"
+                            />
+                        </td>
+                    {/if}
+                    <td>{col["display-name"]}</td>
+                    <td>{col["column-code"]}</td>
+                    <td>{col["column-type"]}</td>
+                    <td>{col["column-name"]}</td>
+                    <td>{col["sort-order"]}</td>
+                    {#if idx <= 6}
+                        <td />
+                    {:else}
+                        <td>
+                            <button
+                                type="button"
+                                on:click={() => {
+                                    editIDX = idx;
+                                }}
+                            >
+                                Edit
+                            </button>
+                            <button
+                                type="button"
+                                lr-click="deleteColumn($index)"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    {/if}
+                </tr>
+            {:else}
+                <tr lr-if="columnEditIndex == $index">
+                    <td />
+                    <td>
+                        <input
+                            type="text"
+                            name="display-name"
+                            value={col["display-name"]}
+                            placeholder="Display name"
+                        />
+                    </td>
+                    <td>
+                        <input
+                            type="text"
+                            name="column-code"
+                            value={col["column-code"]}
+                            placeholder="Column code"
+                        />
+                    </td>
+                    <td>
+                        <input
+                            type="text"
+                            name="column-type"
+                            value={col["column-type"]}
+                            onchange="restrictDatalist(this)"
+                            list="column-types"
+                            placeholder="Column type"
+                            disabled
+                        />
+                    </td>
+                    <td>
+                        <input
+                            type="text"
+                            name="column-name"
+                            value={col["column-name"]}
+                            placeholder="Column name"
+                        />
+                    </td>
+                    <td>
+                        <input
+                            type="hidden"
+                            name="sort-order"
+                            value={col["sort-order"]}
+                        />
+                        <span>{col["sort-order"]}</span>
+                    </td>
+                    <td>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                editIDX = -1;
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button type="button" onclick="updateColumn()">
+                            Save
+                        </button>
+                    </td>
+                </tr>
+            {/if}
+        {/each}
     </tbody>
 </table>
 

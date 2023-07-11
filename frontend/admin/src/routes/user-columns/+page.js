@@ -1,5 +1,29 @@
-export const load = async () => {
-    const r = await fetch("/api/admin/user", {
+/* 
+[
+    {
+        "idx": 1,
+        "display-name": "Idx",
+        "column-code": "idx",
+        "column-type": "integer",
+        "column-name": "IDX",
+        "sort-order": 1
+    },
+    {
+        "idx": 2,
+        "display-name": "UserID",
+        "column-code": "userid",
+        "column-type": "text",
+        "column-name": "USERID",
+        "sort-order": 2
+    }
+    ...
+]
+ */
+
+export const load = async ({ fetch }) => {
+    let columns = {}
+
+    const r = await fetch("/api/admin/user-columns", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -7,16 +31,8 @@ export const load = async () => {
 
     if (r.ok) {
         const response = await r.json()
-        console.log(response)
+        columns = response
     }
 
-    let result = {
-        displayName: 'display Name',
-        columnCode: "",
-        columnType: "",
-        columnName: "",
-        sortOrder: "",
-    }
-
-    return result
+    return { columns: columns }
 }
