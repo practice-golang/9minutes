@@ -2,7 +2,9 @@
     import { base } from "$app/paths";
 </script>
 
+<a href="/" rel="external">Home</a>
 <a href={base}>Admin</a>
+<br />
 <a href="{base}/board-list">Boards</a>
 <a href="{base}/user-columns">User columns</a>
 <a href="{base}/user-list">User list</a>
@@ -11,7 +13,9 @@
 <slot />
 <hr />
 
+<a href="/" rel="external">Home</a>
 <a href={base}>Admin</a>
+<br />
 <a href="{base}/board-list">Boards</a>
 <a href="{base}/user-columns">User columns</a>
 <a href="{base}/user-list">User list</a>
