@@ -3,6 +3,7 @@ package handler
 import (
 	"9minutes/consts"
 	"9minutes/internal/crud"
+	"9minutes/model"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,14 +11,29 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/guregu/null.v4"
 )
 
-func GetUsersList(c *fiber.Ctx) error {
+func GetUserList(c *fiber.Ctx) error {
 	queries := c.Queries()
+
 	search := strings.TrimSpace(queries["search"])
 	page := 1
 	if queries["page"] != "" {
 		page, _ = strconv.Atoi(queries["page"])
+		if page <= 0 {
+			page = 1
+		}
+	}
+	listCount := 10
+	if queries["list-count"] != "" {
+		listCount, _ = strconv.Atoi(queries["list-count"])
+	}
+
+	listingOption := model.UserListingOptions{
+		Search:    null.StringFrom(search),
+		Page:      null.IntFrom(int64(page)),
+		ListCount: null.IntFrom(int64(listCount)),
 	}
 
 	/* Todo: Move to setup */
@@ -30,13 +46,13 @@ func GetUsersList(c *fiber.Ctx) error {
 	}
 	/* Todo: Move to setup */
 
-	result, err := crud.GetUsersListMap(selectUserColumnsMap, search, page)
+	result, err := crud.GetUsersListMap(selectUserColumnsMap, listingOption)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	for i, _ := range result {
-		result[i]["password"] = ""
+	for i := range result.UserList {
+		result.UserList[i]["password"] = ""
 	}
 
 	return c.Status(http.StatusOK).JSON(result)

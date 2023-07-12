@@ -38,7 +38,7 @@ func setApiAdmin(a *fiber.App) {
 
 	/* API Admin - Users */
 	gauser := a.Group("/api/admin/user") // required add auth middleware
-	gauser.Get("/:search?", handler.GetUsersList)
+	gauser.Get("/", handler.GetUserList)
 	gauser.Post("/", handler.AddUser)
 	gauser.Put("/", handler.UpdateUser)
 	gauser.Delete("/", handler.DeleteUser)

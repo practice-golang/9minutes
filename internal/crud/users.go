@@ -243,45 +243,70 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 }
 
 // GetUsersListMap - API Get Users List map
-func GetUsersListMap(columnsMap map[string]interface{}, search string, page int) ([]map[string]interface{}, error) {
-	result := []map[string]interface{}{}
+func GetUsersListMap(columnsMap map[string]interface{}, options model.UserListingOptions) (model.UserPageData, error) {
+	result := model.UserPageData{}
+	users := []map[string]interface{}{}
 
 	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(consts.TableUsers)
-	// columns := np.CreateString(
-	// 	map[string]interface{}{
-	// 		"IDX":      nil,
-	// 		"USERID":   nil,
-	// 		"EMAIL":    nil,
-	// 		"GRADE":    nil,
-	// 		"REGDATE": nil,
-	// 	},
-	// 	dbtype, "", false,
-	// ).Names
+	tableName := db.GetFullTableName(consts.TableUsers)
 	columns := np.CreateString(columnsMap, dbtype, "", false).Names
 
-	wheres := ""
-	if search != "" {
-		wheres += np.CreateWhereString(
+	sqlSearch := ""
+	if options.Search.Valid && options.Search.String != "" {
+		search := options.Search.String
+		sqlSearch += np.CreateWhereString(
 			map[string]interface{}{"USERID": search, "EMAIL": search},
 			db.GetDatabaseTypeString(), "LIKE", "OR", "", false,
 		)
 	}
 
+	paging := db.Obj.GetPagingQuery(
+		(int(options.Page.Int64)-1)*int(options.ListCount.Int64),
+		int(options.ListCount.Int64),
+	)
+
 	sql := `
 	SELECT
 		` + columns + `
-	FROM ` + tablename + `
-	` + wheres
+	FROM ` + tableName + `
+	` + sqlSearch + `
+	ORDER BY IDX ASC ` + `
+	` + paging
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
 	for r.Next() {
 		scanedRow, _ := scanMap(r)
-		result = append(result, scanedRow)
+		users = append(users, scanedRow)
+	}
+
+	var totalCount int64
+	sql = `
+	SELECT
+		COUNT(IDX)
+	FROM ` + tableName + `
+	` + sqlSearch
+
+	r, err = db.Con.Query(sql)
+	if err != nil {
+		return result, err
+	}
+	defer r.Close()
+
+	err = scan.Row(&totalCount, r)
+	if err != nil {
+		return result, err
+	}
+
+	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+
+	result = model.UserPageData{
+		UserList:    users,
+		CurrentPage: int(options.Page.Int64),
+		TotalPage:   int(totalPage),
 	}
 
 	return result, nil

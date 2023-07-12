@@ -94,17 +94,6 @@ func HandleHTML(c *fiber.Ctx) error {
 			break
 		}
 
-		switch name {
-		case "admin":
-			name = "admin/index"
-		case "admin/board-list":
-			log.Println(name)
-		case "admin/user-columns":
-			log.Println(name)
-		case "admin/user-list":
-			log.Println(name)
-		}
-
 		name = "admin/index"
 	}
 

@@ -19,25 +19,41 @@
 ]
  */
 
-export const load = async ({ fetch }) => {
-    let columns = []
-    let users = []
+export const load = async ({ url, fetch }) => {
+    const listCount = Number(url.searchParams.get("list-count")) || 10
+    const page = Number(url.searchParams.get("page")) || 1
+    const search = url.searchParams.get("search") || ""
 
-    const rc = await fetch("/api/admin/user-columns", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-    })
+    async function getColumns() {
+        let columns = []
 
-    if (rc.ok) { columns = await rc.json() }
+        const rc = await fetch("/api/admin/user-columns", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
 
-    const rl = await fetch("/api/admin/user", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-    })
+        if (rc.ok) { columns = await rc.json() }
 
-    if (rl.ok) { users = await rl.json() }
+        return columns
+    }
 
-    return { columns: columns, users: users }
+    async function getUsers(page, listCount, search) {
+        let usersData = {}
+
+        let uri = `/api/admin/user?page=${page}&list-count=${listCount}`
+        if (search != "") { uri += `&search=${search}` }
+
+        const rl = await fetch(uri, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
+
+        if (rl.ok) { usersData = await rl.json() }
+
+        return usersData
+    }
+
+    return { columns: getColumns(), "userlist-data": getUsers(page, listCount, search) }
 }

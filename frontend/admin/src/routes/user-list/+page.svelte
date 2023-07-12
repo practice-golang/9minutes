@@ -1,6 +1,7 @@
 <script>
     import { onMount, onDestroy } from "svelte";
     import { invalidateAll } from "$app/navigation";
+    import { page } from "$app/stores";
 
     import "moment/dist/locale/ko";
     import moment from "moment";
@@ -8,7 +9,15 @@
     export let data;
 
     const columns = data.columns;
-    $: users = data.users;
+
+    let listCount = Number($page.url.searchParams.get("list-count")) || 10;
+    $: users = data["userlist-data"]["user-list"];
+    $: currentPage = data["userlist-data"]["current-page"];
+    $: totalPage = data["userlist-data"]["total-page"];
+    $: jumpPrev = currentPage - 5 > 1 ? currentPage - 5 : 1;
+    $: jumpNext = currentPage + 5 < totalPage ? currentPage + 5 : totalPage;
+
+    let searchKeyword = $page.url.searchParams.get("search") || "";
 
     let selectedIndices = [];
 
@@ -25,6 +34,29 @@
         banned_user: "Banned User",
         resigned_user: "Resigned User",
     };
+
+    function search() {
+        if (searchKeyword != "") {
+            let params = "?search=" + searchKeyword;
+            if (listCount > 10) {
+                params += "&list-count=" + listCount;
+            }
+            location.href = params;
+        }
+    }
+
+    function pressEnter(e) {
+        if (e.key == "Enter") {
+            console.log(searchKeyword);
+            search();
+        }
+    }
+
+    function paramsChange() {
+        location.href =
+            `?list-count=${listCount}` +
+            (searchKeyword != "" ? `&search-keyword=${searchKeyword}` : "");
+    }
 
     function closeNewUser() {
         newUser = {};
@@ -165,14 +197,26 @@
     Add user
 </button>
 
+<span>|</span>
+
 <label for="search">Search:</label>
 <input
     type="text"
     id="search"
-    onkeyup="pressEnter()"
+    on:keyup={pressEnter}
+    bind:value={searchKeyword}
     placeholder="Search for..."
 />
-<button type="button" onclick="search()">Search</button>
+<button type="button" on:click={search}>Search</button>
+
+<span>|</span>
+
+<label for="set-list-count">List:</label>
+<select id="set-list-count" bind:value={listCount} on:change={paramsChange}>
+    {#each [5, 10, 20, 30, 50, 80] as listCountNum}
+        <option value={listCountNum}>{listCountNum}</option>
+    {/each}
+</select>
 
 <table id="users-list-container">
     <!-- Column titles -->
@@ -340,29 +384,40 @@
 
 <div id="pages-container">
     <div lr-loop="pages">
-        <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
-        <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+        <a href="?page=1&list-count={listCount}">
+            <span>&laquo;</span>
+        </a>
+        <a href="?page={jumpPrev}&list-count={listCount}">
+            <span>&lt;</span>
+        </a>
+
+        <span>..</span>
+
+        {#each [currentPage - 2, currentPage - 1] as page}
+            {#if page >= 1}
+                <a href="?page={page}&list-count={listCount}">{page}</a>
+            {/if}
+        {/each}
 
         <b lr-if="page == usersData['current-page']">
             <a href={data.link} rel="external">
-                {data.page}
+                {currentPage}
             </a>
         </b>
-        <a
-            lr-if="page != usersData['current-page']"
-            href={data.link}
-            rel="external"
-        >
-            {data.page}
-        </a>
 
-        <span
-            lr-if="page < usersData['total-page'] && $index == (pages.length - 1)"
-            >&gt;</span
-        >
-        <span
-            lr-if="page < usersData['total-page'] && $index == (pages.length - 1)"
-            >&raquo;</span
-        >
+        {#each [currentPage + 1, currentPage + 2] as page}
+            {#if page <= totalPage}
+                <a href="?page={page}&list-count={listCount}">{page}</a>
+            {/if}
+        {/each}
+
+        <span>..</span>
+
+        <a href="?page={jumpNext}&list-count={listCount}">
+            <span>&gt;</span>
+        </a>
+        <a href="?page={totalPage}&list-count={listCount}">
+            <span>&raquo;</span>
+        </a>
     </div>
 </div>
