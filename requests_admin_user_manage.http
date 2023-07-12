@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=abca6811-3569-43be-92e9-e62a046664f4; 
+@cookie = session_id=33ed66ef-10d6-47f8-a24a-b63b556ce47d
 
 
 ### Login
@@ -29,9 +29,10 @@ Cookie: {{cookie}}
 
 {
     "userid": "user",
-    "email": "user@example.com",
     "password": "user",
-    "grade": ""
+    "email": "user@example.com",
+    "grade": "pending_user",
+    "approval": "N"
 }
 
 ### Edit user

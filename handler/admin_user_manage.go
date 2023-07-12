@@ -2,7 +2,7 @@ package handler
 
 import (
 	"9minutes/consts"
-	"9minutes/crud"
+	"9minutes/internal/crud"
 	"net/http"
 	"strconv"
 	"strings"

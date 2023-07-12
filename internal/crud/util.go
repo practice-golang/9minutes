@@ -1,7 +1,7 @@
 package crud
 
 import (
-	"9minutes/db"
+	"9minutes/internal/db"
 	"9minutes/model"
 	"database/sql"
 	"strings"

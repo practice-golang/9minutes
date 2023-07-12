@@ -9,7 +9,7 @@
     $: selectAll = selectedIndices.length == columns.length - lastDefaultColIDX;
     let selectedIndices = [];
 
-    let editIDX = -1;
+    let editINDEX = -1;
     let showNewCOL = false;
     let newCOL = {};
     let editCOL = {};
@@ -53,17 +53,17 @@
         invalidateAll();
     }
 
-    function openEditColumn(idx) {
-        editIDX = idx;
+    function openEditColumn(index) {
+        editINDEX = index;
         editCOL = {};
-        for (const k in data.columns[idx]) {
-            editCOL[k] = data.columns[idx][k];
+        for (const k in columns[index]) {
+            editCOL[k] = columns[index][k];
         }
     }
 
     function closeEditColumn() {
         editCOL = {};
-        editIDX = -1;
+        editINDEX = -1;
     }
 
     async function updateEditColumn() {
@@ -83,8 +83,8 @@
         invalidateAll();
     }
 
-    async function deleteColumn(idx) {
-        const colIDX = columns[idx]["idx"];
+    async function deleteColumn(index) {
+        const colIDX = columns[index]["idx"];
 
         const uri = "/api/admin/user-columns";
         const r = await fetch(uri, {
@@ -211,8 +211,8 @@
     {/if}
 
     <tbody id="column-list-body">
-        {#each columns as col, idx}
-            {#if editIDX == idx}
+        {#each columns as col, index}
+            {#if editINDEX == index}
                 <tr>
                     <td />
                     <td>
@@ -258,7 +258,7 @@
                 </tr>
             {:else}
                 <tr>
-                    {#if idx <= 6}
+                    {#if index <= 6}
                         <td />
                     {:else}
                         <td>
@@ -274,19 +274,19 @@
                     <td>{colTYPES[col["column-type"]]}</td>
                     <td>{col["column-name"]}</td>
                     <td>{col["sort-order"]}</td>
-                    {#if idx <= 6}
+                    {#if index <= 6}
                         <td />
                     {:else}
                         <td>
                             <button
                                 type="button"
-                                on:click={() => openEditColumn(idx)}
+                                on:click={() => openEditColumn(index)}
                             >
                                 Edit
                             </button>
                             <button
                                 type="button"
-                                on:click={() => deleteColumn(idx)}
+                                on:click={() => deleteColumn(index)}
                             >
                                 Delete
                             </button>

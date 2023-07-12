@@ -1,7 +1,7 @@
 package handler
 
 // import (
-// 	"9minutes/crud"
+// 	"9minutes/internal/crud"
 // 	"9minutes/model"
 // 	"9minutes/router"
 // 	"crypto/sha256"

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"9minutes/fd"
+	"9minutes/internal/fd"
 	"9minutes/model"
 	"9minutes/router"
 	"bytes"

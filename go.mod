@@ -14,8 +14,6 @@ require (
 	github.com/gofiber/template/html/v2 v2.0.4
 	github.com/lib/pq v1.10.9
 	github.com/microcosm-cc/bluemonday v1.0.24
-	github.com/mileusna/useragent v1.3.3
-	github.com/rs/zerolog v1.29.1
 	github.com/sijms/go-ora/v2 v2.7.9
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.11.0

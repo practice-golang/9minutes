@@ -3,9 +3,9 @@ package crud
 
 // import (
 // 	"9minutes/consts"
-// 	"9minutes/db"
+// 	"9minutes/internal/db"
 // 	"9minutes/model"
-// 	"9minutes/np"
+// 	"9minutes/internal/np"
 // 	"errors"
 
 // 	"github.com/blockloop/scan"

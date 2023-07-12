@@ -10,7 +10,7 @@ import (
 
 	"9minutes/auth"
 	"9minutes/consts"
-	"9minutes/db"
+	"9minutes/internal/db"
 	"9minutes/logging"
 	"9minutes/model"
 	"9minutes/router"

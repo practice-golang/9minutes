@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 
 	"9minutes/config"
-	"9minutes/db"
-	"9minutes/email"
 	"9minutes/handler"
+	"9minutes/internal/db"
+	"9minutes/internal/email"
 
 	"github.com/gofiber/fiber/v2"
 )

@@ -1,8 +1,8 @@
 package config
 
 import (
-	"9minutes/db"
-	"9minutes/email"
+	"9minutes/internal/db"
+	"9minutes/internal/email"
 	"9minutes/model"
 )
 

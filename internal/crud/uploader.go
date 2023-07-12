@@ -1,8 +1,8 @@
 package crud
 
 import (
-	"9minutes/db"
-	"9minutes/np"
+	"9minutes/internal/db"
+	"9minutes/internal/np"
 	"fmt"
 )
 

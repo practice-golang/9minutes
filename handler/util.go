@@ -10,8 +10,8 @@ import (
 // import (
 // 	"9minutes/auth"
 // 	"9minutes/config"
-// 	"9minutes/crud"
-// 	"9minutes/fd"
+// 	"9minutes/internal/crud"
+// 	"9minutes/internal/fd"
 // 	"9minutes/model"
 // 	"9minutes/router"
 // 	"bytes"

@@ -7,9 +7,9 @@ import (
 	"os"
 
 	"9minutes/config"
-	"9minutes/db"
-	"9minutes/email"
 	"9minutes/handler"
+	"9minutes/internal/db"
+	"9minutes/internal/email"
 	"9minutes/model"
 	"9minutes/wsock"
 

@@ -2,9 +2,9 @@ package crud
 
 import (
 	"9minutes/consts"
-	"9minutes/db"
+	"9minutes/internal/db"
+	"9minutes/internal/np"
 	"9minutes/model"
-	"9minutes/np"
 	"strconv"
 	"strings"
 

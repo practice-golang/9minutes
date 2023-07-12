@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"9minutes/consts"
-	"9minutes/crud"
-	"9minutes/email"
+	"9minutes/internal/crud"
+	"9minutes/internal/email"
 	"9minutes/model"
 
 	"github.com/gofiber/fiber/v2"

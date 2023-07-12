@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"9minutes/crud"
-	"9minutes/db"
+	"9minutes/internal/crud"
+	"9minutes/internal/db"
 	"9minutes/model"
 	"bytes"
 	"encoding/json"

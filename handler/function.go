@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"9minutes/config"
-	"9minutes/crud"
+	"9minutes/internal/crud"
 	"9minutes/model"
 
 	"gopkg.in/guregu/null.v4"

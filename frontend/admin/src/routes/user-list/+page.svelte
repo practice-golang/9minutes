@@ -1,17 +1,169 @@
 <script>
+    import { onMount, onDestroy } from "svelte";
     import { invalidateAll } from "$app/navigation";
+
+    import "moment/dist/locale/ko";
+    import moment from "moment";
 
     export let data;
 
     const columns = data.columns;
     $: users = data.users;
+
+    let selectedIndices = [];
+
+    let editINDEX = -1;
+    let showNewUser = false;
+    let newUser = {};
+    let editUser = {};
+
+    const userGRADES = {
+        admin: "Admin",
+        manager: "Manager",
+        regular_user: "Regular User",
+        pending_user: "Pending User",
+        banned_user: "Banned User",
+        resigned_user: "Resigned User",
+    };
+
+    function closeNewUser() {
+        newUser = {};
+        showNewUser = false;
+    }
+
+    async function saveNewUser() {
+        const uri = "/api/admin/user";
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(newUser),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        closeNewUser();
+        invalidateAll();
+    }
+
+    function openEditUser(index) {
+        editINDEX = index;
+        editUser = {};
+        for (const k in users[index]) {
+            editUser[k] = users[index][k];
+        }
+    }
+
+    function closeEditUser() {
+        editUser = {};
+        editINDEX = -1;
+    }
+
+    async function updateEditUser() {
+        const columnTypes = {};
+        for (const c of columns) {
+            columnTypes[c["column-code"]] = c["column-type"];
+        }
+
+        for (const k in editUser) {
+            switch (true) {
+                case columnTypes[k] === "number-integer":
+                    editUser[k] = parseInt(editUser[k]);
+                    if (isNaN(editUser[k])) {
+                        delete editUser[k];
+                    }
+                    break;
+                case columnTypes[k] === "number-real":
+                    editUser[k] = parseFloat(editUser[k]);
+                    if (isNaN(editUser[k])) {
+                        delete editUser[k];
+                    }
+                    break;
+            }
+        }
+
+        const uri = "/api/admin/user";
+        const r = await fetch(uri, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify([editUser]),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        closeEditUser();
+        invalidateAll();
+    }
+
+    async function deleteUser(index) {
+        const userIDX = users[index]["idx"];
+
+        const uri = "/api/admin/user";
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify([{ idx: parseInt(userIDX) }]),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        selectedIndices = [];
+        invalidateAll();
+    }
+
+    async function deleteSelectedUsers() {
+        if (selectedIndices.length == 0) {
+            alert("No columns selected");
+            return;
+        }
+
+        const userIndices = [];
+        for (let i = 0; i < selectedIndices.length; i++) {
+            userIndices.push({ idx: parseInt(selectedIndices[i]) });
+        }
+
+        const uri = "/api/admin/user";
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(userIndices),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        selectedIndices = [];
+        invalidateAll();
+    }
+
+    onMount(() => {
+        moment.locale("ko");
+    });
 </script>
 
 <h1>Admin / User list</h1>
 
 <h1>Users list</h1>
 
-<button type="button" onclick="openAdd()">Add user</button>
+<button
+    type="button"
+    on:click={() => {
+        newUser["grade"] = "pending_user";
+        showNewUser = true;
+    }}
+>
+    Add user
+</button>
 
 <label for="search">Search:</label>
 <input
@@ -23,6 +175,7 @@
 <button type="button" onclick="search()">Search</button>
 
 <table id="users-list-container">
+    <!-- Column titles -->
     <thead>
         <tr>
             <td>
@@ -34,128 +187,139 @@
             <th>Control</th>
         </tr>
     </thead>
-    <tr id="add-user">
-        <td />
-        <td />
-        <td>
-            <input type="text" name="userid" value="" placeholder="Userid" />
-        </td>
-        <td>
-            <input
-                type="password"
-                name="password"
-                value=""
-                placeholder="Password"
-            />
-        </td>
-        <td><input type="text" name="email" value="" placeholder="Email" /></td>
-        <!-- <td><input type="text" name="phone" value="" placeholder="Phone" /></td> -->
-        <td>
-            <input
-                type="text"
-                name="grade"
-                onchange="restrictDatalist(this)"
-                list="grade-list"
-                value=""
-                placeholder="Grade"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="approval"
-                onchange="restrictDatalist(this)"
-                list="yn-list"
-                value=""
-                autocomplete="off"
-                placeholder="Approval"
-            />
-        </td>
-        <td>
-            <button type="button" onclick="closeAdd()">Cancel</button>
-            <button type="button" onclick="addUser()">Save</button>
-        </td>
-    </tr>
-    <tbody id="users-list-body">
-        <tr>
+
+    {#if showNewUser}
+        <!-- Add user -->
+        <tr id="add-user">
             <td />
+            <td />
+            {#each columns as col}
+                {#if col["column-code"] == "idx"}
+                    {""}
+                {:else if col["column-code"] == "password"}
+                    <td>
+                        <input
+                            type="password"
+                            bind:value={newUser["password"]}
+                            placeholder={col["display-name"]}
+                        />
+                    </td>
+                {:else if col["column-code"] == "grade"}
+                    <td>
+                        <select bind:value={newUser["grade"]}>
+                            {#each Object.entries(userGRADES) as [key, name]}
+                                <option value={key}>{name}</option>
+                            {/each}
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "approval"}
+                    <td>
+                        <select bind:value={newUser["approval"]}>
+                            <option value="y">Y</option>
+                            <option value="n" selected>N</option>
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "regdate"}
+                    <td />
+                {:else}
+                    <td>
+                        <input
+                            type="text"
+                            bind:value={newUser[col["column-code"]]}
+                            placeholder={col["display-name"]}
+                        />
+                    </td>
+                {/if}
+            {/each}
             <td>
-                <input
-                    type="hidden"
-                    name="idx"
-                    value={data.idx}
-                    placeholder="Index"
-                />
-                <span>{data.idx}</span>
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="userid"
-                    value={data.userid}
-                    placeholder="Userid"
-                />
-            </td>
-            <td>
-                <input
-                    type="password"
-                    name="password"
-                    value=""
-                    placeholder="Password"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="email"
-                    value={data.email}
-                    placeholder="Email"
-                />
-            </td>
-            <!-- <td><input type="text" name="phone" value="{data.phone}" placeholder="Phone" /></td> -->
-            <td>
-                <input
-                    type="text"
-                    name="grade"
-                    onchange="restrictDatalist(this)"
-                    list="grade-list"
-                    value={data.grade}
-                    placeholder="Grade"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="approval"
-                    onchange="restrictDatalist(this)"
-                    list="yn-list"
-                    value={data.approval}
-                    autocomplete="off"
-                    placeholder="Approval"
-                />
-            </td>
-            <td>
-                <button type="button" onclick="closeEdit()">Cancel</button>
-                <button type="button" onclick="updateUser()">Save</button>
+                <button type="button" on:click={closeNewUser}>Cancel</button>
+                <button type="button" on:click={saveNewUser}>Save</button>
             </td>
         </tr>
-        {#each users as user}
-            <tr>
-                <td>
-                    <input type="checkbox" />
-                </td>
-                {#each columns as col}
-                    <td>{user[col["column-code"]]}</td>
-                {/each}
-                <td>
-                    <button type="button" lr-click="openEdit($index)">
-                        Edit
-                    </button>
-                    <button type="button" lr-click="deleteUser($index)">
-                        Delete
-                    </button>
-                </td>
-            </tr>
+    {/if}
+
+    <tbody id="users-list-body">
+        {#each users as user, index}
+            {#if editINDEX == index}
+                <!-- Edit user -->
+                <tr>
+                    <td />
+                    {#each columns as col}
+                        {#if col["column-code"] == "idx"}
+                            <td>{editUser["idx"]}</td>
+                        {:else if col["column-code"] == "grade" || col["column-code"] == "approval"}
+                            <td>
+                                <input
+                                    type="text"
+                                    list="{col['column-code']}-list"
+                                    bind:value={editUser[col["column-code"]]}
+                                    placeholder={col["display-name"]}
+                                />
+                            </td>
+                        {:else if col["column-code"] == "regdate"}
+                            <td>
+                                {moment(
+                                    editUser["regdate"],
+                                    "YYYYMMDDhhmmss"
+                                ).format("YYYY-MM-DD")}
+                            </td>
+                        {:else}
+                            <td>
+                                <input
+                                    type="text"
+                                    bind:value={editUser[col["column-code"]]}
+                                    placeholder={col["display-name"]}
+                                />
+                            </td>
+                        {/if}
+                    {/each}
+                    <td>
+                        <button type="button" on:click={closeEditUser}>
+                            Cancel
+                        </button>
+                        <button type="button" on:click={updateEditUser}>
+                            Save
+                        </button>
+                    </td>
+                </tr>
+            {:else}
+                <!-- Show user -->
+                <tr>
+                    <td>
+                        <input type="checkbox" />
+                    </td>
+                    {#each columns as col}
+                        {#if col["column-code"] == "regdate"}
+                            <td>
+                                {moment(
+                                    user["regdate"],
+                                    "YYYYMMDDhhmmss"
+                                ).format("YYYY-MM-DD")}
+                            </td>
+                        {:else}
+                            <td>{user[col["column-code"]]}</td>
+                        {/if}
+                    {/each}
+                    <td>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                openEditUser(index);
+                            }}
+                        >
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                deleteUser(index);
+                            }}
+                        >
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            {/if}
         {/each}
     </tbody>
 </table>
@@ -169,7 +333,7 @@
     <option value="resigned_user">Resigned user</option>
 </datalist>
 
-<datalist id="yn-list">
+<datalist id="approval-list">
     <option value="Y">Y</option>
     <option value="N">N</option>
 </datalist>
