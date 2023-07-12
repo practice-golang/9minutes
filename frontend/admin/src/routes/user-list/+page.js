@@ -55,5 +55,9 @@ export const load = async ({ url, fetch }) => {
         return usersData
     }
 
-    return { columns: getColumns(), "userlist-data": getUsers(page, listCount, search) }
+    return {
+        columns: getColumns(),
+        "userlist-data": getUsers(page, listCount, search),
+        "inital-select-all": false
+    }
 }

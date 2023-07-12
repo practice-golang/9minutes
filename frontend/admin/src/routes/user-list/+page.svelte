@@ -1,5 +1,5 @@
 <script>
-    import { onMount, onDestroy } from "svelte";
+    import { onMount, onDestroy, beforeUpdate, afterUpdate } from "svelte";
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
 
@@ -12,6 +12,7 @@
 
     let listCount = Number($page.url.searchParams.get("list-count")) || 10;
     $: users = data["userlist-data"]["user-list"];
+    let previousPage = -1;
     $: currentPage = data["userlist-data"]["current-page"];
     $: totalPage = data["userlist-data"]["total-page"];
     $: jumpPrev = currentPage - 5 > 1 ? currentPage - 5 : 1;
@@ -19,6 +20,9 @@
 
     let searchKeyword = $page.url.searchParams.get("search") || "";
 
+    const adminIDX = 1;
+    $: adminCount = 0;
+    let selectAll = false;
     let selectedIndices = [];
 
     let editINDEX = -1;
@@ -34,6 +38,16 @@
         banned_user: "Banned User",
         resigned_user: "Resigned User",
     };
+
+    function toggleSelectAll() {
+        if (selectAll) {
+            selectedIndices = [];
+        } else {
+            selectedIndices = users
+                .filter((user) => parseInt(user["idx"]) > adminIDX)
+                .map((user) => user["idx"]);
+        }
+    }
 
     function search() {
         if (searchKeyword != "") {
@@ -55,7 +69,7 @@
     function paramsChange() {
         location.href =
             `?list-count=${listCount}` +
-            (searchKeyword != "" ? `&search-keyword=${searchKeyword}` : "");
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "");
     }
 
     function closeNewUser() {
@@ -140,7 +154,7 @@
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify([{ idx: parseInt(userIDX) }]),
+            body: JSON.stringify([{ idx: userIDX }]),
         });
 
         if (!r.ok) {
@@ -159,7 +173,7 @@
 
         const userIndices = [];
         for (let i = 0; i < selectedIndices.length; i++) {
-            userIndices.push({ idx: parseInt(selectedIndices[i]) });
+            userIndices.push({ idx: selectedIndices[i] });
         }
 
         const uri = "/api/admin/user";
@@ -181,6 +195,16 @@
     onMount(() => {
         moment.locale("ko");
     });
+
+    afterUpdate(() => {
+        if (previousPage != currentPage) {
+            selectedIndices = [];
+            previousPage = currentPage;
+        }
+
+        adminCount = parseInt(users[0]["idx"]) > adminIDX ? 0 : 1;
+        selectAll = selectedIndices.length == users.length - adminCount;
+    });
 </script>
 
 <h1>Admin / User list</h1>
@@ -195,6 +219,12 @@
     }}
 >
     Add user
+</button>
+
+<span>|</span>
+
+<button type="button" on:click={deleteSelectedUsers}>
+    Delete selected users
 </button>
 
 <span>|</span>
@@ -218,12 +248,16 @@
     {/each}
 </select>
 
-<table id="users-list-container">
+<table id="user-list-container">
     <!-- Column titles -->
     <thead>
         <tr>
             <td>
-                <input type="checkbox" />
+                <input
+                    type="checkbox"
+                    bind:checked={selectAll}
+                    on:change={toggleSelectAll}
+                />
             </td>
             {#each columns as col}
                 <th>{col["display-name"]}</th>
@@ -330,7 +364,13 @@
                 <!-- Show user -->
                 <tr>
                     <td>
-                        <input type="checkbox" />
+                        {#if parseInt(user["idx"]) > 1}
+                            <input
+                                type="checkbox"
+                                bind:group={selectedIndices}
+                                value={user["idx"]}
+                            />
+                        {/if}
                     </td>
                     {#each columns as col}
                         {#if col["column-code"] == "regdate"}
@@ -358,6 +398,7 @@
                             on:click={() => {
                                 deleteUser(index);
                             }}
+                            disabled={parseInt(user["idx"]) == 1}
                         >
                             Delete
                         </button>
@@ -382,42 +423,58 @@
     <option value="N">N</option>
 </datalist>
 
-<div id="pages-container">
-    <div lr-loop="pages">
-        <a href="?page=1&list-count={listCount}">
-            <span>&laquo;</span>
-        </a>
-        <a href="?page={jumpPrev}&list-count={listCount}">
-            <span>&lt;</span>
-        </a>
+<div id="page-container">
+    <a
+        href={`?page=1&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&laquo;</span>
+    </a>
+    <a
+        href={`?page=${jumpPrev}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&lt;</span>
+    </a>
 
-        <span>..</span>
+    <span>..</span>
 
-        {#each [currentPage - 2, currentPage - 1] as page}
-            {#if page >= 1}
-                <a href="?page={page}&list-count={listCount}">{page}</a>
-            {/if}
-        {/each}
-
-        <b lr-if="page == usersData['current-page']">
-            <a href={data.link} rel="external">
-                {currentPage}
+    {#each [currentPage - 2, currentPage - 1] as page}
+        {#if page >= 1}
+            <a
+                href={`?page=${page}&list-count=${listCount}` +
+                    (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+            >
+                {page}
             </a>
-        </b>
+        {/if}
+    {/each}
 
-        {#each [currentPage + 1, currentPage + 2] as page}
-            {#if page <= totalPage}
-                <a href="?page={page}&list-count={listCount}">{page}</a>
-            {/if}
-        {/each}
+    <b>{currentPage}</b>
 
-        <span>..</span>
+    {#each [currentPage + 1, currentPage + 2] as page}
+        {#if page <= totalPage}
+            <a
+                href={`?page=${page}&list-count=${listCount}` +
+                    (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+            >
+                {page}
+            </a>
+        {/if}
+    {/each}
 
-        <a href="?page={jumpNext}&list-count={listCount}">
-            <span>&gt;</span>
-        </a>
-        <a href="?page={totalPage}&list-count={listCount}">
-            <span>&raquo;</span>
-        </a>
-    </div>
+    <span>..</span>
+
+    <a
+        href={`?page=${jumpNext}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&gt;</span>
+    </a>
+    <a
+        href={`?page=${totalPage}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&raquo;</span>
+    </a>
 </div>

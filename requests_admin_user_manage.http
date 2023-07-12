@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=54c8da6e-fb86-4e79-807a-da0d32f97ab8; 
+@cookie = session_id=27aa66f5-2b48-4d61-94f4-ea8ef1779a41; 
 
 
 ### Login
@@ -54,8 +54,18 @@ Cookie: {{cookie}}
     }
 ]
 
-### Delete user - Just update grade as resigned status
+### Delete user - Just update grade as resigned user
 DELETE {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": "15" },
+    { "idx": "17" }
+]
+
+### Delete user - Delete. not default
+DELETE {{uri}}/api/admin/user?mode=delete
 Content-Type: application/json
 Cookie: {{cookie}}
 
