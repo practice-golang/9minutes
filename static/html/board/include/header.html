@@ -1,9 +1,11 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <meta name="google" content="notranslate" />
 
     <title>Board Template</title>
 
@@ -15,16 +17,19 @@
     <div>
         <a href="/">Front page</a>
         <div>
-            Good day, {{.UserId}}.
-            <a href="/login">Login</a>
             {{if ne .UserId ""}}
+            Good day, {{.UserId}}.
             <a href="/logout">Logout</a>
             <a href="/mypage">My page</a>
-
+        
             {{if eq .Grade "admin"}}
             <a href="/admin">Admin</a>
             {{end}}
-
+        
+            {{else if eq .UserId "admin"}}
+            Good day, admin.
+            {{else}}
+            <a href="/login">Login</a>
             {{end}}
         </div>
         <hr />

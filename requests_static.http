@@ -8,7 +8,7 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
+    "userid": "admin",
     "password": "admin"
 }
 

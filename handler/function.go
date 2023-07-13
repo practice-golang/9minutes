@@ -87,6 +87,9 @@ func HandleHTML(c *fiber.Ctx) error {
 			log.Printf("Hello: %s", params["hello"])
 		}
 	case strings.HasPrefix(name, "board"):
+		if name == "board" {
+			name = "board/list"
+		}
 
 	case strings.HasPrefix(name, "admin"):
 		if userid == "" {
@@ -586,18 +589,19 @@ func HandleEditContent(c *fiber.Ctx) error {
 	return c.Render("edit", fiber.Map{})
 }
 
-// WriteContent - Write content API
-func WriteContent(c *fiber.Ctx) error {
+// WriteContentAPI - Write content API
+func WriteContentAPI(c *fiber.Ctx) error {
 	var err error
 
 	board := model.Board{}
 	content := model.Content{}
 
-	uri := strings.Split(c.Context().URI().String(), "/")
-	code := null.StringFrom(uri[len(uri)-1])
-	board.BoardCode = code
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
 
-	c.BodyParser(&content)
+	err = c.BodyParser(&content)
+	if err != nil {
+		return err
+	}
 
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {

@@ -1,13 +1,25 @@
 @uri = http://localhost:5525
-@cookie = session_id=032aaf58-cf63-4eeb-80ad-b8d2230e6a21; 
+@cookie = session_id=c95f9624-c67c-4093-9e9f-339d5c2761af; 
 
 
 ### Login
 POST {{uri}}/api/login HTTP/1.1
-content-type: application/json
+Content-Type: application/json
 Origin: {{uri}}
 
 {
-    "name": "admin",
+    "userid": "admin",
     "password": "admin"
+}
+
+### Write content
+POST {{uri}}/api/board/content/misc1 HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "title": "My test #1",
+    "content": "Nise to mit u lol~\n^_^_^_^& <^-^>'",
+    "author-idx": 1,
+    "author-name": "admin"
 }

@@ -1,12 +1,226 @@
 <script>
-    export let data;
-</script>
+    import { onMount, onDestroy, beforeUpdate, afterUpdate } from "svelte";
+    import { invalidateAll } from "$app/navigation";
+    import { page } from "$app/stores";
 
-<h1>Admin / Board list</h1>
+    export let data;
+
+    const columns = data.columns;
+
+    let listCount = Number($page.url.searchParams.get("list-count")) || 10;
+    $: boards = data["boardlist-data"]["board-list"];
+
+    let previousPage = -1;
+    $: currentPage = data["boardlist-data"]["current-page"];
+    $: totalPage = data["boardlist-data"]["total-page"];
+    $: jumpPrev = currentPage - 5 > 1 ? currentPage - 5 : 1;
+    $: jumpNext = currentPage + 5 < totalPage ? currentPage + 5 : totalPage;
+
+    let searchKeyword = $page.url.searchParams.get("search") || "";
+
+    let selectAll = false;
+    let selectedIndices = [];
+
+    let editINDEX = -1;
+    let showNewBoard = false;
+    let newBoard = {};
+    let editBoard = {};
+
+    const grantTYPES = {
+        admin: "Admin",
+        manager: "Manager",
+        regular_user: "Regular User",
+        pending_user: "Pending User",
+        banned_user: "Banned User",
+        guest: "Guest",
+    };
+
+    const grantSelections = [
+        "grant-read",
+        "grant-write",
+        "grant-comment",
+        "grant-upload",
+    ];
+
+    $: {
+        if (
+            newBoard["board-code"] != undefined &&
+            newBoard["board-code"].length > 0
+        ) {
+            newBoard["board-table"] =
+                "BOARD_" + newBoard["board-code"].toUpperCase();
+            newBoard["comment-table"] =
+                "COMMENT_" + newBoard["board-code"].toUpperCase();
+        }
+
+        if (
+            editBoard["board-code"] != undefined &&
+            editBoard["board-code"].length > 0
+        ) {
+            editBoard["board-table"] =
+                "BOARD_" + editBoard["board-code"].toUpperCase();
+            editBoard["comment-table"] =
+                "COMMENT_" + editBoard["board-code"].toUpperCase();
+        }
+    }
+
+    function toggleSelectAll() {
+        if (selectAll) {
+            selectedIndices = [];
+        } else {
+            selectedIndices = boards.map((board) => board["idx"]);
+        }
+    }
+
+    function closeNewBoard() {
+        newBoard = {};
+        showNewBoard = false;
+    }
+
+    async function saveNewBoard() {
+        const uri = "/api/admin/board";
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(newBoard),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        closeNewBoard();
+        invalidateAll();
+    }
+
+    function openEditBoard(index) {
+        editINDEX = index;
+        editBoard = {};
+        for (const k in boards[index]) {
+            editBoard[k] = boards[index][k];
+        }
+    }
+
+    function closeEditBoard() {
+        editBoard = {};
+        editINDEX = -1;
+    }
+
+    async function updateEditBoard() {
+        for (const k in editBoard) {
+            if (typeof editBoard[k] == undefined || editBoard[k] == null) {
+                continue;
+            }
+            if (typeof editBoard[k] != "string") {
+                editBoard[k] = editBoard[k].toString();
+            }
+        }
+
+        const uri = "/api/admin/board";
+        const r = await fetch(uri, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify([editBoard]),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        closeEditBoard();
+        invalidateAll();
+    }
+
+    async function deleteBoard(index) {
+        const boardIDX =
+            typeof boards[index]["idx"] == "number"
+                ? boards[index]["idx"].toString()
+                : boards[index]["idx"];
+
+        let uri = "/api/admin/board";
+
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify([{ idx: boardIDX }]),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        selectedIndices = [];
+        invalidateAll();
+    }
+
+    async function deleteSelectedBoards() {
+        if (selectedIndices.length == 0) {
+            alert("Selected nothing");
+            return;
+        }
+
+        const boardIndices = [];
+        for (let i = 0; i < selectedIndices.length; i++) {
+            const targetIDX =
+                typeof selectedIndices[i] == "number"
+                    ? selectedIndices[i].toString()
+                    : selectedIndices[i];
+            boardIndices.push({ idx: targetIDX });
+        }
+
+        let uri = "/api/admin/board";
+
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(boardIndices),
+        });
+
+        if (!r.ok) {
+            alert(await r.text());
+        }
+
+        selectedIndices = [];
+        invalidateAll();
+    }
+
+    onMount(() => {});
+
+    afterUpdate(() => {
+        if (previousPage != currentPage) {
+            selectedIndices = [];
+            previousPage = currentPage;
+        }
+
+        selectAll = selectedIndices.length == boards.length;
+    });
+</script>
 
 <h1>Boards</h1>
 
 <div>
+    <button
+        type="button"
+        on:click={() => {
+            newBoard = { "board-type": "board" };
+            showNewBoard = true;
+        }}
+    >
+        Add board
+    </button>
+
+    <span>|</span>
+
+    <button type="button" on:click={deleteSelectedBoards}>
+        Delete selected boards
+    </button>
+
+    <span>|</span>
+
     <label for="search">Search:</label>
     <input
         type="text"
@@ -17,251 +231,171 @@
     <button type="button" onclick="search()">Search</button>
 </div>
 
-<button type="button" onclick="openAdd()">Create</button>
-
 <table id="boards-list-container">
     <thead>
         <tr>
-            <!-- <td><input type="checkbox" name="select-all" placeholder="Select all" /></td> -->
-            <th>Index</th>
-            <th>Name</th>
-            <th>Code</th>
-            <th>Type</th>
-            <th>Board table</th>
-            <th>Comment table</th>
-            <th>Grant read</th>
-            <th>Grant write</th>
-            <th>Grant comment</th>
-            <th>Grant upload</th>
+            <th>
+                <input
+                    type="checkbox"
+                    bind:checked={selectAll}
+                    on:change={toggleSelectAll}
+                />
+            </th>
+
+            {#each columns as col}
+                <th>{col["display-name"]}</th>
+            {/each}
+
             <th>Control</th>
         </tr>
     </thead>
-    <tr id="add-board">
-        <!-- <td>&nbsp;</td> -->
-        <td>&nbsp;</td>
-        <td>
-            <input
-                type="text"
-                name="board-name"
-                value=""
-                placeholder="Board name"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="board-code"
-                onchange="setTableNameByCode(this)"
-                value=""
-                placeholder="Board code"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="board-type"
-                onchange="restrictDatalist(this)"
-                list="board-types"
-                value=""
-                autocomplete="off"
-                placeholder="Board type"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="board-table"
-                value=""
-                placeholder="Board table"
-                disabled
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="comment-table"
-                value=""
-                placeholder="Comment table"
-                disabled
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="grant-read"
-                onchange="restrictDatalist(this)"
-                list="grant-list"
-                value=""
-                autocomplete="off"
-                placeholder="Grant read"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="grant-write"
-                onchange="restrictDatalist(this)"
-                list="grant-list"
-                value=""
-                autocomplete="off"
-                placeholder="Grant write"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="grant-comment"
-                onchange="restrictDatalist(this)"
-                list="grant-list"
-                value=""
-                autocomplete="off"
-                placeholder="Grant comment"
-            />
-        </td>
-        <td>
-            <input
-                type="text"
-                name="grant-upload"
-                onchange="restrictDatalist(this)"
-                list="grant-list"
-                value=""
-                autocomplete="off"
-                placeholder="Grant upload"
-            />
-        </td>
-        <td>
-            <button type="button" onclick="closeAdd()">Cancel</button>
-            <button type="button" onclick="addBoard()">Save</button>
-        </td>
-    </tr>
-    <tbody id="boards-list-body" lr-loop="boardsList">
-        <tr lr-if="boardEditIndex != $index">
-            <!-- <td><input type="checkbox" name="select$index" placeholder="Select" /></td> -->
-            <td>idx</td>
-            <td>board-name</td>
-            <td>board-code</td>
-            <td>board-type</td>
-            <td>board-table</td>
-            <td>comment-table</td>
-            <td>grant-read</td>
-            <td>grant-write</td>
-            <td>grant-comment</td>
-            <td>grant-upload</td>
+
+    {#if showNewBoard}
+        <!-- Add board -->
+        <tr id="add-board">
+            <td />
+            <td />
+
+            {#each columns as col}
+                {#if col["column-code"] == "idx"}
+                    {""}
+                {:else if col["column-code"] == "board-type"}
+                    <td>
+                        <select bind:value={newBoard[col["column-code"]]}>
+                            <option value="board">Board</option>
+                            <option value="gallery">Gallery</option>
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "board-table" || col["column-code"] == "comment-table"}
+                    <td>
+                        <input
+                            bind:value={newBoard[col["column-code"]]}
+                            disabled
+                        />
+                    </td>
+                {:else if grantSelections.includes(col["column-code"])}
+                    <td>
+                        <select bind:value={newBoard[col["column-code"]]}>
+                            {#each Object.entries(grantTYPES) as [key, name]}
+                                <option value={key}>{name}</option>
+                            {/each}
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "regdate"}
+                    <td />
+                {:else}
+                    <td>
+                        <input
+                            type="text"
+                            bind:value={newBoard[col["column-code"]]}
+                            placeholder={col["display-name"]}
+                        />
+                    </td>
+                {/if}
+            {/each}
+
             <td>
-                <button type="button" lr-click="moveToListView($index)">
-                    View
-                </button>
-                <button type="button" lr-click="openEdit($index)">Edit</button>
-                <button type="button" lr-click="deleteBoard($index)">
-                    Delete
-                </button>
+                <button type="button" on:click={closeNewBoard}>Cancel</button>
+                <button type="button" on:click={saveNewBoard}>Save</button>
             </td>
         </tr>
-        <tr lr-if="boardEditIndex == $index">
-            <!-- <td>&nbsp;</td> -->
-            <td>
-                <input
-                    type="hidden"
-                    name="idx"
-                    value="idx"
-                    placeholder="Index"
-                />
-                <span>idx</span>
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="board-name"
-                    value={data.boardName}
-                    placeholder="Board name"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="board-code"
-                    value={data.boardCode}
-                    placeholder="Board code"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="board-type"
-                    list="board-types"
-                    value={data.boardType}
-                    autocomplete="off"
-                    placeholder="Board type"
-                    onchange="restrictDatalist(this)"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="board-table"
-                    value={data.boardTable}
-                    placeholder="Board table"
-                    disabled
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="comment-table"
-                    value={data.commentTable}
-                    placeholder="Comment table"
-                    disabled
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="grant-read"
-                    list="grant-list"
-                    value={data.grantRead}
-                    autocomplete="off"
-                    placeholder="Grant read"
-                    onchange="restrictDatalist(this)"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="grant-write"
-                    list="grant-list"
-                    value={data.grantWrite}
-                    autocomplete="off"
-                    placeholder="Grant write"
-                    onchange="restrictDatalist(this)"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="grant-comment"
-                    list="grant-list"
-                    value={data.grantComment}
-                    autocomplete="off"
-                    placeholder="Grant comment"
-                    onchange="restrictDatalist(this)"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="grant-upload"
-                    list="grant-list"
-                    value={data.grantUpload}
-                    autocomplete="off"
-                    placeholder="Grant upload"
-                    onchange="restrictDatalist(this)"
-                />
-            </td>
-            <td>
-                <button type="button" onclick="closeEdit()">Cancel</button>
-                <button type="button" onclick="updateBoard()">Save</button>
-            </td>
-        </tr>
+    {/if}
+
+    <tbody id="boards-list-body">
+        {#each boards as board, index}
+            <tr>
+                {#if editINDEX == index}
+                    <!-- Edit board -->
+                    <td />
+
+                    {#each columns as col}
+                        {#if col["column-code"] == "idx"}
+                            <td>{editBoard["idx"]}</td>
+                        {:else if col["column-code"] == "board-type"}
+                            <td>
+                                <select
+                                    bind:value={editBoard[col["column-code"]]}
+                                >
+                                    <option value="board">Board</option>
+                                    <option value="gallery">Gallery</option>
+                                </select>
+                            </td>
+                        {:else if col["column-code"] == "board-table" || col["column-code"] == "comment-table"}
+                            <td>
+                                <input
+                                    bind:value={editBoard[col["column-code"]]}
+                                    disabled
+                                />
+                            </td>
+                        {:else if grantSelections.includes(col["column-code"])}
+                            <td>
+                                <select
+                                    bind:value={editBoard[col["column-code"]]}
+                                >
+                                    {#each Object.entries(grantTYPES) as [key, name]}
+                                        <option value={key}>{name}</option>
+                                    {/each}
+                                </select>
+                            </td>
+                        {:else if col["column-code"] == "regdate"}
+                            <td />
+                        {:else}
+                            <td>
+                                <input
+                                    type="text"
+                                    bind:value={editBoard[col["column-code"]]}
+                                    placeholder={col["display-name"]}
+                                />
+                            </td>
+                        {/if}
+                    {/each}
+
+                    <td>
+                        <button type="button" on:click={closeEditBoard}>
+                            Cancel
+                        </button>
+                        <button type="button" on:click={updateEditBoard}>
+                            Save
+                        </button>
+                    </td>
+                {:else}
+                    <!-- Show board -->
+                    <td>
+                        <input
+                            type="checkbox"
+                            bind:group={selectedIndices}
+                            value={board["idx"]}
+                        />
+                    </td>
+
+                    {#each columns as col}
+                        <td>{board[col["column-code"]]}</td>
+                    {/each}
+
+                    <td>
+                        <button type="button" on:click={() => {alert("moveToListView(index)")}}>
+                            View
+                        </button>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                openEditBoard(index);
+                            }}
+                        >
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                deleteBoard(index);
+                            }}
+                        >
+                            Delete
+                        </button>
+                    </td>
+                {/if}
+            </tr>
+        {/each}
     </tbody>
 </table>
 
@@ -279,35 +413,60 @@
     <option value="gallery">Gallery</option>
 </datalist>
 
-<div id="pages-container">
-    <div lr-loop="pages">
-        <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
-        <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
+<div id="page-container">
+    <a
+        href={`?page=1&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&laquo;</span>
+    </a>
+    <a
+        href={`?page=${jumpPrev}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&lt;</span>
+    </a>
 
-        <b lr-if="page == boardsData['current-page']">
-            <a href={data.link} rel="external">
-                {data.page}
+    <span>..</span>
+
+    {#each [currentPage - 2, currentPage - 1] as page}
+        {#if page >= 1}
+            <a
+                href={`?page=${page}&list-count=${listCount}` +
+                    (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+            >
+                {page}
             </a>
-        </b>
-        <a
-            lr-if="page != boardsData['current-page']"
-            href={data.link}
-            rel="external"
-        >
-            {data.page}
-        </a>
+        {/if}
+    {/each}
 
-        <span
-            lr-if="page < boardsData['total-page'] && $index == (pages.length - 1)"
-        >
-            &gt;
-        </span>
-        <span
-            lr-if="page < boardsData['total-page'] && $index == (pages.length - 1)"
-        >
-            &raquo;
-        </span>
-    </div>
+    <b>{currentPage}</b>
+
+    {#each [currentPage + 1, currentPage + 2] as page}
+        {#if page <= totalPage}
+            <a
+                href={`?page=${page}&list-count=${listCount}` +
+                    (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+            >
+                {page}
+            </a>
+        {/if}
+    {/each}
+
+    <span>..</span>
+
+    <a
+        href={`?page=${jumpNext}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&gt;</span>
+    </a>
+    <a
+        href={`?page=${totalPage}&list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "")}
+    >
+        <span>&raquo;</span>
+    </a>
 </div>
 
 <style>
@@ -315,9 +474,5 @@
     th,
     td {
         border: 1px solid black;
-    }
-
-    #add-board {
-        display: none;
     }
 </style>

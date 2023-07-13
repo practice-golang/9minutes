@@ -266,9 +266,9 @@ func setupRouter() {
 
 	// setPAGEs(r) // HTML, Assets, Login/Signup
 	// setPageMyPage(r)   // MyPage
-	// setApiBoard(r)     // API Board
 	// setApiUploader(r) // API Uploader
 
+	setApiBoard(app) // API Board
 	setApiAdmin(app) // API Admin
 	setAPIs(app)     // API
 
