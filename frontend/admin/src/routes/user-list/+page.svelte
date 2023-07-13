@@ -146,10 +146,12 @@
         invalidateAll();
     }
 
-    async function deleteUser(index) {
+    async function deleteUser(index, mode = "resign") {
         const userIDX = users[index]["idx"];
 
-        const uri = "/api/admin/user";
+        let uri = "/api/admin/user";
+        uri += mode == "delete" ? "?mode=delete" : "";
+
         const r = await fetch(uri, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
@@ -165,7 +167,7 @@
         invalidateAll();
     }
 
-    async function deleteSelectedUsers() {
+    async function deleteSelectedUsers(mode = "resign") {
         if (selectedIndices.length == 0) {
             alert("No columns selected");
             return;
@@ -176,7 +178,9 @@
             userIndices.push({ idx: selectedIndices[i] });
         }
 
-        const uri = "/api/admin/user";
+        let uri = "/api/admin/user";
+        uri += mode == "delete" ? "?mode=delete" : "";
+
         const r = await fetch(uri, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
@@ -224,6 +228,10 @@
 <span>|</span>
 
 <button type="button" on:click={deleteSelectedUsers}>
+    Resign selected users
+</button>
+
+<button type="button" on:click={() => deleteSelectedUsers("delete")}>
     Delete selected users
 </button>
 
@@ -393,10 +401,23 @@
                         >
                             Edit
                         </button>
+
+                        <span>|</span>
+
                         <button
                             type="button"
                             on:click={() => {
                                 deleteUser(index);
+                            }}
+                            disabled={parseInt(user["idx"]) == 1}
+                        >
+                            Resign
+                        </button>
+
+                        <button
+                            type="button"
+                            on:click={() => {
+                                deleteUser(index, "delete");
                             }}
                             disabled={parseInt(user["idx"]) == 1}
                         >

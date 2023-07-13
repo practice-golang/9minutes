@@ -422,3 +422,30 @@ func ResignUser(idx int64) error {
 
 	return nil
 }
+
+func DeleteUser(idx int64) error {
+	dbType := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(consts.TableUsers)
+
+	wheres := np.CreateWhereString(
+		map[string]interface{}{"IDX": idx},
+		dbType, "=", "AND", "", false,
+	)
+
+	sql := `DELETE FROM ` + tablename + wheres
+
+	r, err := db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("affected nothing")
+	}
+
+	return nil
+}

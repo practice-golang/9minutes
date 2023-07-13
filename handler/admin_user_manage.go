@@ -132,6 +132,12 @@ func UpdateUser(c *fiber.Ctx) error {
 }
 
 func DeleteUser(c *fiber.Ctx) error {
+	isDelete := false
+	queries := c.Queries()
+	if strings.TrimSpace(queries["mode"]) == "delete" {
+		isDelete = true
+	}
+
 	userDatas := []map[string]interface{}{}
 	userDatasSuccess := []map[string]interface{}{}
 	userDatasFailed := []map[string]interface{}{}
@@ -149,7 +155,12 @@ func DeleteUser(c *fiber.Ctx) error {
 			continue
 		}
 
-		err = crud.ResignUser(int64(idx))
+		if isDelete {
+			err = crud.DeleteUser(int64(idx))
+		} else {
+			err = crud.ResignUser(int64(idx))
+		}
+
 		if err != nil {
 			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
 			userDatasFailed = append(userDatasFailed, responseData)

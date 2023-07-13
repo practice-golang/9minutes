@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=27aa66f5-2b48-4d61-94f4-ea8ef1779a41; 
+@cookie = session_id=cbe41c66-8bfd-4fca-a027-2381bf1c7c3f; 
 
 
 ### Login
@@ -18,7 +18,7 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 ### User list - page
-GET {{uri}}/api/admin/user?page=3
+GET {{uri}}/api/admin/user?page=2
 Content-Type: application/json
 Cookie: {{cookie}}
 
