@@ -16,7 +16,8 @@
         "column-name": "USERID",
         "sort-order": 2
     }
-    ...
+    "total-page": 1,
+    "current-page": 1
 ]
  */
 

@@ -6,7 +6,7 @@
 
     const lastDefaultColIDX = 7;
 
-    $: selectAll = selectedIndices.length == columns.length - lastDefaultColIDX;
+    $: selectAll = selectedIndices.length == columns.length - lastDefaultColIDX && selectedIndices.length > 0;
     let selectedIndices = [];
 
     let editINDEX = -1;
@@ -104,7 +104,7 @@
 
     async function deleteSelectedColumns() {
         if (selectedIndices.length == 0) {
-            alert("No columns selected");
+            alert("Selected nothing");
             return;
         }
 
@@ -130,9 +130,7 @@
     }
 </script>
 
-<h1>Admin / User columns</h1>
-
-<h1>User fields</h1>
+<h1>User columns</h1>
 
 <button
     type="button"

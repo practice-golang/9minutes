@@ -3,8 +3,8 @@
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
 
-    import "moment/dist/locale/ko";
     import moment from "moment";
+    // import "moment/dist/locale/ko";
 
     export let data;
 
@@ -169,7 +169,7 @@
 
     async function deleteSelectedUsers(mode = "resign") {
         if (selectedIndices.length == 0) {
-            alert("No columns selected");
+            alert("Selected nothing");
             return;
         }
 
@@ -197,7 +197,7 @@
     }
 
     onMount(() => {
-        moment.locale("ko");
+        // moment.locale("ko");
     });
 
     afterUpdate(() => {
@@ -211,9 +211,7 @@
     });
 </script>
 
-<h1>Admin / User list</h1>
-
-<h1>Users list</h1>
+<h1>Users</h1>
 
 <button
     type="button"
@@ -326,9 +324,9 @@
 
     <tbody id="users-list-body">
         {#each users as user, index}
-            {#if editINDEX == index}
-                <!-- Edit user -->
-                <tr>
+            <tr>
+                {#if editINDEX == index}
+                    <!-- Edit user -->
                     <td />
                     {#each columns as col}
                         {#if col["column-code"] == "idx"}
@@ -367,10 +365,8 @@
                             Save
                         </button>
                     </td>
-                </tr>
-            {:else}
-                <!-- Show user -->
-                <tr>
+                {:else}
+                    <!-- Show user -->
                     <td>
                         {#if parseInt(user["idx"]) > 1}
                             <input
@@ -424,8 +420,8 @@
                             Delete
                         </button>
                     </td>
-                </tr>
-            {/if}
+                {/if}
+            </tr>
         {/each}
     </tbody>
 </table>

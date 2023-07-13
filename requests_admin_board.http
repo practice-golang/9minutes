@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=a5bf29dc-a203-428e-8c4f-62541d57b640; 
+@cookie = session_id=338e4457-fdf0-40a5-a327-ce8af328dfce; 
 
 
 ### Login
@@ -13,17 +13,22 @@ Origin: {{uri}}
 }
 
 ### Board list
-GET {{uri}}/api/admin/boards
+GET {{uri}}/api/admin/board
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Board list - page
+GET {{uri}}/api/admin/board?page=2&list-count=5
 Content-Type: application/json
 Cookie: {{cookie}}
 
 ### Board list - search
-GET {{uri}}/api/admin/boards?search=mis
+GET {{uri}}/api/admin/board?search=mis
 Content-Type: application/json
 Cookie: {{cookie}}
 
 ### Add board
-POST {{uri}}/api/admin/boards
+POST {{uri}}/api/admin/board
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -41,7 +46,7 @@ Cookie: {{cookie}}
 }
 
 ### Edit board
-PUT {{uri}}/api/admin/boards
+PUT {{uri}}/api/admin/board
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -62,7 +67,7 @@ Cookie: {{cookie}}
 ]
 
 ### Delete board
-DELETE {{uri}}/api/admin/boards
+DELETE {{uri}}/api/admin/board
 Content-Type: application/json
 Cookie: {{cookie}}
 

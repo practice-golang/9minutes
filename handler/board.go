@@ -70,7 +70,7 @@ func GetBoards(c *fiber.Ctx) error {
 	listingOptions.Search = null.StringFrom(queries["search"])
 
 	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(2)
+	listingOptions.ListCount = null.IntFrom(10)
 
 	if queries["page"] != "" {
 		page := queries["page"]
@@ -79,8 +79,8 @@ func GetBoards(c *fiber.Ctx) error {
 			return c.Status(http.StatusBadRequest).SendString(err.Error())
 		}
 
-		if queries["count"] != "" {
-			countPerPage, err := strconv.Atoi(queries["count"])
+		if queries["list-count"] != "" {
+			countPerPage, err := strconv.Atoi(queries["list-count"])
 			if err != nil {
 				return c.Status(http.StatusBadRequest).SendString(err.Error())
 			}

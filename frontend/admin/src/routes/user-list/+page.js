@@ -16,6 +16,8 @@
         "userid": "bab2"
         ... and user defined ...
     }
+    "total-page": 1,
+    "current-page": 1
 ]
  */
 
@@ -57,7 +59,6 @@ export const load = async ({ url, fetch }) => {
 
     return {
         columns: getColumns(),
-        "userlist-data": getUsers(page, listCount, search),
-        "inital-select-all": false
+        "userlist-data": getUsers(page, listCount, search)
     }
 }

@@ -44,7 +44,7 @@ func setApiAdmin(a *fiber.App) {
 	gauser.Delete("/", handler.DeleteUser)
 
 	/* API Admin - Boards */
-	gaboard := a.Group("/api/admin/boards") // required add auth middleware
+	gaboard := a.Group("/api/admin/board") // required add auth middleware
 	gaboard.Get("/", handler.GetBoards)
 	gaboard.Post("/", handler.AddBoard)
 	gaboard.Put("/", handler.UpdateBoard)
