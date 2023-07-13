@@ -732,29 +732,18 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateContent(c *fiber.Ctx) error {
+func UpdateContent(c *fiber.Ctx) (err error) {
 	var board model.Board
 	var content model.Content
 	var deleteList model.FilesToDelete
 
-	uri := strings.Split(c.Context().URI().String(), "/")
-
-	code := uri[len(uri)-2]
-	board.BoardCode = null.StringFrom(code)
-
-	board, err := crud.GetBoardByCode(board)
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
+	board, err = crud.GetBoardByCode(board)
 	if err != nil {
 		return c.Status(http.StatusNotFound).SendString("Board was not found")
 	}
 
-	// userInfo, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
-	// if err != nil {
-	// 	c.Text(http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// content.AuthorIdx = userInfo.Idx
-
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
+	idx, _ := strconv.Atoi(c.Params("idx"))
 	content.Idx = null.IntFrom(int64(idx))
 
 	rbody := c.Body()
@@ -809,12 +798,9 @@ func UpdateContent(c *fiber.Ctx) error {
 func DeleteContent(c *fiber.Ctx) error {
 	var board model.Board
 
-	uri := strings.Split(c.Context().URI().String(), "/")
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
 
-	code := uri[len(uri)-2]
-	board.BoardCode = null.StringFrom(code)
-
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
+	idx, _ := strconv.Atoi(c.Params("idx"))
 
 	board, err := crud.GetBoardByCode(board)
 	if err != nil {

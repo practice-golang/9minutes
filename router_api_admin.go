@@ -23,7 +23,6 @@ func checkAdmin(c *fiber.Ctx) error {
 }
 
 func setApiAdmin(a *fiber.App) {
-
 	/* API Admin */
 	gadmin := a.Group("/api/admin")
 	gadmin.Use(checkAdmin)

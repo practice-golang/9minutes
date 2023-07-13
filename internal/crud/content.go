@@ -300,6 +300,9 @@ func UpdateContent(board model.Board, content model.Content, skipTag string) err
 
 	holder := ""
 	for i := 0; i < len(colNames); i++ {
+		if colValues[i] == "''" {
+			continue
+		}
 		holder += colNames[i] + " = " + colValues[i] + ", "
 	}
 	holder = strings.TrimSuffix(holder, ", ")
