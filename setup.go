@@ -268,8 +268,8 @@ func setupRouter() {
 	// setPageMyPage(r)   // MyPage
 	// setApiUploader(r) // API Uploader
 
-	setApiBoard(app) // API Board
 	setApiAdmin(app) // API Admin
+	setApiBoard(app) // API Board
 	setAPIs(app)     // API
 
 	// setOthers(r)     // Others - make live only ws

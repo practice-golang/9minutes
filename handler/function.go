@@ -310,7 +310,7 @@ func HandleContentList(c *fiber.Ctx) error {
 	listingOptions.Search = null.StringFrom(search)
 
 	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(int64(config.ContentsCountPerPage))
+	listingOptions.ListCount = null.IntFrom(int64(config.ContentListCountPerPage))
 
 	if queries["count"] != "" {
 		countPerPage, err := strconv.Atoi(queries["count"])
@@ -589,10 +589,92 @@ func HandleEditContent(c *fiber.Ctx) error {
 	return c.Render("edit", fiber.Map{})
 }
 
-// WriteContentAPI - Write content API
-func WriteContentAPI(c *fiber.Ctx) error {
-	var err error
+func ListContentAPI(c *fiber.Ctx) (err error) {
+	board := model.Board{}
 
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
+	board, err = crud.GetBoardByCode(board)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	queries := c.Queries()
+	page := 1
+	count := config.ContentListCountPerPage
+	if queries["page"] != "" {
+		page, err = strconv.Atoi(queries["page"])
+		if err != nil {
+			return
+		}
+	}
+	if queries["count"] != "" {
+		count, err = strconv.Atoi(queries["count"])
+		if err != nil {
+			return
+		}
+	}
+
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
+
+	listingOptions := model.ContentListingOptions{}
+	listingOptions.Search = null.StringFrom(queries["search"])
+
+	listingOptions.Page = null.IntFrom(int64(page - 1))
+	listingOptions.ListCount = null.IntFrom(int64(count))
+
+	list, err := crud.GetContentList(board, listingOptions)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(list)
+}
+
+func ReadContentAPI(c *fiber.Ctx) (err error) {
+	board := model.Board{}
+	content := model.Content{}
+
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
+	board, err = crud.GetBoardByCode(board)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	idx := c.Params("idx")
+	content, err = crud.GetContent(board, idx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	content.Views = null.IntFrom(content.Views.Int64 + 1)
+	err = crud.UpdateContent(board, content, "viewcount")
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	commentSearch := c.Query("search")
+
+	commentOptions := model.CommentListingOptions{}
+	commentOptions.Search = null.StringFrom(commentSearch)
+
+	commentOptions.Page = null.IntFrom(-1)
+	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
+
+	comments, err := crud.GetComments(board, content, commentOptions)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+	// commentsJSON, _ := json.Marshal(comments)
+
+	result := make(map[string]interface{})
+	result["content"] = content
+	result["comments"] = comments
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+// WriteContentAPI - Write content API
+func WriteContentAPI(c *fiber.Ctx) (err error) {
 	board := model.Board{}
 	content := model.Content{}
 

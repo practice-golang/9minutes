@@ -11,6 +11,8 @@ func setApiBoard(a *fiber.App) {
 	gbrd := a.Group("/api/board") // Require add session middleware
 
 	/* API Content */
+	gbrd.Get("/content/:board_code", handler.ListContentAPI)
+	gbrd.Get("/content/:board_code/:idx", handler.ReadContentAPI)
 	gbrd.Post("/content/:board_code", handler.WriteContentAPI)
 	gbrd.Put("/content/:board_code/:idx", handler.UpdateContent)
 	gbrd.Delete("/content/:board_code/:idx", handler.DeleteContent)
