@@ -680,7 +680,12 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 
 	board.BoardCode = null.StringFrom(c.Params("board_code"))
 
-	err = c.BodyParser(&content)
+	formValueContent := c.FormValue("content")
+	if formValueContent == "" {
+		return c.Status(http.StatusBadRequest).SendString("content is empty")
+	}
+
+	err = json.Unmarshal([]byte(formValueContent), &content)
 	if err != nil {
 		return err
 	}
@@ -699,8 +704,24 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 
 	now := time.Now().Format("20060102150405")
 	content.RegDate = null.StringFrom(now)
-
 	content.Views = null.IntFrom(0)
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	imdatas := form.File["images"]
+	filesIM := ""
+	for _, imdata := range imdatas {
+		err := c.SaveFile(imdata, config.UploadPath+"/"+imdata.Filename)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
+		}
+
+		filesIM += imdata.Filename + "|"
+	}
+	content.Images = null.StringFrom(filesIM[:len(filesIM)-1])
 
 	r, err := crud.WriteContent(board, content)
 	if err != nil {

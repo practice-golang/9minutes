@@ -8,10 +8,10 @@
     export let data;
 
     onMount(() => {
-        console.log(data);
+        console.log(data)
     });
 
     afterUpdate(() => {});
 </script>
 
-<h1>Read</h1>
+<h1>List</h1>

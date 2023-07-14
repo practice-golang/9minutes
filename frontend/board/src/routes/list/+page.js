@@ -17,7 +17,7 @@ export const load = async ({ url, fetch }) => {
         return columns
     }
 
-    async function getUsers(page, listCount, search) {
+    async function getContentList(page, listCount, search) {
         let usersData = {}
 
         let uri = `/api/admin/user?page=${page}&list-count=${listCount}`
@@ -36,6 +36,6 @@ export const load = async ({ url, fetch }) => {
 
     return {
         columns: getColumns(),
-        "userlist-data": getUsers(page, listCount, search)
+        "userlist-data": getContentList(page, listCount, search)
     }
 }

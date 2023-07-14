@@ -14,22 +14,33 @@ Origin: {{uri}}
 
 ### Content - Write
 POST {{uri}}/api/board/content/misc1 HTTP/1.1
-Content-Type: application/json
 Cookie: {{cookie}}
+Content-Type: multipart/form-data; boundary=FormDataBoundary7MA4YWxkTrZu0gW
+
+--FormDataBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="content"
 
 {
-    "title": "My test #1",
-    "content": "Nise to mit u lol~\n^_^_^_^& <^-^>'",
+    "title": "My test #4",
+    "content": "Nice to mit u lol~\n^_^_^_^& <^-^>'",
     "author-idx": 1,
     "author-name": "admin"
 }
+
+--FormDataBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="panic.png"
+Content-Type: image/jpg
+
+< ./panic.png
+
+--FormDataBoundary7MA4YWxkTrZu0gW--
 
 ### Content - List
 GET {{uri}}/api/board/content/misc1 HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Read
-GET {{uri}}/api/board/content/misc1/1 HTTP/1.1
+GET {{uri}}/api/board/content/misc1/2 HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Update

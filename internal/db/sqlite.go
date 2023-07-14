@@ -266,6 +266,7 @@ func (d *SQLite) CreateBoard(tableInfo model.Board, recreate bool) error {
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
 		"FILES"       TEXT,
+		"IMAGES"      TEXT,
 		"VIEWS"       TEXT,
 		"REGDATE"    TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
@@ -294,6 +295,7 @@ func (d *SQLite) CreateComment(tableInfo model.Board, recreate bool) error {
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
 		"FILES"       TEXT,
+		"IMAGES"      TEXT,
 		"REGDATE"    TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`

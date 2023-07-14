@@ -38,6 +38,7 @@ type Content struct {
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"viewcount"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read, viewcount"`
 	Files      null.String `json:"files"       db:"FILES"       npskip:"viewcount"`
+	Images     null.String `json:"images"      db:"IMAGES"      npskip:"viewcount"`
 	Views      null.Int    `json:"views"       db:"VIEWS"       npskip:"update"`
 	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update, viewcount"`
 }
@@ -74,5 +75,6 @@ type Comment struct {
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read"`
 	Files      null.String `json:"files"       db:"FILES"`
+	Images     null.String `json:"images"      db:"IMAGES"`
 	RegDate    null.String `json:"regdate"     db:"REGDATE"`
 }

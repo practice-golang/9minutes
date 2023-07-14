@@ -443,6 +443,7 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
 		FILES       NCLOB,
+		IMAGES      NCLOB,
 		VIEWS       VARCHAR(11),
 		REGDATE    VARCHAR(14),
 
@@ -477,6 +478,7 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
 		FILES       NCLOB,
+		IMAGES      NCLOB,
 		REGDATE    VARCHAR(14),
 		
 		UNIQUE("IDX")

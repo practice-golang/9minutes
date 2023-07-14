@@ -289,6 +289,7 @@ func (d *Postgres) CreateBoard(tableInfo model.Board, recreate bool) error {
 		"CONTENT"      TEXT NULL DEFAULT NULL,
 		"AUTHOR_IDX"   BIGINT NULL DEFAULT NULL,
 		"FILES"        TEXT NULL DEFAULT NULL,
+		"IMAGES"       TEXT NULL DEFAULT NULL,
 		"VIEWS"        VARCHAR(11) NULL DEFAULT NULL,
 		"REGDATE"     VARCHAR(14) NULL DEFAULT NULL
 	);`
@@ -316,6 +317,7 @@ func (d *Postgres) CreateComment(tableInfo model.Board, recreate bool) error {
 		"CONTENT"    TEXT NULL DEFAULT NULL,
 		"AUTHOR_IDX" BIGINT NULL DEFAULT NULL,
 		"FILES"      TEXT NULL DEFAULT NULL,
+		"IMAGES"     TEXT NULL DEFAULT NULL,
 		"REGDATE"   VARCHAR(14) NULL DEFAULT NULL
 	);`
 
