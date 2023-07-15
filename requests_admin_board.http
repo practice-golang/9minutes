@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=338e4457-fdf0-40a5-a327-ce8af328dfce; 
+@cookie = session_id=26accbcf-1bb2-442a-8e2c-fa93beb84c71; 
 
 
 ### Login
@@ -33,11 +33,11 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "board-name": "misc1",
-    "board-code": "misc1",
+    "board-name": "misc",
+    "board-code": "misc",
     "board-type": "board",
-    "board-table": "board_misc1",
-    "comment-table": "comment_misc1",
+    "board-table": "board_misc",
+    "comment-table": "comment_misc",
     "grant-read": "guest",
     "grant-write": "regular_user",
     "grant-comment": "regular_user",
