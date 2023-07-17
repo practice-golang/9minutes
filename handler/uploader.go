@@ -1,82 +1,68 @@
 package handler
 
-// import (
-// 	"9minutes/internal/crud"
-// 	"9minutes/model"
-// 	"9minutes/router"
-// 	"crypto/sha256"
-// 	"encoding/base64"
-// 	"encoding/json"
-// 	"io"
-// 	"log"
-// 	"net/http"
-// 	"os"
-// 	"path/filepath"
-// 	"strings"
-// 	"time"
+import (
+	"9minutes/config"
+	"9minutes/internal/crud"
+	"crypto/sha256"
+	"encoding/base64"
+	"net/http"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
-// 	"gopkg.in/guregu/null.v4"
-// )
+	"github.com/gofiber/fiber/v2"
+)
 
-// // https://tutorialedge.net/golang/go-file-upload-tutorial
-// func UploadFile(c *router.Context) {
-// 	// w := c.ResponseWriter
-// 	r := c.Request
+// https://tutorialedge.net/golang/go-file-upload-tutorial
+func UploadFile(c *fiber.Ctx) (err error) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
 
-// 	// w.Header().Set("Access-Control-Allow-Origin", "*")
-// 	// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-// 	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-// 	// w.Header().Set("Access-Control-Allow-Credentials", "true")
+	resultMAP := map[string]interface{}{
+		"message": "success",
+		"files":   []map[string]string{},
+	}
 
-// 	r.ParseMultipartForm(1 << 20) // 10 << 20 specifies a maximum upload of 10 MB files
+	fdatas := form.File["upload-files"]
+	for _, fdata := range fdatas {
+		fname := fdata.Filename
 
-// 	file, handler, err := r.FormFile("file")
-// 	if err != nil {
-// 		log.Println("Error Retrieving the File")
-// 		log.Println(err)
-// 		return
-// 	}
-// 	defer file.Close()
+		sha := sha256.New()
+		sha.Write([]byte(filepath.Base(fname) + time.Now().String()))
+		sha.Write([]byte(filepath.Ext(fname) + time.Now().String()))
+		storageName := base64.StdEncoding.EncodeToString(sha.Sum(nil))
+		storageName = strings.NewReplacer("=", "", "+", "", "/", "").Replace(storageName)
+		storageName = storageName + GetRandomString(16) + "_" + time.Now().Format("20060102150405") + filepath.Ext(fname)
 
-// 	sha := sha256.New()
-// 	sha.Write([]byte(filepath.Base(handler.Filename) + time.Now().String()))
-// 	sha.Write([]byte(filepath.Ext(handler.Filename) + time.Now().String()))
-// 	storageName := base64.StdEncoding.EncodeToString(sha.Sum(nil))
-// 	storageName = strings.NewReplacer("=", "", "+", "", "/", "").Replace(storageName)
-// 	storageName = storageName + "_" + time.Now().Format("20060102150405") + filepath.Ext(handler.Filename)
-// 	// storageName := GetRandomString(128) + time.Now().Format("20060102150405") + "." + filepath.Ext(handler.Filename)
+		err := c.SaveFile(fdata, config.UploadPath+"/"+storageName)
+		if err != nil {
+			return err
+		}
 
-// 	// // tempFile, err := ioutil.TempFile(router.UploadPath, "upload-*-"+handler.Filename)
-// 	// tempFile, err := os.CreateTemp(router.UploadPath, "upload-*-"+handler.Filename)
-// 	tempFile, err := os.CreateTemp(router.UploadPath, "*"+storageName)
-// 	if err != nil {
-// 		log.Println(err)
-// 		return
-// 	}
-// 	defer tempFile.Close()
+		r, err := crud.AddUploadedFile(fname, storageName)
+		if err != nil {
+			return err
+		}
 
-// 	fileBytes, err := io.ReadAll(file)
-// 	if err != nil {
-// 		log.Println(err)
-// 		return
-// 	}
-// 	tempFile.Write(fileBytes)
-// 	storageName = filepath.Base(tempFile.Name())
+		fidx, err := r.LastInsertId()
+		if err != nil {
+			return err
+		}
 
-// 	err = crud.AddUploadedFile(handler.Filename, storageName)
-// 	if err != nil {
-// 		log.Println(err)
-// 		return
-// 	}
+		files := map[string]string{
+			"idx":       strconv.FormatInt(fidx, 10),
+			"filename":  fname,
+			"storename": storageName,
+		}
 
-// 	resultMAP := map[string]string{
-// 		"message":   "success",
-// 		"filename":  handler.Filename,
-// 		"storename": storageName,
-// 	}
+		resultMAP["files"] = append(resultMAP["files"].([]map[string]string), files)
+	}
 
-// 	c.Json(http.StatusOK, resultMAP)
-// }
+	return c.Status(http.StatusOK).JSON(resultMAP)
+}
 
 // func UploadImage(c *router.Context) {
 // 	// w := c.ResponseWriter

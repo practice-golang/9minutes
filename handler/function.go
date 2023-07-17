@@ -87,8 +87,11 @@ func HandleHTML(c *fiber.Ctx) error {
 			log.Printf("Hello: %s", params["hello"])
 		}
 	case strings.HasPrefix(name, "board"):
-		if name == "board" {
-			name = "board/list"
+		switch name {
+		case "board":
+			name = "board/index"
+		case "board/write":
+			name = "board/index"
 		}
 
 	case strings.HasPrefix(name, "admin"):
@@ -680,14 +683,9 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 
 	board.BoardCode = null.StringFrom(c.Params("board_code"))
 
-	formValueContent := c.FormValue("content")
-	if formValueContent == "" {
-		return c.Status(http.StatusBadRequest).SendString("content is empty")
-	}
-
-	err = json.Unmarshal([]byte(formValueContent), &content)
+	err = c.BodyParser(&content)
 	if err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
 	board, err = crud.GetBoardByCode(board)
@@ -695,54 +693,13 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	// userInfo, err := crud.GetUserByName(c.AuthInfo.(model.AuthInfo).Name.String)
-	// if err != nil {
-	// 	c.Text(http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// content.AuthorIdx = userInfo.Idx
-
 	now := time.Now().Format("20060102150405")
 	content.RegDate = null.StringFrom(now)
 	content.Views = null.IntFrom(0)
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(err.Error())
-	}
-
-	imdatas := form.File["images"]
-	filesIM := ""
-	for _, imdata := range imdatas {
-		err := c.SaveFile(imdata, config.UploadPath+"/"+imdata.Filename)
-		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
-		}
-
-		filesIM += imdata.Filename + "|"
-	}
-	content.Images = null.StringFrom(filesIM[:len(filesIM)-1])
-
-	r, err := crud.WriteContent(board, content)
+	_, err = crud.WriteContent(board, content)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	boardIDX := board.Idx.Int64
-	postIDX, _ := r.LastInsertId()
-
-	files := strings.Split(content.Files.String, "?")
-
-	for _, f := range files {
-		if f == "" {
-			continue
-		}
-		files := strings.Split(f, "/")
-
-		filename := files[0]
-		storename := files[1]
-
-		crud.UpdateUploadedFile(boardIDX, postIDX, filename, storename)
 	}
 
 	result := map[string]interface{}{

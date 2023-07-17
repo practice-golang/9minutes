@@ -13,12 +13,9 @@ Origin: {{uri}}
 }
 
 ### Content - Write
-POST {{uri}}/api/board/content/misc HTTP/1.1
+POST {{uri}}/api/board/misc/content HTTP/1.1
+Content-Type: application/json
 Cookie: {{cookie}}
-Content-Type: multipart/form-data; boundary=FormDataBoundary7MA4YWxkTrZu0gW
-
---FormDataBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="content"
 
 {
     "title": "My test #4",
@@ -27,20 +24,12 @@ Content-Disposition: form-data; name="content"
     "author-name": "admin"
 }
 
---FormDataBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="images"; filename="panic.png"
-Content-Type: image/jpg
-
-< ./panic.png
-
---FormDataBoundary7MA4YWxkTrZu0gW--
-
 ### Content - List
-GET {{uri}}/api/board/content/misc HTTP/1.1
+GET {{uri}}/api/board/misc HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Read
-GET {{uri}}/api/board/content/misc/1 HTTP/1.1
+GET {{uri}}/api/board/misc/content/1 HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Update
@@ -56,3 +45,16 @@ Cookie: {{cookie}}
 ### Content - Delete
 DELETE {{uri}}/api/board/content/misc/1 HTTP/1.1
 Cookie: {{cookie}}
+
+### File - Upload
+POST {{uri}}/api/uploader HTTP/1.1
+Cookie: {{cookie}}
+Content-Type: multipart/form-data; boundary=FormDataBoundary7MA4YWxkTrZu0gW
+
+--FormDataBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="upload-files"; filename="panic.png"
+Content-Type: image/jpg
+
+< ./panic.png
+
+--FormDataBoundary7MA4YWxkTrZu0gW--

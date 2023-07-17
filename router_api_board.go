@@ -11,14 +11,14 @@ func setApiBoard(a *fiber.App) {
 	gbrd := a.Group("/api/board") // Require add session middleware
 
 	/* API Content */
-	gbrd.Get("/content/:board_code", handler.ListContentAPI)
-	gbrd.Get("/content/:board_code/:idx", handler.ReadContentAPI)
-	gbrd.Post("/content/:board_code", handler.WriteContentAPI)
-	gbrd.Put("/content/:board_code/:idx", handler.UpdateContent)
-	gbrd.Delete("/content/:board_code/:idx", handler.DeleteContent)
+	gbrd.Get("/:board_code", handler.ListContentAPI)
+	gbrd.Get("/:board_code/content/:idx", handler.ReadContentAPI)
+	gbrd.Post("/:board_code/content", handler.WriteContentAPI)
+	gbrd.Put("/:board_code/content/:idx", handler.UpdateContent)
+	gbrd.Delete("/:board_code/content/:idx", handler.DeleteContent)
 
 	/* API Comment */
-	gbrd.Get("/comment/:board/:idx", handler.GetComments)
-	gbrd.Post("/comment/:board/:idx", handler.WriteComment)
-	gbrd.Delete("/comment/:board/:commentidx", handler.DeleteComment)
+	gbrd.Get("/:board/:idx/comment", handler.GetComments)
+	gbrd.Post("/:board/:idx/comment", handler.WriteComment)
+	gbrd.Delete("/:board/:idx/comment/:commentidx", handler.DeleteComment)
 }

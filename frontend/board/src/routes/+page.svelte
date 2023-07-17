@@ -1,1 +1,1 @@
-<h1>Admin</h1>
+<h1>Board</h1>

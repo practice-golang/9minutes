@@ -6,7 +6,7 @@ import preprocess from 'svelte-preprocess';
 const config = {
 	preprocess: preprocess(),
 	kit: {
-		paths: { base: '/admin' },
+		paths: { base: '/board' },
 		adapter: adapter({ fallback: 'index.html' })
 	}
 };

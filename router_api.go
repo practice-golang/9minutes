@@ -21,12 +21,12 @@ func setAPIs(a *fiber.App) {
 	gmyinfo.Delete("/", handler.ResignUser)
 }
 
-// func setApiUploader(r *router.App) {
-// 	/* API Uploader */
-// 	gu := r.Group(`^/api/uploader`, handler.AuthApiSessionMiddleware)
-// 	gu.POST(`/file$`, handler.UploadFile)
-// 	gu.POST(`/image$`, handler.UploadImage)
+func setApiUploader(r *fiber.App) {
+	/* API Uploader */
+	gupload := r.Group("/api/uploader") // Require add session middleware
+	gupload.Post("/", handler.UploadFile)
+	// gu.POST(`/image$`, handler.UploadImage)
 
-// 	// Delete all of files, images, title-image which is(are) uploaded during writing or editing on board, when cancel
-// 	gu.DELETE(`/file$`, handler.DeleteFiles)
-// }
+	// Delete all of files, images, title-image which is(are) uploaded during writing or editing on board, when cancel
+	// gu.DELETE(`/file$`, handler.DeleteFiles)
+}

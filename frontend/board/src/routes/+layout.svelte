@@ -8,7 +8,7 @@
 </svelte:head>
 
 <a href="/" rel="external">Home</a>
-<a href={base}>Admin</a>
+<a href="/admin" rel="external">Admin</a>
 <br />
 <a href="{base}/board-list">Boards</a>
 <a href="{base}/user-columns">User columns</a>

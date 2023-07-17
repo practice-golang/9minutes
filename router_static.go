@@ -13,4 +13,5 @@ func setStaticFiles(a *fiber.App) {
 func setStaticAssets(a *fiber.App) {
 	a.Static("/assets/", HtmlPath+"/assets")
 	a.Static("/admin/_app/", HtmlPath+"/admin/_app")
+	a.Static("/board/_app/", HtmlPath+"/board/_app")
 }

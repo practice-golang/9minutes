@@ -3,10 +3,11 @@ package crud
 import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
+	"database/sql"
 	"fmt"
 )
 
-func AddUploadedFile(fileName, storageName string) error {
+func AddUploadedFile(fileName, storageName string) (sql.Result, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
 	columnsFileName := np.CreateString(map[string]interface{}{"FILE_NAME": nil}, dbtype, "", false)
@@ -19,12 +20,12 @@ func AddUploadedFile(fileName, storageName string) error {
 		'` + fileName + `', '` + storageName + `'
 	)`
 
-	_, err := db.Con.Exec(sql)
+	result, err := db.Con.Exec(sql)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 func UpdateUploadedFile(boardIDX, postIDX int64, filename, storename string) error {

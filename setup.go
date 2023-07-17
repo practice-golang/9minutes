@@ -266,11 +266,11 @@ func setupRouter() {
 
 	// setPAGEs(r) // HTML, Assets, Login/Signup
 	// setPageMyPage(r)   // MyPage
-	// setApiUploader(r) // API Uploader
 
-	setApiAdmin(app) // API Admin
-	setApiBoard(app) // API Board
-	setAPIs(app)     // API
+	setApiAdmin(app)    // API Admin
+	setApiBoard(app)    // API Board
+	setApiUploader(app) // API Uploader
+	setAPIs(app)        // API
 
 	// setOthers(r)     // Others - make live only ws
 	// setRouterNotUse(app) // Not use, should be removed at future
