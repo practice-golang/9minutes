@@ -52,10 +52,6 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 [
-    {
-        "idx": 36
-    },
-    {
-        "idx": 44
-    }
+    { "idx": 36 },
+    { "idx": 44 }
 ]

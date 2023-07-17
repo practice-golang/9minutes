@@ -46,6 +46,7 @@ Cookie: {{cookie}}
 DELETE {{uri}}/api/board/content/misc/1 HTTP/1.1
 Cookie: {{cookie}}
 
+
 ### File - Upload
 POST {{uri}}/api/uploader HTTP/1.1
 Cookie: {{cookie}}
@@ -58,3 +59,12 @@ Content-Type: image/jpg
 < ./panic.png
 
 --FormDataBoundary7MA4YWxkTrZu0gW--
+
+### File - Delete
+DELETE {{uri}}/api/uploader HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 2 }
+]

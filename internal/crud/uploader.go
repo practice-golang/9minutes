@@ -3,9 +3,47 @@ package crud
 import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
+	"9minutes/model"
 	"database/sql"
+	"errors"
 	"fmt"
+
+	"github.com/blockloop/scan"
 )
+
+func GetUploadedFile(idx int) (model.StoredFileInfo, error) {
+	finfo := model.StoredFileInfo{}
+	finfos := []model.StoredFileInfo{}
+
+	dbtype := db.GetDatabaseTypeString()
+	tableName := db.GetFullTableName(db.Info.UploadTable)
+	column := np.CreateString(finfo, dbtype, "", false)
+	where := np.CreateWhereString(map[string]interface{}{"IDX": idx}, dbtype, "=", "AND", "", false)
+
+	sql := `
+	SELECT
+		` + column.Names + `
+	FROM ` + tableName +
+		where
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return finfo, err
+	}
+	defer r.Close()
+
+	err = scan.Rows(&finfos, r)
+	if err != nil {
+		return finfo, err
+	}
+	if len(finfos) == 0 {
+		return finfo, errors.New("no file found")
+	}
+
+	finfo = finfos[0]
+
+	return finfo, nil
+}
 
 func AddUploadedFile(fileName, storageName string) (sql.Result, error) {
 	dbtype := db.GetDatabaseTypeString()
@@ -57,32 +95,17 @@ func UpdateUploadedFile(boardIDX, postIDX int64, filename, storename string) err
 	return nil
 }
 
-func DeleteUploadedFile(boardIDX, postIDX int64, fileName, storeName string) error {
+func DeleteUploadedFile(idx int64) (err error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
-	columnsFileName := np.CreateString(map[string]interface{}{"FILE_NAME": nil}, dbtype, "", false)
-	columnsStorageName := np.CreateString(map[string]interface{}{"STORAGE_NAME": nil}, dbtype, "", false)
-
-	columnsBoardIDX := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
-	columnsPostIDX := np.CreateString(map[string]interface{}{"POST_IDX": nil}, dbtype, "", false)
+	where := np.CreateWhereString(map[string]interface{}{"IDX": idx}, dbtype, "=", "AND", "", false)
 
 	sql := `
 	DELETE
-	FROM ` + tableName + `
-	WHERE ` + columnsFileName.Names + ` = '` + fileName + `'
-		AND ` + columnsStorageName.Names + ` = '` + storeName + `'`
+	FROM ` + tableName +
+		where
 
-	if boardIDX > 0 && postIDX > 0 {
-		sql += `
-			AND ` + columnsBoardIDX.Names + ` = '` + fmt.Sprint(boardIDX) + `'
-			AND ` + columnsPostIDX.Names + ` = '` + fmt.Sprint(postIDX) + `'`
-	} else {
-		sql += `
-			AND ` + columnsBoardIDX.Names + ` IS NULL
-			AND ` + columnsPostIDX.Names + ` IS NULL`
-	}
-
-	_, err := db.Con.Exec(sql)
+	_, err = db.Con.Exec(sql)
 	if err != nil {
 		return err
 	}

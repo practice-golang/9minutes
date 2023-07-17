@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/guregu/null.v4"
 )
 
 // https://tutorialedge.net/golang/go-file-upload-tutorial
@@ -62,6 +63,39 @@ func UploadFile(c *fiber.Ctx) (err error) {
 	}
 
 	return c.Status(http.StatusOK).JSON(resultMAP)
+}
+
+func DeleteFiles(c *fiber.Ctx) (err error) {
+	type uploadIdx struct {
+		Idx null.Int `json:"idx" db:"IDX"`
+	}
+	var uploadIndices []uploadIdx
+
+	err = c.BodyParser(&uploadIndices)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
+	}
+
+	if len(uploadIndices) == 0 {
+		return c.Status(http.StatusBadRequest).Send([]byte("no files to delete"))
+	}
+
+	for _, f := range uploadIndices {
+
+		fdata, err := crud.GetUploadedFile(int(f.Idx.Int64))
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		err = crud.DeleteUploadedFile(f.Idx.Int64)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+		filepath := config.UploadPath + "/" + fdata.StorageName.String
+		DeleteUploadFile(filepath)
+	}
+
+	return c.Status(http.StatusOK).Send([]byte("success"))
 }
 
 // func UploadImage(c *router.Context) {
