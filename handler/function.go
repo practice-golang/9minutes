@@ -317,13 +317,13 @@ func GetComments(c *fiber.Ctx) error {
 
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
+		return c.Status(http.StatusNotFound).SendString("board not found")
 	}
 
 	idx, _ := strconv.Atoi(uri[len(uri)-1])
 	content, err := crud.GetContent(board, fmt.Sprint(idx))
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Content was not found")
+		return c.Status(http.StatusNotFound).SendString("comment not found")
 	}
 
 	listingOptions := model.CommentListingOptions{}
@@ -363,21 +363,21 @@ func GetComments(c *fiber.Ctx) error {
 }
 
 func WriteComment(c *fiber.Ctx) error {
-	board := model.Board{}
+	board := model.Board{BoardCode: null.StringFrom(c.Params("board_code"))}
 	comment := model.Comment{}
 
-	uri := strings.Split(c.Context().URI().String(), "/")
-	boardCode := uri[len(uri)-2]
-	board.BoardCode = null.StringFrom(boardCode)
-
-	board, err := crud.GetBoardByCode(board)
+	contentIdx, err := strconv.ParseInt(c.Params("content_idx"), 0, 64)
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+	comment.BoardIdx = null.IntFrom(contentIdx)
+
+	board, err = crud.GetBoardByCode(board)
+	if err != nil {
+		return c.Status(http.StatusNotFound).SendString("board not found")
 	}
 
-	contentIdx, _ := strconv.Atoi(uri[len(uri)-1])
-
-	err = c.BodyParser(comment)
+	err = c.BodyParser(&comment)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
@@ -386,8 +386,6 @@ func WriteComment(c *fiber.Ctx) error {
 	if comment.Content.String == "" {
 		return c.Status(http.StatusBadRequest).SendString("comment is empty")
 	}
-
-	comment.BoardIdx = null.IntFrom(int64(contentIdx))
 
 	now := time.Now().Format("20060102150405")
 	comment.RegDate = null.StringFrom(now)

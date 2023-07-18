@@ -12,7 +12,7 @@ import (
 func GetContentsList(boardCODE string, queries map[string]string) (model.ContentPageData, error) {
 	var err error
 
-	board := model.Board{}
+	board := model.Board{BoardCode: null.StringFrom(boardCODE)}
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
 		return model.ContentPageData{}, err
@@ -47,10 +47,9 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 func GetContentData(boardCode string, idx int, queries map[string]string) (model.Content, error) {
 	var err error
 
-	board := model.Board{}
+	board := model.Board{BoardCode: null.StringFrom(boardCode)}
 	content := model.Content{}
 
-	board.BoardCode = null.StringFrom(boardCode)
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
 		return model.Content{}, err

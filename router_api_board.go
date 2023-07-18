@@ -19,6 +19,6 @@ func setApiBoard(a *fiber.App) {
 
 	/* API Comment */
 	gbrd.Get("/:board/:idx/comment", handler.GetComments)
-	gbrd.Post("/:board/:idx/comment", handler.WriteComment)
-	gbrd.Delete("/:board/:idx/comment/:commentidx", handler.DeleteComment)
+	gbrd.Post("/:board/:content_idx/comment", handler.WriteComment)
+	gbrd.Delete("/:board/:idx/comment/:comment_idx", handler.DeleteComment)
 }

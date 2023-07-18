@@ -69,3 +69,15 @@ Cookie: {{cookie}}
 [
     { "idx": 7 }
 ]
+
+
+### Comment - List
+GET {{uri}}/api/board/misc/4/comment HTTP/1.1
+
+### Comment - Write
+POST {{uri}}/api/board/misc/4/comment HTTP/1.1
+Content-Type: application/json
+
+{
+    "content": "Nice to meet you & <^-^>'"
+}
