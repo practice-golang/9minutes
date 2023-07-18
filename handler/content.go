@@ -44,10 +44,8 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 	return list, err
 }
 
-func GetContentData(boardCode string, idx int, queries map[string]string) (map[string]interface{}, error) {
+func GetContentData(boardCode string, idx int, queries map[string]string) (model.Content, error) {
 	var err error
-
-	result := make(map[string]interface{})
 
 	board := model.Board{}
 	content := model.Content{}
@@ -55,18 +53,31 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (map[s
 	board.BoardCode = null.StringFrom(boardCode)
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
-		return nil, err
+		return model.Content{}, err
 	}
 
 	content, err = crud.GetContent(board, strconv.Itoa(idx))
 	if err != nil {
-		return nil, err
+		return model.Content{}, err
 	}
 
 	content.Views = null.IntFrom(content.Views.Int64 + 1)
 	err = crud.UpdateContent(board, content, "viewcount")
 	if err != nil {
-		return nil, err
+		return model.Content{}, err
+	}
+
+	return content, nil
+}
+
+func GetCommentsList(boardCode string, contentIdx int, queries map[string]string) (model.CommentPageData, error) {
+	var err error
+
+	board := model.Board{}
+	board.BoardCode = null.StringFrom(boardCode)
+	board, err = crud.GetBoardByCode(board)
+	if err != nil {
+		return model.CommentPageData{}, err
 	}
 
 	commentSearch := queries["search"]
@@ -77,13 +88,10 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (map[s
 	commentOptions.Page = null.IntFrom(-1)
 	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
 
-	comments, err := crud.GetComments(board, content, commentOptions)
+	comments, err := crud.GetComments(board, contentIdx, commentOptions)
 	if err != nil {
-		return nil, err
+		return model.CommentPageData{}, err
 	}
 
-	result["content"] = content
-	result["comments"] = comments
-
-	return result, err
+	return comments, nil
 }

@@ -264,16 +264,10 @@ func setupRouter() {
 	app = fiber.New(cfg)
 	app.Use(recover.New())
 
-	// setPAGEs(r) // HTML, Assets, Login/Signup
-	// setPageMyPage(r)   // MyPage
-
 	setApiAdmin(app)    // API Admin
 	setApiBoard(app)    // API Board
 	setApiUploader(app) // API Uploader
 	setAPIs(app)        // API
-
-	// setOthers(r)     // Others - make live only ws
-	// setRouterNotUse(app) // Not use, should be removed at future
 
 	setStaticFiles(app)  // Files
 	setStaticAssets(app) // Assets

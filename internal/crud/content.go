@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/blockloop/scan"
@@ -177,14 +178,14 @@ func GetComment(board model.Board, boardIdx, commentIdx string) (model.Comment, 
 }
 
 // GetComments - get comment list
-func GetComments(board model.Board, content model.Content, options model.CommentListingOptions) (model.CommentPageData, error) {
+func GetComments(board model.Board, contentIdx int, options model.CommentListingOptions) (model.CommentPageData, error) {
 	result := model.CommentPageData{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.CommentTable.String)
 	userTableName := db.GetFullTableName(db.Info.UserTable)
 
-	idx := fmt.Sprint(content.Idx.Int64)
+	idx := strconv.Itoa(contentIdx)
 
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
 
