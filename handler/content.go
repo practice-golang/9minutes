@@ -51,7 +51,6 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (map[s
 
 	board := model.Board{}
 	content := model.Content{}
-	comments := model.CommentPageData{}
 
 	board.BoardCode = null.StringFrom(boardCode)
 	board, err = crud.GetBoardByCode(board)
@@ -78,7 +77,7 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (map[s
 	commentOptions.Page = null.IntFrom(-1)
 	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
 
-	comments, err = crud.GetComments(board, content, commentOptions)
+	comments, err := crud.GetComments(board, content, commentOptions)
 	if err != nil {
 		return nil, err
 	}
