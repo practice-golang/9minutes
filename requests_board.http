@@ -66,5 +66,5 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 [
-    { "idx": 2 }
+    { "idx": 7 }
 ]

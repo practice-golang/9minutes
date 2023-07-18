@@ -54,9 +54,9 @@ func UploadFile(c *fiber.Ctx) (err error) {
 		}
 
 		files := map[string]string{
-			"idx":       strconv.FormatInt(fidx, 10),
-			"filename":  fname,
-			"storename": storageName,
+			"idx":         strconv.FormatInt(fidx, 10),
+			"filename":    fname,
+			"storagename": storageName,
 		}
 
 		resultMAP["files"] = append(resultMAP["files"].([]map[string]string), files)

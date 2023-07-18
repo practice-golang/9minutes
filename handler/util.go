@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"9minutes/internal/fd"
 	"math/rand"
 	"os"
 	"time"
@@ -43,7 +42,7 @@ func GetRandomString(length int) string {
 }
 
 func DeleteUploadFile(filepath string) {
-	if fd.CheckFileExists(filepath, false) {
+	if _, err := os.Stat(filepath); err == nil {
 		os.Remove(filepath)
 	}
 }
