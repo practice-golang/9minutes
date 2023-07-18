@@ -21,7 +21,8 @@ Cookie: {{cookie}}
     "title": "My test #4",
     "content": "Nice to mit u lol~\n^_^_^_^& <^-^>'",
     "author-idx": 1,
-    "author-name": "admin"
+    "author-name": "admin",
+    "files": "1"
 }
 
 ### Content - List
@@ -29,7 +30,7 @@ GET {{uri}}/api/board/misc HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Read
-GET {{uri}}/api/board/misc/content/1 HTTP/1.1
+GET {{uri}}/api/board/misc/content/4 HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Update

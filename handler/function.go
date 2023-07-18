@@ -89,6 +89,9 @@ func HandleHTML(c *fiber.Ctx) error {
 	case strings.HasPrefix(name, "board"):
 		switch name {
 		case "board":
+			board := params["board"]
+			page := params["page"]
+
 			name = "board/index"
 		case "board/write":
 			name = "board/index"
@@ -593,39 +596,8 @@ func HandleEditContent(c *fiber.Ctx) error {
 }
 
 func ListContentAPI(c *fiber.Ctx) (err error) {
-	board := model.Board{}
-
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	queries := c.Queries()
-	page := 1
-	count := config.ContentListCountPerPage
-	if queries["page"] != "" {
-		page, err = strconv.Atoi(queries["page"])
-		if err != nil {
-			return
-		}
-	}
-	if queries["count"] != "" {
-		count, err = strconv.Atoi(queries["count"])
-		if err != nil {
-			return
-		}
-	}
-
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-
-	listingOptions := model.ContentListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
-
-	listingOptions.Page = null.IntFrom(int64(page - 1))
-	listingOptions.ListCount = null.IntFrom(int64(count))
-
-	list, err := crud.GetContentList(board, listingOptions)
+	boardCode, queries := c.Params("board_code"), c.Queries()
+	list, err := GetContentsList(boardCode, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -634,44 +606,16 @@ func ListContentAPI(c *fiber.Ctx) (err error) {
 }
 
 func ReadContentAPI(c *fiber.Ctx) (err error) {
-	board := model.Board{}
-	content := model.Content{}
+	boardCode, queries := c.Params("board_code"), c.Queries()
+	idx, err := strconv.ParseInt(c.Params("idx"), 10, 64)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
 
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-	board, err = crud.GetBoardByCode(board)
+	result, err := GetContentData(boardCode, int(idx), queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
-
-	idx := c.Params("idx")
-	content, err = crud.GetContent(board, idx)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	content.Views = null.IntFrom(content.Views.Int64 + 1)
-	err = crud.UpdateContent(board, content, "viewcount")
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	commentSearch := c.Query("search")
-
-	commentOptions := model.CommentListingOptions{}
-	commentOptions.Search = null.StringFrom(commentSearch)
-
-	commentOptions.Page = null.IntFrom(-1)
-	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
-
-	comments, err := crud.GetComments(board, content, commentOptions)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-	// commentsJSON, _ := json.Marshal(comments)
-
-	result := make(map[string]interface{})
-	result["content"] = content
-	result["comments"] = comments
 
 	return c.Status(http.StatusOK).JSON(result)
 }

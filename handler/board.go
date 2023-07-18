@@ -4,7 +4,6 @@ import (
 	"9minutes/internal/crud"
 	"9minutes/internal/db"
 	"9minutes/model"
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -12,55 +11,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gopkg.in/guregu/null.v4"
 )
-
-func HandleBoardList(c *fiber.Ctx) error {
-	var err error
-
-	// queries := c.URL.Query()
-	queries := c.Queries()
-
-	listingOptions := model.BoardListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
-
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(100)
-
-	if queries["count"] != "" {
-		countPerPage, err := strconv.Atoi(queries["count"])
-		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
-		}
-
-		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
-	}
-
-	if queries["page"] != "" {
-		page := queries["page"]
-		pageNum, err := strconv.Atoi(page)
-		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
-		}
-
-		listingOptions.Page = null.IntFrom(int64(pageNum))
-	}
-
-	listingOptions.Page.Int64--
-
-	h, err := LoadHTML(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	list, err := crud.GetBoards(listingOptions)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	listJSON, _ := json.Marshal(list)
-	h = bytes.ReplaceAll(h, []byte("$BOARD_LIST$"), listJSON)
-
-	return c.Status(http.StatusOK).Send(h)
-}
 
 // GetBoards - API Get boards list
 func GetBoards(c *fiber.Ctx) error {
