@@ -206,12 +206,6 @@ func setupDB() {
 		log.Fatal("CreateDB:", err)
 	}
 
-	// Not use
-	// err = db.Obj.CreateTable()
-	// if err != nil {
-	// 	log.Fatal("CreateTable:", err)
-	// }
-
 	err = db.Obj.CreateBoardTable()
 	if err != nil {
 		log.Fatal("CreateBoardTable:", err)
@@ -231,27 +225,7 @@ func setupDB() {
 	}
 }
 
-// func setupKey() {
-// 	secret := "practice-golang/9m secret"
-
-// 	privKeyExist := fd.CheckFileExists(auth.JwtPrivateKeyFileName, false)
-// 	pubKeyExist := fd.CheckFileExists(auth.JwtPublicKeyFileName, false)
-// 	if privKeyExist && pubKeyExist {
-// 		auth.LoadRsaKeys()
-// 	} else {
-// 		auth.GenerateRsaKeys()
-// 		auth.SaveRsaKeys()
-// 	}
-
-// 	err := auth.GenerateKeySet()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
-
 func setupRouter() {
-	handler.NewSessionStore()
-
 	engine := html.New("./static/html", ".html")
 	engine.Debug(true)
 	cfg := fiber.Config{
@@ -278,6 +252,8 @@ func doSetup() {
 	// _ = os.Mkdir(StaticPath, os.ModePerm)
 	// _ = os.Mkdir(config.HtmlPath, os.ModePerm)
 	_ = os.Mkdir(UploadPath, os.ModePerm)
+
+	handler.NewSessionStore()
 
 	// setupSession()
 	setupDB()
