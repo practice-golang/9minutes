@@ -19,14 +19,8 @@ export const load = async ({ url, fetch }) => {
 
         if (r.ok) { usersData = await r.json() }
 
-        console.log(usersData)
-
         return usersData
     }
 
-    console.log("WTF???")
-
-    return {
-        "content-list": getContentList(boardCode, page, listCount, search)
-    }
+    return getContentList(boardCode, page, listCount, search)
 }
