@@ -6,6 +6,7 @@ import (
 
 // setStaticFiles - Set static files
 func setStaticFiles(a *fiber.App) {
+	a.Static("/favicon.png", HtmlPath+"/favicon.png")
 	a.Static("/files", FilesPath)
 }
 

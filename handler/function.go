@@ -67,6 +67,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		}
 	case strings.HasPrefix(name, "board"):
 		switch name {
+		case "board":
+			name = "board/index"
 		case "board/list":
 			boardCode := queries["board_code"]
 			page := queries["page"]

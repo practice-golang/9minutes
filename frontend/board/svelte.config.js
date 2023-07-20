@@ -8,7 +8,7 @@ const config = {
 	kit: {
 		paths: { base: '/board' },
 		adapter: adapter({ fallback: 'index.html' })
-	}
+	},
 };
 
 export default config;
