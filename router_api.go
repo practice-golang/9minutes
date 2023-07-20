@@ -9,7 +9,7 @@ import (
 func setAPIs(a *fiber.App) {
 	/* API */
 	gapi := a.Group("/api")
-	gapi.Get("/health", handler.HealthCheck)
+	gapi.Get("/health", handler.HealthCheckAPI)
 	gapi.Post("/login", handler.LoginAPI)
 	gapi.Get("/logout", handler.LogoutAPI)
 	gapi.Post("/signup", handler.SignupAPI)

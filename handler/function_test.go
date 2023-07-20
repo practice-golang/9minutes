@@ -168,7 +168,7 @@ func Test_HealthCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HealthCheck(tt.args.c)
+			HealthCheckAPI(tt.args.c)
 
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()
 			defer res.Body.Close()

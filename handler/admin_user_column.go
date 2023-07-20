@@ -22,7 +22,7 @@ func RestrictedHello(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).Send([]byte("Hello " + userid.(string)))
 }
 
-func GetUserColumns(c *fiber.Ctx) error {
+func GetUserColumnsAPI(c *fiber.Ctx) error {
 	result, err := crud.GetUserColumnsList()
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
@@ -31,7 +31,7 @@ func GetUserColumns(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func AddUserColumn(c *fiber.Ctx) error {
+func AddUserColumnAPI(c *fiber.Ctx) error {
 	var userColumn model.UserColumn
 
 	err := c.BodyParser(&userColumn)
@@ -51,7 +51,7 @@ func AddUserColumn(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateUserColumns(c *fiber.Ctx) error {
+func UpdateUserColumnsAPI(c *fiber.Ctx) error {
 	var userColumns []model.UserColumn
 
 	err := c.BodyParser(&userColumns)
@@ -73,7 +73,7 @@ func UpdateUserColumns(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteUserColumns(c *fiber.Ctx) error {
+func DeleteUserColumnsAPI(c *fiber.Ctx) error {
 	var userColumns []model.UserColumn
 
 	err := c.BodyParser(&userColumns)

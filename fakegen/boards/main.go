@@ -1,4 +1,4 @@
-package main // import "fake-boards"
+package main // import "fakegen-boards"
 
 import (
 	"bytes"

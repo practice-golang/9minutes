@@ -1,4 +1,4 @@
-module fake-users
+module fakegen-users
 
 go 1.20
 

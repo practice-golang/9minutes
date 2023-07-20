@@ -5,41 +5,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"9minutes/config"
 	"9minutes/internal/crud"
 	"9minutes/model"
 
 	"gopkg.in/guregu/null.v4"
-	// "github.com/goccy/go-json"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/microcosm-cc/bluemonday"
 )
 
-var (
-	patternLinkLogin     = `\$LinkLogin\$(.*)\n`
-	patternLinkLogout    = `\$LinkLogout\$(.*)\n`
-	patternLinkAdmin     = `\$LinkAdmin\$(.*)\n`
-	patternLinkMyPage    = `\$LinkMyPage\$(.*)\n`
-	patternYouArePending = `\$YouArePending\$(.*)\n`
-	reLogin              = regexp.MustCompile(patternLinkLogin)
-	reLogout             = regexp.MustCompile(patternLinkLogout)
-	reAdmin              = regexp.MustCompile(patternLinkAdmin)
-	reMyPage             = regexp.MustCompile(patternLinkMyPage)
-	reYouArePending      = regexp.MustCompile(patternYouArePending)
-
-	patternIncludes = `@INCLUDE@(.*)(\n|$)`
-	reIncludes      = regexp.MustCompile(patternIncludes)
-)
-
 var bm = bluemonday.UGCPolicy()
 
-func HealthCheck(c *fiber.Ctx) error {
+func HealthCheckAPI(c *fiber.Ctx) error {
 	return c.SendString("Ok")
 }
 
@@ -54,7 +35,7 @@ func HelloParam(c *fiber.Ctx) error {
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
 	name := strings.TrimSuffix(c.Path()[1:], "/")
-	params := c.Queries()
+	queries := c.Queries()
 	templateMap := fiber.Map{}
 
 	sess, err := store.Get(c)
@@ -81,20 +62,33 @@ func HandleHTML(c *fiber.Ctx) error {
 	case name == "":
 		name = "index"
 
-		if params["hello"] != "" {
-			log.Printf("Hello: %s", params["hello"])
+		if queries["hello"] != "" {
+			log.Printf("Hello: %s", queries["hello"])
 		}
 	case strings.HasPrefix(name, "board"):
 		switch name {
-		case "board":
-			// board := params["board"]
-			// page := params["page"]
+		case "board/list":
+			boardCode := queries["board_code"]
+			page := queries["page"]
+
+			if boardCode == "" {
+				return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
+			}
+			if page == "" {
+				page = "1"
+			}
+
+			// list, err := GetContentsList(boardCode, queries)
+			// if err != nil {
+			// 	return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+			// }
+
+			// log.Println("board HTML:", list)
 
 			name = "board/index"
 		case "board/write":
 			name = "board/index"
 		}
-
 	case strings.HasPrefix(name, "admin"):
 		if userid == "" {
 			name = "status/unauthorized"
@@ -127,17 +121,17 @@ func ListContentAPI(c *fiber.Ctx) (err error) {
 
 func ReadContentAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	idx, err := strconv.ParseInt(c.Params("idx"), 10, 64)
+	idx := c.Params("idx")
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	content, err := GetContentData(boardCode, int(idx), queries)
+	content, err := GetContentData(boardCode, idx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	comments, err := GetCommentsList(boardCode, int(idx), queries)
+	comments, err := GetCommentsList(boardCode, idx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -305,61 +299,19 @@ func DeleteContentAPI(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func GetComments(c *fiber.Ctx) error {
-	var err error
-	var board model.Board
-
-	uri := strings.Split(c.Context().URI().String(), "/")
-
-	code := uri[len(uri)-2]
-	board.BoardCode = null.StringFrom(code)
-	queries := c.Queries()
-
-	board, err = crud.GetBoardByCode(board)
+func GetComments(c *fiber.Ctx) (err error) {
+	boardCode, queries := c.Params("board_code"), c.Queries()
+	contentIdx := c.Params("idx")
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("board not found")
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	idx, _ := strconv.Atoi(uri[len(uri)-1])
-	content, err := crud.GetContent(board, fmt.Sprint(idx))
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("comment not found")
-	}
-
-	listingOptions := model.CommentListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
-
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
-
-	if queries["count"] != "" {
-		countPerPage, err := strconv.Atoi(queries["count"])
-		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
-		}
-
-		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
-	}
-
-	if queries["page"] != "" {
-		page := queries["page"]
-		pageNum, err := strconv.Atoi(page)
-		if err != nil {
-			return c.Status(http.StatusBadRequest).SendString(err.Error())
-		}
-
-		listingOptions.Page = null.IntFrom(int64(pageNum))
-	}
-
-	listingOptions.Page.Int64--
-
-	contentIdx := int(content.Idx.Int64)
-	commentList, err := crud.GetComments(board, contentIdx, listingOptions)
+	comments, err := GetCommentsList(boardCode, contentIdx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return c.Status(http.StatusOK).JSON(commentList)
+	return c.Status(http.StatusOK).JSON(comments)
 }
 
 func WriteComment(c *fiber.Ctx) error {
@@ -380,6 +332,18 @@ func WriteComment(c *fiber.Ctx) error {
 	err = c.BodyParser(&comment)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	comment.AuthorIdx = null.IntFrom(-1)
+
+	// Check session
+	sess, err := store.Get(c)
+	useridInterface := sess.Get("idx")
+	if err == nil && useridInterface != nil {
+		userIDX, err := strconv.Atoi(useridInterface.(string))
+		if err == nil {
+			comment.AuthorIdx = null.IntFrom(int64(userIDX))
+		}
 	}
 
 	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))

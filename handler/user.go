@@ -4,6 +4,8 @@ import (
 	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,7 +16,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetUserList(c *fiber.Ctx) error {
+func GetUserListAPI(c *fiber.Ctx) error {
 	queries := c.Queries()
 
 	search := strings.TrimSpace(queries["search"])
@@ -58,7 +60,7 @@ func GetUserList(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func AddUser(c *fiber.Ctx) error {
+func AddUserAPI(c *fiber.Ctx) error {
 	var err error
 
 	now := time.Now().Format("20060102150405")
@@ -90,7 +92,7 @@ func AddUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateUser(c *fiber.Ctx) error {
+func UpdateUserAPI(c *fiber.Ctx) error {
 	var err error
 
 	userDatas := []map[string]interface{}{}
@@ -131,7 +133,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteUser(c *fiber.Ctx) error {
+func DeleteUserAPI(c *fiber.Ctx) error {
 	isDelete := false
 	queries := c.Queries()
 	if strings.TrimSpace(queries["mode"]) == "delete" {
@@ -175,6 +177,112 @@ func DeleteUser(c *fiber.Ctx) error {
 		result["result"] = "failed"
 		result["failed"] = userDatasFailed
 		result["success"] = userDatasSuccess
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func GetMyInfo(c *fiber.Ctx) error {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	user, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	delete(user.(map[string]interface{}), "password")
+
+	return c.Status(http.StatusOK).JSON(user)
+}
+
+func UpdateMyInfo(c *fiber.Ctx) error {
+	var err error
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	userDataOldRaw, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+	userDataOld := userDataOldRaw.(map[string]interface{})
+
+	userDataNEW := make(map[string]interface{})
+	err = json.Unmarshal(c.Body(), &userDataNEW)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
+	}
+
+	userDataNEW["idx"] = fmt.Sprint(userDataOld["idx"].(int64))
+
+	if _, ok := userDataNEW["password"]; ok {
+		err = bcrypt.CompareHashAndPassword([]byte(userDataOld["password"].(string)), []byte(userDataNEW["old-password"].(string)))
+		if err != nil {
+			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
+		}
+
+		password, err := bcrypt.GenerateFromPassword([]byte(userDataNEW["password"].(string)), consts.BcryptCost)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		userDataNEW["password"] = string(password)
+		delete(userDataNEW, "old-password")
+	}
+
+	err = crud.UpdateUserMap(userDataNEW)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	result := map[string]string{
+		"result": "ok",
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func ResignUser(c *fiber.Ctx) error {
+	var err error
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	userDataRaw, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+	userData := userDataRaw.(map[string]interface{})
+
+	err = crud.ResignUser(userData["idx"].(int64))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	result := map[string]string{
+		"result": "ok",
 	}
 
 	return c.Status(http.StatusOK).JSON(result)

@@ -64,8 +64,6 @@ type CommentPageData struct {
 	CommentList []Comment `json:"comment-list"`
 	TotalPage   int       `json:"total-page"`
 	CurrentPage int       `json:"current-page"`
-	TotalCount  int       `json:"total-count"`
-	ListCount   int       `json:"list-count"`
 }
 
 type Comment struct {

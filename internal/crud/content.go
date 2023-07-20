@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"html"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/blockloop/scan"
@@ -178,14 +177,12 @@ func GetComment(board model.Board, boardIdx, commentIdx string) (model.Comment, 
 }
 
 // GetComments - get comment list
-func GetComments(board model.Board, contentIdx int, options model.CommentListingOptions) (model.CommentPageData, error) {
+func GetComments(board model.Board, contentIdx string, options model.CommentListingOptions) (model.CommentPageData, error) {
 	result := model.CommentPageData{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.CommentTable.String)
 	userTableName := db.GetFullTableName(db.Info.UserTable)
-
-	idx := strconv.Itoa(contentIdx)
 
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
 
@@ -200,7 +197,7 @@ func GetComments(board model.Board, contentIdx int, options model.CommentListing
 	SELECT
 		COUNT(` + columnIdx.Names + `)
 	FROM ` + tableName + `
-	WHERE ` + columnBoardIdx.Names + ` = ` + idx
+	WHERE ` + columnBoardIdx.Names + ` = ` + contentIdx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -238,7 +235,7 @@ func GetComments(board model.Board, contentIdx int, options model.CommentListing
 			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
 		) AS ` + columnAuthorName.Names + `
 	FROM ` + tableName + `
-	WHERE ` + columnBoardIdx.Names + ` = ` + idx + `
+	WHERE ` + columnBoardIdx.Names + ` = ` + contentIdx + `
 	ORDER BY ` + columnIdx.Names + ` ASC
 	` + paging
 
@@ -258,8 +255,6 @@ func GetComments(board model.Board, contentIdx int, options model.CommentListing
 		CommentList: comments,
 		CurrentPage: int(currentPage),
 		TotalPage:   int(totalPage),
-		TotalCount:  int(totalCount),
-		ListCount:   int(options.ListCount.Int64),
 	}
 
 	return result, nil

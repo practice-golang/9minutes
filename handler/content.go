@@ -44,7 +44,7 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 	return list, err
 }
 
-func GetContentData(boardCode string, idx int, queries map[string]string) (model.Content, error) {
+func GetContentData(boardCode, idx string, queries map[string]string) (model.Content, error) {
 	var err error
 
 	board := model.Board{BoardCode: null.StringFrom(boardCode)}
@@ -55,7 +55,7 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (model
 		return model.Content{}, err
 	}
 
-	content, err = crud.GetContent(board, strconv.Itoa(idx))
+	content, err = crud.GetContent(board, idx)
 	if err != nil {
 		return model.Content{}, err
 	}
@@ -69,7 +69,7 @@ func GetContentData(boardCode string, idx int, queries map[string]string) (model
 	return content, nil
 }
 
-func GetCommentsList(boardCode string, contentIdx int, queries map[string]string) (model.CommentPageData, error) {
+func GetCommentsList(boardCode string, contentIDX string, queries map[string]string) (model.CommentPageData, error) {
 	var err error
 
 	board := model.Board{}
@@ -87,7 +87,7 @@ func GetCommentsList(boardCode string, contentIdx int, queries map[string]string
 	commentOptions.Page = null.IntFrom(-1)
 	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
 
-	comments, err := crud.GetComments(board, contentIdx, commentOptions)
+	comments, err := crud.GetComments(board, contentIDX, commentOptions)
 	if err != nil {
 		return model.CommentPageData{}, err
 	}

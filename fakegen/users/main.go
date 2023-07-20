@@ -1,4 +1,4 @@
-package main // import "fake-users"
+package main // import "fakegen-users"
 
 import (
 	"bytes"

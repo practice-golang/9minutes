@@ -14,6 +14,7 @@ import (
 	"9minutes/wsock"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html/v2"
 
@@ -237,6 +238,7 @@ func setupRouter() {
 	}
 	app = fiber.New(cfg)
 	app.Use(recover.New())
+	app.Use(cors.New())
 
 	setApiAdmin(app)    // API Admin
 	setApiBoard(app)    // API Board

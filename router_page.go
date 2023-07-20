@@ -7,5 +7,6 @@ import (
 )
 
 func setPage(a *fiber.App) {
+	// a.Get("/board/:board_code", handler.HandleHTML)
 	a.Get("/*", handler.HandleHTML)
 }

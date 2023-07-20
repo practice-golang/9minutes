@@ -1,4 +1,4 @@
-module fake-boards
+module fakegen-boards
 
 go 1.20
 

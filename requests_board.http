@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=c95f9624-c67c-4093-9e9f-339d5c2761af; 
+@cookie = session_id=07bea9a9-be09-43c7-8905-0d8d0afc7bfa;
 
 
 ### Login
@@ -34,7 +34,7 @@ GET {{uri}}/api/board/misc/content/4 HTTP/1.1
 Cookie: {{cookie}}
 
 ### Content - Update
-PUT {{uri}}/api/board/content/misc/1 HTTP/1.1
+PUT {{uri}}/api/board/misc/content/1 HTTP/1.1
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -79,5 +79,5 @@ POST {{uri}}/api/board/misc/4/comment HTTP/1.1
 Content-Type: application/json
 
 {
-    "content": "Nice to meet you & <^-^>'"
+    "content": "This is a comment! Nice to meet you & <^-^>'"
 }

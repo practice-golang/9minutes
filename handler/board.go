@@ -12,8 +12,8 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// GetBoards - API Get boards list
-func GetBoards(c *fiber.Ctx) error {
+// GetBoardsAPI - API Get boards list
+func GetBoardsAPI(c *fiber.Ctx) error {
 	queries := c.Queries()
 
 	listingOptions := model.BoardListingOptions{}
@@ -64,8 +64,8 @@ func GetBoards(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-// AddBoard - Add board
-func AddBoard(c *fiber.Ctx) error {
+// AddBoardAPI - Add board
+func AddBoardAPI(c *fiber.Ctx) error {
 	var board model.Board
 
 	err := c.BodyParser(&board)
@@ -95,7 +95,7 @@ func AddBoard(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateBoard(c *fiber.Ctx) error {
+func UpdateBoardAPI(c *fiber.Ctx) error {
 	var err error
 
 	boardDatas := []map[string]interface{}{}
@@ -177,7 +177,7 @@ func UpdateBoard(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteBoard(c *fiber.Ctx) error {
+func DeleteBoardAPI(c *fiber.Ctx) error {
 	boardDatas := []map[string]interface{}{}
 	boardDatasSuccess := []map[string]interface{}{}
 	boardDatasFailed := []map[string]interface{}{}

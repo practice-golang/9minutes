@@ -26,26 +26,26 @@ func setApiAdmin(a *fiber.App) {
 	/* API Admin */
 	gadmin := a.Group("/api/admin")
 	gadmin.Use(checkAdmin)
-	gadmin.Get("/health", handler.HealthCheck)
+	gadmin.Get("/health", handler.HealthCheckAPI)
 
 	/* API Admin - User fileds */
 	gauserfield := gadmin.Group("/user-columns") // required add auth middleware
-	gauserfield.Get("/", handler.GetUserColumns)
-	gauserfield.Post("/", handler.AddUserColumn)
-	gauserfield.Put("/", handler.UpdateUserColumns)
-	gauserfield.Delete("/", handler.DeleteUserColumns)
+	gauserfield.Get("/", handler.GetUserColumnsAPI)
+	gauserfield.Post("/", handler.AddUserColumnAPI)
+	gauserfield.Put("/", handler.UpdateUserColumnsAPI)
+	gauserfield.Delete("/", handler.DeleteUserColumnsAPI)
 
 	/* API Admin - Users */
 	gauser := gadmin.Group("/user") // required add auth middleware
-	gauser.Get("/", handler.GetUserList)
-	gauser.Post("/", handler.AddUser)
-	gauser.Put("/", handler.UpdateUser)
-	gauser.Delete("/", handler.DeleteUser)
+	gauser.Get("/", handler.GetUserListAPI)
+	gauser.Post("/", handler.AddUserAPI)
+	gauser.Put("/", handler.UpdateUserAPI)
+	gauser.Delete("/", handler.DeleteUserAPI)
 
 	/* API Admin - Boards */
 	gaboard := gadmin.Group("/board") // required add auth middleware
-	gaboard.Get("/", handler.GetBoards)
-	gaboard.Post("/", handler.AddBoard)
-	gaboard.Put("/", handler.UpdateBoard)
-	gaboard.Delete("/", handler.DeleteBoard)
+	gaboard.Get("/", handler.GetBoardsAPI)
+	gaboard.Post("/", handler.AddBoardAPI)
+	gaboard.Put("/", handler.UpdateBoardAPI)
+	gaboard.Delete("/", handler.DeleteBoardAPI)
 }
