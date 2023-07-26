@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"log"
 	"net/http"
 	"strconv"
@@ -80,14 +81,25 @@ func HandleHTML(c *fiber.Ctx) error {
 				page = "1"
 			}
 
-			// list, err := GetContentsList(boardCode, queries)
-			// if err != nil {
-			// 	return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-			// }
+			list, err := GetContentsList(boardCode, queries)
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+			}
 
-			// log.Println("board HTML:", list)
+			templateMap["BoardCode"] = boardCode
+			templateMap["BoardList"] = list
 
-			name = "board/index"
+		case "board/read":
+			boardCode := queries["board_code"]
+			idx := queries["idx"]
+
+			content, err := GetContentData(boardCode, idx)
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			}
+			content.Content = null.StringFrom(html.UnescapeString(content.Content.String))
+			templateMap["Content"] = content
+
 		case "board/write":
 			name = "board/index"
 		}
@@ -124,11 +136,8 @@ func ListContentAPI(c *fiber.Ctx) (err error) {
 func ReadContentAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	idx := c.Params("idx")
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(err.Error())
-	}
 
-	content, err := GetContentData(boardCode, idx, queries)
+	content, err := GetContentData(boardCode, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

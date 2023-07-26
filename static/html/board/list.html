@@ -1,0 +1,28 @@
+{{template "board/include/header" .}}
+
+<div>
+    Title: {{.Title}}
+</div>
+
+<div>
+    Content list
+
+    <table>
+        <tbody>
+            {{range .BoardList.ContentList}}
+            <tr>
+                <td>{{.Idx.Int64}}</td>
+                <td>
+                    <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
+                        {{.Title.String}}
+                    </a>
+                </td>
+                <td>{{.CommentCount.String}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+</div>
+
+{{template "board/include/footer" .}}

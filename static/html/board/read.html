@@ -1,0 +1,25 @@
+{{template "board/include/header" .}}
+
+<div>
+    Title: {{.Title}}
+</div>
+
+<div>
+    Read content
+
+    <div>
+        {{.Content.Idx.Int64}}
+    </div>
+    {{.Content.Title.String}}
+    {{.Content.TitleImage.String}}
+    {{.Content.Content.String}}
+    {{.Content.AuthorIdx.Int64}}
+    {{.Content.AuthorName.String}}
+    {{.Content.Files.String}}
+    {{.Content.Images.String}}
+    {{.Content.Views.Int64}}
+    {{.Content.RegDate.String}}
+
+</div>
+
+{{template "board/include/footer" .}}

@@ -8,11 +8,6 @@ import (
 func setStaticFiles(a *fiber.App) {
 	a.Static("/favicon.png", HtmlPath+"/favicon.png")
 	a.Static("/files", FilesPath)
-}
-
-// setStaticAssets - Set static js, css
-func setStaticAssets(a *fiber.App) {
 	a.Static("/assets/", HtmlPath+"/assets")
 	a.Static("/admin/_app/", HtmlPath+"/admin/_app")
-	a.Static("/board/_app/", HtmlPath+"/board/_app")
 }

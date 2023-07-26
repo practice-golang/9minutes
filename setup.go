@@ -245,9 +245,8 @@ func setupRouter() {
 	setApiUploader(app) // API Uploader
 	setAPIs(app)        // API
 
-	setStaticFiles(app)  // Files
-	setStaticAssets(app) // Assets
-	setPage(app)         // HTML templates
+	setStaticFiles(app) // Files, Assets
+	setPage(app)        // HTML templates
 }
 
 func doSetup() {

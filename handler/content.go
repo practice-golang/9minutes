@@ -44,7 +44,7 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 	return list, err
 }
 
-func GetContentData(boardCode, idx string, queries map[string]string) (model.Content, error) {
+func GetContentData(boardCode, idx string) (model.Content, error) {
 	var err error
 
 	board := model.Board{BoardCode: null.StringFrom(boardCode)}
