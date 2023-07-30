@@ -3,7 +3,6 @@ module 9minutes
 go 1.18
 
 require (
-	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/blockloop/scan v1.3.0
 	github.com/c2fo/testify v0.0.0-20150827203832-fba96363964a
 	github.com/denisenkom/go-mssqldb v0.12.3
