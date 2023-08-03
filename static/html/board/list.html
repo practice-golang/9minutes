@@ -23,6 +23,21 @@
         </tbody>
     </table>
 
+    <div>
+        <a href="?board_code={{.BoardCode}}">&laquo;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpPrev}}">&lt;</a>
+
+        {{range .BoardList.PageList}}
+        {{if eq . $.BoardList.CurrentPage}}
+        <b>{{.}}</b>
+        {{else}}
+        <a href="?board_code={{$.BoardCode}}&page={{.}}">{{.}}</a>
+        {{end}}
+        {{end}}
+
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpNext}}">&gt;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.TotalPage}}">&raquo;</a>
+    </div>
 </div>
 
 {{template "board/include/footer" .}}

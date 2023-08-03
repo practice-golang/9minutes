@@ -41,6 +41,27 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 
 	list, err := crud.GetContentList(board, listingOptions)
 
+	pageList := []int{}
+	pageShowGap := 2
+	for i := list.CurrentPage - pageShowGap; i <= list.CurrentPage+pageShowGap; i++ {
+		if i > 0 && i <= list.CurrentPage+pageShowGap && i <= list.TotalPage {
+			pageList = append(pageList, i)
+		}
+	}
+	list.PageList = pageList
+
+	pageJumpGap := 5
+	list.JumpPrev = list.CurrentPage - pageJumpGap
+	list.JumpNext = list.CurrentPage + pageJumpGap
+	if list.JumpPrev < 1 {
+		list.JumpPrev = 1
+	}
+	if list.JumpNext > list.TotalPage {
+		list.JumpNext = list.TotalPage
+	}
+
+	list.BoardCode = board.BoardCode.String
+
 	return list, err
 }
 
