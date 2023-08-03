@@ -60,8 +60,6 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 		list.JumpNext = list.TotalPage
 	}
 
-	list.BoardCode = board.BoardCode.String
-
 	return list, err
 }
 

@@ -13,13 +13,14 @@ type ContentListingOptions struct {
 
 // ContentPageData - Contents list
 type ContentPageData struct {
-	BoardCode   string        `json:"board-code"`
-	ContentList []ContentList `json:"content-list"`
-	PageList    []int         `json:"page-list"`
-	TotalPage   int           `json:"total-page"`
-	CurrentPage int           `json:"current-page"`
-	JumpPrev    int           `json:"jump-prev"`
-	JumpNext    int           `json:"jump-next"`
+	BoardCode     string        `json:"board-code"`
+	SearchKeyword string        `json:"search-keyword"`
+	ContentList   []ContentList `json:"content-list"`
+	PageList      []int         `json:"page-list"`
+	TotalPage     int           `json:"total-page"`
+	CurrentPage   int           `json:"current-page"`
+	JumpPrev      int           `json:"jump-prev"`
+	JumpNext      int           `json:"jump-next"`
 }
 
 type ContentList struct {

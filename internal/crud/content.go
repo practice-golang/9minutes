@@ -98,9 +98,11 @@ func GetContentList(board model.Board, options model.ContentListingOptions) (mod
 	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
 
 	result = model.ContentPageData{
-		ContentList: list,
-		CurrentPage: int(options.Page.Int64) + 1,
-		TotalPage:   int(totalPage),
+		BoardCode:     board.BoardCode.String,
+		SearchKeyword: options.Search.String,
+		ContentList:   list,
+		CurrentPage:   int(options.Page.Int64) + 1,
+		TotalPage:     int(totalPage),
 	}
 
 	return result, err

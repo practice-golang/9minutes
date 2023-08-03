@@ -5,6 +5,12 @@
 </div>
 
 <div>
+    Search:
+    <input onkeyup="doSearch()" type="text" name="search" value="{{.BoardList.SearchKeyword}}" placeholder="Search keyword" />
+    <button onclick="doSearch()" type="button">🔍</button>
+</div>
+
+<div>
     Content list
 
     <table>
@@ -24,20 +30,43 @@
     </table>
 
     <div>
-        <a href="?board_code={{.BoardCode}}">&laquo;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpPrev}}">&lt;</a>
+        <a href="?board_code={{.BoardCode}}&search={{.BoardList.SearchKeyword}}">&laquo;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpPrev}}&search={{.BoardList.SearchKeyword}}">&lt;</a>
 
         {{range .BoardList.PageList}}
         {{if eq . $.BoardList.CurrentPage}}
         <b>{{.}}</b>
         {{else}}
-        <a href="?board_code={{$.BoardCode}}&page={{.}}">{{.}}</a>
+        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.BoardList.SearchKeyword}}">{{.}}</a>
         {{end}}
         {{end}}
 
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpNext}}">&gt;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.TotalPage}}">&raquo;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpNext}}&search={{.BoardList.SearchKeyword}}">&gt;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.BoardList.TotalPage}}&search={{.BoardList.SearchKeyword}}">&raquo;</a>
     </div>
 </div>
+
+<script>
+    const boardCode = "{{.BoardCode}}"
+
+    function doSearch() {
+        switch (globalThis.event.type) {
+            case "keyup":
+                if (globalThis.event.code != "Enter") { return false }
+                break
+        }
+
+        let params = `?board_code=${boardCode}`
+        const keyword = document.querySelector("input[name=search]").value
+        if (keyword == "") {
+            const search = new URLSearchParams(globalThis.location.search).get("search")
+            if (search == null || search == "") { return false }
+        } else {
+            params += `&search=${keyword}`
+        }
+
+        location.href = params
+    }
+</script>
 
 {{template "board/include/footer" .}}
