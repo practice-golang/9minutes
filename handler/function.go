@@ -33,6 +33,60 @@ func HelloParam(c *fiber.Ctx) error {
 	}
 }
 
+func HandleBoardHTML(c *fiber.Ctx) error {
+	name := strings.TrimSuffix(c.Path()[1:], "/")
+	queries := c.Queries()
+	templateMap := fiber.Map{}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := ""
+	useridInterface := sess.Get("userid")
+	if useridInterface != nil {
+		userid = useridInterface.(string)
+	}
+	grade := ""
+	gradeInterface := sess.Get("grade")
+	if gradeInterface != nil {
+		grade = gradeInterface.(string)
+	}
+
+	templateMap["Title"] = "9minutes"
+	templateMap["UserId"] = userid
+	templateMap["Grade"] = grade
+
+	boardCode := queries["board_code"]
+	page := queries["page"]
+
+	if boardCode == "" {
+		return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
+	}
+	if page == "" {
+		page = "1"
+	}
+
+	list, err := GetContentsList(boardCode, queries)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	templateMap["BoardCode"] = boardCode
+	templateMap["BoardList"] = list
+
+	err = c.Render(name, templateMap)
+	if err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			return c.Status(http.StatusNotFound).SendString("Page not Found")
+		}
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return nil
+}
+
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
 	name := strings.TrimSuffix(c.Path()[1:], "/")
@@ -70,25 +124,6 @@ func HandleHTML(c *fiber.Ctx) error {
 		switch name {
 		case "board":
 			name = "board/index"
-		case "board/list":
-			boardCode := queries["board_code"]
-			page := queries["page"]
-
-			if boardCode == "" {
-				return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
-			}
-			if page == "" {
-				page = "1"
-			}
-
-			list, err := GetContentsList(boardCode, queries)
-			if err != nil {
-				return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-			}
-
-			templateMap["BoardCode"] = boardCode
-			templateMap["BoardList"] = list
-
 		case "board/read":
 			boardCode := queries["board_code"]
 			idx := queries["idx"]
