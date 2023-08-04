@@ -12,6 +12,9 @@ Origin: {{uri}}
     "password": "admin"
 }
 
+### Board list
+GET {{uri}}/api/board
+
 ### Content - Write
 POST {{uri}}/api/board/misc/content HTTP/1.1
 Content-Type: application/json
