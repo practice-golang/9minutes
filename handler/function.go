@@ -192,19 +192,6 @@ func BoardListAPI(c *fiber.Ctx) (err error) {
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
-	boardList := result.BoardList
-
-	// catalog 작업전까지 일단 무시
-	if len(boardList) > 0 {
-		var fields model.Field
-		if boardList[0].Fields != nil {
-			err = json.Unmarshal(boardList[0].Fields.([]byte), &fields)
-			if err != nil {
-				return c.Status(http.StatusInternalServerError).SendString(err.Error())
-			}
-			boardList[0].Fields = fields
-		}
-	}
 
 	return c.Status(http.StatusOK).JSON(result)
 }
