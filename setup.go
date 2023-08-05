@@ -11,7 +11,6 @@ import (
 	"9minutes/internal/db"
 	"9minutes/internal/email"
 	"9minutes/model"
-	"9minutes/wsock"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -260,6 +259,4 @@ func doSetup() {
 	setupDB()
 	// setupKey()
 	setupRouter()
-
-	wsock.InitWebSocketChat()
 }

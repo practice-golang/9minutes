@@ -158,6 +158,57 @@ func HandleHTML(c *fiber.Ctx) error {
 	return nil
 }
 
+func BoardListAPI(c *fiber.Ctx) (err error) {
+	queries := c.Queries()
+
+	listingOptions := model.BoardListingOptions{}
+	listingOptions.Search = null.StringFrom(queries["search"])
+
+	listingOptions.Page = null.IntFrom(1)
+	listingOptions.ListCount = null.IntFrom(10)
+
+	if queries["page"] != "" {
+		page := queries["page"]
+		pageNum, err := strconv.Atoi(page)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
+		}
+
+		if queries["list-count"] != "" {
+			countPerPage, err := strconv.Atoi(queries["list-count"])
+			if err != nil {
+				return c.Status(http.StatusBadRequest).SendString(err.Error())
+			}
+
+			listingOptions.ListCount = null.IntFrom(int64(countPerPage))
+		}
+
+		listingOptions.Page = null.IntFrom(int64(pageNum))
+	}
+
+	listingOptions.Page.Int64--
+
+	result, err := crud.GetBoards(listingOptions)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+	boardList := result.BoardList
+
+	// catalog 작업전까지 일단 무시
+	if len(boardList) > 0 {
+		var fields model.Field
+		if boardList[0].Fields != nil {
+			err = json.Unmarshal(boardList[0].Fields.([]byte), &fields)
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			}
+			boardList[0].Fields = fields
+		}
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
 func ListContentAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	list, err := GetContentsList(boardCode, queries)

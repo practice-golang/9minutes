@@ -13,7 +13,7 @@ Origin: {{uri}}
 }
 
 ### Board list
-GET {{uri}}/api/board
+GET {{uri}}/api/board/list
 
 ### Content - Write
 POST {{uri}}/api/board/misc/content HTTP/1.1

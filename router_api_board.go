@@ -10,6 +10,9 @@ func setApiBoard(a *fiber.App) {
 	/* API Board */
 	gbrd := a.Group("/api/board") // Require add session middleware
 
+	/* API Board list */
+	gbrd.Get("/list", handler.BoardListAPI)
+
 	/* API Content */
 	gbrd.Get("/:board_code", handler.ListContentAPI)
 	gbrd.Get("/:board_code/content/:idx", handler.ReadContentAPI)
