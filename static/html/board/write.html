@@ -1,0 +1,274 @@
+{{template "board/include/header" .}}
+
+<div>
+    <label for="title-image-upload">Title Image:</label>
+    <input type="file" id="title-image-upload">
+    <button type="button" onclick="insertTitleImage()">Upload title image</button>
+</div>
+<div>
+    <label for="image-upload">Image:</label>
+    <input type="file" id="image-upload" multiple>
+    <button type="button" onclick="insertImage()">Upload</button>
+</div>
+<div>
+    <label for="file-upload">File:</label>
+    <input type="file" id="file-upload" multiple>
+    <button type="button" onclick="insertFile()">Upload</button>
+</div>
+
+<div>
+    <input type="hidden" id="title-image" placeholder="Title Image">
+    <input type="text" id="title" placeholder="Title">
+</div>
+
+<div id="editor"></div>
+<div>
+    <button type="button" onclick="moveToList()">Cancel</button>
+    <button type="button" onclick="writeContent()">Save</button>
+</div>
+
+<div id="filelist-container">
+    <ul lr-loop="filelist">
+        <li>
+            <span lr-if="deletelist[$index] == undefined">
+                {{.filename}}
+                <button lr-click="setFileToDelete($index)">X</button>
+            </span>
+            <span lr-if="deletelist[$index] != undefined">
+                <s>{{.filename}}</s>
+                <button lr-click="unsetFileFromDelete($index)">Undo</button>
+            </span>
+        </li>
+    </ul>
+</div>
+
+<link rel="stylesheet" href="/assets/css/editor.css">
+<script>"use strict"</script>
+<script src="/assets/js/myeditor.js"></script>
+
+<script>
+    let statusWriteContent = false
+    const data = ``
+    const url = new URL(window.location.href)
+    const urlParams = url.searchParams
+    let titleImage = ""
+    const filelist = new Array()
+    const storelist = new Array()
+    const deletelist = {}
+
+    const options = {
+        uploadFileActionURI: "/api/uploader/file",
+        uploadImageActionURI: "/api/uploader/image",
+        uploadAccessURI: "/upload",
+    }
+    const editorEL = document.querySelector("#editor")
+    const editor = new MyEditor(data, editorEL, options)
+
+    async function insertFile() {
+        const uploadURI = options.uploadFileActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#file-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+            if (r.ok) {
+                const result = await r.json()
+
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
+                lrFileList.reload()
+            }
+        }
+
+        document.querySelector("#file-upload").value = ""
+    }
+
+    async function insertImage() {
+        const uploadURI = options.uploadImageActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#image-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+
+            if (r.ok) {
+                const result = await r.json()
+
+                editor.insertImage(`${accessURI}/${result.storename}`)
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
+                lrFileList.reload()
+            }
+        }
+
+        document.querySelector("#image-upload").value = ""
+    }
+
+    async function insertTitleImage() {
+        const uploadURI = options.uploadImageActionURI
+        const accessURI = options.uploadAccessURI
+
+        const files = document.querySelector("#title-image-upload").files
+        for (const file of files) {
+            if (file == undefined) {
+                return
+            } // Selected nothing
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const r = await fetch(uploadURI, {
+                method: 'POST',
+                body: formData
+            })
+            if (r.ok) {
+                const result = await r.json()
+
+                titleImage = `${accessURI}/${result.storename}`
+
+                filelist.push({ "filename": result.filename })
+                storelist.push({ "filename": result.filename + "/" + result.storename })
+                lrFileList.reload()
+            }
+        }
+
+        document.querySelector("#title-image-upload").value = ""
+    }
+
+    function setFileToDelete(idx) {
+        const names = storelist[idx].filename.split("/")
+        deletelist[idx] = { "filename": names[0], "storename": names[1] }
+
+        lrFileList.reload()
+    }
+
+    function unsetFileFromDelete(idx) {
+        delete deletelist[idx]
+
+        lrFileList.reload()
+    }
+
+    async function writeContent() {
+        statusWriteContent = true
+
+        for (const idx in storelist) {
+            for (const j in deletelist) {
+                if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
+                    storelist.splice(idx, 1)
+                }
+            }
+        }
+        const storeListArray = storelist.map(file => { return file.filename })
+        const storeListString = storeListArray.join("?")
+
+        const data = {
+            "title": document.querySelector("#title").value,
+            "title-image": titleImage,
+            "content": editor.getHTML(),
+            "files": storeListString
+        }
+
+        const r = await fetch("/api/board/content/$CODE$", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            const result = await r.json()
+            if (result.result == "success") {
+                await deleteNotUploaded()
+                moveToList()
+            } else {
+                alert("Writing failed")
+                statusWriteContent = false
+            }
+        } else {
+            alert("Server error")
+            statusWriteContent = false
+        }
+
+        return false
+    }
+
+    function moveToList() {
+        location.href = "/board?code=" + urlParams.get("code")
+    }
+
+    async function deleteNotUploaded() {
+        const deleteFiles = Object.values(deletelist)
+        const data = { "board-idx": "-1", "post-idx": "-1", "delete-files": deleteFiles }
+
+        const r = await fetch("/api/uploader/file", {
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+    }
+
+    async function cancelProcess() {
+        if (statusWriteContent) { return false }
+
+        const deleteFiles = new Array()
+        for (const i in storelist) {
+            const files = storelist[i].filename.split("/")
+            const deleteFile = { "filename": files[0], "storename": files[1] }
+            deleteFiles.push(deleteFile)
+        }
+
+        const data = { "board-idx": "-1", "post-idx": "-1", "delete-files": deleteFiles }
+
+        const r = await fetch("/api/uploader/file", {
+            method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+    }
+
+    window.onbeforeunload = () => { cancelProcess() }
+
+
+    const lrFileList = new ListRenderer(document.querySelector("#filelist-container"))
+    lrFileList.render()
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /*
+     Need js for custom resize handle??? :
+     https://spin.atomicobject.com/2019/11/21/creating-a-resizable-html-element
+     */
+    #editor {
+        resize: vertical;
+        overflow: auto;
+
+        border: 1px solid silver;
+        height: 50vh;
+    }
+</style>
+
+{{template "board/include/footer" .}}

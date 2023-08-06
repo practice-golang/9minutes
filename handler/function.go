@@ -136,7 +136,7 @@ func HandleHTML(c *fiber.Ctx) error {
 			templateMap["Content"] = content
 
 		case "board/write":
-			name = "board/index"
+			name = "board/write"
 		}
 	case strings.HasPrefix(name, "admin"):
 		if userid == "" {
