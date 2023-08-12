@@ -4,21 +4,14 @@
 <script src="/assets/js/toastui-editor-all.min.js"></script>
 
 <div>
-    <label for="file-upload">File:</label>
-    <input type="file" id="file-upload" multiple>
-    <button type="button" onclick="insertFile()">Upload</button>
-</div>
-
-<div>
-    <input type="hidden" id="title-image" placeholder="Title Image">
     <input type="text" id="title" placeholder="Title">
 </div>
 
 <div id="editor"></div>
 
 <div>
-    <button type="button" onclick="moveToList()">Cancel</button>
-    <button type="button" onclick="writeContent()">Save</button>
+    <input type="file" id="upload-files" multiple />
+    <button type="button" onclick="uploadFile()">Upload</button>
 </div>
 
 <div id="filelist-container">
@@ -34,6 +27,11 @@
             </span>
         </li>
     </ul>
+</div>
+
+<div>
+    <button type="button" onclick="moveToList()">Cancel</button>
+    <button type="button" onclick="writeContent()">Save</button>
 </div>
 
 <script>
@@ -79,6 +77,39 @@
         }
     }
 
+    async function uploadFile() {
+        const files = document.querySelector("#upload-files").files
+
+        const formData = new FormData()
+        for (const blob of Array.from(files)) {
+            formData.append("upload-files", blob)
+        }
+
+        const uri = "/api/uploader"
+        const r = await fetch(uri, {
+            method: "POST",
+            body: formData
+        })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#filelist-container > ul")
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+            })
+        }
+    }
+
     async function deleteFile(idx, storagename) {
         const data = [{ "idx": parseInt(idx) }]
         const uri = "/api/uploader"
@@ -92,16 +123,17 @@
         if (r.ok) {
             document.querySelector(`#file-${idx}`).remove()
 
-            const imgTags = document.querySelectorAll("img")
-            imgTags.forEach((img) => {
-                const fnames = img.src.split("/")
-                const fname = fnames[fnames.length - 1]
-                if (fname == storagename) {
-                    img.remove()
-                    return
-                }
-            })
-
+            if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                const imgTags = document.querySelectorAll("img")
+                imgTags.forEach((img) => {
+                    const fnames = img.src.split("/")
+                    const fname = fnames[fnames.length - 1]
+                    if (fname == storagename) {
+                        img.remove()
+                        return
+                    }
+                })
+            }
         } else {
             alert("Failed to delete file")
         }
