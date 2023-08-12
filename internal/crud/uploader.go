@@ -45,6 +45,43 @@ func GetUploadedFile(idx int) (model.StoredFileInfo, error) {
 	return finfo, nil
 }
 
+func GetUploadedFiles(idxes []int) ([]model.StoredFileInfo, error) {
+	finfo := model.StoredFileInfo{}
+	finfos := []model.StoredFileInfo{}
+
+	dbtype := db.GetDatabaseTypeString()
+	tableName := db.GetFullTableName(db.Info.UploadTable)
+	column := np.CreateString(finfo, dbtype, "", false)
+
+	var indices []map[string]interface{}
+	for _, idx := range idxes {
+		indices = append(indices, map[string]interface{}{"IDX": idx})
+	}
+	where := np.CreateWhereString(indices, dbtype, "=", "OR", "", false)
+
+	sql := `
+	SELECT
+		` + column.Names + `
+	FROM ` + tableName +
+		where
+
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return finfos, err
+	}
+	defer r.Close()
+
+	err = scan.Rows(&finfos, r)
+	if err != nil {
+		return finfos, err
+	}
+	if len(finfos) == 0 {
+		return finfos, errors.New("no file found")
+	}
+
+	return finfos, nil
+}
+
 func AddUploadedFile(fileName, storageName string) (sql.Result, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)

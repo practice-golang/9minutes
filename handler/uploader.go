@@ -65,6 +65,43 @@ func UploadFile(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(resultMAP)
 }
 
+func FilesInfo(c *fiber.Ctx) (err error) {
+	type uploadIdx struct {
+		Idx null.Int `json:"idx" db:"IDX"`
+	}
+	var uploadIndices []uploadIdx
+
+	err = c.BodyParser(&uploadIndices)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
+	}
+
+	if len(uploadIndices) == 0 {
+		return c.Status(http.StatusBadRequest).Send([]byte("no files to delete"))
+	}
+
+	var indices []int
+	for _, u := range uploadIndices {
+		indices = append(indices, int(u.Idx.Int64))
+	}
+
+	var result = []fiber.Map{}
+	fdatas, err := crud.GetUploadedFiles(indices)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	for _, fdata := range fdatas {
+		result = append(result, fiber.Map{
+			"idx":         strconv.FormatInt(fdata.Idx.Int64, 10),
+			"filename":    fdata.FileName.String,
+			"storagename": fdata.StorageName.String,
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
 func DeleteFiles(c *fiber.Ctx) (err error) {
 	type uploadIdx struct {
 		Idx null.Int `json:"idx" db:"IDX"`

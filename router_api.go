@@ -25,6 +25,7 @@ func setApiUploader(r *fiber.App) {
 	/* API Uploader */
 	gupload := r.Group("/api/uploader") // Require add session middleware
 	gupload.Post("/", handler.UploadFile)
+	gupload.Post("/files-info", handler.FilesInfo)
 	gupload.Delete("/", handler.DeleteFiles)
 
 	// gu.POST(`/image$`, handler.UploadImage)

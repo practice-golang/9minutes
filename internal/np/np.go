@@ -180,20 +180,47 @@ func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) Colu
 
 // CreateWhereString - create string from struct, map
 func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue string, checkValid bool) (result string) {
-	created := CreateString(o, dbtype, skipValue, checkValid)
+	if reflect.TypeOf(o).Kind() == reflect.Slice {
+		switch objects := o.(type) {
+		case []map[string]interface{}:
+			for i, object := range objects {
+				created := CreateString(object, dbtype, skipValue, checkValid)
 
-	names := strings.Split(created.Names, ",")
-	values := strings.Split(created.Values, ",")
-	for i, name := range names {
-		value := values[i]
-		if opValue == "LIKE" {
-			value = value[0:1] + "%" + value[1:len(value)-1] + "%" + value[len(value)-1:]
+				names := strings.Split(created.Names, ",")
+				values := strings.Split(created.Values, ",")
+				for j, name := range names {
+					value := values[j]
+					if opValue == "LIKE" {
+						value = value[0:1] + "%" + value[1:len(value)-1] + "%" + value[len(value)-1:]
+					}
+
+					if i == 0 && j == 0 {
+						result += " WHERE " + name + " " + opValue + " " + value
+					} else {
+						result += " " + opCombine + " " + name + " " + opValue + " " + value
+					}
+				}
+			}
+		default:
+			// Todo - struct slice
+			log.Println("CreateWhereString - Unknown o type", objects)
 		}
+	} else {
+		created := CreateString(o, dbtype, skipValue, checkValid)
 
-		if i == 0 {
-			result += " WHERE " + name + " " + opValue + " " + value
-		} else {
-			result += " " + opCombine + " " + name + " " + opValue + " " + value
+		names := strings.Split(created.Names, ",")
+		values := strings.Split(created.Values, ",")
+		for i, name := range names {
+			value := values[i]
+			if opValue == "LIKE" {
+				value = value[0:1] + "%" + value[1:len(value)-1] + "%" + value[len(value)-1:]
+			}
+
+			if i == 0 {
+				result += " WHERE " + name + " " + opValue + " " + value
+			} else {
+				result += " " + opCombine + " " + name + " " + opValue + " " + value
+			}
 		}
 	}
 

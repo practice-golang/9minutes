@@ -64,6 +64,18 @@ Content-Type: image/jpg
 
 --FormDataBoundary7MA4YWxkTrZu0gW--
 
+
+### File - files info
+POST {{uri}}/api/uploader/files-info HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 8 },
+    { "idx": 9 }
+]
+
+
 ### File - Delete
 DELETE {{uri}}/api/uploader HTTP/1.1
 Content-Type: application/json
