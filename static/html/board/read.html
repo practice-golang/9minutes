@@ -5,11 +5,9 @@
 </div>
 
 <div>
-    Read content
-
-    <div>
+    <!-- <div>
         {{.Content.Idx.Int64}}
-    </div>
+    </div> -->
     {{.Content.Title.String}}
     {{.Content.TitleImage.String}}
     {{.Content.Content.String}}
@@ -19,7 +17,19 @@
     {{.Content.Images.String}}
     {{.Content.Views.Int64}}
     {{.Content.RegDate.String}}
-
 </div>
+
+<div>
+    <button type="button" onclick="backToList()">List</button>
+</div>
+
+<script>
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+
+    function backToList() {
+        location.href = `/board/list?board_code=${boardCode}`
+    }
+</script>
 
 {{template "board/include/footer" .}}

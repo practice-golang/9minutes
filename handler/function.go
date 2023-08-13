@@ -136,6 +136,12 @@ func HandleHTML(c *fiber.Ctx) error {
 			templateMap["Content"] = content
 
 		case "board/write":
+			boardCode := queries["board_code"]
+
+			if boardCode == "" {
+				return c.Status(http.StatusBadRequest).SendString("no board code")
+			}
+
 			name = "board/write"
 		}
 	case strings.HasPrefix(name, "admin"):

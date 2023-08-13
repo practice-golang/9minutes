@@ -16,7 +16,7 @@
 
 <div id="filelist-container">
     <ul>
-        <li>
+        <!-- <li>
             <span>
                 {{.filename}}
                 <button lr-click="setFileToDelete($index)">X</button>
@@ -25,17 +25,22 @@
                 <s>{{.filename}}</s>
                 <button lr-click="unsetFileFromDelete($index)">Undo</button>
             </span>
-        </li>
+        </li> -->
     </ul>
 </div>
 
 <div>
-    <button type="button" onclick="moveToList()">Cancel</button>
+    <button type="button" onclick="backToList()">Cancel</button>
     <button type="button" onclick="writeContent()">Save</button>
 </div>
 
 <script>
-    const content = "hello world"
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+
+    const initialContent = ""
+    const filesList = []
+
     const editor = new toastui.Editor({
         el: document.querySelector("#editor"),
         previewStyle: "tab",
@@ -43,7 +48,7 @@
         hideModeSwitch: true,
         height: "500px",
         hooks: { addImageBlobHook: onUploadImage },
-        initialValue: content
+        initialValue: initialContent
     })
 
     async function onUploadImage(blob, callback) {
@@ -73,6 +78,8 @@
                 li.appendChild(btn)
 
                 fcontainer.appendChild(li)
+
+                filesList.push(f)
             })
         }
     }
@@ -106,6 +113,8 @@
                 li.appendChild(btn)
 
                 fcontainer.appendChild(li)
+
+                filesList.push(f)
             })
         }
     }
@@ -122,6 +131,12 @@
 
         if (r.ok) {
             document.querySelector(`#file-${idx}`).remove()
+            for (const i in filesList) {
+                if (filesList[i].idx == idx && filesList[i].storagename == storagename) {
+                    filesList.splice(i, 1)
+                    break
+                }
+            }
 
             if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
                 const imgTags = document.querySelectorAll("img")
@@ -137,6 +152,43 @@
         } else {
             alert("Failed to delete file")
         }
+    }
+
+    async function writeContent() {
+        const uri = `/api/board/${boardCode}/content`
+
+        const title = document.querySelector("#title").value
+        const content = editor.getHTML()
+
+        let fileIndices = ""
+        for (const f of filesList) { fileIndices += `${f.idx}|` }
+        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
+
+        const data = {
+            "title": title,
+            "content": content,
+            "author-idx": 1,
+            "author-name": "admin",
+            "files": fileIndices
+        }
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            location.href = `/board/list?board_code=${boardCode}`
+        } else {
+            alert("Write failed")
+        }
+
+        return false
+    }
+
+    function backToList() {
+        location.href = `/board/list?board_code=${boardCode}`
     }
 </script>
 

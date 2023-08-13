@@ -5,7 +5,6 @@ import (
 	"9minutes/internal/crud"
 	"crypto/sha256"
 	"encoding/base64"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -29,11 +28,6 @@ func UploadFile(c *fiber.Ctx) (err error) {
 	}
 
 	fdatas := form.File["upload-files"]
-
-	for fiels, headers := range form.File {
-		log.Println("uploading file", fiels, headers)
-	}
-
 	for _, fdata := range fdatas {
 		fname := fdata.Filename
 
