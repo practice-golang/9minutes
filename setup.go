@@ -227,7 +227,7 @@ func setupDB() {
 
 func setupRouter() {
 	engine := html.New("./static/html", ".html")
-	engine.Debug(true)
+	// engine.Debug(true)
 	cfg := fiber.Config{
 		AppName:               "9minutes",
 		DisableStartupMessage: false,

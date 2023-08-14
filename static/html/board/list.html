@@ -20,8 +20,9 @@
                     <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
                         {{.Title.String}}
                     </a>
+                    [{{.CommentCount.String}}]
                 </td>
-                <td>{{.CommentCount.String}}</td>
+                <td>{{.Views.Int64}}</td>
             </tr>
             {{end}}
         </tbody>
@@ -49,7 +50,9 @@
 </div>
 
 <script>
-    const boardCode = "{{.BoardCode}}"
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+    // const boardCode = "{{.BoardCode}}"
 
     function doSearch() {
         switch (globalThis.event.type) {
