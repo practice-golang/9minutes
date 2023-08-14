@@ -15,7 +15,9 @@
         <span>{{.Content.Views.Int64}}</span>
     </div>
 
-    <div id="content"></div>
+    <div>
+        {{unescape .Content.Content.String}}
+    </div>
 
     <div>
         {{.Content.Files.String}}
@@ -36,10 +38,7 @@
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${contentIdx}` }
 
-    function init() {
-        document.querySelector("#content").innerHTML = "{{.Content.Content.String}}"
-
-    }
+    function init() { }
 
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>

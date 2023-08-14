@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
 
@@ -227,6 +228,10 @@ func setupDB() {
 
 func setupRouter() {
 	engine := html.New("./static/html", ".html")
+	engine.AddFunc("unescape", func(s string) template.HTML {
+		return template.HTML(s)
+	})
+
 	// engine.Debug(true)
 	cfg := fiber.Config{
 		AppName:               "9minutes",
