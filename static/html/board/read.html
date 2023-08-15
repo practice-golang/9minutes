@@ -19,8 +19,8 @@
         {{unescape .Content.Content.String}}
     </div>
 
-    <div>
-        {{.Content.Files.String}}
+    <div id="fileslist-container">
+        <ul></ul>
     </div>
 </div>
 
@@ -38,7 +38,37 @@
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${contentIdx}` }
 
-    function init() { }
+    async function getFilesInfo() {
+        const indexList = []
+        for (const fidx of fileIndices.split("|")) {
+            indexList.push({ idx: parseInt(fidx) })
+        }
+
+        const uri = "/api/uploader/files-info"
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(indexList)
+        })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.forEach((f) => {
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+
+                fcontainer.appendChild(li)
+            })
+        }
+    }
+
+    function init() {
+        getFilesInfo()
+    }
 
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>

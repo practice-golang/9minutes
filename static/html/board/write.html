@@ -14,7 +14,7 @@
     <button type="button" onclick="uploadFile()">Upload</button>
 </div>
 
-<div id="filelist-container">
+<div id="fileslist-container">
     <ul>
         <!-- <li>
             <span>
@@ -64,7 +64,7 @@
         if (r.ok) {
             const response = await r.json()
 
-            const fcontainer = document.querySelector("#filelist-container > ul")
+            const fcontainer = document.querySelector("#fileslist-container > ul")
             response.files.forEach((f) => {
                 callback(`/upload/${f.storagename}`, f.filename)
 
@@ -101,7 +101,7 @@
         if (r.ok) {
             const response = await r.json()
 
-            const fcontainer = document.querySelector("#filelist-container > ul")
+            const fcontainer = document.querySelector("#fileslist-container > ul")
             response.files.forEach((f) => {
                 const btn = document.createElement("button")
                 btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)

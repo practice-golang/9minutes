@@ -1,6 +1,8 @@
 # Todo
 
-* [ ] Change to go-fiber
+* [x] Change to go-fiber
+* [ ] Editor
+    * [ ] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
 * [ ] Move and clean up folders under static - admin, html, static..
 * [ ] Board list generation for menu items
 * [ ] Page, HTML - Use Svelte component

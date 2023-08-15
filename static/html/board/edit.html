@@ -1,288 +1,224 @@
-@INCLUDE@board/include/header.html
+{{template "board/include/header" .}}
+
+<link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
+<script src="/assets/js/toastui-editor-all.min.js"></script>
 
 <div>
-    <label for="image-upload">Image:</label>
-    <input type="file" id="image-upload" multiple>
-    <button type="button" onclick="insertImage()">Upload</button>
-
-</div>
-<div>
-    <label for="title-image-upload">Title Image:</label>
-    <input type="file" id="title-image-upload">
-    <button type="button" onclick="insertTitleImage()">Title image upload</button>
-</div>
-<div>
-    <label for="file-upload">File:</label>
-    <input type="file" id="file-upload" multiple>
-    <button type="button" onclick="insertFile()">Upload</button>
+    <input type="text" id="title" value="{{.Content.Title.String}}" placeholder="Title">
 </div>
 
-<div>
-    Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
-    Title image: $TITLE_IMAGE$
-</div>
 <div id="editor"></div>
+
 <div>
-    <button type="button" onclick="moveToList()">Cancel</button>
-    <button type="button" onclick="updateContent()">Update</button>
+    <input type="file" id="upload-files" multiple />
+    <button type="button" onclick="uploadFile()">Upload</button>
 </div>
 
-<div id="filelist-container">
-    <ul lr-loop="filelist">
-        <li>
-            <span lr-if="deletelist[$index] == undefined">
-                <a href="{{.link}}" target="_blank">{{.filename}}</a>
-                <button lr-click="setFileToDelete($index)">X</button>
-            </span>
-            <span lr-if="deletelist[$index] != undefined">
-                <s><a href="{{.link}}" target="_blank">{{.filename}}</a></s>
-                <button lr-click="unsetFileFromDelete($index)">Undo</button>
-            </span>
-        </li>
-    </ul>
+<div id="fileslist-container">
+    <ul></ul>
 </div>
 
-<link rel="stylesheet" href="/assets/css/editor.css">
-<script>"use strict"</script>
-<script src="/assets/js/myeditor.js"></script>
+<div>
+    <button type="button" onclick="backToList()">Cancel</button>
+    <button type="button" onclick="writeContent()">Save</button>
+</div>
 
 <script>
-    let statusWriteContent = false
-    let data = `$CONTENT$`;
-    const url = new URL(window.location.href)
-    const urlParams = url.searchParams
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+    const initialContent = "{{.Content.Content.String}}"
+    const fileIndices = "{{.Content.Files.String}}"
+    const filesList = []
 
-    const accessURI = "/upload"
+    function backToList() { location.href = `/board/list?board_code=${boardCode}` }
 
-    let titleImage = "$TITLE_IMAGE$"
+    const editor = new toastui.Editor({
+        el: document.querySelector("#editor"),
+        previewStyle: "tab",
+        initialEditType: "wysiwyg",
+        hideModeSwitch: true,
+        height: "500px",
+        hooks: { addImageBlobHook: onUploadImage },
+        initialValue: initialContent
+    })
 
-    const filelistString = "$FILE_LIST$"
-    const filelist = new Array()
-    const storelist = new Array()
-    const deletelist = {}
-    const appendlist = new Array()
+    async function onUploadImage(blob, callback) {
+        const formData = new FormData()
+        formData.append("upload-files", blob)
 
-    const options = {
-        uploadFileActionURI: "/api/uploader/file",
-        uploadImageActionURI: "/api/uploader/image",
-        uploadAccessURI: "/upload",
-    }
-    const editorEL = document.querySelector("#editor")
-    const editor = new MyEditor(data, editorEL, options)
+        const uri = "/api/uploader"
+        const r = await fetch(uri, {
+            method: "POST",
+            body: formData
+        })
 
-    async function insertFile() {
-        const uploadURI = options.uploadFileActionURI
-        const accessURI = options.uploadAccessURI
+        if (r.ok) {
+            const response = await r.json()
 
-        const files = document.querySelector("#file-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                callback(`/upload/${f.storagename}`, f.filename)
 
-            const formData = new FormData()
-            formData.append("file", file)
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
 
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                filesList.push(f)
             })
-            if (r.ok) {
-                const result = await r.json()
-
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
         }
-
-        document.querySelector("#file-upload").value = ""
     }
 
-    async function insertImage() {
-        const uploadURI = options.uploadImageActionURI
-        const accessURI = options.uploadAccessURI
+    async function uploadFile() {
+        const files = document.querySelector("#upload-files").files
 
-        const files = document.querySelector("#image-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
+        const formData = new FormData()
+        for (const blob of Array.from(files)) {
+            formData.append("upload-files", blob)
+        }
 
-            const formData = new FormData()
-            formData.append("file", file)
+        const uri = "/api/uploader"
+        const r = await fetch(uri, {
+            method: "POST",
+            body: formData
+        })
 
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                filesList.push(f)
             })
-            if (r.ok) {
-                const result = await r.json()
-
-                editor.insertImage(`${accessURI}/${result.storename}`)
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
         }
-
-        document.querySelector("#image-upload").value = ""
     }
 
-    async function insertTitleImage() {
-        const uploadURI = options.uploadImageActionURI
-        const accessURI = options.uploadAccessURI
+    async function deleteFile(idx, storagename) {
+        const data = [{ "idx": parseInt(idx) }]
+        const uri = "/api/uploader"
 
-        const files = document.querySelector("#title-image-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
-
-            const formData = new FormData()
-            formData.append("file", file)
-
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
-            })
-            if (r.ok) {
-                const result = await r.json()
-
-                titleImage = `${accessURI}/${result.storename}`
-
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
-        }
-
-        document.querySelector("#title-image-upload").value = ""
-    }
-
-    function setFileToDelete(idx) {
-        const names = storelist[idx].filename.split("/")
-        deletelist[idx] = { "filename": names[0], "storename": names[1] }
-
-        lrFileList.reload()
-    }
-
-    function unsetFileFromDelete(idx) {
-        delete deletelist[idx]
-
-        lrFileList.reload()
-    }
-
-    async function updateContent() {
-        statusWriteContent = true
-
-        for (const idx in storelist) {
-            for (const j in deletelist) {
-                if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
-                    storelist.splice(idx, 1)
-                }
-            }
-        }
-        const storeListArray = storelist.map(file => { return file.filename })
-        const storeListString = storeListArray.join("?")
-        const deleteFiles = Object.values(deletelist)
-
-        const data = {
-            "idx": urlParams.get("idx"),
-            "title": document.querySelector("#title").value,
-            "title-image": titleImage,
-            "content": editor.getHTML(),
-            "files": storeListString,
-            "delete-files": deleteFiles
-        }
-
-        const r = await fetch("/api/board/content/$CODE$/$IDX$", {
-            method: "PUT",
+        const r = await fetch(uri, {
+            method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
 
         if (r.ok) {
-            location.href = "/board/read.html?code=$CODE$&idx=$IDX$"
+            document.querySelector(`#file-${idx}`).remove()
+            for (const i in filesList) {
+                if (filesList[i].idx == idx && filesList[i].storagename == storagename) {
+                    filesList.splice(i, 1)
+                    break
+                }
+            }
+
+            if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                const imgTags = document.querySelectorAll("img")
+                imgTags.forEach((img) => {
+                    const fnames = img.src.split("/")
+                    const fname = fnames[fnames.length - 1]
+                    if (fname == storagename) {
+                        img.remove()
+                        return
+                    }
+                })
+            }
         } else {
-            alert("Server error")
-            statusWriteContent = false
+            alert("Failed to delete file")
+        }
+    }
+
+    async function writeContent() {
+        const uri = `/api/board/${boardCode}/content`
+
+        const title = document.querySelector("#title").value
+        const initialContent = editor.getHTML()
+        const filesList = []
+
+        let fileIndices = ""
+        for (const f of filesList) { fileIndices += `${f.idx}|` }
+        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
+
+        const data = {
+            "title": title,
+            "content": initialContent,
+            "author-idx": 1,
+            "author-name": "admin",
+            "files": fileIndices
+        }
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            location.href = `/board/list?board_code=${boardCode}`
+        } else {
+            alert("Write failed")
         }
 
         return false
     }
 
-    function moveToList() {
-        location.href = "/board?code=" + urlParams.get("code")
-        // history.back()
-    }
-
-    async function cancelProcess() {
-        if (statusWriteContent) { return false }
-
-        const deleteFiles = new Array()
-        for (const i in appendlist) {
-            const files = appendlist[i].filename.split("/")
-            const deleteFile = { "filename": files[0], "storename": files[1] }
-            deleteFiles.push(deleteFile)
+    async function getFilesInfo() {
+        const indexList = []
+        for (const fidx of fileIndices.split("|")) {
+            indexList.push({ idx: parseInt(fidx) })
         }
 
-        const data = { "board-idx": -1, "post-idx": -1, "delete-files": deleteFiles }
+        const uri = "/api/uploader/files-info"
 
-        const r = await fetch("/api/uploader/file", {
-            method: 'DELETE',
+        const r = await fetch(uri, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            body: JSON.stringify(indexList)
         })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+                filesList.push(f)
+            })
+        }
     }
 
-    window.onbeforeunload = () => { cancelProcess() }
 
-    for (const f of filelistString.split("?")) {
-        if (f == "") { continue }
-
-        storelist.push({ "filename": f })
-
-        const files = f.split("/")
-        filelist.push({
-            "storename": files[1],
-            "filename": files[0],
-            "link": accessURI + "/" + files[1]
-        })
+    function init() {
+        getFilesInfo()
     }
 
-
-    const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
-    lrFileList.render()
+    document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    /*
-     Need js for custom resize handle??? :
-     https://spin.atomicobject.com/2019/11/21/creating-a-resizable-html-element
-     */
-    #editor {
-        resize: vertical;
-        overflow: auto;
-
-        border: 1px solid silver;
-    }
-
-    #editor img {
-        max-width: 70vw;
-        overflow: auto;
-    }
-</style>
-
-@INCLUDE@board/include/footer.html
+{{template "board/include/footer" .}}

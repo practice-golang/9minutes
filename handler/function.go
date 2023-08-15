@@ -124,7 +124,7 @@ func HandleHTML(c *fiber.Ctx) error {
 		switch name {
 		case "board":
 			name = "board/index"
-		case "board/read":
+		case "board/read", "board/edit":
 			boardCode := queries["board_code"]
 			idx := queries["idx"]
 
