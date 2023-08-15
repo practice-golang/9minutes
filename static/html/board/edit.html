@@ -26,6 +26,7 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
+    const contentIdx = queries.get("idx")
     const initialContent = "{{.Content.Content.String}}"
     const fileIndices = "{{.Content.Files.String}}"
     const filesList = []
@@ -146,7 +147,7 @@
     }
 
     async function writeContent() {
-        const uri = `/api/board/${boardCode}/content`
+        const uri = `/api/board/${boardCode}/content/${contentIdx}`
 
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()
@@ -165,7 +166,7 @@
         }
 
         const r = await fetch(uri, {
-            method: "POST",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
