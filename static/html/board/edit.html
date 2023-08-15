@@ -28,7 +28,7 @@
     const boardCode = queries.get("board_code")
     const contentIdx = queries.get("idx")
     const initialContent = "{{.Content.Content.String}}"
-    const fileIndices = "{{.Content.Files.String}}"
+    let fileIndices = "{{.Content.Files.String}}"
     const filesList = []
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
@@ -151,17 +151,14 @@
 
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()
-        const filesList = []
 
-        let fileIndices = ""
+        fileIndices = ""
         for (const f of filesList) { fileIndices += `${f.idx}|` }
         if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
 
         const data = {
             "title": title,
             "content": initialContent,
-            "author-idx": 1,
-            "author-name": "admin",
             "files": fileIndices
         }
 

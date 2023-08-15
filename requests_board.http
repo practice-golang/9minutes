@@ -43,7 +43,8 @@ Cookie: {{cookie}}
 
 {
     "title": "My test #1",
-    "content": "Nice to meet you & <^-^>'"
+    "content": "Nice to meet you & <^-^>'",
+    "files": "81|82"
 }
 
 ### Content - Delete

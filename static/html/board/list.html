@@ -1,10 +1,6 @@
 {{template "board/include/header" .}}
 
 <div>
-    Title: {{.Title}}
-</div>
-
-<div>
     Search:
     <input onkeyup="doSearch()" type="text" name="search" value="{{.BoardList.SearchKeyword}}" placeholder="Search keyword" />
     <button onclick="doSearch()" type="button">🔍</button>

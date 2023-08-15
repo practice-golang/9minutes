@@ -303,10 +303,10 @@ func UpdateContentAPI(c *fiber.Ctx) (err error) {
 		if f == "" {
 			continue
 		}
-		files := strings.Split(f, "/")
+		fnames := strings.Split(f, "/")
 
-		filename := files[0]
-		storename := files[1]
+		filename := fnames[0]
+		storename := fnames[1]
 
 		crud.UpdateUploadedFile(board.Idx.Int64, content.Idx.Int64, filename, storename)
 	}
