@@ -94,6 +94,10 @@
         invalidateAll();
     }
 
+    function moveToListView(index) {
+        window.open("/board/list?board_code=" + boards[index]["board-code"], "_blank")
+    }
+
     function openEditBoard(index) {
         editINDEX = index;
         editBoard = {};
@@ -373,7 +377,12 @@
                     {/each}
 
                     <td>
-                        <button type="button" on:click={() => {alert("moveToListView(index)")}}>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                moveToListView(index);
+                            }}
+                        >
                             View
                         </button>
                         <button

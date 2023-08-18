@@ -32,7 +32,6 @@
         </tr>
     </thead>
     <tr id="add-board">
-        <!-- <td>&nbsp;</td> -->
         <td>&nbsp;</td>
         <td><input type="text" name="board-name" value="" placeholder="Board name" /></td>
         <td><input type="text" name="board-code" onchange="setTableNameByCode(this)" value="" placeholder="Board code" /></td>
@@ -187,11 +186,15 @@
         if (r.ok) { location.reload() }
     }
 
-    function moveToListView(index) { window.open("/board?code=" + boardsList[index]["board-code"], "_blank") }
+    function moveToListView(index) {
+        window.open("/board?code=" + boardsList[index]["board-code"], "_blank")
+    }
+
     function openEdit(idx) {
         boardEditIndex = idx
         lrBoardsList.reload()
     }
+
     function closeEdit(event) {
         boardEditIndex = -1
         lrBoardsList.reload()
