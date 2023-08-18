@@ -69,7 +69,7 @@ func HandleBoardHTML(c *fiber.Ctx) error {
 		page = "1"
 	}
 
-	list, err := GetContentsList(boardCode, queries)
+	list, err := GetPostingList(boardCode, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
@@ -129,12 +129,12 @@ func HandleHTML(c *fiber.Ctx) error {
 			boardCode := queries["board_code"]
 			idx := queries["idx"]
 
-			content, err := GetContentData(boardCode, idx)
+			posting, err := GetPostingData(boardCode, idx)
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
-			content.Content = null.StringFrom(html.UnescapeString(content.Content.String))
-			templateMap["Content"] = content
+			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
+			templateMap["Posting"] = posting
 
 		case "board/write":
 			boardCode := queries["board_code"]
@@ -203,9 +203,9 @@ func BoardListAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func ListContentAPI(c *fiber.Ctx) (err error) {
+func ListPostingAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	list, err := GetContentsList(boardCode, queries)
+	list, err := GetPostingList(boardCode, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -213,11 +213,11 @@ func ListContentAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(list)
 }
 
-func ReadContentAPI(c *fiber.Ctx) (err error) {
+func ReadPostingAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	idx := c.Params("idx")
 
-	content, err := GetContentData(boardCode, idx)
+	posting, err := GetPostingData(boardCode, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -228,20 +228,20 @@ func ReadContentAPI(c *fiber.Ctx) (err error) {
 	}
 
 	result := make(map[string]interface{})
-	result["content"] = content
+	result["posting"] = posting
 	result["comments"] = comments
 
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-// WriteContentAPI - Write content API
-func WriteContentAPI(c *fiber.Ctx) (err error) {
+// WritePostingAPI - Write posting API
+func WritePostingAPI(c *fiber.Ctx) (err error) {
 	board := model.Board{}
-	content := model.Content{}
+	posting := model.Posting{}
 
 	board.BoardCode = null.StringFrom(c.Params("board_code"))
 
-	err = c.BodyParser(&content)
+	err = c.BodyParser(&posting)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
@@ -252,10 +252,10 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 	}
 
 	now := time.Now().Format("20060102150405")
-	content.RegDate = null.StringFrom(now)
-	content.Views = null.IntFrom(0)
+	posting.RegDate = null.StringFrom(now)
+	posting.Views = null.IntFrom(0)
 
-	_, err = crud.WriteContent(board, content)
+	_, err = crud.WritePosting(board, posting)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -268,9 +268,9 @@ func WriteContentAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateContentAPI(c *fiber.Ctx) (err error) {
+func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 	var board model.Board
-	var content model.Content
+	var posting model.Posting
 	var deleteList model.FilesToDelete
 
 	board.BoardCode = null.StringFrom(c.Params("board_code"))
@@ -280,16 +280,16 @@ func UpdateContentAPI(c *fiber.Ctx) (err error) {
 	}
 
 	idx, _ := strconv.Atoi(c.Params("idx"))
-	content.Idx = null.IntFrom(int64(idx))
+	posting.Idx = null.IntFrom(int64(idx))
 
 	rbody := c.Body()
 
-	err = json.Unmarshal(rbody, &content)
+	err = json.Unmarshal(rbody, &posting)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = crud.UpdateContent(board, content, "update")
+	err = crud.UpdatePosting(board, posting, "update")
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -306,7 +306,7 @@ func UpdateContentAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteContentAPI(c *fiber.Ctx) error {
+func DeletePostingAPI(c *fiber.Ctx) error {
 	var board model.Board
 
 	board.BoardCode = null.StringFrom(c.Params("board_code"))
@@ -318,12 +318,12 @@ func DeleteContentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).SendString("Board was not found")
 	}
 
-	content, err := crud.GetContent(board, fmt.Sprint(idx))
+	posting, err := crud.GetPosting(board, fmt.Sprint(idx))
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Content was not found")
+		return c.Status(http.StatusNotFound).SendString("Posting was not found")
 	}
 
-	uploadIndices := strings.Split(content.Files.String, "|")
+	uploadIndices := strings.Split(posting.Files.String, "|")
 	for _, f := range uploadIndices {
 		if f == "" {
 			continue
@@ -347,7 +347,7 @@ func DeleteContentAPI(c *fiber.Ctx) error {
 		DeleteUploadFile(filepath)
 	}
 
-	err = crud.DeleteContent(board, fmt.Sprint(idx))
+	err = crud.DeletePosting(board, fmt.Sprint(idx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -366,12 +366,12 @@ func DeleteContentAPI(c *fiber.Ctx) error {
 
 func GetComments(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	contentIdx := c.Params("idx")
+	postingIdx := c.Params("idx")
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	comments, err := GetCommentsList(boardCode, contentIdx, queries)
+	comments, err := GetCommentsList(boardCode, postingIdx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -383,11 +383,11 @@ func WriteComment(c *fiber.Ctx) error {
 	board := model.Board{BoardCode: null.StringFrom(c.Params("board_code"))}
 	comment := model.Comment{}
 
-	contentIdx, err := strconv.ParseInt(c.Params("content_idx"), 0, 64)
+	postingIdx, err := strconv.ParseInt(c.Params("posting_idx"), 0, 64)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
-	comment.BoardIdx = null.IntFrom(contentIdx)
+	comment.BoardIdx = null.IntFrom(postingIdx)
 
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
@@ -411,8 +411,8 @@ func WriteComment(c *fiber.Ctx) error {
 		}
 	}
 
-	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))
-	if comment.Content.String == "" {
+	comment.Posting = null.StringFrom(bm.Sanitize(comment.Posting.String))
+	if comment.Posting.String == "" {
 		return c.Status(http.StatusBadRequest).SendString("comment is empty")
 	}
 

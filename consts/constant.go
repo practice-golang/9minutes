@@ -8,6 +8,15 @@ var (
 	TableUsers       string = "users"
 	TableUserColumns string = "user_fields"
 
+	UserGrades = []string{
+		"admin",
+		"manager",
+		"regular_user",
+		"pending_user",
+		"banned_user",
+		"guest",
+	}
+
 	/* Message */
 	MsgFailedToLogin   = `<html><script>alert('Failed to login');location.href="/login.html"</script></html>`
 	MsgForbidden       = `<html><script>location.href="/auth/logout"</script></html>`

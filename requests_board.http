@@ -15,8 +15,8 @@ Origin: {{uri}}
 ### Board list
 GET {{uri}}/api/board/list
 
-### Content - Write
-POST {{uri}}/api/board/misc/content HTTP/1.1
+### Posting - Write
+POST {{uri}}/api/board/misc/posting HTTP/1.1
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -28,16 +28,16 @@ Cookie: {{cookie}}
     "files": "1"
 }
 
-### Content - List
+### Posting - List
 GET {{uri}}/api/board/misc HTTP/1.1
 Cookie: {{cookie}}
 
-### Content - Read
-GET {{uri}}/api/board/misc/content/4 HTTP/1.1
+### Posting - Read
+GET {{uri}}/api/board/misc/posting/4 HTTP/1.1
 Cookie: {{cookie}}
 
-### Content - Update
-PUT {{uri}}/api/board/misc/content/1 HTTP/1.1
+### Posting - Update
+PUT {{uri}}/api/board/misc/posting/1 HTTP/1.1
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -47,8 +47,8 @@ Cookie: {{cookie}}
     "files": "81|82"
 }
 
-### Content - Delete
-DELETE {{uri}}/api/board/misc/content/1 HTTP/1.1
+### Posting - Delete
+DELETE {{uri}}/api/board/misc/posting/1 HTTP/1.1
 Cookie: {{cookie}}
 
 

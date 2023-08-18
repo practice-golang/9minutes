@@ -4,18 +4,18 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// ContentListingOptions - Search, page
-type ContentListingOptions struct {
+// PostingListingOptions - Search, page
+type PostingListingOptions struct {
 	Search    null.String
 	Page      null.Int
 	ListCount null.Int
 }
 
-// ContentPageData - Contents list
-type ContentPageData struct {
+// PostingPageData - Contents list
+type PostingPageData struct {
 	BoardCode     string        `json:"board-code"`
 	SearchKeyword string        `json:"search-keyword"`
-	ContentList   []ContentList `json:"content-list"`
+	PostingList   []PostingList `json:"posting-list"`
 	PageList      []int         `json:"page-list"`
 	TotalPage     int           `json:"total-page"`
 	CurrentPage   int           `json:"current-page"`
@@ -23,7 +23,7 @@ type ContentPageData struct {
 	JumpNext      int           `json:"jump-next"`
 }
 
-type ContentList struct {
+type PostingList struct {
 	Idx          null.Int    `json:"idx"           db:"IDX"           npskip:"insert, update"`
 	Title        null.String `json:"title"         db:"TITLE"`
 	TitleImage   null.String `json:"title-image"   db:"TITLE_IMAGE"`
@@ -34,7 +34,7 @@ type ContentList struct {
 	RegDate      null.String `json:"regdate"       db:"REGDATE"`
 }
 
-type Content struct {
+type Posting struct {
 	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update, viewcount"`
 	Title      null.String `json:"title"       db:"TITLE"       npskip:"viewcount"`
 	TitleImage null.String `json:"title-image" db:"TITLE_IMAGE" npskip:"viewcount"`
@@ -73,7 +73,7 @@ type CommentPageData struct {
 type Comment struct {
 	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update"`
 	BoardIdx   null.Int    `json:"board-idx"   db:"BOARD_IDX"`
-	Content    null.String `json:"content"     db:"CONTENT"`
+	Posting    null.String `json:"content"     db:"CONTENT"`
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read"`
 	Files      null.String `json:"files"       db:"FILES"`

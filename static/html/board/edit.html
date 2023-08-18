@@ -4,7 +4,7 @@
 <script src="/assets/js/toastui-editor-all.min.js"></script>
 
 <div>
-    <input type="text" id="title" value="{{.Content.Title.String}}" placeholder="Title">
+    <input type="text" id="title" value="{{.Posting.Title.String}}" placeholder="Title">
 </div>
 
 <div id="editor"></div>
@@ -20,18 +20,18 @@
 
 <div>
     <button type="button" onclick="backToList()">Cancel</button>
-    <button type="button" onclick="writeContent()">Save</button>
+    <button type="button" onclick="writePosting()">Save</button>
 </div>
 
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const contentIdx = queries.get("idx")
-    const initialContent = "{{.Content.Content.String}}"
-    let fileIndices = "{{.Content.Files.String}}"
+    const postingIdx = queries.get("idx")
+    const initialContent = "{{.Posting.Content.String}}"
+    let fileIndices = "{{.Posting.Files.String}}"
     const filesList = []
 
-    function backToList() { location.href = `/board/list?board_code=${boardCode}` }
+    function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${postingIdx}` }
 
     const editor = new toastui.Editor({
         el: document.querySelector("#editor"),
@@ -146,8 +146,8 @@
         }
     }
 
-    async function writeContent() {
-        const uri = `/api/board/${boardCode}/content/${contentIdx}`
+    async function writePosting() {
+        const uri = `/api/board/${boardCode}/posting/${postingIdx}`
 
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()

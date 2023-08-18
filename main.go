@@ -97,41 +97,6 @@ func firstRun() {
 	ListeningAddress = ListeningIP + ":" + ListeningPort
 }
 
-// func writeEmbedToDir(dir string) {
-// 	rootDir, err := Content.ReadDir(dir)
-// 	if err != nil {
-// 		fmt.Println("Error: ", err)
-// 		return
-// 	}
-
-// 	for _, f := range rootDir {
-// 		if dir+"/"+f.Name() == "html/admin" {
-// 			continue
-// 		}
-
-// 		if f.IsDir() {
-// 			os.MkdirAll(dir+"/"+f.Name(), os.ModePerm)
-// 			writeEmbedToDir(dir + "/" + f.Name())
-// 		} else {
-// 			sf, err := os.Create(dir + "/" + f.Name())
-// 			if err != nil {
-// 				log.Fatal("failed to create file for embedded html: ", err)
-// 			}
-// 			defer sf.Close()
-
-// 			ef, err := Content.ReadFile(dir + "/" + f.Name())
-// 			if err != nil {
-// 				log.Fatal("failed to read embedded html: ", err)
-// 			}
-
-// 			_, err = sf.Write(ef)
-// 			if err != nil {
-// 				log.Fatal("failed to write file from embedded html: ", err)
-// 			}
-// 		}
-// 	}
-// }
-
 func exportStaticEmbed() error {
 	exportPath := "."
 
@@ -174,54 +139,6 @@ func exportStaticEmbed() error {
 
 	return nil
 }
-
-// func exportStaticEmbedRecursive(fpath fs.FS, exportPath string, basePath string) error {
-// 	err := os.MkdirAll(exportPath, 0755)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = fs.WalkDir(fpath, basePath, func(path string, d fs.DirEntry, err error) error {
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		filePath := filepath.Join(exportPath, path)
-// 		if d.IsDir() {
-// 			// Create directory if it doesn't exist
-// 			err := os.MkdirAll(filePath, 0755)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		} else {
-// 			// Extract file
-// 			srcFile, err := fpath.Open(path)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			defer srcFile.Close()
-
-// 			dstFile, err := os.Create(filePath)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			defer dstFile.Close()
-
-// 			_, err = io.Copy(dstFile, srcFile)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 		return nil
-// 	})
-
-// 	return err
-// }
-
-// func exportStaticEmbed() error {
-// 	exportPath := "."
-// 	return exportStaticEmbedRecursive(Content, exportPath, "static")
-// }
 
 func main() {
 	if len(os.Args) > 1 {

@@ -1,11 +1,11 @@
 # Todo
 
 * [x] Change to go-fiber
+* [x] Admin - Use Svelte component for Page, HTML
+* [ ] Board list generation for menu items
 * [ ] Editor
     * [ ] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
 * [ ] Move and clean up folders under static - admin, html, static..
-* [ ] Board list generation for menu items
-* [ ] Page, HTML - Use Svelte component
 * [ ] Show/Edit default and custom column in mypage
 * [ ] Choose use or delete approval column
 * [ ] User list
@@ -16,7 +16,6 @@
     * [ ] files dump, migration - No idea yet
 * [ ] Make user column definitions move to up or down
 * [ ] Add content type in admin page - Page
-    * [ ] Rename board type to content type
 * [ ] Rearrange route paths
 
 * Waive

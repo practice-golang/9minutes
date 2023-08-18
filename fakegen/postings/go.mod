@@ -1,4 +1,4 @@
-module fake-contents
+module fake-posting
 
 go 1.20
 

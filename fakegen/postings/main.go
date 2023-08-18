@@ -1,4 +1,4 @@
-package main // import "fake-contents"
+package main // import "fake-posting"
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ type LoginData struct {
 	Password string `json:"password,omitempty"`
 }
 
-type ContentData struct {
+type PostingData struct {
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	AuthorIdx  int    `json:"author-idx"`
@@ -43,9 +43,9 @@ func getSession(uri string) (cookieSession string) {
 	return
 }
 
-func prepareContents(count int) (contents []ContentData) {
+func preparePostings(count int) (contents []PostingData) {
 	for i := 0; i < count; i++ {
-		content := ContentData{
+		content := PostingData{
 			Title:      gofakeit.LetterN(10),
 			Content:    gofakeit.LetterN(40),
 			AuthorIdx:  1,
@@ -59,7 +59,7 @@ func prepareContents(count int) (contents []ContentData) {
 	return contents
 }
 
-func writeContents(uri, sess string, content ContentData) {
+func writePostings(uri, sess string, content PostingData) {
 	contentsJSON, _ := json.Marshal(content)
 	buf := bytes.NewBuffer(contentsJSON)
 
@@ -84,11 +84,11 @@ func main() {
 	sess := getSession(uriLogin)
 
 	count := 30
-	contents := prepareContents(count)
+	contents := preparePostings(count)
 
-	uriWriteContent := "http://localhost:5525/api/board/misc/content"
+	uriWriteContent := "http://localhost:5525/api/board/misc/posting"
 
 	for _, c := range contents {
-		writeContents(uriWriteContent, sess, c)
+		writePostings(uriWriteContent, sess, c)
 	}
 }

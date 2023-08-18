@@ -2,21 +2,21 @@
 
 <div>
     <!-- <div>
-        {{.Content.Idx.Int64}}
+        {{.Posting.Idx.Int64}}
     </div> -->
 
     <div>
-        <span>{{.Content.Title.String}}</span>
+        <span>{{.Posting.Title.String}}</span>
     </div>
 
     <div>
-        <span>{{.Content.AuthorName.String}}</span> |
-        <span>{{.Content.RegDate.String}}</span> |
-        <span>{{.Content.Views.Int64}}</span>
+        <span>{{.Posting.AuthorName.String}}</span> |
+        <span>{{.Posting.RegDate.String}}</span> |
+        <span>{{.Posting.Views.Int64}}</span>
     </div>
 
     <div>
-        {{unescape .Content.Content.String}}
+        {{unescape .Posting.Content.String}}
     </div>
 
     <div id="fileslist-container">
@@ -27,19 +27,19 @@
 <div>
     <button type="button" onclick="backToList()">List</button>
     <button type="button" onclick="moveToEdit()">Edit</button>
-    <button type="button" onclick="deleteContent()">Delete</button>
+    <button type="button" onclick="deletePosting()">Delete</button>
 </div>
 
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const contentIdx = queries.get("idx")
-    const fileIndices = "{{.Content.Files.String}}"
+    const postingIdx = queries.get("idx")
+    const fileIndices = "{{.Posting.Files.String}}"
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
-    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${contentIdx}` }
-    async function deleteContent() {
-        const uri = `/api/board/${boardCode}/content/${contentIdx}`
+    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
+    async function deletePosting() {
+        const uri = `/api/board/${boardCode}/posting/${postingIdx}`
         const r = await fetch(uri, {
             method: "DELETE",
         })

@@ -31,7 +31,7 @@
 
 <div>
     <button type="button" onclick="backToList()">Cancel</button>
-    <button type="button" onclick="writeContent()">Save</button>
+    <button type="button" onclick="writePosting()">Save</button>
 </div>
 
 <script>
@@ -154,8 +154,8 @@
         }
     }
 
-    async function writeContent() {
-        const uri = `/api/board/${boardCode}/content`
+    async function writePosting() {
+        const uri = `/api/board/${boardCode}/posting`
 
         const title = document.querySelector("#title").value
         const content = editor.getHTML()

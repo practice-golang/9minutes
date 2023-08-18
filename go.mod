@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/blockloop/scan v1.3.0
-	github.com/c2fo/testify v0.0.0-20150827203832-fba96363964a
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/emersion/go-msgauth v0.6.6
 	github.com/go-sql-driver/mysql v1.7.1

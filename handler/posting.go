@@ -9,37 +9,37 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetContentsList(boardCODE string, queries map[string]string) (model.ContentPageData, error) {
+func GetPostingList(boardCODE string, queries map[string]string) (model.PostingPageData, error) {
 	var err error
 
 	board := model.Board{BoardCode: null.StringFrom(boardCODE)}
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
-		return model.ContentPageData{}, err
+		return model.PostingPageData{}, err
 	}
 
 	page := 1
-	count := config.ContentListCountPerPage
+	count := config.PostingListCountPerPage
 	if queries["page"] != "" {
 		page, err = strconv.Atoi(queries["page"])
 		if err != nil {
-			return model.ContentPageData{}, nil
+			return model.PostingPageData{}, nil
 		}
 	}
 	if queries["count"] != "" {
 		count, err = strconv.Atoi(queries["count"])
 		if err != nil {
-			return model.ContentPageData{}, nil
+			return model.PostingPageData{}, nil
 		}
 	}
 
-	listingOptions := model.ContentListingOptions{}
+	listingOptions := model.PostingListingOptions{}
 	listingOptions.Search = null.StringFrom(queries["search"])
 
 	listingOptions.Page = null.IntFrom(int64(page - 1))
 	listingOptions.ListCount = null.IntFrom(int64(count))
 
-	list, err := crud.GetContentList(board, listingOptions)
+	list, err := crud.GetPostingList(board, listingOptions)
 
 	pageList := []int{}
 	pageShowGap := 2
@@ -63,32 +63,32 @@ func GetContentsList(boardCODE string, queries map[string]string) (model.Content
 	return list, err
 }
 
-func GetContentData(boardCode, idx string) (model.Content, error) {
+func GetPostingData(boardCode, idx string) (model.Posting, error) {
 	var err error
 
 	board := model.Board{BoardCode: null.StringFrom(boardCode)}
-	content := model.Content{}
+	posting := model.Posting{}
 
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
-		return model.Content{}, err
+		return model.Posting{}, err
 	}
 
-	content, err = crud.GetContent(board, idx)
+	posting, err = crud.GetPosting(board, idx)
 	if err != nil {
-		return model.Content{}, err
+		return model.Posting{}, err
 	}
 
-	content.Views = null.IntFrom(content.Views.Int64 + 1)
-	err = crud.UpdateContent(board, content, "viewcount")
+	posting.Views = null.IntFrom(posting.Views.Int64 + 1)
+	err = crud.UpdatePosting(board, posting, "viewcount")
 	if err != nil {
-		return model.Content{}, err
+		return model.Posting{}, err
 	}
 
-	return content, nil
+	return posting, nil
 }
 
-func GetCommentsList(boardCode string, contentIDX string, queries map[string]string) (model.CommentPageData, error) {
+func GetCommentsList(boardCode string, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
 	var err error
 
 	board := model.Board{}
@@ -106,7 +106,7 @@ func GetCommentsList(boardCode string, contentIDX string, queries map[string]str
 	commentOptions.Page = null.IntFrom(-1)
 	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
 
-	comments, err := crud.GetComments(board, contentIDX, commentOptions)
+	comments, err := crud.GetComments(board, postingIDX, commentOptions)
 	if err != nil {
 		return model.CommentPageData{}, err
 	}
