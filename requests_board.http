@@ -48,7 +48,7 @@ Cookie: {{cookie}}
 }
 
 ### Content - Delete
-DELETE {{uri}}/api/board/content/misc/1 HTTP/1.1
+DELETE {{uri}}/api/board/misc/content/1 HTTP/1.1
 Cookie: {{cookie}}
 
 

@@ -27,6 +27,7 @@
 <div>
     <button type="button" onclick="backToList()">List</button>
     <button type="button" onclick="moveToEdit()">Edit</button>
+    <button type="button" onclick="deleteContent()">Delete</button>
 </div>
 
 <script>
@@ -37,6 +38,19 @@
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${contentIdx}` }
+    async function deleteContent() {
+        const uri = `/api/board/${boardCode}/content/${contentIdx}`
+        const r = await fetch(uri, {
+            method: "DELETE",
+        })
+
+        if (r.ok) {
+            alert("Deleted")
+            backToList()
+        }
+
+        return false
+    }
 
     async function getFilesInfo() {
         const indexList = []

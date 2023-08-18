@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"9minutes/config"
 	"9minutes/internal/crud"
 	"9minutes/model"
 
@@ -322,30 +323,29 @@ func DeleteContentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).SendString("Content was not found")
 	}
 
-	deleteFiles := strings.Split(content.Files.String, "?")
-	deleteList := model.FilesToDelete{}
-	for _, df := range deleteFiles {
-		if !strings.Contains(df, "/") {
+	uploadIndices := strings.Split(content.Files.String, "|")
+	for _, f := range uploadIndices {
+		if f == "" {
+			continue
+		}
+		fidx, err := strconv.Atoi(f)
+		if err != nil {
 			continue
 		}
 
-		deleteFile := model.File{}
+		fdata, err := crud.GetUploadedFile(fidx)
+		if err != nil {
+			continue
+		}
 
-		dfs := strings.Split(df, "/")
-		deleteFile.FileName = null.StringFrom(dfs[0])
-		deleteFile.StoreName = null.StringFrom(dfs[1])
+		err = crud.DeleteUploadedFile(int64(fidx))
+		if err != nil {
+			continue
+		}
 
-		deleteList.DeleteFiles = append(deleteList.DeleteFiles, deleteFile)
+		filepath := config.UploadPath + "/" + fdata.StorageName.String
+		DeleteUploadFile(filepath)
 	}
-
-	// for _, f := range deleteList.DeleteFiles {
-	// 	filepath := router.UploadPath + "/" + f.StoreName.String
-	// 	err = crud.DeleteUploadedFile(board.Idx.Int64, content.Idx.Int64, f.FileName.String, f.StoreName.String)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	// 	}
-	// 	DeleteUploadFile(filepath)
-	// }
 
 	err = crud.DeleteContent(board, fmt.Sprint(idx))
 	if err != nil {

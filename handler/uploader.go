@@ -118,7 +118,6 @@ func DeleteFiles(c *fiber.Ctx) (err error) {
 	}
 
 	for _, f := range uploadIndices {
-
 		fdata, err := crud.GetUploadedFile(int(f.Idx.Int64))
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
