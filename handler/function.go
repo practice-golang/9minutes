@@ -298,31 +298,6 @@ func UpdateContentAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	files := strings.Split(content.Files.String, "?")
-	for _, f := range files {
-		if f == "" {
-			continue
-		}
-		fnames := strings.Split(f, "/")
-
-		filename := fnames[0]
-		storename := fnames[1]
-
-		crud.UpdateUploadedFile(board.Idx.Int64, content.Idx.Int64, filename, storename)
-	}
-	for _, f := range deleteList.DeleteFiles {
-		crud.UpdateUploadedFile(board.Idx.Int64, content.Idx.Int64, f.FileName.String, f.StoreName.String)
-	}
-
-	// for _, f := range deleteList.DeleteFiles {
-	// 	filepath := router.UploadPath + "/" + f.StoreName.String
-	// 	err = crud.DeleteUploadedFile(board.Idx.Int64, content.Idx.Int64, f.FileName.String, f.StoreName.String)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	// 	}
-	// 	DeleteUploadFile(filepath)
-	// }
-
 	result := map[string]interface{}{
 		"result": "success",
 	}
