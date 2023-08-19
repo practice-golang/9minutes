@@ -28,6 +28,7 @@
 </div>
 
 <div>
+    <!-- Todo - change button onclick to a href -->
     <button type="button" onclick="backToList()">List</button>
     <button type="button" onclick="moveToEdit()">Edit</button>
     <button type="button" onclick="deletePosting()">Delete</button>
@@ -42,15 +43,29 @@
         <span>{{unescape .Content.String}}</span>
         {{end}}
     </div>
+</div>
 
-    <div id="comment-pagination">
+<div>
+    <a onclick="getComments('1')">&laquo;</a>
+    <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
 
-    </div>
+    <span id="comment-pages">
+        {{range .Comments.PageList}}
+        {{if eq . $.Comments.CurrentPage}}
+        <b>{{.}}</b>
+        {{else}}
+        <a onclick="getComments('{{.}}')">{{.}}</a>
+        {{end}}
+        {{end}}
+    </span>
 
-    <div id="editor"></div>
-    <div>
-        <button type="button" onclick="writeComment()">Write</button>
-    </div>
+    <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
+    <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
+</div>
+
+<div id="editor"></div>
+<div>
+    <button type="button" onclick="writeComment()">Write</button>
 </div>
 
 <script>
@@ -121,21 +136,45 @@
         }
     }
 
-    async function getComments() {
+    let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
+    let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
+
+    async function getComments(page = 1) {
+        page = parseInt(page)
+        if (page < 1) { page = 1 }
+        if (page > totalCommentPage) { page = totalCommentPage }
+
         const commentsContainer = document.querySelector("#comments")
-        const uri = `/api/board/${boardCode}/${postingIdx}/comment`
+        const pageContainer = document.querySelector("#comment-pages")
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment?page=${page}`
 
         const r = await fetch(uri)
 
         let commentsHTML = ""
         if (r.ok) {
-            const response = await r.json()
-            
-            response["comment-list"].forEach((comment) =>{
+            const data = await r.json()
+
+            data["comment-list"].forEach((comment) => {
                 commentsHTML += `${comment["author-name"]}|${comment["regdate"]}|${comment["content"]}`
             })
-
             commentsContainer.innerHTML = commentsHTML
+
+            // paging
+            const begin = data["current-page"] - 5 > 0 ? data["current-page"] - 5 : 1
+            const fin = data["current-page"] + 5 <= data["total-page"] ? data["current-page"] + 5 : data["total-page"]
+
+            let pages = ""
+            for (let i = begin; i <= fin; i++) {
+                if (i == page) {
+                    pages += `<b>${i}</b>`
+                } else {
+                    pages += `<a onclick="getComments('${i}')">${i}</a>`
+                }
+            }
+            pageContainer.innerHTML = pages
+
+            currentCommentPage = data["current-page"]
+            totalCommentPage = data["total-pages"]
         }
     }
 

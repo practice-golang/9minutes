@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"9minutes/config"
@@ -238,6 +239,10 @@ func setupRouter() {
 		}
 		return t.Format("2006-01-02 15:04:05")
 	})
+	engine.AddFunc("js_array", func(s []int) string {
+		return strings.Trim(strings.Replace(fmt.Sprint(s), " ", ",", -1), "[]")
+	})
+
 	// engine.Debug(true)
 
 	cfg := fiber.Config{
