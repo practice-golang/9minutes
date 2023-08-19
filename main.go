@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 
 	"9minutes/config"
-	"9minutes/handler"
-	"9minutes/internal/db"
 	"9minutes/internal/email"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,13 +20,10 @@ import (
 var sampleINI string
 
 //go:embed all:static/html/*
-var Content embed.FS
-
-//go:embed all:static/embed/*
-var EmbedStatic embed.FS // should be removed
+var EmbedHTML embed.FS
 
 //go:embed all:static/*
-var StaticEmbed embed.FS
+var EmbedStatic embed.FS
 
 var (
 	StaticPath = config.StaticPath
@@ -43,51 +38,6 @@ var (
 	app *fiber.App
 )
 
-func initialize() {
-	db.Info = config.DatabaseInfoSQLite
-	// email.Info = config.EmailServerSMTP
-	email.Info = config.EmailServerDirect
-
-	envPORT := os.Getenv("PORT")
-	envDBMS := os.Getenv("DATABASE_TYPE")
-	if envPORT != "" {
-		ListeningIP = "0.0.0.0"
-		ListeningPort = envPORT
-
-		StaticPath = "static"
-		UploadPath = "upload"
-		handler.StoreRoot = "static/html"
-
-		envAddress := os.Getenv("DATABASE_ADDRESS")
-		envDbPort := os.Getenv("DATABASE_PORT")
-		envProtocol := os.Getenv("DATABASE_PROTOCOL")
-		envDbName := os.Getenv("DATABASE_NAME")
-		envDbID := os.Getenv("DATABASE_ID")
-		envDbPassword := os.Getenv("DATABASE_PASSWORD")
-
-		switch envDBMS {
-		case "mysql":
-			db.Info = config.DatabaseInfoMySQL
-			db.Info.Addr = envAddress
-			db.Info.Port = envDbPort
-			db.Info.Protocol = envProtocol
-			db.Info.DatabaseName = envDbName
-			db.Info.GrantID = envDbID
-			db.Info.GrantPassword = envDbPassword
-		case "postgres":
-			db.Info = config.DatabaseInfoPgPublic
-		case "sqlserver":
-			db.Info = config.DatabaseInfoSqlServer
-		default:
-			db.Info = config.DatabaseInfoMySQL
-		}
-	} else {
-		setupINI()
-	}
-
-	ListeningAddress = ListeningIP + ":" + ListeningPort
-}
-
 func exportStaticEmbed() error {
 	exportPath := "."
 
@@ -96,7 +46,7 @@ func exportStaticEmbed() error {
 		return err
 	}
 
-	err = fs.WalkDir(Content, "static", func(path string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(EmbedHTML, "static", func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() {
 			filePath := filepath.Join(exportPath, path)
 			err := os.MkdirAll(filepath.Dir(filePath), 0755)
@@ -104,7 +54,7 @@ func exportStaticEmbed() error {
 				return err
 			}
 
-			srcFile, err := Content.Open(path)
+			srcFile, err := EmbedHTML.Open(path)
 			if err != nil {
 				return err
 			}
@@ -161,8 +111,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	initialize()
-	doSetup()
+	setupMain()
 
 	println("Listen", ListeningAddress)
 	log.Fatal(app.Listen(ListeningAddress))

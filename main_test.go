@@ -49,7 +49,7 @@ func Test_main(t *testing.T) {
 			// defer res.Body.Close()
 
 			db.Info.DatabaseType = model.SQLITE
-			doSetup()
+			setupMain()
 
 			ServerHandler.ServeHTTP(tt.args.c.ResponseWriter, tt.args.c.Request)
 			res := tt.args.c.ResponseWriter.(*httptest.ResponseRecorder).Result()

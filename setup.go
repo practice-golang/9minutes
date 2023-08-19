@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"time"
 
 	"9minutes/config"
 	"9minutes/handler"
@@ -168,7 +169,7 @@ func setupINI() {
 			if email.Info.UseEmail && email.Info.SendDirect {
 				dkimKey, err := os.ReadFile(cfg.Section("email").Key("DKIM_PATH").String())
 				if err != nil {
-					panic(err)
+					panic("check dkim path. " + err.Error())
 				}
 				email.Info.Service.KeyDKIM = string(dkimKey)
 			}
@@ -227,8 +228,16 @@ func setupDB() {
 }
 
 func setupRouter() {
+	// engine := html.NewFileSystem(http.FS(EmbedHTML), ".html")
 	engine := html.New("./static/html", ".html")
 	engine.AddFunc("unescape", func(s string) template.HTML { return template.HTML(s) })
+	engine.AddFunc("format_date", func(s string) string {
+		t, err := time.Parse("20060102150405", s)
+		if err != nil {
+			return ""
+		}
+		return t.Format("2006-01-02 15:04:05")
+	})
 	// engine.Debug(true)
 
 	cfg := fiber.Config{
@@ -251,15 +260,54 @@ func setupRouter() {
 	setPage(app)        // HTML templates
 }
 
-func doSetup() {
-	// _ = os.Mkdir(StaticPath, os.ModePerm)
-	// _ = os.Mkdir(config.HtmlPath, os.ModePerm)
+func setupMain() {
+	db.Info = config.DatabaseInfoSQLite
+	// email.Info = config.EmailServerSMTP
+	email.Info = config.EmailServerDirect
+
+	envPORT := os.Getenv("PORT")
+	envDBMS := os.Getenv("DATABASE_TYPE")
+	if envPORT != "" {
+		ListeningIP = "0.0.0.0"
+		ListeningPort = envPORT
+
+		StaticPath = "static"
+		UploadPath = "upload"
+		handler.StoreRoot = "static/html"
+
+		envAddress := os.Getenv("DATABASE_ADDRESS")
+		envDbPort := os.Getenv("DATABASE_PORT")
+		envProtocol := os.Getenv("DATABASE_PROTOCOL")
+		envDbName := os.Getenv("DATABASE_NAME")
+		envDbID := os.Getenv("DATABASE_ID")
+		envDbPassword := os.Getenv("DATABASE_PASSWORD")
+
+		switch envDBMS {
+		case "mysql":
+			db.Info = config.DatabaseInfoMySQL
+			db.Info.Addr = envAddress
+			db.Info.Port = envDbPort
+			db.Info.Protocol = envProtocol
+			db.Info.DatabaseName = envDbName
+			db.Info.GrantID = envDbID
+			db.Info.GrantPassword = envDbPassword
+		case "postgres":
+			db.Info = config.DatabaseInfoPgPublic
+		case "sqlserver":
+			db.Info = config.DatabaseInfoSqlServer
+		default:
+			db.Info = config.DatabaseInfoMySQL
+		}
+	} else {
+		setupINI()
+	}
+
+	ListeningAddress = ListeningIP + ":" + ListeningPort
+
 	_ = os.Mkdir(UploadPath, os.ModePerm)
 
 	handler.NewSessionStore()
 
-	// setupSession()
 	setupDB()
-	// setupKey()
 	setupRouter()
 }

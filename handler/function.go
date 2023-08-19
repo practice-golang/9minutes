@@ -136,6 +136,12 @@ func HandleHTML(c *fiber.Ctx) error {
 			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
 			templateMap["Posting"] = posting
 
+			comments, err := GetCommentsList(boardCode, idx, map[string]string{})
+			if err != nil {
+				return err
+			}
+			templateMap["Comments"] = comments
+
 		case "board/write":
 			boardCode := queries["board_code"]
 
@@ -411,8 +417,8 @@ func WriteComment(c *fiber.Ctx) error {
 		}
 	}
 
-	comment.Posting = null.StringFrom(bm.Sanitize(comment.Posting.String))
-	if comment.Posting.String == "" {
+	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))
+	if comment.Content.String == "" {
 		return c.Status(http.StatusBadRequest).SendString("comment is empty")
 	}
 
