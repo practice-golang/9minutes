@@ -40,9 +40,9 @@ type Posting struct {
 	TitleImage null.String `json:"title-image" db:"TITLE_IMAGE" npskip:"viewcount"`
 	Content    null.String `json:"content"     db:"CONTENT"     npskip:"viewcount"`
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"viewcount"`
-	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read, viewcount"`
+	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update, viewcount"`
 	Files      null.String `json:"files"       db:"FILES"       npskip:"viewcount"`
-	Images     null.String `json:"images"      db:"IMAGES"      npskip:"viewcount"`
+	Images     null.String `json:"images"      db:"IMAGES"      npskip:"viewcount"` // TODO - remove
 	Views      null.Int    `json:"views"       db:"VIEWS"       npskip:"update"`
 	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update, viewcount"`
 }
@@ -54,29 +54,4 @@ type FilesToDelete struct {
 type File struct {
 	FileName  null.String `json:"filename"  db:"FILE_NAME"`
 	StoreName null.String `json:"storename" db:"STORAGE_NAME"`
-}
-
-// CommentListingOptions - Search, page
-type CommentListingOptions struct {
-	Search    null.String
-	Page      null.Int
-	ListCount null.Int
-}
-
-// CommentPageData - Contents list
-type CommentPageData struct {
-	CommentList []Comment `json:"comment-list"`
-	TotalPage   int       `json:"total-page"`
-	CurrentPage int       `json:"current-page"`
-}
-
-type Comment struct {
-	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update"`
-	BoardIdx   null.Int    `json:"board-idx"   db:"BOARD_IDX"`
-	Content    null.String `json:"content"     db:"CONTENT"`
-	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"`
-	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"insert, update, select, read"`
-	Files      null.String `json:"files"       db:"FILES"`
-	Images     null.String `json:"images"      db:"IMAGES"`
-	RegDate    null.String `json:"regdate"     db:"REGDATE"`
 }

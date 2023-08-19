@@ -35,13 +35,13 @@
 
 <!-- Comment -->
 <div>
-    {{range .Comments.CommentList}}
-    <div>
+    <div id="comments">
+        {{range .Comments.CommentList}}
         <span>{{unescape .AuthorName.String}}</span>|
         <span>{{format_date .RegDate.String}}</span>|
         <span>{{unescape .Content.String}}</span>
+        {{end}}
     </div>
-    {{end}}
 
     <div id="editor"></div>
     <div>
@@ -117,6 +117,24 @@
         }
     }
 
+    async function getComments() {
+        const commentsContainer = document.querySelector("#comments")
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment`
+
+        const r = await fetch(uri)
+
+        let commentsHTML = ""
+        if (r.ok) {
+            const response = await r.json()
+            
+            response["comment-list"].forEach((comment) =>{
+                commentsHTML += `${comment["author-name"]}|${comment["regdate"]}|${comment["content"]}`
+            })
+
+            commentsContainer.innerHTML = commentsHTML
+        }
+    }
+
     async function writeComment() {
         const uri = `/api/board/${boardCode}/${postingIdx}/comment`
         const content = editor.getHTML()
@@ -126,9 +144,9 @@
         if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
 
         const data = {
-            "content": content,
             "author-idx": 1,
             "author-name": "admin",
+            "content": content,
             "files": fileIndices
         }
 
@@ -139,7 +157,8 @@
         })
 
         if (r.ok) {
-            location.href = `/board/list?board_code=${boardCode}`
+            // location.href = `/board/list?board_code=${boardCode}`
+            getComments()
         } else {
             alert("Write failed")
         }

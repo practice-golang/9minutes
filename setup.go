@@ -228,7 +228,7 @@ func setupDB() {
 }
 
 func setupRouter() {
-	// engine := html.NewFileSystem(http.FS(EmbedHTML), ".html")
+	// engine := html.NewFileSystem(http.FS(EmbedHTML), ".html") // TODO - embed
 	engine := html.New("./static/html", ".html")
 	engine.AddFunc("unescape", func(s string) template.HTML { return template.HTML(s) })
 	engine.AddFunc("format_date", func(s string) string {
@@ -260,7 +260,8 @@ func setupRouter() {
 	setPage(app)        // HTML templates
 }
 
-func setupMain() {
+// setupConfig - setup configurations from environment variables or ini
+func setupConfig() {
 	db.Info = config.DatabaseInfoSQLite
 	// email.Info = config.EmailServerSMTP
 	email.Info = config.EmailServerDirect
@@ -303,11 +304,4 @@ func setupMain() {
 	}
 
 	ListeningAddress = ListeningIP + ":" + ListeningPort
-
-	_ = os.Mkdir(UploadPath, os.ModePerm)
-
-	handler.NewSessionStore()
-
-	setupDB()
-	setupRouter()
 }

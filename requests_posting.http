@@ -1,0 +1,81 @@
+@uri = http://localhost:5525
+@cookie = session_id=07bea9a9-be09-43c7-8905-0d8d0afc7bfa;
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+Content-Type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+### Posting - Write
+POST {{uri}}/api/board/misc/posting HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "title": "My test #4",
+    "content": "Nice to mit u lol~\n^_^_^_^& <^-^>'",
+    "author-idx": 1,
+    "author-name": "admin",
+    "files": "1"
+}
+
+### Posting - List
+GET {{uri}}/api/board/misc HTTP/1.1
+Cookie: {{cookie}}
+
+### Posting - Read
+GET {{uri}}/api/board/misc/posting/4 HTTP/1.1
+Cookie: {{cookie}}
+
+### Posting - Update
+PUT {{uri}}/api/board/misc/posting/1 HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "title": "My test #1",
+    "content": "Nice to meet you & <^-^>'",
+    "files": "81|82"
+}
+
+### Posting - Delete
+DELETE {{uri}}/api/board/misc/posting/1 HTTP/1.1
+Cookie: {{cookie}}
+
+### File - Upload
+POST {{uri}}/api/uploader HTTP/1.1
+Cookie: {{cookie}}
+Content-Type: multipart/form-data; boundary=FormDataBoundary7MA4YWxkTrZu0gW
+
+--FormDataBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="upload-files"; filename="panic.png"
+Content-Type: image/jpg
+
+< ./panic.png
+
+--FormDataBoundary7MA4YWxkTrZu0gW--
+
+### File - files info
+POST {{uri}}/api/uploader/files-info HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 8 },
+    { "idx": 9 }
+]
+
+### File - Delete
+DELETE {{uri}}/api/uploader HTTP/1.1
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 7 }
+]

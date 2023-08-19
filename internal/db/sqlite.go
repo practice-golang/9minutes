@@ -265,10 +265,11 @@ func (d *SQLite) CreateBoard(tableInfo model.Board, recreate bool) error {
 		"TITLE_IMAGE" TEXT,
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
+		"AUTHOR_NAME" TEXT,
 		"FILES"       TEXT,
 		"IMAGES"      TEXT,
 		"VIEWS"       TEXT,
-		"REGDATE"    TEXT,
+		"REGDATE"     TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
@@ -294,9 +295,10 @@ func (d *SQLite) CreateComment(tableInfo model.Board, recreate bool) error {
 		"BOARD_IDX"   INTEGER,
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
+		"AUTHOR_NAME" TEXT,
 		"FILES"       TEXT,
 		"IMAGES"      TEXT,
-		"REGDATE"    TEXT,
+		"REGDATE"     TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 

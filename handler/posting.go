@@ -40,6 +40,9 @@ func GetPostingList(boardCODE string, queries map[string]string) (model.PostingP
 	listingOptions.ListCount = null.IntFrom(int64(count))
 
 	list, err := crud.GetPostingList(board, listingOptions)
+	if err != nil {
+		return model.PostingPageData{}, nil
+	}
 
 	pageList := []int{}
 	pageShowGap := 2
@@ -86,30 +89,4 @@ func GetPostingData(boardCode, idx string) (model.Posting, error) {
 	}
 
 	return posting, nil
-}
-
-func GetCommentsList(boardCode string, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
-	var err error
-
-	board := model.Board{}
-	board.BoardCode = null.StringFrom(boardCode)
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return model.CommentPageData{}, err
-	}
-
-	commentSearch := queries["search"]
-
-	commentOptions := model.CommentListingOptions{}
-	commentOptions.Search = null.StringFrom(commentSearch)
-
-	commentOptions.Page = null.IntFrom(-1)
-	commentOptions.ListCount = null.IntFrom(int64(config.CommentCountPerPage))
-
-	comments, err := crud.GetComments(board, postingIDX, commentOptions)
-	if err != nil {
-		return model.CommentPageData{}, err
-	}
-
-	return comments, nil
 }

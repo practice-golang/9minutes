@@ -442,10 +442,11 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 		TITLE_IMAGE VARCHAR(256),
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
+		AUTHOR_NAME VARCHAR(256),
 		FILES       NCLOB,
 		IMAGES      NCLOB,
 		VIEWS       VARCHAR(11),
-		REGDATE    VARCHAR(14),
+		REGDATE     VARCHAR(14),
 
 		UNIQUE("IDX")
 	)`
@@ -477,9 +478,10 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 		BOARD_IDX   NUMBER(11),
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
+		AUTHOR_NAME VARCHAR(256),
 		FILES       NCLOB,
 		IMAGES      NCLOB,
-		REGDATE    VARCHAR(14),
+		REGDATE     VARCHAR(14),
 		
 		UNIQUE("IDX")
 	)`
