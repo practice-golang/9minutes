@@ -30,32 +30,23 @@ var EmbedStatic embed.FS // should be removed
 //go:embed all:static/*
 var StaticEmbed embed.FS
 
-var StaticPath = config.StaticPath
-var HtmlPath = config.HtmlPath
-var FilesPath = config.FilesPath
-var UploadPath = config.UploadPath
-
 var (
+	StaticPath = config.StaticPath
+	HtmlPath   = config.HtmlPath
+	FilesPath  = config.FilesPath
+	UploadPath = config.UploadPath
+
 	ListeningIP      string = "localhost"
 	ListeningPort    string = "4416"
-	ListeningAddress string
+	ListeningAddress string = ListeningIP + ":" + ListeningPort
 
 	app *fiber.App
 )
 
-func firstRun() {
+func initialize() {
 	db.Info = config.DatabaseInfoSQLite
-	// db.Info = config.DatabaseInfoMySQL
-	// db.Info = config.DatabaseInfoPgPublic
-	// db.Info = config.DatabaseInfoSqlServer
-
-	// db.Info = config.DatabaseInfoOracle
-	// db.InfoOracleAdmin = config.DatabaseInfoOracleSystem
-	// db.Info = config.DatabaseInfoOracleCloud
-	// db.InfoOracleAdmin = config.DatabaseInfoOracleCloudAdmin
-
-	email.Info = config.EmailServerDirect
 	// email.Info = config.EmailServerSMTP
+	email.Info = config.EmailServerDirect
 
 	envPORT := os.Getenv("PORT")
 	envDBMS := os.Getenv("DATABASE_TYPE")
@@ -170,7 +161,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	firstRun()
+	initialize()
 	doSetup()
 
 	println("Listen", ListeningAddress)

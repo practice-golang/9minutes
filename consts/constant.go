@@ -8,13 +8,13 @@ var (
 	TableUsers       string = "users"
 	TableUserColumns string = "user_fields"
 
-	UserGrades = []string{
-		"admin",
-		"manager",
-		"regular_user",
-		"pending_user",
-		"banned_user",
-		"guest",
+	UserGrades = map[string]int{
+		"admin":        1000,
+		"manager":      2000,
+		"regular_user": 3000,
+		"pending_user": 4000,
+		"guest":        5000,
+		"banned_user":  6000,
 	}
 
 	/* Message */
