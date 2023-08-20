@@ -14,7 +14,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetCommentsList(boardCode string, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
+func GetCommentList(boardCode string, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
 	var err error
 
 	board := model.Board{}
@@ -81,7 +81,7 @@ func GetComments(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	comments, err := GetCommentsList(boardCode, postingIdx, queries)
+	comments, err := GetCommentList(boardCode, postingIdx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

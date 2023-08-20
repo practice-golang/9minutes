@@ -47,15 +47,12 @@ func GetComments(board model.Board, contentIdx string, options model.CommentList
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.CommentTable.String)
-	userTableName := db.GetFullTableName(db.Info.UserTable)
+	// userTableName := db.GetFullTableName(db.Info.UserTable)
 
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnBoardIdx := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
-	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
-	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
 
 	var totalCount int64
 	sql := `
@@ -92,13 +89,7 @@ func GetComments(board model.Board, contentIdx string, options model.CommentList
 
 	sql = `
 	SELECT
-		` + column.Names + `,
-		(
-			SELECT
-				` + columnUserId.Names + `
-			FROM ` + userTableName + `
-			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
-		) AS ` + columnAuthorName.Names + `
+		` + column.Names + `
 	FROM ` + tableName + `
 	WHERE ` + columnBoardIdx.Names + ` = ` + contentIdx + `
 	ORDER BY ` + columnIdx.Names + ` ASC

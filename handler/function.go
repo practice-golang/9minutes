@@ -132,7 +132,7 @@ func HandleHTML(c *fiber.Ctx) error {
 			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
 			templateMap["Posting"] = posting
 
-			comments, err := GetCommentsList(boardCode, idx, map[string]string{})
+			comments, err := GetCommentList(boardCode, idx, map[string]string{"page": "0"})
 			if err != nil {
 				return err
 			}

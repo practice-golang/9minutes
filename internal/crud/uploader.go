@@ -5,7 +5,6 @@ import (
 	"9minutes/internal/np"
 	"9minutes/model"
 	"database/sql"
-	"errors"
 
 	"github.com/blockloop/scan"
 )
@@ -35,9 +34,10 @@ func GetUploadedFile(idx int) (model.StoredFileInfo, error) {
 	if err != nil {
 		return finfo, err
 	}
-	if len(finfos) == 0 {
-		return finfo, errors.New("no file found")
-	}
+	// if len(finfos) == 0 {
+	// 	// return finfo, errors.New("no file found")
+	// 	return finfo, nil
+	// }
 
 	finfo = finfos[0]
 
@@ -74,9 +74,10 @@ func GetUploadedFiles(idxes []int) ([]model.StoredFileInfo, error) {
 	if err != nil {
 		return finfos, err
 	}
-	if len(finfos) == 0 {
-		return finfos, errors.New("no file found")
-	}
+	// if len(finfos) == 0 {
+	// 	// return finfos, errors.New("no file found")
+	// 	return finfos, nil
+	// }
 
 	return finfos, nil
 }

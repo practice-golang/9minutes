@@ -38,7 +38,7 @@
 <div>
     <div id="comments">
         {{range .Comments.CommentList}}
-        <span>{{unescape .AuthorName.String}}</span>|
+        <span>{{.AuthorName.String}}</span>|
         <span>{{format_date .RegDate.String}}</span>|
         <span>{{unescape .Content.String}}</span>
         {{end}}
@@ -46,7 +46,7 @@
 </div>
 
 <div>
-    <a onclick="getComments('1')">&laquo;</a>
+    <a onclick="getComments(parseInt('1'))">&laquo;</a>
     <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
 
     <span id="comment-pages">
@@ -139,9 +139,13 @@
     let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
     let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
 
+    /* 
+    getComments(page)
+    page: number - If page is 0, last comment page
+     */
     async function getComments(page = 1) {
         page = parseInt(page)
-        if (page < 1) { page = 1 }
+        if (page < 0) { page = 0 } // last page
         if (page > totalCommentPage) { page = totalCommentPage }
 
         const commentsContainer = document.querySelector("#comments")
@@ -163,18 +167,21 @@
             const begin = data["current-page"] - 5 > 0 ? data["current-page"] - 5 : 1
             const fin = data["current-page"] + 5 <= data["total-page"] ? data["current-page"] + 5 : data["total-page"]
 
+            if (page == 0) { page = totalCommentPage }
+
             let pages = ""
-            for (let i = begin; i <= fin; i++) {
-                if (i == page) {
-                    pages += `<b>${i}</b>`
+            data["page-list"].forEach((p) => {
+                if (p == page) {
+                    pages += `<b>${p}</b>`
                 } else {
-                    pages += `<a onclick="getComments('${i}')">${i}</a>`
+                    pages += `<a onclick="getComments('${p}')">${p}</a>`
                 }
-            }
+                pages += "\n"
+            })
             pageContainer.innerHTML = pages
 
             currentCommentPage = data["current-page"]
-            totalCommentPage = data["total-pages"]
+            totalCommentPage = data["total-page"]
         }
     }
 
@@ -201,7 +208,7 @@
 
         if (r.ok) {
             // location.href = `/board/list?board_code=${boardCode}`
-            getComments()
+            getComments(0)
         } else {
             alert("Write failed")
         }
@@ -237,10 +244,7 @@
         }
     }
 
-    function init() {
-        getFilesInfo()
-    }
-
+    function init() { getFilesInfo() }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
 

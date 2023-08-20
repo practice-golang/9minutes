@@ -116,7 +116,7 @@ func ReadPostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	comments, err := GetCommentsList(boardCode, idx, queries)
+	comments, err := GetCommentList(boardCode, idx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
