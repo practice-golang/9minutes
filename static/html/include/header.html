@@ -13,6 +13,28 @@
 <body>
     <div>
         <a href="/">Front page</a>
+
+        <div>
+            <label for="board-selection">Board:</label>
+            <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
+            <datalist id="board-list">
+                {{range .BoardPageData.BoardList}}
+                <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
+                {{end}}
+            </datalist>
+        </div>
+
+        <script>
+            function moveBoard(el) {
+                const boardList = document.querySelector(`#board-list option[value="${el.value}"]`)
+
+                const selectedBoardCode = el.value
+                const selectedBoardName = boardList.dataset.name
+
+                location.href = `/board/list?board_code=${selectedBoardCode}`
+            }
+        </script>
+
         <div>
             {{if ne .UserId ""}}
             Good day, {{.UserId}}.
@@ -30,3 +52,14 @@
             {{end}}
         </div>
         <hr />
+
+<!-- 
+    </div>
+
+    <footer>
+        board footer
+    </footer>
+</body>
+
+</html>
+ -->

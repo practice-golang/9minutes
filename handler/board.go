@@ -235,3 +235,41 @@ func DeleteBoardAPI(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(result)
 }
+
+func BoardListAPI(c *fiber.Ctx) (err error) {
+	queries := c.Queries()
+
+	listingOptions := model.BoardListingOptions{}
+	listingOptions.Search = null.StringFrom(queries["search"])
+
+	listingOptions.Page = null.IntFrom(1)
+	listingOptions.ListCount = null.IntFrom(10)
+
+	if queries["page"] != "" {
+		page := queries["page"]
+		pageNum, err := strconv.Atoi(page)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).SendString(err.Error())
+		}
+
+		if queries["list-count"] != "" {
+			countPerPage, err := strconv.Atoi(queries["list-count"])
+			if err != nil {
+				return c.Status(http.StatusBadRequest).SendString(err.Error())
+			}
+
+			listingOptions.ListCount = null.IntFrom(int64(countPerPage))
+		}
+
+		listingOptions.Page = null.IntFrom(int64(pageNum))
+	}
+
+	listingOptions.Page.Int64--
+
+	result, err := crud.GetBoards(listingOptions)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}

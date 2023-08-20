@@ -2,14 +2,14 @@
 
 <div>
     Search:
-    <input onkeyup="doSearch()" type="text" name="search" value="{{.BoardList.SearchKeyword}}" placeholder="Search keyword" />
+    <input onkeyup="doSearch()" type="text" name="search" value="{{.PostingList.SearchKeyword}}" placeholder="Search keyword" />
     <button onclick="doSearch()" type="button">🔍</button>
 </div>
 
 <div>
     <table>
         <tbody>
-            {{range .BoardList.PostingList}}
+            {{range .PostingList.PostingList}}
             <tr>
                 <td>{{.Idx.Int64}}</td>
                 <td>
@@ -25,19 +25,19 @@
     </table>
 
     <div>
-        <a href="?board_code={{.BoardCode}}&search={{.BoardList.SearchKeyword}}">&laquo;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpPrev}}&search={{.BoardList.SearchKeyword}}">&lt;</a>
+        <a href="?board_code={{.BoardCode}}&search={{.PostingList.SearchKeyword}}">&laquo;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpPrev}}&search={{.PostingList.SearchKeyword}}">&lt;</a>
 
-        {{range .BoardList.PageList}}
-        {{if eq . $.BoardList.CurrentPage}}
+        {{range .PostingList.PageList}}
+        {{if eq . $.PostingList.CurrentPage}}
         <b>{{.}}</b>
         {{else}}
-        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.BoardList.SearchKeyword}}">{{.}}</a>
+        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.PostingList.SearchKeyword}}">{{.}}</a>
         {{end}}
         {{end}}
 
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.JumpNext}}&search={{.BoardList.SearchKeyword}}">&gt;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.BoardList.TotalPage}}&search={{.BoardList.SearchKeyword}}">&raquo;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpNext}}&search={{.PostingList.SearchKeyword}}">&gt;</a>
+        <a href="?board_code={{.BoardCode}}&page={{.PostingList.TotalPage}}&search={{.PostingList.SearchKeyword}}">&raquo;</a>
     </div>
 </div>
 
