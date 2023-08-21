@@ -18,6 +18,7 @@
                     </a>
                     [{{.CommentCount.String}}]
                 </td>
+                <td>{{.AuthorName.String}}</td>
                 <td>{{.Views.Int64}}</td>
             </tr>
             {{end}}
@@ -25,8 +26,10 @@
     </table>
 
     <div>
-        <a href="?board_code={{.BoardCode}}&search={{.PostingList.SearchKeyword}}">&laquo;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpPrev}}&search={{.PostingList.SearchKeyword}}">&lt;</a>
+        <span class="page-jump">
+            <a href="?board_code={{.BoardCode}}&search={{.PostingList.SearchKeyword}}">&laquo;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpPrev}}&search={{.PostingList.SearchKeyword}}">&lt;</a>
+        </span>
 
         {{range .PostingList.PageList}}
         {{if eq . $.PostingList.CurrentPage}}
@@ -36,8 +39,10 @@
         {{end}}
         {{end}}
 
-        <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpNext}}&search={{.PostingList.SearchKeyword}}">&gt;</a>
-        <a href="?board_code={{.BoardCode}}&page={{.PostingList.TotalPage}}&search={{.PostingList.SearchKeyword}}">&raquo;</a>
+        <span class="page-jump">
+            <a href="?board_code={{.BoardCode}}&page={{.PostingList.JumpNext}}&search={{.PostingList.SearchKeyword}}">&gt;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.PostingList.TotalPage}}&search={{.PostingList.SearchKeyword}}">&raquo;</a>
+        </span>
     </div>
 </div>
 

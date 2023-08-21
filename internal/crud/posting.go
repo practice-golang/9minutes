@@ -19,21 +19,17 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.BoardTable.String)
-	userTableName := db.GetFullTableName(db.Info.UserTable)
 	commentTableName := db.GetFullTableName(board.CommentTable.String)
 
 	column := np.CreateString(model.PostingList{}, dbtype, "select", false)
-	sqlSearch := ""
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnTitle := np.CreateString(map[string]interface{}{"TITLE": nil}, dbtype, "", false)
 	columnContent := np.CreateString(map[string]interface{}{"CONTENT": nil}, dbtype, "", false)
-	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnBoardIdx := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
-	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
-	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
 	columnCommentCount := np.CreateString(map[string]interface{}{"COMMENT_COUNT": nil}, dbtype, "", false)
 
+	sqlSearch := ""
 	if options.Search.Valid && options.Search.String != "" {
 		sqlSearch = `
 		WHERE LOWER(` + columnTitle.Names + `) LIKE LOWER('%` + options.Search.String + `%')
@@ -48,12 +44,6 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 	sql := `
 	SELECT
 		` + column.Names + `,
-		(
-			SELECT
-				` + columnUserId.Names + `
-			FROM ` + userTableName + `
-			WHERE ` + columnIdx.Names + ` = A.` + columnAuthorIdx.Names + `
-		) AS ` + columnAuthorName.Names + `,
 		(
 			SELECT
 				COUNT(` + columnIdx.Names + `)
@@ -111,23 +101,25 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 func GetPosting(board model.Board, idx string) (model.Posting, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.BoardTable.String)
-	userTableName := db.GetFullTableName(db.Info.UserTable)
+	// userTableName := db.GetFullTableName(db.Info.UserTable)
 
 	column := np.CreateString(model.Posting{}, dbtype, "select", false)
-	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-	columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
-	columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
+	// columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
+	// columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
+	// columnAuthorName := np.CreateString(map[string]interface{}{"AUTHOR_NAME": nil}, dbtype, "", false)
 
+	/*
+		(
+		SELECT
+			` + columnUserId.Names + `
+		FROM ` + userTableName + `
+		WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
+		) AS ` + columnAuthorName.Names + `
+	*/
 	sql := `
 	SELECT
-		` + column.Names + `,
-		(
-			SELECT
-				` + columnUserId.Names + `
-			FROM ` + userTableName + `
-			WHERE ` + columnIdx.Names + ` = ` + tableName + `.` + columnAuthorIdx.Names + `
-		) AS ` + columnAuthorName.Names + `
+		` + column.Names + `
 	FROM ` + tableName + `
 	WHERE ` + columnIdx.Names + ` = ` + idx
 

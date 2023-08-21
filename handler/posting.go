@@ -133,17 +133,36 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 	board := model.Board{}
 	posting := model.Posting{}
 
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-
 	err = c.BodyParser(&posting)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
+	board.BoardCode = null.StringFrom(c.Params("board_code"))
 	board, err = crud.GetBoardByCode(board)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
+
+	userid := "guest"
+	useridInterface := sess.Get("userid")
+	if useridInterface != nil {
+		userid = useridInterface.(string)
+	}
+
+	posting.AuthorIdx = null.IntFrom(useridx)
+	posting.AuthorName = null.StringFrom(userid)
 
 	now := time.Now().Format("20060102150405")
 	posting.RegDate = null.StringFrom(now)
@@ -158,7 +177,6 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 		"result": "success",
 	}
 
-	// c.Json(http.StatusOK, result)
 	return c.Status(http.StatusOK).JSON(result)
 }
 

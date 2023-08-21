@@ -27,8 +27,8 @@ type PostingList struct {
 	Idx          null.Int    `json:"idx"           db:"IDX"           npskip:"insert, update"`
 	Title        null.String `json:"title"         db:"TITLE"`
 	TitleImage   null.String `json:"title-image"   db:"TITLE_IMAGE"`
-	AuthorIdx    null.Int    `json:"author-idx"    db:"AUTHOR_IDX"`
-	AuthorName   null.String `json:"author-name"   db:"AUTHOR_NAME"   npskip:"insert, update, select, read"`
+	AuthorIdx    null.Int    `json:"author-idx"    db:"AUTHOR_IDX"    npskip:"insert, update"`
+	AuthorName   null.String `json:"author-name"   db:"AUTHOR_NAME"   npskip:"insert, update"`
 	CommentCount null.String `json:"comment-count" db:"COMMENT_COUNT" npskip:"insert, update, select, read"`
 	Views        null.Int    `json:"views"         db:"VIEWS"`
 	RegDate      null.String `json:"regdate"       db:"REGDATE"`
@@ -39,7 +39,7 @@ type Posting struct {
 	Title      null.String `json:"title"       db:"TITLE"       npskip:"viewcount"`
 	TitleImage null.String `json:"title-image" db:"TITLE_IMAGE" npskip:"viewcount"`
 	Content    null.String `json:"content"     db:"CONTENT"     npskip:"viewcount"`
-	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"viewcount"`
+	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"update, viewcount"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update, viewcount"`
 	Files      null.String `json:"files"       db:"FILES"       npskip:"viewcount"`
 	Images     null.String `json:"images"      db:"IMAGES"      npskip:"viewcount"` // TODO - remove

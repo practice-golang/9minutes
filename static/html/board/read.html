@@ -42,8 +42,10 @@
 </div>
 
 <div>
-    <a onclick="getComments(parseInt('1'))">&laquo;</a>
-    <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('1'))">&laquo;</a>
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
+    </span>
 
     <span id="comment-pages">
         {{range .Comments.PageList}}
@@ -55,8 +57,10 @@
         {{end}}
     </span>
 
-    <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
-    <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
+        <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
+    </span>
 </div>
 
 <div id="editor"></div>
@@ -130,8 +134,19 @@
         }
     }
 
+
     let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
     let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
+
+    function showCommentPageJumper() {
+        const commentPages = document.querySelector("#comment-pages")
+        const pageJumper = document.querySelectorAll(".page-jump")
+
+        let displayMode = "initial"
+        if (commentPages.innerHTML.trim() == "") { displayMode = "none" }
+
+        pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
+    }
 
     /* 
     getComments(page)
@@ -178,6 +193,8 @@
 
             currentCommentPage = data["current-page"]
             totalCommentPage = data["total-page"]
+
+            showCommentPageJumper()
         }
     }
 
@@ -239,8 +256,18 @@
         }
     }
 
-    function init() { getFilesInfo() }
+    function init() {
+        showCommentPageJumper()
+
+        getFilesInfo()
+    }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
+
+<style>
+    .page-jump {
+        display: none;
+    }
+</style>
 
 {{template "layout_board_footer" .}}

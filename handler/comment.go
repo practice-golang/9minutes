@@ -90,36 +90,43 @@ func GetComments(c *fiber.Ctx) (err error) {
 }
 
 func WriteComment(c *fiber.Ctx) error {
-	board := model.Board{BoardCode: null.StringFrom(c.Params("board_code"))}
 	comment := model.Comment{}
-
 	postingIdx, err := strconv.ParseInt(c.Params("posting_idx"), 0, 64)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 	comment.BoardIdx = null.IntFrom(postingIdx)
 
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("board not found")
-	}
-
 	err = c.BodyParser(&comment)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	comment.AuthorIdx = null.IntFrom(-1)
-
-	// Check session
-	sess, err := store.Get(c)
-	useridInterface := sess.Get("idx")
-	if err == nil && useridInterface != nil {
-		userIDX, err := strconv.Atoi(useridInterface.(string))
-		if err == nil {
-			comment.AuthorIdx = null.IntFrom(int64(userIDX))
-		}
+	board := model.Board{BoardCode: null.StringFrom(c.Params("board_code"))}
+	board, err = crud.GetBoardByCode(board)
+	if err != nil {
+		return c.Status(http.StatusNotFound).SendString("board not found")
 	}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
+
+	userid := "guest"
+	useridInterface := sess.Get("userid")
+	if useridInterface != nil {
+		userid = useridInterface.(string)
+	}
+
+	comment.AuthorIdx = null.IntFrom(useridx)
+	comment.AuthorName = null.StringFrom(userid)
 
 	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))
 	if comment.Content.String == "" {
