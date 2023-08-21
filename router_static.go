@@ -11,7 +11,7 @@ import (
 func setStaticFiles(a *fiber.App) {
 	if IsStaticEmbed {
 		configFavicon := filesystem.Config{Root: http.FS(EmbedHTML), PathPrefix: "/static/html"}
-		configFiles := filesystem.Config{Root: http.FS(EmbedStatic), PathPrefix: "/static"}
+		configFiles := filesystem.Config{Root: http.FS(EmbedStatic), PathPrefix: "/static/files"}
 		configAssets := filesystem.Config{Root: http.FS(EmbedHTML), PathPrefix: "/static/html/assets"}
 		configAdminApp := filesystem.Config{Root: http.FS(EmbedHTML), PathPrefix: "/static/html/admin/_app"}
 
