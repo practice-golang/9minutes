@@ -23,7 +23,7 @@ type CommentPageData struct {
 
 type Comment struct {
 	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update"`
-	BoardIdx   null.Int    `json:"board-idx"   db:"BOARD_IDX"`
+	BoardIdx   null.Int    `json:"board-idx"   db:"BOARD_IDX"` // TODO - remove
 	Content    null.String `json:"content"     db:"CONTENT"`
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update"`

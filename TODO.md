@@ -4,6 +4,7 @@
 * [x] Admin - Use Svelte component for Page, HTML
 * [x] Board list generation for menu items
 * [ ] All board table names to lowercase
+* [ ] escape/unscape comment writing/reading
 * [ ] Editor
     * [ ] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
 * [ ] Move and clean up folders under static - admin, html, static..

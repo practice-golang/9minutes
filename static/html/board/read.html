@@ -74,9 +74,7 @@
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
     async function deletePosting() {
         const uri = `/api/board/${boardCode}/posting/${postingIdx}`
-        const r = await fetch(uri, {
-            method: "DELETE",
-        })
+        const r = await fetch(uri, { method: "DELETE" })
 
         if (r.ok) {
             alert("Deleted")
@@ -153,9 +151,11 @@
         let commentsHTML = ""
         if (r.ok) {
             const data = await r.json()
+            totalCommentPage = data["total-page"]
 
             data["comment-list"].forEach((comment) => {
-                commentsHTML += `${comment["author-name"]}|${comment["regdate"]}|${comment["content"]}`
+                const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
+                commentsHTML += `${comment["author-name"]}|${regdate}|${comment["content"]}`
             })
             commentsContainer.innerHTML = commentsHTML
 
@@ -203,7 +203,6 @@
         })
 
         if (r.ok) {
-            // location.href = `/board/list?board_code=${boardCode}`
             getComments(0)
         } else {
             alert("Write failed")
