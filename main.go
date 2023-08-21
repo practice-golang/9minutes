@@ -14,6 +14,9 @@ import (
 //go:embed 9minutes.ini
 var sampleINI string
 
+//go:embed static/html/favicon.png
+var Favicon embed.FS
+
 //go:embed all:static/html/*
 var EmbedHTML embed.FS
 
@@ -21,19 +24,27 @@ var EmbedHTML embed.FS
 var EmbedStatic embed.FS
 
 var (
-	StaticPath = config.StaticPath
-	HtmlPath   = config.HtmlPath
-	FilesPath  = config.FilesPath
-	UploadPath = config.UploadPath
+	PathPrefix string = ""
+	StaticPath string = config.StaticPath
+	HtmlPath   string = config.HtmlPath
+	FilesPath  string = config.FilesPath
+	UploadPath string = config.UploadPath
 
 	ListeningIP      string = "localhost"
 	ListeningPort    string = "4416"
 	ListeningAddress string = ListeningIP + ":" + ListeningPort
 
-	app *fiber.App
+	IsStaticEmbed bool = false
 )
 
+var app *fiber.App
+
 func main() {
+	if _, err := os.Stat(HtmlPath); os.IsNotExist(err) {
+		IsStaticEmbed = true
+		// PathPrefix = "static/"
+	}
+
 	parseArgs()
 
 	_ = os.Mkdir(UploadPath, os.ModePerm)

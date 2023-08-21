@@ -1,3 +1,5 @@
+{{define "layout_header"}}
+
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -7,9 +9,8 @@
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <meta name="google" content="notranslate" />
 
-    <title>Board Template</title>
+    <title>Template</title>
 
-    <!-- <link rel="stylesheet" href="https://unpkg.com/mvp.css"> -->
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/modal.css">
     <script src="/assets/js/list-renderer.js"></script>
@@ -18,6 +19,34 @@
 <body>
     <div>
         <a href="/">Front page</a>
+
+        <div>
+            <label for="board-selection">Board:</label>
+            <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
+            <datalist id="board-list">
+                {{range .BoardPageData.BoardList}}
+                <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
+                {{end}}
+            </datalist>
+        </div>
+        
+        <style>
+            label {
+                display: initial;
+            }
+        </style>
+        
+        <script>
+            function moveBoard(el) {
+                const boardList = document.querySelector(`#board-list option[value="${el.value}"]`)
+
+                const selectedBoardCode = el.value
+                const selectedBoardName = boardList.dataset.name
+
+                location.href = `/board/list?board_code=${selectedBoardCode}`
+            }
+        </script>
+
         <div>
             {{if ne .UserId ""}}
             Good day, {{.UserId}}.
@@ -35,18 +64,15 @@
             {{end}}
         </div>
         <hr />
-
-        <div id="menu">
-            <ul>
-                <li>hello</li>
-            </ul>
-        </div>
-
     </div>
+{{end}}
 
+
+{{define "layout_footer"}}
     <footer>
-        board footer
+        Template footer
     </footer>
 </body>
 
 </html>
+{{end}}

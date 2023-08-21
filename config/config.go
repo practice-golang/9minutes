@@ -15,10 +15,10 @@ var (
 )
 
 var (
-	StaticPath = "static"
-	HtmlPath   = "static/html"
-	FilesPath  = "static/files"
-	UploadPath = "upload"
+	StaticPath string = "static"
+	HtmlPath   string = "static/html"
+	FilesPath  string = "static/files"
+	UploadPath string = "upload"
 )
 
 var (

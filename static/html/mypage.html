@@ -1,4 +1,4 @@
-{{template "include/header" .}}
+{{template "layout_header" .}}
 
 <script>
     document.title = "My page"
@@ -6,8 +6,14 @@
 
 <div>
     <span id="username"></span>
+
+    <br />
+
     <input type="password" name="old-password" value="" placeholder="Old password" />
     <input type="password" name="password" value="" placeholder="New password" />
+
+    <br />
+
     <input type="password" name="password-confirm" value="" placeholder="Confirm new password" />
     <input type="text" name="email" value="" placeholder="Email" />
     <!-- <input type="text" name="phone" value="" placeholder="Phone" /> -->
@@ -98,4 +104,4 @@
     })
 </script>
 
-{{template "include/footer" .}}
+{{template "layout_footer" .}}

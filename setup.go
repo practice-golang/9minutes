@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -229,8 +231,18 @@ func setupDB() {
 }
 
 func setupRouter() {
-	// engine := html.NewFileSystem(http.FS(EmbedHTML), ".html") // TODO - embed
-	engine := html.New("./static/html", ".html")
+	var engine *html.Engine
+
+	if IsStaticEmbed {
+		htmlRoot, err := fs.Sub(EmbedHTML, "static/html")
+		if err != nil {
+			log.Fatal(err)
+		}
+		engine = html.NewFileSystem(http.FS(htmlRoot), ".html")
+	} else {
+		engine = html.New("./static/html", ".html")
+	}
+
 	engine.AddFunc("unescape", func(s string) template.HTML { return template.HTML(s) })
 	engine.AddFunc("format_date", func(s string) string {
 		t, err := time.Parse("20060102150405", s)
