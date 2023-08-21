@@ -40,12 +40,11 @@ var (
 var app *fiber.App
 
 func main() {
+	parseArgs()
+
 	if _, err := os.Stat(HtmlPath); os.IsNotExist(err) {
 		IsStaticEmbed = true
-		// PathPrefix = "static/"
 	}
-
-	parseArgs()
 
 	_ = os.Mkdir(UploadPath, os.ModePerm)
 	setupConfig()

@@ -2,9 +2,19 @@
 
 It works!!
 
+{{if .PendingUser}}
 <div>
-    <div>Your account is pending approval. Check email and verify it.</div>
+    <p>Your account is pending approval. Check email and verify it.</p>
 </div>
+{{else if eq .Grade "admin"}}
+<div>
+    <p>Admin account</p>
+</div>
+{{else if eq .Grade "manager"}}
+<div>
+    <p>Manager account</p>
+</div>
+{{end}}
 
 <hr />
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"html"
@@ -49,9 +50,18 @@ func HandleBoardHTML(c *fiber.Ctx) error {
 		grade = gradeInterface.(string)
 	}
 
-	templateMap["Title"] = "9minutes"
+	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
 	templateMap["Grade"] = grade
+
+	boardCode := queries["board_code"]
+	if boardCode == "" {
+		return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
+	}
+	page := queries["page"]
+	if page == "" {
+		page = "1"
+	}
 
 	boardListingOptions := model.BoardListingOptions{}
 	boardListingOptions.Page = null.IntFrom(0)
@@ -59,14 +69,16 @@ func HandleBoardHTML(c *fiber.Ctx) error {
 	boardList, _ := crud.GetBoards(boardListingOptions)
 	templateMap["BoardPageData"] = boardList
 
-	boardCode := queries["board_code"]
-	page := queries["page"]
+	currentBoard, _ := crud.GetBoardByCode(model.Board{BoardCode: null.StringFrom(boardCode)})
 
-	if boardCode == "" {
-		return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
+	templateMap["Accessible"] = false
+	if consts.UserGrades[grade] >= consts.UserGrades[currentBoard.GrantRead.String] {
+		templateMap["Accessible"] = true
 	}
-	if page == "" {
-		page = "1"
+
+	templateMap["PendingUser"] = true
+	if grade != "pending_user" {
+		templateMap["PendingUser"] = false
 	}
 
 	list, err := GetPostingList(boardCode, queries)
@@ -110,7 +122,7 @@ func HandleHTML(c *fiber.Ctx) error {
 		grade = gradeInterface.(string)
 	}
 
-	templateMap["Title"] = "9minutes"
+	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
 	templateMap["Grade"] = grade
 
@@ -119,6 +131,11 @@ func HandleHTML(c *fiber.Ctx) error {
 	boardListingOptions.ListCount = null.IntFrom(9999)
 	boardList, _ := crud.GetBoards(boardListingOptions)
 	templateMap["BoardPageData"] = boardList
+
+	templateMap["PendingUser"] = true
+	if grade != "pending_user" {
+		templateMap["PendingUser"] = false
+	}
 
 	switch true {
 	case name == "":
