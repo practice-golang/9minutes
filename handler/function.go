@@ -21,85 +21,6 @@ func HealthCheckAPI(c *fiber.Ctx) error {
 	return c.SendString("Ok")
 }
 
-func HelloParam(c *fiber.Ctx) error {
-	if len(c.Params("name")) > 0 {
-		return c.Status(http.StatusOK).SendString("Hello " + c.Params("name"))
-	} else {
-		return c.Status(http.StatusBadRequest).SendString("Missing parameter")
-	}
-}
-
-func HandleBoardHTML(c *fiber.Ctx) error {
-	name := strings.TrimSuffix(c.Path()[1:], "/")
-	queries := c.Queries()
-	templateMap := fiber.Map{}
-
-	sess, err := store.Get(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	userid := ""
-	useridInterface := sess.Get("userid")
-	if useridInterface != nil {
-		userid = useridInterface.(string)
-	}
-	grade := ""
-	gradeInterface := sess.Get("grade")
-	if gradeInterface != nil {
-		grade = gradeInterface.(string)
-	}
-
-	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
-	templateMap["UserId"] = userid
-	templateMap["Grade"] = grade
-
-	boardCode := queries["board_code"]
-	if boardCode == "" {
-		return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
-	}
-	page := queries["page"]
-	if page == "" {
-		page = "1"
-	}
-
-	boardListingOptions := model.BoardListingOptions{}
-	boardListingOptions.Page = null.IntFrom(0)
-	boardListingOptions.ListCount = null.IntFrom(9999)
-	boardList, _ := crud.GetBoards(boardListingOptions)
-	templateMap["BoardPageData"] = boardList
-
-	currentBoard, _ := crud.GetBoardByCode(model.Board{BoardCode: null.StringFrom(boardCode)})
-
-	templateMap["Accessible"] = false
-	if consts.UserGrades[grade] >= consts.UserGrades[currentBoard.GrantRead.String] {
-		templateMap["Accessible"] = true
-	}
-
-	templateMap["PendingUser"] = true
-	if grade != "pending_user" {
-		templateMap["PendingUser"] = false
-	}
-
-	list, err := GetPostingList(boardCode, queries)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	}
-
-	templateMap["BoardCode"] = boardCode
-	templateMap["PostingList"] = list
-
-	err = c.Render(name, templateMap)
-	if err != nil {
-		if strings.Contains(err.Error(), "does not exist") {
-			return c.Status(http.StatusNotFound).SendString("Page not Found")
-		}
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	return nil
-}
-
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
 	name := strings.TrimSuffix(c.Path()[1:], "/")
@@ -182,6 +103,77 @@ func HandleHTML(c *fiber.Ctx) error {
 
 		name = "admin/index"
 	}
+
+	err = c.Render(name, templateMap)
+	if err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			return c.Status(http.StatusNotFound).SendString("Page not Found")
+		}
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return nil
+}
+
+func HandleBoardHTML(c *fiber.Ctx) error {
+	name := strings.TrimSuffix(c.Path()[1:], "/")
+	queries := c.Queries()
+	templateMap := fiber.Map{}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := ""
+	useridInterface := sess.Get("userid")
+	if useridInterface != nil {
+		userid = useridInterface.(string)
+	}
+	grade := ""
+	gradeInterface := sess.Get("grade")
+	if gradeInterface != nil {
+		grade = gradeInterface.(string)
+	}
+
+	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
+	templateMap["UserId"] = userid
+	templateMap["Grade"] = grade
+
+	boardCode := queries["board_code"]
+	if boardCode == "" {
+		return c.Status(http.StatusBadRequest).SendString("missing parameter - board")
+	}
+	page := queries["page"]
+	if page == "" {
+		page = "1"
+	}
+
+	boardListingOptions := model.BoardListingOptions{}
+	boardListingOptions.Page = null.IntFrom(0)
+	boardListingOptions.ListCount = null.IntFrom(9999)
+	boardList, _ := crud.GetBoards(boardListingOptions)
+	templateMap["BoardPageData"] = boardList
+
+	currentBoard, _ := crud.GetBoardByCode(model.Board{BoardCode: null.StringFrom(boardCode)})
+
+	templateMap["Accessible"] = false
+	if consts.UserGrades[grade] >= consts.UserGrades[currentBoard.GrantRead.String] {
+		templateMap["Accessible"] = true
+	}
+
+	templateMap["PendingUser"] = true
+	if grade != "pending_user" {
+		templateMap["PendingUser"] = false
+	}
+
+	list, err := GetPostingList(boardCode, queries)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	templateMap["BoardCode"] = boardCode
+	templateMap["PostingList"] = list
 
 	err = c.Render(name, templateMap)
 	if err != nil {
