@@ -32,7 +32,7 @@ import (
 )
 
 func setupINI() {
-	iniPath := "9minutes.ini"
+	iniPath := "config.ini"
 
 	cfg, err := ini.Load(iniPath)
 	if err != nil {
@@ -47,8 +47,8 @@ func setupINI() {
 			log.Fatal("Create INI: ", err)
 		}
 
-		fmt.Println("9minutes.ini is created")
-		fmt.Println("Please modify 9minutes.ini then run again")
+		fmt.Println("config.ini is created")
+		fmt.Println("Please modify config.ini then run again")
 
 		os.Exit(1)
 	}

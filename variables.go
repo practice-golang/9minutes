@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-//go:embed 9minutes.ini
+//go:embed config.ini
 var sampleINI string
 
 //go:embed static/html/favicon.png

@@ -19,7 +19,7 @@ Bulletin board
 ```sh
 $ ./9minutes
 ```
-* Modify `9minutes.ini` then run again `9minutes` binary
+* Modify `config.ini` then run again `9minutes` binary
 * Open `http://localhost:5525` in browser
 * Sign in with `admin` / `admin`
 
@@ -65,7 +65,7 @@ See `setup.go` and `router_*.go`
 ## Email sending
 
 * For the purpose of user verification and password reset
-* See `9minutes.ini`
+* See `config.ini`
 * You can choose `smtp` or `direct sending`
 * When use `direct sending`, you should learn about domain, `DKIM`, `spf record`, `PTR record`
     * Also most of cloud service blocked port 25 so you probably can not use it
