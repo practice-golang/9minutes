@@ -1,12 +1,8 @@
-package main // import "9minutes"
+package server
 
 import (
-	"embed"
-	"log"
-	"os"
-
 	"9minutes/config"
-	"9minutes/handler"
+	"embed"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -38,20 +34,3 @@ var (
 )
 
 var app *fiber.App
-
-func main() {
-	parseArgs()
-
-	if _, err := os.Stat(HtmlPath); os.IsNotExist(err) {
-		IsStaticEmbed = true
-	}
-
-	_ = os.Mkdir(UploadPath, os.ModePerm)
-	setupConfig()
-	handler.NewSessionStore()
-	setupDB()
-	setupRouter()
-
-	println("Listen", ListeningAddress)
-	log.Fatal(app.Listen(ListeningAddress))
-}

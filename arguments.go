@@ -1,4 +1,4 @@
-package main // import "9minutes"
+package server
 
 import (
 	"9minutes/internal/email"
