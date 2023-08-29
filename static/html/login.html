@@ -1,29 +1,20 @@
-<html lang="ko">
+{{template "layout_nomenu_header" .}}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+<input type="hidden" name="destination" value="" />
 
-    <title>Login</title>
-</head>
+<div id="login-container">
+    <label for="userid">Username</label>
+    <input type="text" id="userid" name="userid" tabindex="1" required />
 
-<body>
-    <input type="hidden" name="destination" value="" />
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" tabindex="2" required />
 
-    <div id="login-container">
-        <label for="userid">Username</label>
-        <input type="text" id="userid" name="userid" tabindex="1" required />
+    <br />
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" tabindex="2" required />
-
-        <input type="submit" tabindex="3" value="Login" onclick="login()" />
-        <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset'" />
-        <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup'" />
-    </div>
-
-</body>
+    <input type="submit" tabindex="3" value="Login" onclick="login()" />
+    <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset'" />
+    <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup'" />
+</div>
 
 <script>
     document.querySelector("input[name='destination']").value = document.referrer
@@ -63,4 +54,4 @@
     document.querySelector("#login-container").addEventListener("keyup", pressEnter)
 </script>
 
-</html>
+{{template "layout_nomenu_footer" .}}

@@ -1,10 +1,6 @@
 # NP
 
-NP - Create `N`ull types and `P`ointer to comma separated string
-
 Create comma separated names and values from `struct` or `map` for raw SQL query.
-
-This is an experimental and for my own usage.
 
 ## Which types of
 * `database/sql` Nullnnnn
@@ -20,7 +16,7 @@ See `np_test.go`
 package main
 
 import (
-	"github.com/practice-golang/np"
+	"github.com/practice-golang/9minutes/np"
 )
 
 // Human

@@ -1,31 +1,21 @@
-<html lang="ko">
+{{template "layout_nomenu_header" .}}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+<div>
+    <input type="text" name="username" value="" placeholder="Username" required />
+    <input type="password" name="password" value="" placeholder="Password" required />
+    <input type="text" name="email" value="" placeholder="Email" required />
+    <!-- <input type="text" name="phone" value="" placeholder="Phone" required /> -->
+</div>
 
-    <title>Sign up</title>
-</head>
+<div>
+    <img id="captcha-image" src="/api/captcha/$CAPTCHAID$.png" alt="Captcha image">
+    <a onclick="reloadCaptcha()">Reload</a>
+    <input type=hidden name="captcha-id" value="$CAPTCHAID$"><br>
+    <input name=captcha-answer placeholder="Write number in image" />
+</div>
 
-<body>
-    <div>
-        <input type="text" name="username" value="" placeholder="Username" required />
-        <input type="password" name="password" value="" placeholder="Password" required />
-        <input type="text" name="email" value="" placeholder="Email" required />
-        <!-- <input type="text" name="phone" value="" placeholder="Phone" required /> -->
-    </div>
-
-    <div>
-        <img id="captcha-image" src="/api/captcha/$CAPTCHAID$.png" alt="Captcha image">
-        <a onclick="reloadCaptcha()">Reload</a>
-        <input type=hidden name="captcha-id" value="$CAPTCHAID$"><br>
-        <input name=captcha-answer placeholder="Write number in image" />
-    </div>
-
-    <button type="button" onclick="location.href='/'">Cancel</button>
-    <button type="button" onclick="signup()">Sign up</button>
-</body>
+<button type="button" onclick="location.href='/'">Cancel</button>
+<button type="button" onclick="signup()">Sign up</button>
 
 <script>
     let captchaID = "$CAPTCHAID$";
@@ -73,4 +63,4 @@
     }
 </script>
 
-</html>
+{{template "layout_nomenu_footer" .}}
