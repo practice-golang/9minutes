@@ -11,13 +11,13 @@
 
 <script>
     async function signup() {
-        let data = {
+        const data = {
             username: document.querySelector('input[name="username"]').value,
             password: document.querySelector('input[name="password"]').value,
             email: document.querySelector('input[name="email"]').value,
         }
 
-        let r = await fetch('/api/signup', {
+        const r = await fetch('/api/signup', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
