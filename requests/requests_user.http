@@ -25,9 +25,9 @@ content-type: application/json
 Origin: {{uri}}
 
 {
-    "userid": "bab2",
-    "email": "edp1096@naver.com",
-    "password": "bab2"
+    "userid": "practice",
+    "email": "practice-golang@gmail.com",
+    "password": "11a11"
 }
 
 ### Myinfo

@@ -198,6 +198,52 @@ func setupINI() {
 	}
 }
 
+// setupConfig - setup configurations from environment variables or ini
+func setupConfig() {
+	db.Info = config.DatabaseInfoSQLite
+	// email.Info = config.EmailServerSMTP
+	email.Info = config.EmailServerDirect
+
+	envPORT := os.Getenv("PORT")
+	envDBMS := os.Getenv("DATABASE_TYPE")
+	if envPORT != "" {
+		ListeningIP = "0.0.0.0"
+		ListeningPort = envPORT
+
+		StaticPath = "static"
+		UploadPath = "upload"
+		handler.StoreRoot = "static/html"
+
+		envAddress := os.Getenv("DATABASE_ADDRESS")
+		envDbPort := os.Getenv("DATABASE_PORT")
+		envProtocol := os.Getenv("DATABASE_PROTOCOL")
+		envDbName := os.Getenv("DATABASE_NAME")
+		envDbID := os.Getenv("DATABASE_ID")
+		envDbPassword := os.Getenv("DATABASE_PASSWORD")
+
+		switch envDBMS {
+		case "mysql":
+			db.Info = config.DatabaseInfoMySQL
+			db.Info.Addr = envAddress
+			db.Info.Port = envDbPort
+			db.Info.Protocol = envProtocol
+			db.Info.DatabaseName = envDbName
+			db.Info.GrantID = envDbID
+			db.Info.GrantPassword = envDbPassword
+		case "postgres":
+			db.Info = config.DatabaseInfoPgPublic
+		case "sqlserver":
+			db.Info = config.DatabaseInfoSqlServer
+		default:
+			db.Info = config.DatabaseInfoMySQL
+		}
+	} else {
+		setupINI()
+	}
+
+	ListeningAddress = ListeningIP + ":" + ListeningPort
+}
+
 func setupDB() {
 	var err error
 
@@ -275,50 +321,4 @@ func setupRouter() {
 
 	setStaticFiles(app) // Files, Assets
 	setPage(app)        // HTML templates
-}
-
-// setupConfig - setup configurations from environment variables or ini
-func setupConfig() {
-	db.Info = config.DatabaseInfoSQLite
-	// email.Info = config.EmailServerSMTP
-	email.Info = config.EmailServerDirect
-
-	envPORT := os.Getenv("PORT")
-	envDBMS := os.Getenv("DATABASE_TYPE")
-	if envPORT != "" {
-		ListeningIP = "0.0.0.0"
-		ListeningPort = envPORT
-
-		StaticPath = "static"
-		UploadPath = "upload"
-		handler.StoreRoot = "static/html"
-
-		envAddress := os.Getenv("DATABASE_ADDRESS")
-		envDbPort := os.Getenv("DATABASE_PORT")
-		envProtocol := os.Getenv("DATABASE_PROTOCOL")
-		envDbName := os.Getenv("DATABASE_NAME")
-		envDbID := os.Getenv("DATABASE_ID")
-		envDbPassword := os.Getenv("DATABASE_PASSWORD")
-
-		switch envDBMS {
-		case "mysql":
-			db.Info = config.DatabaseInfoMySQL
-			db.Info.Addr = envAddress
-			db.Info.Port = envDbPort
-			db.Info.Protocol = envProtocol
-			db.Info.DatabaseName = envDbName
-			db.Info.GrantID = envDbID
-			db.Info.GrantPassword = envDbPassword
-		case "postgres":
-			db.Info = config.DatabaseInfoPgPublic
-		case "sqlserver":
-			db.Info = config.DatabaseInfoSqlServer
-		default:
-			db.Info = config.DatabaseInfoMySQL
-		}
-	} else {
-		setupINI()
-	}
-
-	ListeningAddress = ListeningIP + ":" + ListeningPort
 }

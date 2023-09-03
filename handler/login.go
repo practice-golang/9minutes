@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"9minutes/consts"
@@ -90,12 +91,12 @@ func SignupAPI(c *fiber.Ctx) error {
 	// err = json.NewDecoder(c.Body).Decode(&userData)
 	err = json.Unmarshal(rbody, &userData)
 	if err != nil {
-		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
+		return c.Status(http.StatusBadRequest).Send([]byte("Unmarshal:" + err.Error()))
 	}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte("GenerateFromPassword:" + err.Error()))
 	}
 
 	userData["password"] = string(password)
@@ -114,7 +115,7 @@ func SignupAPI(c *fiber.Ctx) error {
 
 	err = crud.AddUserMap(userData)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte("AddUserMap:" + err.Error()))
 	}
 
 	userid = userData["userid"].(string)
@@ -122,10 +123,10 @@ func SignupAPI(c *fiber.Ctx) error {
 
 	userInsertResult, err := crud.GetUserByNameAndEmailMap(userid, useremail)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte("GetUserByNameAndEmailMap:" + err.Error()))
 	}
 
-	userIDX = userInsertResult.(map[string]interface{})["idx"].(string)
+	userIDX = strconv.Itoa(int(userInsertResult.(map[string]interface{})["idx"].(int64)))
 
 	verificationKEY := GetRandomString(32)
 	verificationData := map[string]string{
@@ -135,7 +136,7 @@ func SignupAPI(c *fiber.Ctx) error {
 
 	err = crud.AddUserVerification(verificationData)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte("AddUserVerification:" + err.Error()))
 	}
 
 	// Send verification email
@@ -156,7 +157,7 @@ func SignupAPI(c *fiber.Ctx) error {
 	if email.Info.UseEmail {
 		err = email.SendVerificationEmail(message)
 		if err != nil {
-			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+			return c.Status(http.StatusInternalServerError).Send([]byte("SendVerificationEmail:" + err.Error()))
 		}
 	}
 
