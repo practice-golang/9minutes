@@ -12,6 +12,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -19,6 +20,15 @@ var bm = bluemonday.UGCPolicy()
 
 func HealthCheckAPI(c *fiber.Ctx) error {
 	return c.SendString("Ok")
+}
+
+func getSessionValue(sess *session.Session, key string) (result string) {
+	value := sess.Get(key)
+	if value != nil {
+		result = value.(string)
+	}
+
+	return result
 }
 
 // HandleHTML - Handle HTML template layout
@@ -32,16 +42,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	userid := ""
-	useridInterface := sess.Get("userid")
-	if useridInterface != nil {
-		userid = useridInterface.(string)
-	}
-	grade := ""
-	gradeInterface := sess.Get("grade")
-	if gradeInterface != nil {
-		grade = gradeInterface.(string)
-	}
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
 
 	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
@@ -115,7 +117,7 @@ func HandleHTML(c *fiber.Ctx) error {
 	return nil
 }
 
-func HandleBoardHTML(c *fiber.Ctx) error {
+func HandlePostingList(c *fiber.Ctx) error {
 	name := strings.TrimSuffix(c.Path()[1:], "/")
 	queries := c.Queries()
 	templateMap := fiber.Map{}
@@ -125,16 +127,8 @@ func HandleBoardHTML(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	userid := ""
-	useridInterface := sess.Get("userid")
-	if useridInterface != nil {
-		userid = useridInterface.(string)
-	}
-	grade := ""
-	gradeInterface := sess.Get("grade")
-	if gradeInterface != nil {
-		grade = gradeInterface.(string)
-	}
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
 
 	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
@@ -180,6 +174,7 @@ func HandleBoardHTML(c *fiber.Ctx) error {
 		if strings.Contains(err.Error(), "does not exist") {
 			return c.Status(http.StatusNotFound).SendString("Page not Found")
 		}
+
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 

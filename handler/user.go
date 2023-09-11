@@ -3,6 +3,7 @@ package handler
 import (
 	"9minutes/consts"
 	"9minutes/internal/crud"
+	"9minutes/internal/email"
 	"9minutes/model"
 	"encoding/json"
 	"fmt"
@@ -286,4 +287,69 @@ func ResignUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
+}
+
+func ResetPasswordAPI(c *fiber.Ctx) error {
+	var err error
+
+	columnsCount, _ := crud.GetUserColumnsCount()
+
+	userid := c.FormValue("userid")
+	useremail := c.FormValue("email")
+
+	if userid == "" {
+		return c.Status(http.StatusBadRequest).Send([]byte("userid is empty"))
+	}
+	if useremail == "" {
+		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
+	}
+
+	password := GetRandomString(16)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	switch columnsCount {
+	// case model.UserDataFieldCount:
+	// 	// Waive struct at this time
+	// 	user, err := crud.GetUserByNameAndEmail(userid, useremail)
+	// 	if err != nil {
+	// 		return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
+	// 	}
+
+	// 	user.Password = null.StringFrom(string(passwordHash))
+	// 	crud.UpdateUser(user)
+	default:
+		user, err := crud.GetUserByNameAndEmailMap(userid, useremail)
+		if err != nil {
+			return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
+		}
+
+		user.(map[string]interface{})["password"] = string(passwordHash)
+		crud.UpdateUserMap(user.(map[string]interface{}))
+	}
+
+	// Send password reset email
+	message := email.Message{
+		Service:          email.Info.Service,
+		AppendFromToName: false,
+		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
+		To:               email.To{Email: useremail, Name: userid},
+		Subject:          "EnjoyTools - Password changed",
+		Body: `
+		The password for your account was changed on ` + time.Now().UTC().Format("2006-01-02 15:04:05 UTC") + `
+		<br /><br />
+		` + password,
+		BodyType: email.HTML,
+	}
+
+	if email.Info.UseEmail {
+		err = email.SendVerificationEmail(message)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+	}
+
+	return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetEmail))
 }

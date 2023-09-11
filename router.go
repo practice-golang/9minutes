@@ -91,6 +91,7 @@ func setAPIs(a *fiber.App) {
 	gapi.Post("/login", handler.LoginAPI)
 	gapi.Get("/logout", handler.LogoutAPI)
 	gapi.Post("/signup", handler.SignupAPI)
+	gapi.Post("/password-reset", handler.ResetPasswordAPI)
 
 	/* API myinfo */
 	gmyinfo := gapi.Group("/myinfo") // Require add session middleware
@@ -122,6 +123,6 @@ func setStaticFiles(a *fiber.App) {
 }
 
 func setPage(a *fiber.App) {
-	a.Get("/board/list", handler.HandleBoardHTML)
+	a.Get("/board/list", handler.HandlePostingList)
 	a.Get("/*", handler.HandleHTML)
 }
