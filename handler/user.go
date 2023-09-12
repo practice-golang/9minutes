@@ -15,6 +15,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
+
+	qrcode "github.com/skip2/go-qrcode"
+	"github.com/xlzd/gotp"
 )
 
 func GetUserListAPI(c *fiber.Ctx) error {
@@ -352,4 +355,39 @@ func ResetPasswordAPI(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetEmail))
+}
+
+func Get2FaQR(c *fiber.Ctx) error {
+	// randomSecret := gotp.RandomSecret(16)
+	randomSecret := "ILOYEUDHGQJUSG7WP4RRP3RLT4"
+	fmt.Println(randomSecret)
+
+	totp := gotp.NewDefaultTOTP(randomSecret)
+	fmt.Println("current one-time password is:", totp.Now())
+
+	uri := totp.ProvisioningUri("user@email.com", consts.SiteName)
+	fmt.Println(uri)
+
+	// err := qrcode.WriteFile(uri, qrcode.Medium, 256, "qr.png")
+	qrb64, err := qrcode.Encode(uri, qrcode.Medium, 256)
+	if err != nil {
+		return err
+	}
+
+	c.Set("Content-type", "image/png")
+	return c.Status(http.StatusOK).Send(qrb64)
+}
+
+// func Verify2FA(randomSecret string) {
+func Verify2FA(c *fiber.Ctx) error {
+	randomSecret := "ILOYEUDHGQJUSG7WP4RRP3RLT4"
+
+	totp := gotp.NewDefaultTOTP(randomSecret)
+	otpValue := totp.Now()
+	fmt.Println("current one-time password is:", otpValue)
+
+	ok := totp.Verify(otpValue, time.Now().Unix())
+	fmt.Println("verify OTP success:", ok)
+
+	return c.Status(http.StatusOK).Send([]byte(otpValue))
 }

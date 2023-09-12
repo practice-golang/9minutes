@@ -50,3 +50,15 @@ Cookie: {{cookie}}
 DELETE {{uri}}/api/myinfo HTTP/1.1
 content-type: application/json
 Cookie: {{cookie}}
+
+### 2FA QR code test
+GET {{uri}}/api/2fa/qr HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+
+### 2FA verification test
+GET {{uri}}/api/2fa/verify HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+

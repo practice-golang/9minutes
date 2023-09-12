@@ -85,13 +85,15 @@ func setApiUploader(r *fiber.App) {
 }
 
 func setAPIs(a *fiber.App) {
-	/* API */
+	/* User login API */
 	gapi := a.Group("/api")
 	gapi.Get("/health", handler.HealthCheckAPI)
 	gapi.Post("/login", handler.LoginAPI)
 	gapi.Get("/logout", handler.LogoutAPI)
 	gapi.Post("/signup", handler.SignupAPI)
 	gapi.Post("/password-reset", handler.ResetPasswordAPI)
+	gapi.Get("/2fa/qr", handler.Get2FaQR)
+	gapi.Get("/2fa/verify", handler.Verify2FA)
 
 	/* API myinfo */
 	gmyinfo := gapi.Group("/myinfo") // Require add session middleware

@@ -2,6 +2,7 @@ package consts
 
 var (
 	ProgramName string = "9minutes"
+	SiteName    string = "9mSite"
 
 	BcryptCost       int    = 8
 	TableBoards      string = "boards"
@@ -18,9 +19,10 @@ var (
 	}
 
 	/* Message */
-	MsgFailedToLogin   = `<html><script>alert('Failed to login');location.href="/login.html"</script></html>`
-	MsgForbidden       = `<html><script>location.href="/auth/logout"</script></html>`
-	MsgAlreadyLoggedin = `<html><script>location.href="/"</script></html>`
+	// Not use yet
+	// MsgFailedToLogin   = `<html><script>alert('Failed to login');location.href="/login.html"</script></html>`
+	// MsgForbidden       = `<html><script>location.href="/auth/logout"</script></html>`
+	// MsgAlreadyLoggedin = `<html><script>location.href="/"</script></html>`
 
 	MsgPasswordResetEmail        = `<html><script>alert('Password reset email have been sent');location.href="/"</script></html>`
 	MsgPasswordResetUserNotFound = `<html><script>alert('User not found');location.href="/"</script></html>`

@@ -12,7 +12,9 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/sijms/go-ora/v2 v2.7.17
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4
+	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.12.0
 	gopkg.in/guregu/null.v4 v4.0.0
 	gopkg.in/ini.v1 v1.67.0
