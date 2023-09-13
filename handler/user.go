@@ -154,17 +154,18 @@ func DeleteUserAPI(c *fiber.Ctx) error {
 	}
 
 	for _, userData := range userDatas {
-		idx, err := strconv.Atoi(userData["idx"].(string))
-		if err != nil {
-			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
-			userDatasFailed = append(userDatasFailed, responseData)
-			continue
-		}
+		// idx, err := strconv.Atoi(userData["idx"].(string))
+		// if err != nil {
+		// 	responseData := map[string]interface{}{"data": userData, "error": err.Error()}
+		// 	userDatasFailed = append(userDatasFailed, responseData)
+		// 	continue
+		// }
+		idx := int64(userData["idx"].(float64))
 
 		if isDelete {
-			err = crud.DeleteUser(int64(idx))
+			err = crud.DeleteUser(idx)
 		} else {
-			err = crud.ResignUser(int64(idx))
+			err = crud.ResignUser(idx)
 		}
 
 		if err != nil {

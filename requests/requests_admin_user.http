@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=e39fad30-22a1-47d3-9c25-54623f38a7be; 
+@cookie = session_id=71d15050-9d9a-413e-8da9-309ed92258e5; max-age=86400; path=/; secure; SameSite=None
 
 
 ### Login
@@ -47,7 +47,7 @@ Cookie: {{cookie}}
 
 [
     {
-        "idx": "17",
+        "idx": 17,
         "userid": "userb",
         "email": "userb@example.com",
         "grade": "pending_user"
@@ -60,8 +60,8 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 [
-    { "idx": "15" },
-    { "idx": "17" }
+    { "idx": 10 },
+    { "idx": 17 }
 ]
 
 ### Delete user - Delete. not default

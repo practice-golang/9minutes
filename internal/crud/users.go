@@ -362,7 +362,7 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 		userData[k] = v
 	}
 
-	idx := userData["idx"].(string)
+	idx := int64(userData["idx"].(float64))
 	delete(userData, "idx")
 
 	updateset := np.CreateUpdateString(userData, dbtype, "", false)
