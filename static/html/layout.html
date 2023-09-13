@@ -50,9 +50,8 @@
 
         <div>
             {{if ne .UserId ""}}
-            Good day, {{.UserId}}.
+            Good day, <a href="/mypage">{{.UserId}}</a>.
             <a href="/logout">Logout</a>
-            <a href="/mypage">My page</a>
 
             {{if eq .Grade "admin"}}
             <a href="/admin">Admin</a>
