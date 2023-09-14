@@ -25,3 +25,17 @@ Content-Type: application/json
     "content": "<p>This is a comment! Nice to meet you & <^-^>'</p>",
     "files": ""
 }
+
+### Comment - Update
+PUT {{uri}}/api/board/misc/1/comment/1 HTTP/1.1
+Content-Type: application/json
+
+{
+    "author-idx": 1,
+    "author-name": "admin",
+    "content": "<p>This is a comment! Edit!!</p>",
+    "files": ""
+}
+
+### Comment - Delete
+DELETE {{uri}}/api/board/misc/1/comment/1 HTTP/1.1
