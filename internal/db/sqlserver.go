@@ -114,9 +114,7 @@ func (d *SqlServer) CreateUploadTable() error {
 	CREATE TABLE "` + Info.UploadTable + `" (
 		IDX             BIGINT       NOT NULL IDENTITY PRIMARY KEY,
 		FILE_NAME       VARCHAR(512) NULL DEFAULT NULL,
-		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL,
-		BOARD_IDX       INT          NULL,
-		POST_IDX        INT          NULL
+		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL
 	)`
 
 	_, err := Con.Exec(sql)
@@ -367,7 +365,7 @@ func (d *SqlServer) CreateComment(tableInfo model.Board, recreate bool) error {
 	IF OBJECT_ID(N'` + tableInfo.CommentTable.String + `', N'U') IS NULL
 	CREATE TABLE "` + tableInfo.CommentTable.String + `" (
 		IDX         BIGINT       NOT NULL IDENTITY PRIMARY KEY,
-		BOARD_IDX   BIGINT       NOT NULL,
+		POSTING_IDX BIGINT       NOT NULL,
 		TITLE       VARCHAR(256) NULL DEFAULT NULL,
 		TITLE_IMAGE VARCHAR(256) NULL DEFAULT NULL,
 		CONTENT     TEXT         NULL DEFAULT NULL,

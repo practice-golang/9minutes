@@ -3,6 +3,9 @@
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
 * [x] Board list generation for menu items
+* [ ] Comment edit, Delete
+    * [ ] Comment edit
+    * [ ] Comment delete
 * [ ] All board table names to lowercase
 * [ ] escape/unscape comment writing/reading
 * [ ] Editor

@@ -148,13 +148,13 @@
         pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
     }
 
-    /* 
+    /*
     getComments(page)
-    page: number - If page is 0, last comment page
+    page: number - If page is 1, last comment page
      */
     async function getComments(page = 1) {
         page = parseInt(page)
-        if (page < 0) { page = 0 } // last page
+        if (page < 0) { page = 1 } // last page
         if (page > totalCommentPage) { page = totalCommentPage }
 
         const commentsContainer = document.querySelector("#comments")
@@ -221,10 +221,11 @@
 
         if (r.ok) {
             getComments(0)
-        } else {
-            alert("Write failed")
+            editor.setHTML("")
+            return false
         }
-
+        
+        alert("Write failed")
         return false
     }
 

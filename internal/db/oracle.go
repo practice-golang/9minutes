@@ -209,8 +209,6 @@ func (d *Oracle) CreateUploadTable() error {
 		IDX             NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		FILE_NAME       VARCHAR(512),
 		STORAGE_NAME    VARCHAR(512),
-		BOARD_IDX       NUMBER(11),
-		POST_IDX        NUMBER(11),
 
 		UNIQUE("IDX")
 	)`
@@ -475,7 +473,7 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 	sql = `
 	CREATE TABLE ` + commentName + ` (
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
-		BOARD_IDX   NUMBER(11),
+		POSTING_IDX NUMBER(11),
 		CONTENT     NCLOB,
 		AUTHOR_IDX  NUMBER(11),
 		AUTHOR_NAME VARCHAR(256),

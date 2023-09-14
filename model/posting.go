@@ -42,7 +42,6 @@ type Posting struct {
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"update, viewcount"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update, viewcount"`
 	Files      null.String `json:"files"       db:"FILES"       npskip:"viewcount"`
-	Images     null.String `json:"images"      db:"IMAGES"      npskip:"viewcount"` // TODO - remove
 	Views      null.Int    `json:"views"       db:"VIEWS"       npskip:"update"`
 	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update, viewcount"`
 }

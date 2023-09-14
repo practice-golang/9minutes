@@ -109,9 +109,7 @@ func (d *Postgres) CreateUploadTable() error {
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UploadTable + ` (
 		"IDX"             SERIAL        PRIMARY KEY,
 		"FILE_NAME"       VARCHAR(512)  NULL DEFAULT NULL,
-		"STORAGE_NAME"    VARCHAR(512)  NULL DEFAULT NULL,
-		"BOARD_IDX"       INTEGER       NULL DEFAULT NULL,
-		"POST_IDX"        INTEGER       NULL DEFAULT NULL
+		"STORAGE_NAME"    VARCHAR(512)  NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
@@ -314,7 +312,7 @@ func (d *Postgres) CreateComment(tableInfo model.Board, recreate bool) error {
 	sql += `
 	CREATE TABLE IF NOT EXISTS ` + tableName + ` (
 		"IDX"         BIGSERIAL    PRIMARY KEY,
-		"BOARD_IDX"   BIGINT,
+		"POSTING_IDX" BIGINT,
 		"CONTENT"     TEXT         NULL DEFAULT NULL,
 		"AUTHOR_IDX"  BIGINT       NULL DEFAULT NULL,
 		"AUTHOR_NAME" VARCHAR(256) NULL DEFAULT NULL,

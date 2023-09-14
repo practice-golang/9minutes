@@ -95,7 +95,7 @@ func WriteComment(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
-	comment.BoardIdx = null.IntFrom(postingIdx)
+	comment.PostingIdx = null.IntFrom(postingIdx)
 
 	err = c.BodyParser(&comment)
 	if err != nil {
@@ -156,7 +156,7 @@ func DeleteComment(c *fiber.Ctx) error {
 	code := uri[len(uri)-3]
 	board.BoardCode = null.StringFrom(code)
 
-	boardIdx, _ := strconv.Atoi(uri[len(uri)-2])
+	postingIdx, _ := strconv.Atoi(uri[len(uri)-2])
 	commentIdx, _ := strconv.Atoi(uri[len(uri)-1])
 
 	board, err := crud.GetBoardByCode(board)
@@ -164,7 +164,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).SendString("Board was not found")
 	}
 
-	err = crud.DeleteComment(board, fmt.Sprint(boardIdx), fmt.Sprint(commentIdx))
+	err = crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

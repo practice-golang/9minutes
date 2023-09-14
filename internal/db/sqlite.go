@@ -92,8 +92,6 @@ func (d *SQLite) CreateUploadTable() error {
 		"IDX"             INTEGER,
 		"FILE_NAME"       TEXT,
 		"STORAGE_NAME"    TEXT,
-		"BOARD_IDX"       INTEGER,
-		"POST_IDX"        INTEGER,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
@@ -292,7 +290,7 @@ func (d *SQLite) CreateComment(tableInfo model.Board, recreate bool) error {
 	sql += `
 	CREATE TABLE IF NOT EXISTS "` + tableName + `" (
 		"IDX"         INTEGER,
-		"BOARD_IDX"   INTEGER,
+		"POSTING_IDX" INTEGER,
 		"CONTENT"     TEXT,
 		"AUTHOR_IDX"  INTEGER,
 		"AUTHOR_NAME" TEXT,

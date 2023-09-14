@@ -26,7 +26,7 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnTitle := np.CreateString(map[string]interface{}{"TITLE": nil}, dbtype, "", false)
 	columnContent := np.CreateString(map[string]interface{}{"CONTENT": nil}, dbtype, "", false)
-	columnBoardIdx := np.CreateString(map[string]interface{}{"BOARD_IDX": nil}, dbtype, "", false)
+	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, dbtype, "", false)
 	columnCommentCount := np.CreateString(map[string]interface{}{"COMMENT_COUNT": nil}, dbtype, "", false)
 
 	sqlSearch := ""
@@ -48,7 +48,7 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 			SELECT
 				COUNT(` + columnIdx.Names + `)
 			FROM ` + commentTableName + `
-			WHERE ` + columnBoardIdx.Names + ` = A.` + columnIdx.Names + `
+			WHERE ` + columnPostingIdx.Names + ` = A.` + columnIdx.Names + `
 		) AS ` + columnCommentCount.Names + `
 	FROM ` + tableName + ` A
 	` + sqlSearch + `
