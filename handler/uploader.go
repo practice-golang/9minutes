@@ -77,7 +77,7 @@ func FilesInfo(c *fiber.Ctx) (err error) {
 	}
 
 	if len(uploadIndices) == 0 {
-		return c.Status(http.StatusBadRequest).Send([]byte("no files to delete"))
+		return c.Status(http.StatusBadRequest).Send([]byte("no files to show"))
 	}
 
 	var indices []int

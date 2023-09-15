@@ -36,6 +36,8 @@
         {{range .Comments.CommentList}}
         <span>{{.AuthorName.String}}</span>|
         <span>{{format_date .RegDate.String}}</span>|
+        <button type="button" onclick="editComment('{{.Idx.Int64}}')">edit</button>
+        <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         <span>{{unescape .Content.String}}</span>
         {{end}}
     </div>
@@ -61,6 +63,13 @@
         <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
         <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
     </span>
+</div>
+
+<div id="modifier-container">
+    <div id="modifier"></div>
+    <div>
+        <button type="button">Update</button>
+    </div>
 </div>
 
 <div id="editor"></div>
@@ -170,7 +179,13 @@
 
             data["comment-list"].forEach((comment) => {
                 const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
-                commentsHTML += `${comment["author-name"]}|${regdate}|${comment["content"]}`
+                commentsHTML += `
+                <span>${comment["author-name"]}</span>|
+                <span>${regdate}</span>|
+                <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
+                <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
+                <span>${comment["content"]}</span>
+                `
             })
             commentsContainer.innerHTML = commentsHTML
 
@@ -202,6 +217,11 @@
         const uri = `/api/board/${boardCode}/${postingIdx}/comment`
         const content = editor.getHTML()
 
+        if (content.trim() == "<p><br></p>") {
+            alert("Text is empty")
+            return false
+        }
+
         let fileIndices = ""
         for (const f of filesList) { fileIndices += `${f.idx}|` }
         if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
@@ -224,7 +244,7 @@
             editor.setHTML("")
             return false
         }
-        
+
         alert("Write failed")
         return false
     }
@@ -244,10 +264,10 @@
         })
 
         if (r.ok) {
-            const response = await r.json()
+            const commentData = await r.json()
 
             const fcontainer = document.querySelector("#fileslist-container > ul")
-            response.forEach((f) => {
+            commentData.forEach((f) => {
                 const li = document.createElement("li")
                 li.setAttribute("id", `file-${f.idx}`)
                 li.appendChild(document.createTextNode(`${f.filename}`))
@@ -257,9 +277,16 @@
         }
     }
 
+    function editComment(idx) {
+        alert("Edit!" + idx)
+    }
+
+    function deleteComment(idx) {
+        alert("Delete!" + idx)
+    }
+
     function init() {
         showCommentPageJumper()
-
         getFilesInfo()
     }
     document.addEventListener("DOMContentLoaded", function () { init() })
@@ -267,6 +294,10 @@
 
 <style>
     .page-jump {
+        display: none;
+    }
+
+    #modifier-container {
         display: none;
     }
 </style>
