@@ -268,11 +268,18 @@
 
             const fcontainer = document.querySelector("#fileslist-container > ul")
             commentData.forEach((f) => {
+                const a = document.createElement("a")
+                a.setAttribute("href", `/upload/${f.storagename}`)
+                a.setAttribute("target", "_blank")
+                a.appendChild(document.createTextNode(`${f.filename}`))
+
                 const li = document.createElement("li")
                 li.setAttribute("id", `file-${f.idx}`)
-                li.appendChild(document.createTextNode(`${f.filename}`))
+                // li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(a)
 
                 fcontainer.appendChild(li)
+                filesList.push(f)
             })
         }
     }
