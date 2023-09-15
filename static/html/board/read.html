@@ -217,7 +217,8 @@
         const uri = `/api/board/${boardCode}/${postingIdx}/comment`
         const content = editor.getHTML()
 
-        if (content.trim() == "<p><br></p>") {
+        const emptyContent = "<p><br></p>"
+        if (content.trim() == emptyContent) {
             alert("Text is empty")
             return false
         }
