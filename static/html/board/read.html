@@ -39,6 +39,7 @@
         <button type="button" onclick="editComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         <span>{{unescape .Content.String}}</span>
+        <comment-modifier id="modifier-{{.Idx.Int64}}"></comment-modifier>
         {{end}}
     </div>
 </div>
@@ -65,12 +66,24 @@
     </span>
 </div>
 
-<div id="modifier-container">
-    <div id="modifier"></div>
-    <div>
-        <button type="button">Update</button>
+<!-- Comment modification editor -->
+<template id="modifier-template">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+
+    <div class="modifier-container">
+        <div class="modifier"></div>
+        <div>
+            <button type="button" onclick="cancelEditComment(this)">Cancel</button>
+            <button type="button">Update</button>
+        </div>
     </div>
-</div>
+
+    <style>
+        .modifier-container {
+            display: none;
+        }
+    </style>
+</template>
 
 <div id="editor"></div>
 <div>
@@ -109,6 +122,31 @@
         hooks: { addImageBlobHook: onUploadImage },
         initialValue: initialContent
     })
+
+    class modifierElement extends HTMLElement {
+        constructor() {
+            super()
+            const template = document.getElementById("modifier-template")
+            const templateContent = template.content
+
+            const shadowRoot = this.attachShadow({ mode: "open" })
+            shadowRoot.appendChild(templateContent.cloneNode(true))
+
+            // const modifier = new toastui.Editor({
+            //     el: document.querySelector("#modifier-container > .modifier"),
+            //     previewStyle: "tab",
+            //     initialEditType: "wysiwyg",
+            //     hideModeSwitch: true,
+            //     height: "250px",
+            //     hooks: { addImageBlobHook: onUploadImage },
+            //     initialValue: initialContent
+            // })
+        }
+    }
+
+    customElements.define("comment-modifier", modifierElement)
+
+    let openedModifierIdxes = []
 
     async function onUploadImage(blob, callback) {
         const formData = new FormData()
@@ -185,6 +223,7 @@
                 <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 <span>${comment["content"]}</span>
+                <comment-modifier id="modifier-${comment["idx"]}"></comment-modifier>
                 `
             })
             commentsContainer.innerHTML = commentsHTML
@@ -286,11 +325,31 @@
     }
 
     function editComment(idx) {
-        alert("Edit!" + idx)
+        for (openedIDX of openedModifierIdxes) {
+            const modifierEL = document.querySelector(`comment-modifier#modifier-${openedIDX}`)
+            if (modifierEL != null) {
+                modifierEL.shadowRoot.querySelectorAll(".modifier-container")[0].style.display = "none"
+            }
+        }
+        openedModifierIdxes = []
+
+        const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
+        modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
+        openedModifierIdxes.push(idx)
     }
 
     function deleteComment(idx) {
         alert("Delete!" + idx)
+    }
+
+    function updateComment(self) {
+        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
+    }
+
+    function cancelEditComment(self) {
+        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
+        container.style.display = "none"
+        openedModifierIdxes = []
     }
 
     function init() {
@@ -302,10 +361,6 @@
 
 <style>
     .page-jump {
-        display: none;
-    }
-
-    #modifier-container {
         display: none;
     }
 </style>
