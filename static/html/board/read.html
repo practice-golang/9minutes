@@ -38,7 +38,7 @@
         <span>{{format_date .RegDate.String}}</span>|
         <button type="button" onclick="editComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
-        <span>{{unescape .Content.String}}</span>
+        <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
         <comment-modifier id="modifier-{{.Idx.Int64}}"></comment-modifier>
         {{end}}
     </div>
@@ -69,12 +69,14 @@
 <!-- Comment modification editor -->
 <template id="modifier-template">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
+    <script src="/assets/js/toastui-editor-all.min.js"></script>
 
     <div class="modifier-container">
         <div class="modifier"></div>
         <div>
             <button type="button" onclick="cancelEditComment(this)">Cancel</button>
-            <button type="button">Update</button>
+            <button type="button" onclick="updateComment(this)">Update</button>
         </div>
     </div>
 
@@ -84,6 +86,7 @@
         }
     </style>
 </template>
+<!-- Comment modification editor -->
 
 <div id="editor"></div>
 <div>
@@ -143,9 +146,9 @@
             // })
         }
     }
-
     customElements.define("comment-modifier", modifierElement)
 
+    let commentModifier
     let openedModifierIdxes = []
 
     async function onUploadImage(blob, callback) {
@@ -334,6 +337,20 @@
         openedModifierIdxes = []
 
         const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
+
+        const modTarget = modifierROOT.querySelectorAll(".modifier-container > .modifier")[0]
+        const modContent = document.querySelector(`#comment-${idx}`).innerHTML
+
+        commentModifier = new toastui.Editor({
+            el: modTarget,
+            previewStyle: "tab",
+            initialEditType: "wysiwyg",
+            hideModeSwitch: true,
+            height: "250px",
+            hooks: { addImageBlobHook: onUploadImage },
+            initialValue: modContent
+        })
+
         modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
         openedModifierIdxes.push(idx)
     }
@@ -344,6 +361,12 @@
 
     function updateComment(self) {
         const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
+        const data = commentModifier.getHTML()
+
+        console.log(data)
+
+        container.style.display = "none"
+        openedModifierIdxes = []
     }
 
     function cancelEditComment(self) {
