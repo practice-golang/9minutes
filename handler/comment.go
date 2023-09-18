@@ -144,6 +144,43 @@ func WriteComment(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
+func UpdateComment(c *fiber.Ctx) error {
+	var board model.Board
+
+	boardCode := c.Params("board_code")
+	postingIdx := c.Params("posting_idx")
+	commentIdx := c.Params("comment_idx")
+
+	board.BoardCode = null.StringFrom(boardCode)
+	board, err := crud.GetBoardByCode(board)
+	if err != nil {
+		return c.Status(http.StatusNotFound).SendString("Board was not found")
+	}
+
+	comment := model.Comment{}
+	err = c.BodyParser(&comment)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	commentIdxINT, err := strconv.Atoi(commentIdx)
+	if err != nil {
+		return c.Status(http.StatusNotFound).SendString("comment index is not correct")
+	}
+	comment.Idx = null.IntFrom(int64(commentIdxINT))
+
+	err = crud.UpdateComment(board, comment, fmt.Sprint(postingIdx))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	result := map[string]interface{}{
+		"result": "success",
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
 func DeleteComment(c *fiber.Ctx) error {
 	var board model.Board
 

@@ -23,10 +23,10 @@ type CommentPageData struct {
 
 type Comment struct {
 	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update"`
-	PostingIdx null.Int    `json:"posting-idx" db:"POSTING_IDX"`
+	PostingIdx null.Int    `json:"posting-idx" db:"POSTING_IDX" npskip:"update"`
 	Content    null.String `json:"content"     db:"CONTENT"`
 	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"update"`
 	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update"`
 	Files      null.String `json:"files"       db:"FILES"`
-	RegDate    null.String `json:"regdate"     db:"REGDATE"`
+	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update"`
 }

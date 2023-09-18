@@ -5,6 +5,8 @@ import (
 	"9minutes/internal/np"
 	"9minutes/model"
 	"math"
+	"strconv"
+	"strings"
 
 	"github.com/blockloop/scan"
 )
@@ -127,6 +129,38 @@ func WriteComment(board model.Board, content model.Comment) error {
 	) VALUES (
 		` + column.Values + `
 	)`
+
+	_, err := db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateComment(board model.Board, comment model.Comment, postingIdx string) error {
+	tableName := db.GetFullTableName(board.CommentTable.String)
+	commentIDX := strconv.Itoa(int(comment.Idx.Int64))
+
+	column := np.CreateString(comment, db.GetDatabaseTypeString(), "update", false)
+	colNames := strings.Split(column.Names, ",")
+	colValues := strings.Split(column.Values, ",")
+
+	holder := ""
+	for i := 0; i < len(colNames); i++ {
+		if colNames[i] != `"FILES"` && colValues[i] == "''" {
+			continue
+		}
+		holder += colNames[i] + " = " + colValues[i] + ", "
+	}
+	holder = strings.TrimSuffix(holder, ", ")
+
+	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
+
+	sql := `
+	UPDATE ` + tableName + ` SET
+		` + holder + `
+	WHERE ` + columnIdx.Names + ` = ` + commentIDX
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

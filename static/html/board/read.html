@@ -225,7 +225,7 @@
                 <span>${regdate}</span>|
                 <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
-                <span>${comment["content"]}</span>
+                <span id="comment-${comment['idx']}">${comment["content"]}</span>
                 <comment-modifier id="modifier-${comment["idx"]}"></comment-modifier>
                 `
             })
@@ -250,6 +250,8 @@
 
             currentCommentPage = data["current-page"]
             totalCommentPage = data["total-page"]
+            openedModifierIdxes = []
+            commentModifier = null
 
             showCommentPageJumper()
         }
@@ -381,12 +383,14 @@
 
         container.style.display = "none"
         openedModifierIdxes = []
+        commentModifier = null
     }
 
     function cancelEditComment(self) {
         const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
         container.style.display = "none"
         openedModifierIdxes = []
+        commentModifier = null
     }
 
     function init() {
