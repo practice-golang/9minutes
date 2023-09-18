@@ -36,7 +36,7 @@
         {{range .Comments.CommentList}}
         <span>{{.AuthorName.String}}</span>|
         <span>{{format_date .RegDate.String}}</span>|
-        <button type="button" onclick="editComment('{{.Idx.Int64}}')">edit</button>
+        <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
         <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
@@ -73,7 +73,12 @@
     <script src="/assets/js/toastui-editor-all.min.js"></script>
 
     <div class="modifier-container">
-        <div class="modifier"></div>
+        <div id="modifier"></div>
+
+        <div class="comment-fileslist-container">
+            <ul></ul>
+        </div>
+
         <div>
             <button type="button" onclick="cancelEditComment(this)">Cancel</button>
             <button type="button" onclick="updateComment(this)">Update</button>
@@ -129,9 +134,7 @@
     class modifierElement extends HTMLElement {
         constructor() {
             super()
-            const template = document.getElementById("modifier-template")
-            const templateContent = template.content
-
+            const templateContent = document.querySelector("#modifier-template").content
             const shadowRoot = this.attachShadow({ mode: "open" })
             shadowRoot.appendChild(templateContent.cloneNode(true))
         }
@@ -319,7 +322,7 @@
         }
     }
 
-    function editComment(idx) {
+    function openEditComment(idx) {
         for (openedIDX of openedModifierIdxes) {
             const modifierEL = document.querySelector(`comment-modifier#modifier-${openedIDX}`)
             if (modifierEL != null) {
@@ -329,12 +332,10 @@
         openedModifierIdxes = []
 
         const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
-
-        const modTarget = modifierROOT.querySelectorAll(".modifier-container > .modifier")[0]
         const modContent = document.querySelector(`#comment-${idx}`).innerHTML
 
         commentModifier = new toastui.Editor({
-            el: modTarget,
+            el: modifierROOT.querySelector("#modifier"),
             previewStyle: "tab",
             initialEditType: "wysiwyg",
             hideModeSwitch: true,
