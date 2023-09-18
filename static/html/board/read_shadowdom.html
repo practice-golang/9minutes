@@ -1,0 +1,420 @@
+{{template "layout_board_header" .}}
+
+<link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
+<script src="/assets/js/toastui-editor-all.min.js"></script>
+
+<div>
+    <div>
+        <span>{{.Posting.Title.String}}</span>
+    </div>
+
+    <div>
+        <span>{{.Posting.AuthorName.String}}</span> |
+        <span>{{format_date .Posting.RegDate.String}}</span> |
+        <span>{{.Posting.Views.Int64}}</span>
+    </div>
+
+    <div>
+        {{unescape .Posting.Content.String}}
+    </div>
+
+    <div id="fileslist-container">
+        <ul></ul>
+    </div>
+</div>
+
+<div>
+    <!-- Todo - change button onclick to a href -->
+    <button type="button" onclick="backToList()">List</button>
+    <button type="button" onclick="moveToEdit()">Edit</button>
+    <button type="button" onclick="deletePosting()">Delete</button>
+</div>
+
+<!-- Comment -->
+<div>
+    <div id="comments">
+        {{range .Comments.CommentList}}
+        <span>{{.AuthorName.String}}</span>|
+        <span>{{format_date .RegDate.String}}</span>|
+        <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
+        <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
+        <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
+        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
+        {{end}}
+    </div>
+</div>
+
+<div>
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('1'))">&laquo;</a>
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
+    </span>
+
+    <span id="comment-pages">
+        {{range .Comments.PageList}}
+        {{if eq . $.Comments.CurrentPage}}
+        <b>{{.}}</b>
+        {{else}}
+        <a onclick="getComments('{{.}}')">{{.}}</a>
+        {{end}}
+        {{end}}
+    </span>
+
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
+        <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
+    </span>
+</div>
+
+<!-- Comment modification editor -->
+<template id="modifier-template">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
+    <script src="/assets/js/toastui-editor-all.min.js"></script>
+
+    <div class="modifier-container">
+        <div id="modifier"></div>
+
+        <div class="comment-fileslist-container">
+            <ul></ul>
+        </div>
+
+        <div>
+            <button type="button" onclick="cancelEditComment(this)">Cancel</button>
+            <button type="button" onclick="updateComment(this)">Update</button>
+        </div>
+    </div>
+
+    <style>
+        .modifier-container {
+            display: none;
+        }
+    </style>
+</template>
+<!-- Comment modification editor -->
+
+<div id="editor"></div>
+<div>
+    <button type="button" onclick="writeComment()">Write</button>
+</div>
+
+<script>
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+    const postingIdx = queries.get("idx")
+    const fileIndices = "{{.Posting.Files.String}}"
+
+    function backToList() { location.href = `/board/list?board_code=${boardCode}` }
+    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
+    async function deletePosting() {
+        const uri = `/api/board/${boardCode}/posting/${postingIdx}`
+        const r = await fetch(uri, { method: "DELETE" })
+
+        if (r.ok) {
+            alert("Deleted")
+            backToList()
+        }
+
+        return false
+    }
+
+    const initialContent = ""
+    const filesList = []
+
+    const editor = new toastui.Editor({
+        el: document.querySelector("#editor"),
+        previewStyle: "tab",
+        initialEditType: "wysiwyg",
+        hideModeSwitch: true,
+        height: "250px",
+        hooks: { addImageBlobHook: onUploadImage },
+        initialValue: initialContent
+    })
+
+    class modifierElement extends HTMLElement {
+        constructor() {
+            super()
+            const templateContent = document.querySelector("#modifier-template").content
+            const shadowRoot = this.attachShadow({ mode: "open" })
+            shadowRoot.appendChild(templateContent.cloneNode(true))
+        }
+    }
+    customElements.define("comment-modifier", modifierElement)
+
+    let commentModifier
+    let openedModifierIdxes = []
+
+    async function onUploadImage(blob, callback) {
+        const formData = new FormData()
+        formData.append("upload-files", blob)
+
+        const uri = "/api/uploader"
+        const r = await fetch(uri, {
+            method: "POST",
+            body: formData
+        })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                callback(`/upload/${f.storagename}`, f.filename)
+
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                filesList.push(f)
+            })
+        }
+    }
+
+
+    let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
+    let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
+
+    function showCommentPageJumper() {
+        const commentPages = document.querySelector("#comment-pages")
+        const pageJumper = document.querySelectorAll(".page-jump")
+
+        let displayMode = "initial"
+        if (commentPages.innerHTML.trim() == "") { displayMode = "none" }
+
+        pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
+    }
+
+    /*
+    getComments(page)
+    page: number - If page is 1, last comment page
+     */
+    async function getComments(page = 1) {
+        page = parseInt(page)
+        if (page < 0) { page = 1 } // last page
+        if (page > totalCommentPage) { page = totalCommentPage }
+
+        const commentsContainer = document.querySelector("#comments")
+        const pageContainer = document.querySelector("#comment-pages")
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment?page=${page}`
+
+        const r = await fetch(uri)
+
+        let commentsHTML = ""
+        if (r.ok) {
+            const data = await r.json()
+            totalCommentPage = data["total-page"]
+
+            data["comment-list"].forEach((comment) => {
+                const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
+                commentsHTML += `
+                <span>${comment["author-name"]}</span>|
+                <span>${regdate}</span>|
+                <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
+                <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
+                <span id="comment-${comment['idx']}">${comment["content"]}</span>
+                <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
+                `
+            })
+            commentsContainer.innerHTML = commentsHTML
+
+            // paging
+            const begin = data["current-page"] - 5 > 0 ? data["current-page"] - 5 : 1
+            const fin = data["current-page"] + 5 <= data["total-page"] ? data["current-page"] + 5 : data["total-page"]
+
+            if (page == 0) { page = totalCommentPage }
+
+            let pages = ""
+            data["page-list"].forEach((p) => {
+                if (p == page) {
+                    pages += `<b>${p}</b>`
+                } else {
+                    pages += `<a onclick="getComments('${p}')">${p}</a>`
+                }
+                pages += "\n"
+            })
+            pageContainer.innerHTML = pages
+
+            currentCommentPage = data["current-page"]
+            totalCommentPage = data["total-page"]
+            openedModifierIdxes = []
+            commentModifier = null
+
+            showCommentPageJumper()
+        }
+    }
+
+    async function writeComment() {
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment`
+        const content = editor.getHTML()
+
+        const emptyContent = "<p><br></p>"
+        if (content.trim() == emptyContent) {
+            alert("Text is empty")
+            return false
+        }
+
+        let fileIndices = ""
+        for (const f of filesList) { fileIndices += `${f.idx}|` }
+        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
+
+        const data = {
+            "author-idx": 1,
+            "author-name": "admin",
+            "content": content,
+            "files": fileIndices
+        }
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            getComments(0)
+            editor.setHTML("")
+            return false
+        }
+
+        alert("Write failed")
+        return false
+    }
+
+    async function getFilesInfo() {
+        const indexList = []
+        for (const fidx of fileIndices.split("|")) {
+            indexList.push({ idx: parseInt(fidx) })
+        }
+
+        const uri = "/api/uploader/files-info"
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(indexList)
+        })
+
+        if (r.ok) {
+            const commentData = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            commentData.forEach((f) => {
+                const a = document.createElement("a")
+                a.setAttribute("href", `/upload/${f.storagename}`)
+                a.setAttribute("target", "_blank")
+                a.appendChild(document.createTextNode(`${f.filename}`))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                // li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(a)
+
+                fcontainer.appendChild(li)
+                filesList.push(f)
+            })
+        }
+    }
+
+    function openEditComment(idx) {
+        for (openedIDX of openedModifierIdxes) {
+            const modifierEL = document.querySelector(`comment-modifier#modifier-${openedIDX}`)
+            if (modifierEL != null) {
+                modifierEL.shadowRoot.querySelectorAll(".modifier-container")[0].style.display = "none"
+            }
+        }
+        openedModifierIdxes = []
+
+        const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
+        const modContent = document.querySelector(`#comment-${idx}`).innerHTML
+
+        commentModifier = new toastui.Editor({
+            el: modifierROOT.querySelector("#modifier"),
+            previewStyle: "tab",
+            initialEditType: "wysiwyg",
+            hideModeSwitch: true,
+            height: "250px",
+            hooks: { addImageBlobHook: onUploadImage },
+            initialValue: modContent
+        })
+
+        modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
+        openedModifierIdxes.push(idx)
+    }
+
+    async function deleteComment(commentIDX) {
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+        const r = await fetch(uri, {
+            method: "DELETE"
+        })
+
+        if (r.ok) {
+            if (currentCommentPage == totalCommentPage) {
+                getComments(totalCommentPage)
+            } else {
+                getComments(currentCommentPage)
+            }
+        } else {
+            alert("Failed to delete")
+        }
+    }
+
+    async function updateComment(self) {
+        const commentIDX = self.getRootNode().host.dataset.idx
+        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
+        const content = commentModifier.getHTML()
+
+        const data = {
+            "content": content,
+            "files": fileIndices
+        }
+
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+        const r = await fetch(uri, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            if (currentCommentPage == totalCommentPage) {
+                getComments(totalCommentPage)
+            } else {
+                getComments(currentCommentPage)
+            }
+        } else {
+            alert("Failed to update")
+        }
+
+        container.style.display = "none"
+        openedModifierIdxes = []
+        commentModifier = null
+    }
+
+    function cancelEditComment(self) {
+        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
+        container.style.display = "none"
+        openedModifierIdxes = []
+        commentModifier = null
+    }
+
+    function init() {
+        showCommentPageJumper()
+        getFilesInfo()
+    }
+    document.addEventListener("DOMContentLoaded", function () { init() })
+</script>
+
+<style>
+    .page-jump {
+        display: none;
+    }
+</style>
+
+{{template "layout_board_footer" .}}
