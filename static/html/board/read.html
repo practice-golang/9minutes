@@ -39,7 +39,7 @@
         <button type="button" onclick="editComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
-        <comment-modifier id="modifier-{{.Idx.Int64}}"></comment-modifier>
+        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
         {{end}}
     </div>
 </div>
@@ -134,16 +134,6 @@
 
             const shadowRoot = this.attachShadow({ mode: "open" })
             shadowRoot.appendChild(templateContent.cloneNode(true))
-
-            // const modifier = new toastui.Editor({
-            //     el: document.querySelector("#modifier-container > .modifier"),
-            //     previewStyle: "tab",
-            //     initialEditType: "wysiwyg",
-            //     hideModeSwitch: true,
-            //     height: "250px",
-            //     hooks: { addImageBlobHook: onUploadImage },
-            //     initialValue: initialContent
-            // })
         }
     }
     customElements.define("comment-modifier", modifierElement)
@@ -226,7 +216,7 @@
                 <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 <span id="comment-${comment['idx']}">${comment["content"]}</span>
-                <comment-modifier id="modifier-${comment["idx"]}"></comment-modifier>
+                <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
                 `
             })
             commentsContainer.innerHTML = commentsHTML
@@ -359,7 +349,6 @@
 
     async function deleteComment(commentIDX) {
         const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
-
         const r = await fetch(uri, {
             method: "DELETE"
         })
@@ -375,11 +364,32 @@
         }
     }
 
-    function updateComment(self) {
+    async function updateComment(self) {
+        const commentIDX = self.getRootNode().host.dataset.idx
         const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
-        const data = commentModifier.getHTML()
+        const content = commentModifier.getHTML()
 
-        console.log(data)
+        const data = {
+            "content": content,
+            "files": fileIndices
+        }
+
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+        const r = await fetch(uri, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            if (currentCommentPage == totalCommentPage) {
+                getComments(totalCommentPage)
+            } else {
+                getComments(currentCommentPage)
+            }
+        } else {
+            alert("Failed to update")
+        }
 
         container.style.display = "none"
         openedModifierIdxes = []
