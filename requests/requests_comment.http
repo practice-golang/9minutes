@@ -38,4 +38,4 @@ Content-Type: application/json
 }
 
 ### Comment - Delete
-DELETE {{uri}}/api/board/misc/1/comment/1 HTTP/1.1
+DELETE {{uri}}/api/board/misc/30/comment/11 HTTP/1.1

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -76,10 +75,7 @@ func GetCommentList(boardCode string, postingIDX string, queries map[string]stri
 
 func GetComments(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	postingIdx := c.Params("idx")
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(err.Error())
-	}
+	postingIdx := c.Params("posting_idx")
 
 	comments, err := GetCommentList(boardCode, postingIdx, queries)
 	if err != nil {
@@ -151,14 +147,11 @@ func WriteComment(c *fiber.Ctx) error {
 func DeleteComment(c *fiber.Ctx) error {
 	var board model.Board
 
-	uri := strings.Split(c.Context().URI().String(), "/")
+	boardCode := c.Params("board_code")
+	postingIdx := c.Params("posting_idx")
+	commentIdx := c.Params("comment_idx")
 
-	code := uri[len(uri)-3]
-	board.BoardCode = null.StringFrom(code)
-
-	postingIdx, _ := strconv.Atoi(uri[len(uri)-2])
-	commentIdx, _ := strconv.Atoi(uri[len(uri)-1])
-
+	board.BoardCode = null.StringFrom(boardCode)
 	board, err := crud.GetBoardByCode(board)
 	if err != nil {
 		return c.Status(http.StatusNotFound).SendString("Board was not found")

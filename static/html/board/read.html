@@ -355,8 +355,22 @@
         openedModifierIdxes.push(idx)
     }
 
-    function deleteComment(idx) {
-        alert("Delete!" + idx)
+    async function deleteComment(commentIDX) {
+        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+
+        const r = await fetch(uri, {
+            method: "DELETE"
+        })
+
+        if (r.ok) {
+            if (currentCommentPage == totalCommentPage) {
+                getComments(totalCommentPage)
+            } else {
+                getComments(currentCommentPage)
+            }
+        } else {
+            alert("Failed to delete")
+        }
     }
 
     function updateComment(self) {
