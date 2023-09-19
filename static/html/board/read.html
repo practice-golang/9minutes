@@ -2,6 +2,8 @@
 
 <link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
 <script src="/assets/js/toastui-editor-all.min.js"></script>
+<link rel="stylesheet" href="/assets/css/editor.css" />
+<script src="/assets/js/myeditor.js"></script>
 
 <div>
     <div>
@@ -71,6 +73,8 @@
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
     <script src="/assets/js/toastui-editor-all.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/editor.css" />
+    <script src="/assets/js/myeditor.js"></script>
 
     <div class="modifier-container">
         <div id="modifier"></div>
@@ -88,6 +92,13 @@
     <style>
         .modifier-container {
             display: none;
+        }
+
+        #modifier {
+            resize: vertical;
+            overflow: auto;
+            height: 12em;
+            border: 1px solid silver;
         }
     </style>
 </template>
@@ -121,15 +132,21 @@
     const initialContent = ""
     const filesList = []
 
-    const editor = new toastui.Editor({
-        el: document.querySelector("#editor"),
-        previewStyle: "tab",
-        initialEditType: "wysiwyg",
-        hideModeSwitch: true,
-        height: "250px",
-        hooks: { addImageBlobHook: onUploadImage },
-        initialValue: initialContent
-    })
+    // const editor = new toastui.Editor({
+    //     el: document.querySelector("#editor"),
+    //     previewStyle: "tab",
+    //     initialEditType: "wysiwyg",
+    //     hideModeSwitch: true,
+    //     height: "250px",
+    //     hooks: { addImageBlobHook: onUploadImage },
+    //     initialValue: initialContent
+    // })
+    const editorEL = document.querySelector("#editor")
+    const options = {
+        uploadActionURI: "/api/uploader",
+        uploadAccessURI: "/upload",
+    }
+    const editor = new MyEditor(initialContent, editorEL, options)
 
     class modifierElement extends HTMLElement {
         constructor() {
@@ -216,7 +233,7 @@
                 commentsHTML += `
                 <span>${comment["author-name"]}</span>|
                 <span>${regdate}</span>|
-                <button type="button" onclick="editComment('${comment["idx"]}')">edit</button>
+                <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 <span id="comment-${comment['idx']}">${comment["content"]}</span>
                 <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
@@ -254,7 +271,8 @@
         const uri = `/api/board/${boardCode}/${postingIdx}/comment`
         const content = editor.getHTML()
 
-        const emptyContent = "<p><br></p>"
+        // const emptyContent = "<p><br></p>"
+        const emptyContent = "<p></p>"
         if (content.trim() == emptyContent) {
             alert("Text is empty")
             return false
@@ -334,15 +352,21 @@
         const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
         const modContent = document.querySelector(`#comment-${idx}`).innerHTML
 
-        commentModifier = new toastui.Editor({
-            el: modifierROOT.querySelector("#modifier"),
-            previewStyle: "tab",
-            initialEditType: "wysiwyg",
-            hideModeSwitch: true,
-            height: "250px",
-            hooks: { addImageBlobHook: onUploadImage },
-            initialValue: modContent
-        })
+        // commentModifier = new toastui.Editor({
+        //     el: modifierROOT.querySelector("#modifier"),
+        //     previewStyle: "tab",
+        //     initialEditType: "wysiwyg",
+        //     hideModeSwitch: true,
+        //     height: "250px",
+        //     hooks: { addImageBlobHook: onUploadImage },
+        //     initialValue: modContent
+        // })
+        const editorEL = modifierROOT.querySelector("#modifier")
+        const options = {
+            uploadActionURI: "/api/uploader",
+            uploadAccessURI: "/upload",
+        }
+        commentModifier = new MyEditor(modContent, editorEL, options)
 
         modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
         openedModifierIdxes.push(idx)
@@ -414,6 +438,13 @@
 <style>
     .page-jump {
         display: none;
+    }
+
+    #editor {
+        resize: vertical;
+        overflow: auto;
+        height: 12em;
+        border: 1px solid silver;
     }
 </style>
 
