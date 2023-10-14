@@ -1,7 +1,16 @@
 {{template "layout_board_header" .}}
 
-<link rel="stylesheet" href="/assets/css/toastui-editor.min.css" />
-<script src="/assets/js/toastui-editor-all.min.js"></script>
+<link rel="stylesheet" href="/assets/css/myeditor.css" />
+<script src="/assets/js/myeditor.js"></script>
+
+<style>
+    #editor {
+        height: 60vh;
+        resize: vertical;
+        overflow: hidden;
+        border: 1px solid silver;
+    }
+</style>
 
 <div>
     <input type="text" id="title" value="{{.Posting.Title.String}}" placeholder="Title">
@@ -33,48 +42,12 @@
 
     function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${postingIdx}` }
 
-    const editor = new toastui.Editor({
-        el: document.querySelector("#editor"),
-        previewStyle: "tab",
-        initialEditType: "wysiwyg",
-        hideModeSwitch: true,
-        height: "500px",
-        hooks: { addImageBlobHook: onUploadImage },
-        initialValue: initialContent
-    })
-
-    async function onUploadImage(blob, callback) {
-        const formData = new FormData()
-        formData.append("upload-files", blob)
-
-        const uri = "/api/uploader"
-        const r = await fetch(uri, {
-            method: "POST",
-            body: formData
-        })
-
-        if (r.ok) {
-            const response = await r.json()
-
-            const fcontainer = document.querySelector("#fileslist-container > ul")
-            response.files.forEach((f) => {
-                callback(`/upload/${f.storagename}`, f.filename)
-
-                const btn = document.createElement("button")
-                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
-                btn.appendChild(document.createTextNode("X"))
-
-                const li = document.createElement("li")
-                li.setAttribute("id", `file-${f.idx}`)
-                li.appendChild(document.createTextNode(`${f.filename}`))
-                li.appendChild(btn)
-
-                fcontainer.appendChild(li)
-
-                filesList.push(f)
-            })
-        }
+    const editorEL = document.querySelector("#editor")
+    const options = {
+        uploadActionURI: "/api/uploader",
+        uploadAccessURI: "/upload",
     }
+    const editor = new MyEditor(initialContent, editorEL, options)
 
     async function uploadFile() {
         const files = document.querySelector("#upload-files").files
