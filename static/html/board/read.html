@@ -180,7 +180,7 @@
             const data = await r.json()
             totalCommentPage = data["total-page"]
 
-            data["comment-list"].forEach((comment) => {
+            data["comment-list"] && data["comment-list"].forEach((comment) => {
                 const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
                 commentsHTML += `
                 <span>${comment["author-name"]}</span>|
@@ -313,6 +313,9 @@
 
         modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
         openedModifierIdxes.push(idx)
+
+        const scrollOffsetY = editorEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
+        window.scroll(window.scrollX, scrollOffsetY)
     }
 
     async function deleteComment(commentIDX) {
@@ -322,10 +325,16 @@
         })
 
         if (r.ok) {
+            const response = await r.json()
+
             if (currentCommentPage == totalCommentPage) {
-                getComments(totalCommentPage)
+                await getComments(totalCommentPage)
             } else {
-                getComments(currentCommentPage)
+                await getComments(currentCommentPage)
+            }
+
+            if (currentCommentPage > totalCommentPage) {
+                await getComments(totalCommentPage)
             }
         } else {
             alert("Failed to delete")

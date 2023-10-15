@@ -1,5 +1,21 @@
 {{template "layout_board_header" .}}
 
+<style>
+    .cellSelector:hover {
+        cursor: pointer;
+        color: maroon;
+        font-weight: bolder;
+    }
+
+    .cellMiddle {
+        width: 7em;
+    }
+
+    .cellShort {
+        width: 3em;
+    }
+</style>
+
 <div>
     Search:
     <input onkeyup="doSearch()" type="text" name="search" value="{{.PostingList.SearchKeyword}}" placeholder="Search keyword" />
@@ -11,15 +27,13 @@
         <tbody>
             {{range .PostingList.PostingList}}
             <tr>
-                <td>{{.Idx.Int64}}</td>
-                <td>
-                    <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
-                        {{.Title.String}}
-                    </a>
+                <td class="cellShort">{{.Idx.Int64}}</td>
+                <td class="cellSelector" onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
+                    {{.Title.String}}
                     [{{.CommentCount.String}}]
                 </td>
-                <td>{{.AuthorName.String}}</td>
-                <td>{{.Views.Int64}}</td>
+                <td class="cellMiddle">{{.AuthorName.String}}</td>
+                <td class="cellShort">{{.Views.Int64}}</td>
             </tr>
             {{end}}
         </tbody>
