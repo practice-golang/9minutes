@@ -128,15 +128,6 @@
     const initialContent = ""
     const filesList = []
 
-    // const editor = new toastui.Editor({
-    //     el: document.querySelector("#editor"),
-    //     previewStyle: "tab",
-    //     initialEditType: "wysiwyg",
-    //     hideModeSwitch: true,
-    //     height: "250px",
-    //     hooks: { addImageBlobHook: onUploadImage },
-    //     initialValue: initialContent
-    // })
     const editorEL = document.querySelector("#editor")
     const options = {
         uploadActionURI: "/api/uploader",
@@ -156,41 +147,6 @@
 
     let commentModifier
     let openedModifierIdxes = []
-
-    async function onUploadImage(blob, callback) {
-        const formData = new FormData()
-        formData.append("upload-files", blob)
-
-        const uri = "/api/uploader"
-        const r = await fetch(uri, {
-            method: "POST",
-            body: formData
-        })
-
-        if (r.ok) {
-            const response = await r.json()
-
-            const fcontainer = document.querySelector("#fileslist-container > ul")
-            response.files.forEach((f) => {
-                callback(`/upload/${f.storagename}`, f.filename)
-
-                const btn = document.createElement("button")
-                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
-                btn.appendChild(document.createTextNode("X"))
-
-                const li = document.createElement("li")
-                li.setAttribute("id", `file-${f.idx}`)
-                li.appendChild(document.createTextNode(`${f.filename}`))
-                li.appendChild(btn)
-
-                fcontainer.appendChild(li)
-
-                filesList.push(f)
-            })
-        }
-    }
-
-
     let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
     let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
 
@@ -348,15 +304,6 @@
         const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
         const modContent = document.querySelector(`#comment-${idx}`).innerHTML
 
-        // commentModifier = new toastui.Editor({
-        //     el: modifierROOT.querySelector("#modifier"),
-        //     previewStyle: "tab",
-        //     initialEditType: "wysiwyg",
-        //     hideModeSwitch: true,
-        //     height: "250px",
-        //     hooks: { addImageBlobHook: onUploadImage },
-        //     initialValue: modContent
-        // })
         const editorEL = modifierROOT.querySelector("#modifier")
         const options = {
             uploadActionURI: "/api/uploader",

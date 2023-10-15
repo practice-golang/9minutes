@@ -45,7 +45,7 @@
     const editorEL = document.querySelector("#editor")
     const options = {
         uploadActionURI: "/api/uploader",
-        uploadAccessURI: "/upload",
+        uploadAccessURI: "/upload/",
     }
     const editor = new MyEditor(initialContent, editorEL, options)
 
@@ -57,7 +57,8 @@
             formData.append("upload-files", blob)
         }
 
-        const uri = "/api/uploader"
+        // const uri = "/api/uploader"
+        const uri = options.uploadAccessURI
         const r = await fetch(uri, {
             method: "POST",
             body: formData
