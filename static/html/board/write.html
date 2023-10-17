@@ -3,16 +3,8 @@
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
 <script src="/assets/js/myeditor.js"></script>
 
-<style>
-    #editor {
-        height: 60vh;
-        resize: vertical;
-        overflow: hidden;
-        border: 1px solid silver;
-    }
-</style>
-
-<div>
+<div class="input-container">
+    <span>Title: </span>
     <input type="text" id="title" placeholder="Title">
 </div>
 
@@ -26,14 +18,8 @@
 <div id="fileslist-container">
     <ul>
         <!-- <li>
-            <span>
-                {{.filename}}
-                <button lr-click="setFileToDelete($index)">X</button>
-            </span>
-            <span>
-                <s>{{.filename}}</s>
-                <button lr-click="unsetFileFromDelete($index)">Undo</button>
-            </span>
+            <span>{{.filename}}<button lr-click="setFileToDelete($index)">X</button></span>
+            <span><s>{{.filename}}</s><button lr-click="unsetFileFromDelete($index)">Undo</button></span>
         </li> -->
     </ul>
 </div>

@@ -70,7 +70,6 @@
 <template id="modifier-template">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/myeditor.css" />
-    <script src="/assets/js/myeditor.js"></script>
 
     <div class="modifier-container">
         <div id="modifier"></div>
@@ -84,19 +83,6 @@
             <button type="button" onclick="updateComment(this)">Update</button>
         </div>
     </div>
-
-    <style>
-        .modifier-container {
-            display: none;
-        }
-
-        #modifier {
-            resize: vertical;
-            overflow: auto;
-            height: 12em;
-            border: 1px solid silver;
-        }
-    </style>
 </template>
 <!-- Comment modification editor -->
 
