@@ -4,6 +4,10 @@
 <script src="/assets/js/myeditor.js"></script>
 
 <style>
+    a:hover {
+        cursor: pointer;
+    }
+
     .page-jump {
         display: none;
     }
@@ -22,7 +26,7 @@
 
 <div>
     <div>
-        <span>{{.Posting.Title.String}}</span>
+        <h3>{{.Posting.Title.String}}</h3>
     </div>
 
     <div>
@@ -30,6 +34,8 @@
         <span>{{format_date .Posting.RegDate.String}}</span> |
         <span>{{.Posting.Views.Int64}}</span>
     </div>
+
+    <hr />
 
     <div>
         {{unescape .Posting.Content.String}}
@@ -41,11 +47,12 @@
 </div>
 
 <div>
-    <!-- Todo - change button onclick to a href -->
     <button type="button" onclick="backToList()">List</button>
     <button type="button" onclick="moveToEdit()">Edit</button>
     <button type="button" onclick="deletePosting()">Delete</button>
 </div>
+
+<hr />
 
 <!-- Comment -->
 <div>
@@ -81,7 +88,16 @@
         <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
         <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
     </span>
+
 </div>
+
+<div>
+    <button type="button" onclick="backToList()">List</button>
+    <button type="button" onclick="moveToEdit()">Edit</button>
+    <button type="button" onclick="deletePosting()">Delete</button>
+</div>
+
+<hr />
 
 <div id="editor" class="comment-editor"></div>
 <div>
