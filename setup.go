@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	gohtml "html"
 	"html/template"
 	"io/fs"
 	"log"
@@ -289,7 +290,9 @@ func setupRouter() {
 		engine = html.New("./static/html", ".html")
 	}
 
-	engine.AddFunc("unescape", func(s string) template.HTML { return template.HTML(s) })
+	engine.AddFunc("unescape", func(s string) template.HTML {
+		return template.HTML(gohtml.UnescapeString(s))
+	})
 	engine.AddFunc("format_date", func(s string) string {
 		t, err := time.Parse("20060102150405", s)
 		if err != nil {

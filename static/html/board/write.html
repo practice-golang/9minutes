@@ -8,7 +8,7 @@
     <input type="text" id="title" placeholder="Title">
 </div>
 
-<div id="editor"></div>
+<div id="editor" class="posting-editor"></div>
 
 <div>
     <input type="file" id="upload-files" multiple />
@@ -30,6 +30,12 @@
 </div>
 
 <script>
+    const imageUploadCallback = function (response) {
+        console.log(response)
+    }
+</script>
+
+<script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
 
@@ -40,6 +46,7 @@
     const options = {
         uploadActionURI: "/api/uploader",
         uploadAccessURI: "/upload",
+        uploadCallback: imageUploadCallback,
     }
     const editor = new MyEditor(initialContent, editorEL, options)
 

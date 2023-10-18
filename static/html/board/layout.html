@@ -36,21 +36,10 @@
         width: calc(100% - 3.3em);
     }
 
-    #editor {
-        height: 60vh;
+    .posting-editor {
         resize: vertical;
         overflow: hidden;
-        border: 1px solid silver;
-    }
-
-    .modifier-container {
-        display: none;
-    }
-
-    #modifier {
-        resize: vertical;
-        overflow: auto;
-        height: 12em;
+        height: 60vh;
         border: 1px solid silver;
     }
 </style>
@@ -103,10 +92,10 @@
         </div>
         <hr />
     </div>
-    {{end}}
+{{end}}
 
 
-    {{define "layout_board_footer"}}
+{{define "layout_board_footer"}}
     <footer>
         Template board footer
     </footer>

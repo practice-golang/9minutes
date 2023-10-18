@@ -3,6 +3,23 @@
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
 <script src="/assets/js/myeditor.js"></script>
 
+<style>
+    .page-jump {
+        display: none;
+    }
+
+    comment-modifier {
+        display: none;
+    }
+
+    .comment-editor {
+        resize: vertical;
+        overflow: hidden;
+        height: 10em;
+        border: 1px solid silver;
+    }
+</style>
+
 <div>
     <div>
         <span>{{.Posting.Title.String}}</span>
@@ -66,13 +83,27 @@
     </span>
 </div>
 
+<div id="editor" class="comment-editor"></div>
+<div>
+    <button type="button" onclick="writeComment()">Write comment</button>
+</div>
+
 <!-- Comment modification editor -->
 <template id="modifier-template">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/myeditor.css" />
 
-    <div class="modifier-container">
-        <div id="modifier"></div>
+    <style>
+        .comment-modifier {
+            resize: vertical;
+            overflow: hidden;
+            height: 12em;
+            border: 1px solid silver;
+        }
+    </style>
+
+    <div class="comment-modifier-container">
+        <div id="modifier" class="comment-modifier"></div>
 
         <div class="comment-fileslist-container">
             <ul></ul>
@@ -86,10 +117,21 @@
 </template>
 <!-- Comment modification editor -->
 
-<div id="editor"></div>
-<div>
-    <button type="button" onclick="writeComment()">Write comment</button>
-</div>
+<script>
+    const imageUploadCallback = function (response) {
+        console.log(response)
+    }
+
+    function decodeString(s) {
+        const textArea = document.createElement("textarea")
+        textArea.innerHTML = s
+
+        const result = textArea.value
+        textArea.remove()
+
+        return result
+    }
+</script>
 
 <script>
     const queries = new URLSearchParams(window.location.search)
@@ -118,6 +160,7 @@
     const options = {
         uploadActionURI: "/api/uploader",
         uploadAccessURI: "/upload",
+        uploadCallback: imageUploadCallback,
     }
     const editor = new MyEditor(initialContent, editorEL, options)
 
@@ -131,8 +174,7 @@
     }
     customElements.define("comment-modifier", modifierElement)
 
-    let commentModifier
-    let openedModifierIdxes = []
+    const commentModifiers = {}
     let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
     let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
 
@@ -173,7 +215,7 @@
                 <span>${regdate}</span>|
                 <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
-                <span id="comment-${comment['idx']}">${comment["content"]}</span>
+                <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
                 <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
                 `
             })
@@ -198,8 +240,6 @@
 
             currentCommentPage = data["current-page"]
             totalCommentPage = data["total-page"]
-            openedModifierIdxes = []
-            commentModifier = null
 
             showCommentPageJumper()
         }
@@ -279,26 +319,30 @@
     }
 
     function openEditComment(idx) {
-        for (openedIDX of openedModifierIdxes) {
-            const modifierEL = document.querySelector(`comment-modifier#modifier-${openedIDX}`)
-            if (modifierEL != null) {
-                modifierEL.shadowRoot.querySelectorAll(".modifier-container")[0].style.display = "none"
-            }
-        }
-        openedModifierIdxes = []
-
-        const modifierROOT = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot
+        const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
+        const modifierROOT = modifierEL.shadowRoot
         const modContent = document.querySelector(`#comment-${idx}`).innerHTML
 
         const editorEL = modifierROOT.querySelector("#modifier")
         const options = {
             uploadActionURI: "/api/uploader",
             uploadAccessURI: "/upload",
+            uploadCallback: imageUploadCallback,
         }
-        commentModifier = new MyEditor(modContent, editorEL, options)
 
-        modifierROOT.querySelectorAll(".modifier-container")[0].style.display = "block"
-        openedModifierIdxes.push(idx)
+        if (!editorEL.hasChildNodes()) {
+            commentModifiers[`modifier-${idx}`] = new MyEditor(modContent, editorEL, options)
+        }
+
+        if (modifierEL.style.display != "block") {
+            commentModifiers[`modifier-${idx}`].setHTML(modContent)
+        }
+
+        for (const i in commentModifiers) {
+            commentModifiers[i].view.dom.getRootNode().host.style.display = "none"
+        }
+
+        modifierEL.style.display = "block"
 
         const scrollOffsetY = editorEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
         window.scroll(window.scrollX, scrollOffsetY)
@@ -328,9 +372,9 @@
     }
 
     async function updateComment(self) {
+        const modifierEL = self.getRootNode().host
         const commentIDX = self.getRootNode().host.dataset.idx
-        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
-        const content = commentModifier.getHTML()
+        const content = commentModifiers[modifierEL.id].getHTML()
 
         const data = {
             "content": content,
@@ -354,16 +398,15 @@
             alert("Failed to update")
         }
 
-        container.style.display = "none"
-        openedModifierIdxes = []
-        commentModifier = null
+        modifierEL.style.display = "none"
     }
 
     function cancelEditComment(self) {
-        const container = self.getRootNode().querySelectorAll(".modifier-container")[0]
-        container.style.display = "none"
-        openedModifierIdxes = []
-        commentModifier = null
+        const modifierEL = self.getRootNode().host
+        const modifierROOT = modifierEL.shadowRoot
+        const editorEL = modifierROOT.querySelector("#modifier")
+
+        modifierEL.style.display = "none"
     }
 
     function init() {
@@ -372,18 +415,5 @@
     }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
-
-<style>
-    .page-jump {
-        display: none;
-    }
-
-    #editor {
-        resize: vertical;
-        overflow: auto;
-        height: 12em;
-        border: 1px solid silver;
-    }
-</style>
 
 {{template "layout_board_footer" .}}
