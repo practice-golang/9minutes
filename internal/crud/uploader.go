@@ -34,10 +34,10 @@ func GetUploadedFile(idx int) (model.StoredFileInfo, error) {
 	if err != nil {
 		return finfo, err
 	}
-	// if len(finfos) == 0 {
-	// 	// return finfo, errors.New("no file found")
-	// 	return finfo, nil
-	// }
+	if len(finfos) == 0 {
+		// return finfo, errors.New("no file found")
+		return finfo, nil
+	}
 
 	finfo = finfos[0]
 

@@ -121,6 +121,8 @@ func GetComments(board model.Board, contentIdx string, options model.CommentList
 func WriteComment(board model.Board, content model.Comment) error {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 
+	content.Content.String = EscapeString(content.Content.String)
+
 	column := np.CreateString(content, db.GetDatabaseTypeString(), "insert", false)
 
 	sql := `
@@ -141,6 +143,8 @@ func WriteComment(board model.Board, content model.Comment) error {
 func UpdateComment(board model.Board, comment model.Comment, postingIdx string) error {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 	commentIDX := strconv.Itoa(int(comment.Idx.Int64))
+
+	comment.Content.String = EscapeString(comment.Content.String)
 
 	column := np.CreateString(comment, db.GetDatabaseTypeString(), "update", false)
 	colNames := strings.Split(column.Names, ",")

@@ -4,6 +4,7 @@ import (
 	"9minutes/internal/db"
 	"9minutes/model"
 	"database/sql"
+	"html"
 	"strings"
 )
 
@@ -43,4 +44,12 @@ func scanMap(r *sql.Rows) (map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+func EscapeString(s string) string {
+	s = html.EscapeString(s)
+	s = strings.ReplaceAll(s, "\n", "%0A")
+	s = strings.ReplaceAll(s, ",", "%2C")
+
+	return s
 }

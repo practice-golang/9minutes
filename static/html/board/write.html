@@ -51,7 +51,8 @@
             formData.append("upload-files", blob)
         }
 
-        const uri = "/api/uploader"
+        // const uri = "/api/uploader"
+        const uri = options.uploadActionURI
         const r = await fetch(uri, {
             method: "POST",
             body: formData
@@ -80,7 +81,8 @@
 
     async function deleteFile(idx, storagename) {
         const data = [{ "idx": parseInt(idx) }]
-        const uri = "/api/uploader"
+        // const uri = "/api/uploader"
+        const uri = options.uploadActionURI
 
         const r = await fetch(uri, {
             method: "DELETE",

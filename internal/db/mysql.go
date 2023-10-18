@@ -31,29 +31,6 @@ func (d *Mysql) CreateDB() error {
 	return nil
 }
 
-// CreateTable - Not use
-// func (d *Mysql) CreateTable() error {
-// 	sql := `
-// 	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.TableName + ` (
-// 		IDX     INT(11) NOT NULL AUTO_INCREMENT,
-// 		TITLE   VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-// 		AUTHOR  VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-
-// 		PRIMARY KEY (IDX) USING BTREE
-// 	)
-// 	COLLATE='utf8_general_ci'
-// 	ENGINE=InnoDB;`
-
-// 	log.Println(sql)
-
-// 	_, err := Con.Exec(sql)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
 func (d *Mysql) Exec(sql string, colValues []interface{}, options string) (int64, int64, error) {
 	var err error
 	var count int64 = 0

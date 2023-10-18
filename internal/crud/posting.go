@@ -6,7 +6,6 @@ import (
 	"9minutes/model"
 	"database/sql"
 	"fmt"
-	"html"
 	"math"
 	"strings"
 
@@ -141,8 +140,11 @@ func GetPosting(board model.Board, idx string) (model.Posting, error) {
 func WritePosting(board model.Board, content model.Posting) (sql.Result, error) {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
-	content.Title = null.StringFrom(html.EscapeString(content.Title.String))
-	content.Content = null.StringFrom(html.EscapeString(content.Content.String))
+	content.Title = null.StringFrom(content.Title.String)
+	content.Content = null.StringFrom(content.Content.String)
+
+	content.Title.String = EscapeString(content.Title.String)
+	content.Content.String = EscapeString(content.Content.String)
 
 	column := np.CreateString(content, db.GetDatabaseTypeString(), "insert", false)
 
@@ -165,8 +167,11 @@ func UpdatePosting(board model.Board, content model.Posting, skipTag string) err
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	idx := fmt.Sprint(content.Idx.Int64)
 
-	content.Title = null.StringFrom(html.EscapeString(content.Title.String))
-	content.Content = null.StringFrom(html.EscapeString(content.Content.String))
+	content.Title = null.StringFrom(content.Title.String)
+	content.Content = null.StringFrom(content.Content.String)
+
+	content.Title.String = EscapeString(content.Title.String)
+	content.Content.String = EscapeString(content.Content.String)
 
 	column := np.CreateString(content, db.GetDatabaseTypeString(), skipTag, false)
 	colNames := strings.Split(column.Names, ",")

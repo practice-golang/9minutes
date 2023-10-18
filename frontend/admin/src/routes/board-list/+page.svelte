@@ -48,9 +48,9 @@
             newBoard["board-code"].length > 0
         ) {
             newBoard["board-table"] =
-                "BOARD_" + newBoard["board-code"].toUpperCase();
+                "board_" + newBoard["board-code"].toLowerCase();
             newBoard["comment-table"] =
-                "COMMENT_" + newBoard["board-code"].toUpperCase();
+                "comment_" + newBoard["board-code"].toLowerCase();
         }
 
         if (
@@ -58,9 +58,9 @@
             editBoard["board-code"].length > 0
         ) {
             editBoard["board-table"] =
-                "BOARD_" + editBoard["board-code"].toUpperCase();
+                "board_" + editBoard["board-code"].toLowerCase();
             editBoard["comment-table"] =
-                "COMMENT_" + editBoard["board-code"].toUpperCase();
+                "comment_" + editBoard["board-code"].toLowerCase();
         }
     }
 
@@ -95,7 +95,10 @@
     }
 
     function moveToListView(index) {
-        window.open("/board/list?board_code=" + boards[index]["board-code"], "_blank")
+        window.open(
+            "/board/list?board_code=" + boards[index]["board-code"],
+            "_blank"
+        );
     }
 
     function openEditBoard(index) {
@@ -478,10 +481,10 @@
     </a>
 </div>
 
-<style>
+<!-- <style>
     table,
     th,
     td {
         border: 1px solid black;
     }
-</style>
+</style> -->
