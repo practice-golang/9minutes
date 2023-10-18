@@ -1,5 +1,6 @@
 @uri = http://localhost:5525
-@cookie = session_id=ce217678-9322-4bfb-972d-d0d501be5818; 
+# @uri = http://enjoytools.net:5525
+@cookie = session_id=4fcc9af0-ff9e-483b-9ea3-f8031f2d067d;
 
 ### health
 GET {{uri}}/api/health

@@ -11,7 +11,7 @@ func NewSessionStore() {
 	store = session.New(session.Config{
 		CookieSecure:   false,
 		CookieHTTPOnly: false,
-		CookieSameSite: "None", // For cross-origin
+		// CookieSameSite: "None", // For cross-origin
 	})
 }
 
