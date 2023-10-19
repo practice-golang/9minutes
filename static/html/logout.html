@@ -2,10 +2,10 @@
 
 <head></head>
 
-<body></body>
+<body>s</body>
 
 <script>
-    addEventListener("DOMContentLoaded", async function () {
+    async function doLogout() {
         const uri = "/api/logout"
 
         const response = await fetch(uri, {
@@ -18,7 +18,11 @@
         location.href = "/"
 
         return false
-    })
+    }
+
+    doLogout()
+
+    // addEventListener("DOMContentLoaded", () => { doLogout() })
 </script>
 
 </html>
