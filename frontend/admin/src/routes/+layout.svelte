@@ -9,18 +9,17 @@
 
 <a href="/" rel="external">Home</a>
 <a href={base}>Admin</a>
-<br />
+|
 <a href="{base}/board-list">Boards</a>
 <a href="{base}/user-columns">User columns</a>
 <a href="{base}/user-list">User list</a>
 
 <hr />
+
 <slot />
+
 <hr />
 
-<a href="/" rel="external">Home</a>
-<a href={base}>Admin</a>
-<br />
 <a href="{base}/board-list">Boards</a>
 <a href="{base}/user-columns">User columns</a>
 <a href="{base}/user-list">User list</a>
