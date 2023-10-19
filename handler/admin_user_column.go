@@ -23,10 +23,11 @@ func RestrictedHello(c *fiber.Ctx) error {
 }
 
 func GetUserColumnsAPI(c *fiber.Ctx) error {
-	result, err := crud.GetUserColumnsList()
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	}
+	// result, err := crud.GetUserColumnsList()
+	// if err != nil {
+	// 	return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	// }
+	result := UserColumnsALL
 
 	return c.Status(http.StatusOK).JSON(result)
 }
@@ -47,6 +48,8 @@ func AddUserColumnAPI(c *fiber.Ctx) error {
 	result := map[string]string{
 		"result": "ok",
 	}
+
+	SetUserColumnsALL()
 
 	return c.Status(http.StatusOK).JSON(result)
 }
@@ -70,6 +73,8 @@ func UpdateUserColumnsAPI(c *fiber.Ctx) error {
 		"result": "ok",
 	}
 
+	SetUserColumnsALL()
+
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -91,6 +96,8 @@ func DeleteUserColumnsAPI(c *fiber.Ctx) error {
 	result := map[string]string{
 		"result": "ok",
 	}
+
+	SetUserColumnsALL()
 
 	return c.Status(http.StatusOK).JSON(result)
 }

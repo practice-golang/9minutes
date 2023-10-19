@@ -43,7 +43,9 @@ func GetUserListAPI(c *fiber.Ctx) error {
 	}
 
 	/* Todo: Move to setup */
-	columnNames, _ := crud.GetUserColumnsList()
+	// columnNames, _ := crud.GetUserColumnsList()
+	columnNames := UserColumnsALL
+
 	selectUserColumnsMap := map[string]interface{}{}
 	for _, c := range columnNames {
 		if c.ColumnName.Valid && c.ColumnName.String != "PASSWORD" {

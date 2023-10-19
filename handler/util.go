@@ -64,3 +64,7 @@ func SetBoardDataALL() map[string]model.Board {
 
 	return BoardListALL
 }
+
+func SetUserColumnsALL() {
+	UserColumnsALL, _ = crud.GetUserColumnsList()
+}

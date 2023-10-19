@@ -281,6 +281,10 @@ func setBoardDataList() {
 	handler.SetBoardDataALL()
 }
 
+func setUserColumnsList() {
+	handler.SetUserColumnsALL()
+}
+
 func setupRouter() {
 	var engine *html.Engine
 
@@ -329,5 +333,6 @@ func setupRouter() {
 	setStaticFiles(app) // Files, Assets
 	setPage(app)        // HTML templates
 
-	setBoardDataList() // Board list
+	setBoardDataList()   // Board list
+	setUserColumnsList() // User column list
 }

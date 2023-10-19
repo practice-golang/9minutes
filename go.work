@@ -3,7 +3,7 @@ go 1.21.0
 use (
 	.
 	./cmd
-	./fakegen/boards
-	./fakegen/postings
-	./fakegen/users
+	./misc/fakegen/boards
+	./misc/fakegen/postings
+	./misc/fakegen/users
 )

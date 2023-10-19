@@ -22,7 +22,7 @@
  */
 
 export const load = async ({ url, fetch }) => {
-    const listCount = Number(url.searchParams.get("list-count")) || 10
+    const listCount = Number(url.searchParams.get("list-count")) || 20
     const page = Number(url.searchParams.get("page")) || 1
     const search = url.searchParams.get("search") || ""
 
