@@ -363,12 +363,23 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 		userData[k] = v
 	}
 
-	idxSTR, _ := strconv.Atoi(userData["idx"].(string))
+	var idx int64
+	switch idxUnknown := userData["idx"].(type) {
+	case int64:
+		idx = idxUnknown
+	case int:
+		idx = int64(idxUnknown)
+	case float64:
+		idx = int64(idxUnknown)
+	case string:
+		idxSTR, _ := strconv.Atoi(idxUnknown)
+		idx = int64(idxSTR)
+	}
 	delete(userData, "idx")
 
 	updateset := np.CreateUpdateString(userData, dbtype, "", false)
 	wheres := np.CreateWhereString(
-		map[string]interface{}{"IDX": int64(idxSTR)},
+		map[string]interface{}{"IDX": idx},
 		dbtype, "=", "AND", "", false,
 	)
 

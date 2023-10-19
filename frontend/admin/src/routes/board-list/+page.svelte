@@ -3,6 +3,8 @@
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
 
+    import "$lib/styles/table.css"
+
     export let data;
 
     const columns = data.columns;
@@ -480,11 +482,3 @@
         <span>&raquo;</span>
     </a>
 </div>
-
-<!-- <style>
-    table,
-    th,
-    td {
-        border: 1px solid black;
-    }
-</style> -->

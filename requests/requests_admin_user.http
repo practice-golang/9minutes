@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=71d15050-9d9a-413e-8da9-309ed92258e5; max-age=86400; path=/; secure; SameSite=None
+@cookie = session_id=9bd0d1af-f2cc-4963-8319-62063b4fbd21; max-age=86400; path=/; HttpOnly; SameSite=Lax
 
 
 ### Login
@@ -9,7 +9,7 @@ Origin: {{uri}}
 
 {
     "userid": "admin",
-    "password": "admin"
+    "password": "1111"
 }
 
 ### User list
@@ -47,7 +47,7 @@ Cookie: {{cookie}}
 
 [
     {
-        "idx": 17,
+        "idx": 204,
         "userid": "userb",
         "email": "userb@example.com",
         "grade": "pending_user"

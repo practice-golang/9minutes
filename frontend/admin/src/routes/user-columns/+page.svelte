@@ -1,12 +1,16 @@
 <script>
     import { invalidateAll } from "$app/navigation";
 
+    import "$lib/styles/table.css";
+
     export let data;
     $: columns = data.columns;
 
     const lastDefaultColIDX = 7;
 
-    $: selectAll = selectedIndices.length == columns.length - lastDefaultColIDX && selectedIndices.length > 0;
+    $: selectAll =
+        selectedIndices.length == columns.length - lastDefaultColIDX &&
+        selectedIndices.length > 0;
     let selectedIndices = [];
 
     let editINDEX = -1;
@@ -145,159 +149,160 @@
     Delete selected columns
 </button>
 
-<table id="column-list-container">
-    <thead>
-        <tr>
-            <td>
-                <input
-                    type="checkbox"
-                    checked={selectAll}
-                    on:click={toggleSelectAll}
-                />
-            </td>
-            <th>Display name</th>
-            <th>Column code</th>
-            <th>Column type</th>
-            <th>Column name</th>
-            <th>Sort Order</th>
-            <th>Control</th>
-        </tr>
-    </thead>
+<div class="table-container">
+    <table id="column-list-container">
+        <thead>
+            <tr>
+                <td>
+                    <input
+                        type="checkbox"
+                        checked={selectAll}
+                        on:click={toggleSelectAll}
+                    />
+                </td>
+                <th>Display name</th>
+                <th>Column code</th>
+                <th>Column type</th>
+                <th>Column name</th>
+                <th>Sort Order</th>
+                <th>Control</th>
+            </tr>
+        </thead>
 
-    {#if showNewCOL}
-        <tr id="add-column">
-            <td />
-            <td>
-                <input
-                    type="text"
-                    name="display-name"
-                    bind:value={newCOL["display-name"]}
-                    placeholder="Display name"
-                />
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="column-code"
-                    bind:value={newCOL["column-code"]}
-                    placeholder="Column code"
-                />
-            </td>
-            <td>
-                <select name="column-type" bind:value={newCOL["column-type"]}>
-                    {#each Object.entries(colTYPES) as [key, name]}
-                        <option value={key}>{name}</option>
-                    {/each}
-                </select>
-            </td>
-            <td>
-                <input
-                    type="text"
-                    name="column-name"
-                    bind:value={newCOL["column-name"]}
-                    placeholder="Column name"
-                />
-            </td>
-            <td />
-            <td>
-                <button type="button" on:click={closeNewColumn}>
-                    Cancel
-                </button>
-                <button type="button" on:click={saveNewColumn}> Save </button>
-            </td>
-        </tr>
-    {/if}
+        {#if showNewCOL}
+            <tr id="add-column">
+                <td />
+                <td>
+                    <input
+                        type="text"
+                        name="display-name"
+                        bind:value={newCOL["display-name"]}
+                        placeholder="Display name"
+                    />
+                </td>
+                <td>
+                    <input
+                        type="text"
+                        name="column-code"
+                        bind:value={newCOL["column-code"]}
+                        placeholder="Column code"
+                    />
+                </td>
+                <td>
+                    <select
+                        name="column-type"
+                        bind:value={newCOL["column-type"]}
+                    >
+                        {#each Object.entries(colTYPES) as [key, name]}
+                            <option value={key}>{name}</option>
+                        {/each}
+                    </select>
+                </td>
+                <td>
+                    <input
+                        type="text"
+                        name="column-name"
+                        bind:value={newCOL["column-name"]}
+                        placeholder="Column name"
+                    />
+                </td>
+                <td />
+                <td>
+                    <button type="button" on:click={closeNewColumn}>
+                        Cancel
+                    </button>
+                    <button type="button" on:click={saveNewColumn}>
+                        Save
+                    </button>
+                </td>
+            </tr>
+        {/if}
 
-    <tbody id="column-list-body">
-        {#each columns as col, index}
-            {#if editINDEX == index}
-                <tr>
-                    <td />
-                    <td>
-                        <input
-                            type="text"
-                            name="display-name"
-                            bind:value={editCOL["display-name"]}
-                            placeholder="Display name"
-                        />
-                    </td>
-                    <td>
-                        <input
-                            type="text"
-                            name="column-code"
-                            bind:value={editCOL["column-code"]}
-                            placeholder="Column code"
-                        />
-                    </td>
-                    <td>{colTYPES[col["column-type"]]}</td>
-                    <td>
-                        <input
-                            type="text"
-                            name="column-name"
-                            bind:value={editCOL["column-name"]}
-                            placeholder="Column name"
-                        />
-                    </td>
-                    <td>
-                        <input
-                            type="number"
-                            name="sort-order"
-                            bind:value={editCOL["sort-order"]}
-                        />
-                    </td>
-                    <td>
-                        <button type="button" on:click={closeEditColumn}>
-                            Cancel
-                        </button>
-                        <button type="button" on:click={updateEditColumn}>
-                            Save
-                        </button>
-                    </td>
-                </tr>
-            {:else}
-                <tr>
-                    {#if index <= 6}
-                        <td />
-                    {:else}
+        <tbody id="column-list-body">
+            {#each columns as col, index}
+                {#if editINDEX == index}
+                    <tr>
+                        <td class="colFixedMin" />
                         <td>
                             <input
-                                type="checkbox"
-                                bind:group={selectedIndices}
-                                value={col["idx"]}
+                                type="text"
+                                name="display-name"
+                                bind:value={editCOL["display-name"]}
+                                placeholder="Display name"
                             />
                         </td>
-                    {/if}
-                    <td>{col["display-name"]}</td>
-                    <td>{col["column-code"]}</td>
-                    <td>{colTYPES[col["column-type"]]}</td>
-                    <td>{col["column-name"]}</td>
-                    <td>{col["sort-order"]}</td>
-                    {#if index <= 6}
-                        <td />
-                    {:else}
                         <td>
-                            <button
-                                type="button"
-                                on:click={() => openEditColumn(index)}
-                            >
-                                Edit
+                            <input
+                                type="text"
+                                name="column-code"
+                                bind:value={editCOL["column-code"]}
+                                placeholder="Column code"
+                            />
+                        </td>
+                        <td>{colTYPES[col["column-type"]]}</td>
+                        <td>
+                            <input
+                                type="text"
+                                name="column-name"
+                                bind:value={editCOL["column-name"]}
+                                placeholder="Column name"
+                            />
+                        </td>
+                        <td>
+                            <input
+                                type="number"
+                                name="sort-order"
+                                bind:value={editCOL["sort-order"]}
+                            />
+                        </td>
+                        <td class="colFixedMax">
+                            <button type="button" on:click={closeEditColumn}>
+                                Cancel
                             </button>
-                            <button
-                                type="button"
-                                on:click={() => deleteColumn(index)}
-                            >
-                                Delete
+                            <button type="button" on:click={updateEditColumn}>
+                                Save
                             </button>
                         </td>
-                    {/if}
-                </tr>
-            {/if}
-        {/each}
-    </tbody>
-</table>
-
-<datalist id="column-types">
-    <option value="text">Text</option>
-    <option value="number-integer">Number Integer</option>
-    <option value="number-real">Number Real</option>
-</datalist>
+                    </tr>
+                {:else}
+                    <tr>
+                        {#if index <= 6}
+                            <td class="colFixedMin" />
+                        {:else}
+                            <td class="colFixedMin">
+                                <input
+                                    type="checkbox"
+                                    bind:group={selectedIndices}
+                                    value={col["idx"]}
+                                />
+                            </td>
+                        {/if}
+                        <td class="colField">{col["display-name"]}</td>
+                        <td class="colField">{col["column-code"]}</td>
+                        <td class="colField">{colTYPES[col["column-type"]]}</td>
+                        <td class="colField">{col["column-name"]}</td>
+                        <td class="colFixedMid">{col["sort-order"]}</td>
+                        {#if index <= 6}
+                            <td />
+                        {:else}
+                            <td class="colFixedMax">
+                                <button
+                                    type="button"
+                                    on:click={() => openEditColumn(index)}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    on:click={() => deleteColumn(index)}
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        {/if}
+                    </tr>
+                {/if}
+            {/each}
+        </tbody>
+    </table>
+</div>
