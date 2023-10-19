@@ -43,7 +43,7 @@
                 <label for="board-selection">Board:</label>
                 <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
                 <datalist id="board-list">
-                    {{range .BoardPageData.BoardList}}
+                    {{range .BoardList}}
                     <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
                     {{end}}
                 </datalist>

@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"9minutes/internal/crud"
+	"9minutes/model"
 	"math/rand"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/guregu/null.v4"
 )
 
 // import (
@@ -45,4 +48,19 @@ func DeleteUploadFile(filepath string) {
 	if _, err := os.Stat(filepath); err == nil {
 		os.Remove(filepath)
 	}
+}
+
+func SetBoardDataALL() map[string]model.Board {
+	BoardListALL = map[string]model.Board{}
+
+	boardListingOptions := model.BoardListingOptions{}
+	boardListingOptions.Page = null.IntFrom(0)
+	boardListingOptions.ListCount = null.IntFrom(99999)
+	boardList, _ := crud.GetBoards(boardListingOptions)
+
+	for _, b := range boardList.BoardList {
+		BoardListALL[b.BoardCode.String] = b
+	}
+
+	return BoardListALL
 }

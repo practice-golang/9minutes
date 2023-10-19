@@ -52,8 +52,9 @@ func HandleHTML(c *fiber.Ctx) error {
 	boardListingOptions := model.BoardListingOptions{}
 	boardListingOptions.Page = null.IntFrom(0)
 	boardListingOptions.ListCount = null.IntFrom(9999)
-	boardList, _ := crud.GetBoards(boardListingOptions)
-	templateMap["BoardPageData"] = boardList
+	// boardList, _ := crud.GetBoards(boardListingOptions)
+	// templateMap["BoardPageData"] = boardList
+	templateMap["BoardList"] = BoardListALL
 
 	templateMap["PendingUser"] = true
 	if grade != "pending_user" {
@@ -151,8 +152,9 @@ func HandlePostingList(c *fiber.Ctx) error {
 	boardListingOptions := model.BoardListingOptions{}
 	boardListingOptions.Page = null.IntFrom(0)
 	boardListingOptions.ListCount = null.IntFrom(9999)
-	boardList, _ := crud.GetBoards(boardListingOptions)
-	templateMap["BoardPageData"] = boardList
+	// boardList, _ := crud.GetBoards(boardListingOptions)
+	// templateMap["BoardPageData"] = boardList
+	templateMap["BoardList"] = BoardListALL
 
 	currentBoard, _ := crud.GetBoardByCode(model.Board{BoardCode: null.StringFrom(boardCode)})
 

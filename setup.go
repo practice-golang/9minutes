@@ -277,6 +277,10 @@ func setupDB() {
 	}
 }
 
+func setBoardDataList() {
+	handler.SetBoardDataALL()
+}
+
 func setupRouter() {
 	var engine *html.Engine
 
@@ -324,4 +328,6 @@ func setupRouter() {
 
 	setStaticFiles(app) // Files, Assets
 	setPage(app)        // HTML templates
+
+	setBoardDataList() // Board list
 }

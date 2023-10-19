@@ -92,6 +92,8 @@ func AddBoardAPI(c *fiber.Ctx) error {
 		"result": "ok",
 	}
 
+	SetBoardDataALL()
+
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -174,6 +176,8 @@ func UpdateBoardAPI(c *fiber.Ctx) error {
 		result["success"] = boardDatasSucess
 	}
 
+	SetBoardDataALL()
+
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -232,6 +236,8 @@ func DeleteBoardAPI(c *fiber.Ctx) error {
 		result["failed"] = boardDatasFailed
 		result["success"] = boardDatasSuccess
 	}
+
+	SetBoardDataALL()
 
 	return c.Status(http.StatusOK).JSON(result)
 }
