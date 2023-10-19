@@ -308,7 +308,7 @@ func setupRouter() {
 
 	cfg := fiber.Config{
 		AppName:               "9minutes",
-		DisableStartupMessage: false,
+		DisableStartupMessage: true,
 		JSONEncoder:           json.Marshal,
 		JSONDecoder:           json.Unmarshal,
 		Views:                 engine,

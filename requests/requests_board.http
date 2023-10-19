@@ -14,3 +14,6 @@ Origin: {{uri}}
 
 ### Board list
 GET {{uri}}/api/board/list
+
+### Board list search
+GET {{uri}}/api/board/list?list-count=20&search=m

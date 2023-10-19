@@ -20,7 +20,7 @@ func GetBoardsAPI(c *fiber.Ctx) error {
 	listingOptions.Search = null.StringFrom(queries["search"])
 
 	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(10)
+	listingOptions.ListCount = null.IntFrom(20)
 
 	if queries["page"] != "" {
 		page := queries["page"]
