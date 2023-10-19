@@ -9,8 +9,8 @@ var store *session.Store
 
 func NewSessionStore() {
 	store = session.New(session.Config{
-		CookieSecure:   false,
-		CookieHTTPOnly: false,
+		CookieSecure:   true,
+		CookieHTTPOnly: true,
 		// CookieSameSite: "None", // For cross-origin
 		// CookieSameSite: "Strict",
 		CookieSameSite: "Lax",
