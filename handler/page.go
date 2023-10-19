@@ -97,6 +97,11 @@ func HandleHTML(c *fiber.Ctx) error {
 
 			name = "board/write"
 		}
+	case strings.HasPrefix(name, "mypage"):
+		if userid == "" {
+			name = "status/unauthorized"
+			break
+		}
 	case strings.HasPrefix(name, "admin"):
 		if userid == "" {
 			name = "status/unauthorized"

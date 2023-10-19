@@ -7,6 +7,7 @@ import (
 	"9minutes/model"
 	"errors"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/blockloop/scan"
@@ -362,12 +363,12 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 		userData[k] = v
 	}
 
-	idx := int64(userData["idx"].(float64))
+	idxSTR, _ := strconv.Atoi(userData["idx"].(string))
 	delete(userData, "idx")
 
 	updateset := np.CreateUpdateString(userData, dbtype, "", false)
 	wheres := np.CreateWhereString(
-		map[string]interface{}{"IDX": idx},
+		map[string]interface{}{"IDX": int64(idxSTR)},
 		dbtype, "=", "AND", "", false,
 	)
 
