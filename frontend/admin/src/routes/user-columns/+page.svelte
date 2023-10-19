@@ -283,7 +283,7 @@
                         <td class="colField">{col["column-name"]}</td>
                         <td class="colFixedMid">{col["sort-order"]}</td>
                         {#if index <= 6}
-                            <td />
+                            <td class="colFixedMax" />
                         {:else}
                             <td class="colFixedMax">
                                 <button
