@@ -35,7 +35,36 @@
 
 <script>
     const imageUploadCallback = function (response) {
-        console.log(response)
+        /*
+        {
+            "files": [
+                {
+                    "filename": "usmc.jpg",
+                    "idx": "5",
+                    "storagename": "WoOgzrwn5EjHCPJNwKjEw8tP45KAE4QZX3kfuNjoLxAOSICenUveeVdv_20231102183553.jpg"
+                }
+            ],
+            "message": "success"
+        }
+        */
+
+        if (response.message == "success") {
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                filesList.push(f)
+            })
+        }
     }
 </script>
 
