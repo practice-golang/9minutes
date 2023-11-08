@@ -341,7 +341,7 @@
         return false
     }
 
-    async function getFilesInfo() {
+    async function getPostingFilesInfo() {
         const indexList = []
         for (const fidx of fileIndices.split("|")) {
             indexList.push({ idx: parseInt(fidx) })
@@ -469,7 +469,7 @@
 
     function init() {
         showCommentPageJumper()
-        getFilesInfo()
+        getPostingFilesInfo()
     }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
