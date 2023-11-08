@@ -60,7 +60,7 @@
         {{unescape .Posting.Content.String}}
     </div>
 
-    <div id="fileslist-container">
+    <div id="posting-fileslist-container">
         <ul></ul>
     </div>
 </div>
@@ -118,7 +118,12 @@
 
 <hr />
 
-<div id="editor" class="comment-editor"></div>
+<div id="writer" class="comment-editor"></div>
+
+<div id="writer-fileslist-container">
+    <ul></ul>
+</div>
+
 <div>
     <button type="button" onclick="writeComment()">Write comment</button>
 </div>
@@ -137,24 +142,42 @@
         }
     </style>
 
-    <div class="comment-modifier-container">
-        <div id="modifier" class="comment-modifier"></div>
+    <div id="modifier" class="comment-modifier"></div>
 
-        <div class="comment-fileslist-container">
-            <ul></ul>
-        </div>
+    <div class="modifier-fileslist-container">
+        <ul></ul>
+    </div>
 
-        <div>
-            <button type="button" onclick="cancelEditComment(this)">Cancel</button>
-            <button type="button" onclick="updateComment(this)">Update</button>
-        </div>
+    <div>
+        <button type="button" onclick="cancelEditComment(this)">Cancel</button>
+        <button type="button" onclick="updateComment(this)">Update</button>
     </div>
 </template>
 <!-- Comment modification editor -->
 
 <script>
-    const imageUploadCallback = function (response) {
-        console.log(response)
+    const imageUploadCallback = (idx) => function (response) {
+        if (response.message == "success") {
+            let fcontainer = document.querySelector("#writer-fileslist-container")
+            if (idx) {
+                fcontainer = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot.querySelector(".modifier-fileslist-container")
+            }
+
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                filesList.push(f)
+            })
+        }
     }
 
     function decodeString(s) {
@@ -191,11 +214,11 @@
     const initialContent = ""
     const filesList = []
 
-    const editorEL = document.querySelector("#editor")
+    const editorEL = document.querySelector("#writer")
     const options = {
         uploadActionURI: "/api/uploader",
         uploadAccessURI: "/upload",
-        uploadCallback: imageUploadCallback,
+        uploadCallback: imageUploadCallback(null),
     }
     const editor = new MyEditor(initialContent, editorEL, options)
 
@@ -335,7 +358,7 @@
         if (r.ok) {
             const commentData = await r.json()
 
-            const fcontainer = document.querySelector("#fileslist-container > ul")
+            const fcontainer = document.querySelector("#posting-fileslist-container > ul")
             commentData.forEach((f) => {
                 const a = document.createElement("a")
                 a.setAttribute("href", `/upload/${f.storagename}`)
@@ -362,7 +385,7 @@
         const options = {
             uploadActionURI: "/api/uploader",
             uploadAccessURI: "/upload",
-            uploadCallback: imageUploadCallback,
+            uploadCallback: imageUploadCallback(idx),
         }
 
         if (!editorEL.hasChildNodes()) {
