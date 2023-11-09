@@ -201,12 +201,13 @@
 
             const fcontainer = document.querySelector("#fileslist-container > ul")
             response.forEach((f) => {
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+
                 const btn = document.createElement("button")
                 btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
                 btn.appendChild(document.createTextNode("X"))
 
-                const li = document.createElement("li")
-                li.setAttribute("id", `file-${f.idx}`)
                 li.appendChild(document.createTextNode(`${f.filename}`))
                 li.appendChild(btn)
 

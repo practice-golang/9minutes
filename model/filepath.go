@@ -5,9 +5,9 @@ import (
 )
 
 type StoredFileInfo struct {
-	Idx         null.Int    `json:"idx" db:"IDX"`
-	FileName    null.String `json:"filename" db:"FILE_NAME"`
-	StorageName null.String `json:"storage_name" db:"STORAGE_NAME"`
+	Idx         null.Int    `json:"idx"             db:"IDX"`
+	FileName    null.String `json:"filename"        db:"FILE_NAME"`
+	StorageName null.String `json:"storage_name"    db:"STORAGE_NAME"`
 }
 
 type FilePath struct {

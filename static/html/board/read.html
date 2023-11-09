@@ -83,6 +83,10 @@
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
         <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
+        <a onclick="getFilesInfo(parseInt('{{.Idx.Int64}}'))">Attachment</a>
+        <div id="comment-files-container-{{.Idx.Int64}}">
+            <ul></ul>
+        </div>
         {{end}}
     </div>
 </div>
@@ -144,7 +148,7 @@
 
     <div id="modifier" class="comment-modifier"></div>
 
-    <div class="modifier-fileslist-container">
+    <div id="modifier-fileslist-container">
         <ul></ul>
     </div>
 
@@ -160,7 +164,9 @@
         if (response.message == "success") {
             let fcontainer = document.querySelector("#writer-fileslist-container")
             if (idx) {
-                fcontainer = document.querySelector(`comment-modifier#modifier-${idx}`).shadowRoot.querySelector(".modifier-fileslist-container")
+                const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
+                const modifierROOT = modifierEL.shadowRoot
+                fcontainer = modifierROOT.querySelector("#modifier-fileslist-container")
             }
 
             response.files.forEach((f) => {
@@ -195,7 +201,11 @@
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
     const postingIdx = queries.get("idx")
-    const fileIndices = "{{.Posting.Files.String}}"
+    const postingFileIdxes = "{{.Posting.Files.String}}"
+    let commentsFileIdxes = {}
+    "{{range .Comments.CommentList}}"
+    commentsFileIdxes[parseInt("{{.Idx.Int64}}")] = "{{.Files.String}}"
+    "{{end}}"
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
@@ -209,6 +219,42 @@
         }
 
         return false
+    }
+
+    async function deleteFile(idx, storagename) {
+        const data = [{ "idx": parseInt(idx) }]
+        // const uri = "/api/uploader"
+        const uri = options.uploadActionURI
+
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            document.querySelector(`#file-${idx}`).remove()
+            for (const i in filesList) {
+                if (filesList[i].idx == idx && filesList[i].storagename == storagename) {
+                    filesList.splice(i, 1)
+                    break
+                }
+            }
+
+            if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                const imgTags = document.querySelectorAll("img")
+                imgTags.forEach((img) => {
+                    const fnames = img.src.split("/")
+                    const fname = fnames[fnames.length - 1]
+                    if (fname == storagename) {
+                        img.remove()
+                        return
+                    }
+                })
+            }
+        } else {
+            alert("Failed to delete file")
+        }
     }
 
     const initialContent = ""
@@ -266,8 +312,11 @@
             const data = await r.json()
             totalCommentPage = data["total-page"]
 
+            commentsFileIdxes = {}
+
             data["comment-list"] && data["comment-list"].forEach((comment) => {
                 const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
+
                 commentsHTML += `
                 <span>${comment["author-name"]}</span>|
                 <span>${regdate}</span>|
@@ -275,7 +324,13 @@
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
                 <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
+                <a onclick="getFilesInfo(parseInt('${comment["idx"]}'))">Attachment</a>
+                <div id="comment-files-container-${comment["idx"]}">
+                    <ul></ul>
+                </div>
                 `
+
+                commentsFileIdxes[parseInt(comment["idx"])] = comment.files
             })
             commentsContainer.innerHTML = commentsHTML
 
@@ -341,9 +396,26 @@
         return false
     }
 
-    async function getPostingFilesInfo() {
+    async function getFilesInfo(idx = null, targetEL = null) {
         const indexList = []
-        for (const fidx of fileIndices.split("|")) {
+        let attatchList
+
+        let fileIdxes = postingFileIdxes.split("|")
+        let targetContainer = "#posting-fileslist-container > ul"
+        if (idx) {
+            fileIdxes = commentsFileIdxes[parseInt(idx)].split("|")
+            targetContainer = `#comment-files-container-${idx} > ul`
+        }
+
+        if (!targetEL) {
+            attatchList = document.querySelector(targetContainer)
+        } else {
+            attatchList = targetEL
+        }
+
+        if (!fileIdxes.length) { return false }
+
+        for (const fidx of fileIdxes) {
             indexList.push({ idx: parseInt(fidx) })
         }
 
@@ -358,19 +430,28 @@
         if (r.ok) {
             const commentData = await r.json()
 
-            const fcontainer = document.querySelector("#posting-fileslist-container > ul")
-            commentData.forEach((f) => {
-                const a = document.createElement("a")
-                a.setAttribute("href", `/upload/${f.storagename}`)
-                a.setAttribute("target", "_blank")
-                a.appendChild(document.createTextNode(`${f.filename}`))
 
+            attatchList.innerHTML = ""
+            commentData.forEach((f) => {
                 const li = document.createElement("li")
                 li.setAttribute("id", `file-${f.idx}`)
-                // li.appendChild(document.createTextNode(`${f.filename}`))
-                li.appendChild(a)
 
-                fcontainer.appendChild(li)
+                if (!targetEL) {
+                    const a = document.createElement("a")
+                    a.setAttribute("href", `/upload/${f.storagename}`)
+                    a.setAttribute("target", "_blank")
+                    a.appendChild(document.createTextNode(`${f.filename}`))
+                    li.appendChild(a)
+                } else {
+                    const btn = document.createElement("button")
+                    btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                    btn.appendChild(document.createTextNode("X"))
+
+                    li.appendChild(document.createTextNode(`${f.filename}`))
+                    li.appendChild(btn)
+                }
+
+                attatchList.appendChild(li)
                 filesList.push(f)
             })
         }
@@ -399,6 +480,9 @@
         for (const i in commentModifiers) {
             commentModifiers[i].view.dom.getRootNode().host.style.display = "none"
         }
+
+        const attachList = modifierROOT.querySelector("#modifier-fileslist-container > ul")
+        getFilesInfo(idx, attachList)
 
         modifierEL.style.display = "block"
 
@@ -436,7 +520,7 @@
 
         const data = {
             "content": content,
-            "files": fileIndices
+            "files": postingFileIdxes
         }
 
         const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
@@ -469,7 +553,7 @@
 
     function init() {
         showCommentPageJumper()
-        getPostingFilesInfo()
+        getFilesInfo()
     }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
