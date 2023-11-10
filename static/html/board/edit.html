@@ -117,7 +117,6 @@
 
     async function deleteFile(idx, storagename) {
         const data = [{ "idx": parseInt(idx) }]
-        // const uri = "/api/uploader"
         const uri = options.uploadActionURI
 
         const r = await fetch(uri, {

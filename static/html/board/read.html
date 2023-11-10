@@ -175,12 +175,12 @@
             if (idx) {
                 const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
                 const modifierROOT = modifierEL.shadowRoot
-                fcontainer = modifierROOT.querySelector("#modifier-fileslist-container")
+                fcontainer = modifierROOT.querySelector("#modifier-fileslist-container > ul")
             }
 
             response.files.forEach((f) => {
                 const btn = document.createElement("button")
-                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.setAttribute("onclick", `deleteFile(${idx}, ${f.idx}, '${f.storagename}')`)
                 btn.appendChild(document.createTextNode("X"))
 
                 const li = document.createElement("li")
@@ -234,10 +234,18 @@
         return false
     }
 
-    async function deleteFile(idx, storagename) {
-        const data = [{ "idx": parseInt(idx) }]
-        // const uri = "/api/uploader"
+    async function deleteFile(commentIDX, fidx, storagename) {
+        const data = [{ "idx": parseInt(fidx) }]
         const uri = options.uploadActionURI
+
+        let targetRoot = document
+        let container = document.querySelector("#writer-fileslist-container > ul")
+        let targetAttachKey = "comment-new"
+        if (commentIDX) {
+            targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
+            container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
+            targetAttachKey = "comment-mod"
+        }
 
         const r = await fetch(uri, {
             method: "DELETE",
@@ -246,16 +254,16 @@
         })
 
         if (r.ok) {
-            document.querySelector(`#file-${idx}`).remove()
-            for (const i in filesList) {
-                if (filesList[i].idx == idx && filesList[i].storagename == storagename) {
-                    filesList.splice(i, 1)
+            container.querySelector(`#file-${fidx}`).remove()
+            for (const i in attachIdxList) {
+                if (attachIdxList[i].idx == fidx && attachIdxList[i].storagename == storagename) {
+                    attachIdxList.splice(i, 1)
                     break
                 }
             }
 
             if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
-                const imgTags = document.querySelectorAll("img")
+                const imgTags = targetRoot.querySelectorAll("img")
                 imgTags.forEach((img) => {
                     const fnames = img.src.split("/")
                     const fname = fnames[fnames.length - 1]
@@ -416,7 +424,7 @@
 
     async function getFilesInfo(idx = null, targetEL = null) {
         const indexList = []
-        let attatchList
+        let attachList
 
         let fileIdxes = postingFileIdxes.split("|")
         let targetContainer = "#posting-fileslist-container > ul"
@@ -428,9 +436,9 @@
         }
 
         if (!targetEL) {
-            attatchList = document.querySelector(targetContainer)
+            attachList = document.querySelector(targetContainer)
         } else {
-            attatchList = targetEL
+            attachList = targetEL
         }
 
         if (!fileIdxes.length) { return false }
@@ -449,9 +457,9 @@
 
         if (r.ok) {
             const commentData = await r.json()
-            attachIdxList["posting"] = []
+            attachIdxList[targetAttachKey] = []
 
-            attatchList.innerHTML = ""
+            attachList.innerHTML = ""
             commentData.forEach((f) => {
                 const li = document.createElement("li")
                 li.setAttribute("id", `file-${f.idx}`)
@@ -464,14 +472,14 @@
                     li.appendChild(a)
                 } else {
                     const btn = document.createElement("button")
-                    btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                    btn.setAttribute("onclick", `deleteFile(${idx}, ${f.idx}, '${f.storagename}')`)
                     btn.appendChild(document.createTextNode("X"))
 
                     li.appendChild(document.createTextNode(`${f.filename}`))
                     li.appendChild(btn)
                 }
 
-                attatchList.appendChild(li)
+                attachList.appendChild(li)
 
                 attachIdxList[targetAttachKey].push(f)
             })
@@ -542,7 +550,7 @@
         const content = commentModifiers[modifierEL.id].getHTML()
 
         let flist = ""
-        for (f of  attachIdxList["comment-mod"]) {
+        for (f of attachIdxList["comment-mod"]) {
             flist += f.idx
         }
         flist = flist.replace(/|\s*$/, "")
