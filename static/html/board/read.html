@@ -160,9 +160,18 @@
 <!-- Comment modification editor -->
 
 <script>
+    let filesList = []
+    const attachIdxList = {
+        "posting": [],
+        "comment-new": [],
+        "comment-mod": []
+    }
+</script>
+
+<script>
     const imageUploadCallback = (idx) => function (response) {
         if (response.message == "success") {
-            let fcontainer = document.querySelector("#writer-fileslist-container")
+            let fcontainer = document.querySelector("#writer-fileslist-container > ul")
             if (idx) {
                 const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
                 const modifierROOT = modifierEL.shadowRoot
@@ -181,7 +190,11 @@
 
                 fcontainer.appendChild(li)
 
-                filesList.push(f)
+                if (idx) {
+                    attachIdxList["comment-mod"].push(f)
+                } else {
+                    attachIdxList["comment-new"].push(f)
+                }
             })
         }
     }
@@ -258,8 +271,6 @@
     }
 
     const initialContent = ""
-    const filesList = []
-
     const editorEL = document.querySelector("#writer")
     const options = {
         uploadActionURI: "/api/uploader",
@@ -297,6 +308,9 @@
     page: number - If page is 1, last comment page
      */
     async function getComments(page = 1) {
+        // filesList = []
+        attachIdxList["comment-mod"] = []
+
         page = parseInt(page)
         if (page < 0) { page = 1 } // last page
         if (page > totalCommentPage) { page = totalCommentPage }
@@ -370,7 +384,7 @@
         }
 
         let fileIndices = ""
-        for (const f of filesList) { fileIndices += `${f.idx}|` }
+        for (const f of attachIdxList["comment-new"]) { fileIndices += `${f.idx}|` }
         if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
 
         const data = {
@@ -388,7 +402,11 @@
 
         if (r.ok) {
             getComments(0)
+
             editor.setHTML("")
+            attachIdxList["comment-new"] = []
+            document.querySelector("#writer-fileslist-container > ul").innerHTML = ""
+
             return false
         }
 
@@ -402,9 +420,11 @@
 
         let fileIdxes = postingFileIdxes.split("|")
         let targetContainer = "#posting-fileslist-container > ul"
+        let targetAttachKey = "posting"
         if (idx) {
             fileIdxes = commentsFileIdxes[parseInt(idx)].split("|")
             targetContainer = `#comment-files-container-${idx} > ul`
+            targetAttachKey = "comment-mod"
         }
 
         if (!targetEL) {
@@ -429,7 +449,7 @@
 
         if (r.ok) {
             const commentData = await r.json()
-
+            attachIdxList["posting"] = []
 
             attatchList.innerHTML = ""
             commentData.forEach((f) => {
@@ -452,12 +472,15 @@
                 }
 
                 attatchList.appendChild(li)
-                filesList.push(f)
+
+                attachIdxList[targetAttachKey].push(f)
             })
         }
     }
 
     function openEditComment(idx) {
+        attachIdxList["comment-mod"] = []
+
         const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
         const modifierROOT = modifierEL.shadowRoot
         const modContent = document.querySelector(`#comment-${idx}`).innerHTML
@@ -518,9 +541,15 @@
         const commentIDX = self.getRootNode().host.dataset.idx
         const content = commentModifiers[modifierEL.id].getHTML()
 
+        let flist = ""
+        for (f of  attachIdxList["comment-mod"]) {
+            flist += f.idx
+        }
+        flist = flist.replace(/|\s*$/, "")
+
         const data = {
             "content": content,
-            "files": postingFileIdxes
+            "files": flist
         }
 
         const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
@@ -551,9 +580,10 @@
         modifierEL.style.display = "none"
     }
 
-    function init() {
+    async function init() {
         showCommentPageJumper()
-        getFilesInfo()
+        await getFilesInfo()
+        // filesList = []
     }
     document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
