@@ -3,13 +3,17 @@
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
 * [x] Board list generation for menu items
-* [ ] Comment edit, Delete
-    * [ ] Comment edit
-    * [ ] Comment delete
-* [ ] All board table names to lowercase
+* [x] Comment edit, Delete
+    * [x] Comment edit
+    * [x] Comment delete
+* [x] All board table names to lowercase
+* [x] Editor
+    * [x] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
+* [ ] Board list cache
+    * [ ] When execute
+    * [ ] When create
+    * [ ] When change
 * [ ] escape/unscape comment writing/reading
-* [ ] Editor
-    * [ ] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
 * [ ] Move and clean up folders under static - admin, html, static..
 * [ ] Show/Edit default and custom column in mypage
 * [ ] Choose use or delete approval column
