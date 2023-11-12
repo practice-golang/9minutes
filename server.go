@@ -98,6 +98,7 @@ func RunServer() {
 	setupConfig()
 	handler.NewSessionStore()
 	setupDB()
+
 	setupRouter()
 
 	println("Listen", ListeningAddress)

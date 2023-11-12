@@ -13,6 +13,11 @@
     * [ ] When execute
     * [ ] When create
     * [ ] When change
+* [ ] Add manager setting for each boards
+    * [ ] DB
+    * [ ] Admin page
+    * [ ] Control API
+* [ ] Clean up HandleHTML function
 * [ ] escape/unscape comment writing/reading
 * [ ] Move and clean up folders under static - admin, html, static..
 * [ ] Show/Edit default and custom column in mypage
