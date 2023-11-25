@@ -9,11 +9,26 @@
 * [x] All board table names to lowercase
 * [x] Editor
     * [x] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
-* [ ] Board list cache
-    * [ ] When execute
-    * [ ] When create
-    * [ ] When change
-* [ ] Add manager setting for each boards
+* [x] Board list cache
+    * [x] When execute
+    * [x] When create
+    * [x] When change
+* [ ] User grade from numbers
+    * [ ] API - User grade list
+    * Refs.
+        * 100: admin
+        * 200: manager
+        * 300: regular user
+        * 310: member of board
+        * 400: pending user
+        * 500: guest
+        * 600: banned user
+* [ ] Board managing page
+    * [ ] API
+        * [ ] Edit board settings
+        * [ ] Add/edit/remove user as member
+    * [ ] HTML Page - by svelte?
+* [ ] Add manager account setting for each boards
     * [ ] DB
     * [ ] Admin page
     * [ ] Control API
