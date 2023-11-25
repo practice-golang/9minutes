@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"net/http"
@@ -98,6 +99,12 @@ func DeleteUserColumnsAPI(c *fiber.Ctx) error {
 	}
 
 	SetUserColumnsALL()
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func GetUserGrades(c *fiber.Ctx) error {
+	result := consts.UserGrades
 
 	return c.Status(http.StatusOK).JSON(result)
 }

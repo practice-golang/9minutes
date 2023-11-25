@@ -26,7 +26,7 @@ export const load = async ({ url, fetch }) => {
     const page = Number(url.searchParams.get("page")) || 1
     const search = url.searchParams.get("search") || ""
 
-    async function getColumns() {
+    async function getUserColumns() {
         let columns = []
 
         const rc = await fetch("/api/admin/user-columns", {
@@ -38,6 +38,20 @@ export const load = async ({ url, fetch }) => {
         if (rc.ok) { columns = await rc.json() }
 
         return columns
+    }
+
+    async function getUserGrades() {
+        let grades = {}
+
+        const rg = await fetch("/api/admin/user-grades", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
+
+        if (rg.ok) { grades = await rg.json() }
+
+        return grades
     }
 
     async function getUsers(page, listCount, search) {
@@ -58,7 +72,8 @@ export const load = async ({ url, fetch }) => {
     }
 
     return {
-        columns: getColumns(),
+        columns: getUserColumns(),
+        grades: getUserGrades(),
         "userlist-data": getUsers(page, listCount, search)
     }
 }

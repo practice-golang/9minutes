@@ -11,6 +11,7 @@
     export let data;
 
     const columns = data.columns;
+    const grades = data.grades;
 
     let listCount = Number($page.url.searchParams.get("list-count")) || 20;
     $: users = data["userlist-data"]["user-list"];
@@ -31,15 +32,6 @@
     let showNewUser = false;
     let newUser = {};
     let editUser = {};
-
-    const userGRADES = {
-        admin: "Admin",
-        manager: "Manager",
-        regular_user: "Regular User",
-        pending_user: "Pending User",
-        banned_user: "Banned User",
-        resigned_user: "Resigned User",
-    };
 
     function toggleSelectAll() {
         if (selectAll) {
@@ -293,8 +285,8 @@
                     {:else if col["column-code"] == "grade"}
                         <td>
                             <select bind:value={newUser["grade"]}>
-                                {#each Object.entries(userGRADES) as [key, name]}
-                                    <option value={key}>{name}</option>
+                                {#each Object.entries(grades) as [key, grade]}
+                                    <option value={key}>{grade.name}</option>
                                 {/each}
                             </select>
                         </td>
@@ -342,8 +334,8 @@
                                             col["column-code"]
                                         ]}
                                     >
-                                        {#each Object.entries(userGRADES) as [key, name]}
-                                            <option value={key}>{name}</option>
+                                        {#each Object.entries(grades) as [key, grade]}
+                                            <option value={key}>{grade.name}</option>
                                         {/each}
                                     </select>
                                 </td>

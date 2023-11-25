@@ -13,17 +13,9 @@
     * [x] When execute
     * [x] When create
     * [x] When change
-* [ ] User grade from numbers
-    * [ ] API - User grade list
-    * Refs.
-        * 100: admin
-        * 200: manager
-        * 300: regular user
-        * 310: member of board
-        * 400: pending user
-        * 500: guest
-        * 600: banned user
-* [ ] Banned user time count - When page open or login, check the ban time is gone
+* [x] User grade from numbers
+    * [x] API - User grade list
+    * Refs. - consts/contant.go
 * [ ] Board managing page
     * [ ] API
         * [ ] Edit board settings
@@ -33,6 +25,7 @@
     * [ ] DB
     * [ ] Admin page
     * [ ] Control API
+* [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
 * [ ] escape/unscape comment writing/reading
 * [ ] Move and clean up folders under static - admin, html, static..

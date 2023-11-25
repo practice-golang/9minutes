@@ -38,6 +38,20 @@ export const load = async ({ url, fetch }) => {
         { "display-name": "Grant upload", "column-code": "grant-upload", "column-name": "GRANT_UPLOAD" },
     ]
 
+    async function getUserGrades() {
+        let grades = {}
+
+        const rg = await fetch("/api/admin/user-grades", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        })
+
+        if (rg.ok) { grades = await rg.json() }
+
+        return grades
+    }
+
     async function getBoards(page, listCount, search) {
         let boardsData = {}
 
@@ -56,5 +70,9 @@ export const load = async ({ url, fetch }) => {
         return boardsData
     }
 
-    return { columns: columns, "boardlist-data": getBoards(page, listCount, search) }
+    return {
+        columns: columns,
+        grades: getUserGrades(),
+        "boardlist-data": getBoards(page, listCount, search)
+    }
 }

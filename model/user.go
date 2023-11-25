@@ -4,6 +4,12 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
+type UserGrade struct {
+	Name  string `json:"name"`
+	Code  string `json:"code"`
+	Point int    `json:"point"`
+}
+
 // UserListingOptions - Search, page
 type UserListingOptions struct {
 	Search    null.String

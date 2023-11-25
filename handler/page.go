@@ -161,7 +161,7 @@ func HandlePostingList(c *fiber.Ctx) error {
 	currentBoard, _ := crud.GetBoardByCode(model.Board{BoardCode: null.StringFrom(boardCode)})
 
 	templateMap["Accessible"] = false
-	if consts.UserGrades[grade] >= consts.UserGrades[currentBoard.GrantRead.String] {
+	if consts.UserGrades[grade].Point >= consts.UserGrades[currentBoard.GrantRead.String].Point {
 		templateMap["Accessible"] = true
 	}
 

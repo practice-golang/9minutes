@@ -3,11 +3,12 @@
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
 
-    import "$lib/styles/table.css"
+    import "$lib/styles/table.css";
 
     export let data;
 
     const columns = data.columns;
+    const grades = data.grades;
 
     let listCount = Number($page.url.searchParams.get("list-count")) || 10;
     $: boards = data["boardlist-data"]["board-list"];
@@ -27,15 +28,6 @@
     let showNewBoard = false;
     let newBoard = {};
     let editBoard = {};
-
-    const grantTYPES = {
-        admin: "Admin",
-        manager: "Manager",
-        regular_user: "Regular User",
-        pending_user: "Pending User",
-        banned_user: "Banned User",
-        guest: "Guest",
-    };
 
     const grantSelections = [
         "grant-read",
@@ -99,7 +91,7 @@
     function moveToListView(index) {
         window.open(
             "/board/list?board_code=" + boards[index]["board-code"],
-            "_blank"
+            "_blank",
         );
     }
 
@@ -285,8 +277,8 @@
                 {:else if grantSelections.includes(col["column-code"])}
                     <td>
                         <select bind:value={newBoard[col["column-code"]]}>
-                            {#each Object.entries(grantTYPES) as [key, name]}
-                                <option value={key}>{name}</option>
+                            {#each Object.entries(grades) as [key, grade]}
+                                <option value={key}>{grade.name}</option>
                             {/each}
                         </select>
                     </td>
@@ -341,8 +333,10 @@
                                 <select
                                     bind:value={editBoard[col["column-code"]]}
                                 >
-                                    {#each Object.entries(grantTYPES) as [key, name]}
-                                        <option value={key}>{name}</option>
+                                    {#each Object.entries(grades) as [key, grade]}
+                                        <option value={key}>
+                                            {grade.name}
+                                        </option>
                                     {/each}
                                 </select>
                             </td>

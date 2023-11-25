@@ -37,6 +37,10 @@ func setApiAdmin(a *fiber.App) {
 	gauserfield.Put("/", handler.UpdateUserColumnsAPI)
 	gauserfield.Delete("/", handler.DeleteUserColumnsAPI)
 
+	/* API Admin - User grades */
+	gauserggrades := gadmin.Group("/user-grades") // required add auth middleware
+	gauserggrades.Get("/", handler.GetUserGrades)
+
 	/* API Admin - Users */
 	gauser := gadmin.Group("/user") // required add auth middleware
 	gauser.Get("/", handler.GetUserListAPI)
