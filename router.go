@@ -40,6 +40,8 @@ func setApiAdmin(a *fiber.App) {
 	/* API Admin - User grades */
 	gauserggrades := gadmin.Group("/user-grades") // required add auth middleware
 	gauserggrades.Get("/", handler.GetUserGrades)
+	gauserggrades4grant := gadmin.Group("/user-grades-for-grant") // required add auth middleware
+	gauserggrades4grant.Get("/", handler.GetUserGradesForGrant)
 
 	/* API Admin - Users */
 	gauser := gadmin.Group("/user") // required add auth middleware

@@ -6,7 +6,7 @@
     import moment from "moment";
     // import "moment/dist/locale/ko";
 
-    import "$lib/styles/table.css"
+    import "$lib/styles/table.css";
 
     export let data;
 
@@ -286,7 +286,9 @@
                         <td>
                             <select bind:value={newUser["grade"]}>
                                 {#each Object.entries(grades) as [key, grade]}
-                                    <option value={key}>{grade.name}</option>
+                                    <option value={grade.point}
+                                        >{grade.name}</option
+                                    >
                                 {/each}
                             </select>
                         </td>
@@ -335,7 +337,9 @@
                                         ]}
                                     >
                                         {#each Object.entries(grades) as [key, grade]}
-                                            <option value={key}>{grade.name}</option>
+                                            <option value={grade.point}>
+                                                {grade.name}
+                                            </option>
                                         {/each}
                                     </select>
                                 </td>
@@ -354,7 +358,7 @@
                                 <td class="colFixedMid">
                                     {moment(
                                         editUser["regdate"],
-                                        "YYYYMMDDhhmmss"
+                                        "YYYYMMDDhhmmss",
                                     ).format("YYYY-MM-DD")}
                                 </td>
                             {:else}
@@ -393,7 +397,7 @@
                                 <td class="colFixedMid">
                                     {moment(
                                         user["regdate"],
-                                        "YYYYMMDDhhmmss"
+                                        "YYYYMMDDhhmmss",
                                     ).format("YYYY-MM-DD")}
                                 </td>
                             {:else}

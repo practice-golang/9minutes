@@ -41,7 +41,7 @@ export const load = async ({ url, fetch }) => {
     }
 
     async function getUserGrades() {
-        let grades = {}
+        let grades = []
 
         const rg = await fetch("/api/admin/user-grades", {
             method: "GET",
@@ -49,7 +49,10 @@ export const load = async ({ url, fetch }) => {
             credentials: "include",
         })
 
-        if (rg.ok) { grades = await rg.json() }
+        if (rg.ok) {
+            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].point - b[1].point })
+            for (let el of gradesArr) { grades.push(el[1]) }
+        }
 
         return grades
     }

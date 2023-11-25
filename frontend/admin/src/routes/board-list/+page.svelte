@@ -278,7 +278,7 @@
                     <td>
                         <select bind:value={newBoard[col["column-code"]]}>
                             {#each Object.entries(grades) as [key, grade]}
-                                <option value={key}>{grade.name}</option>
+                                <option value={grade.code}>{grade.name}</option>
                             {/each}
                         </select>
                     </td>
@@ -334,7 +334,7 @@
                                     bind:value={editBoard[col["column-code"]]}
                                 >
                                     {#each Object.entries(grades) as [key, grade]}
-                                        <option value={key}>
+                                        <option value={grade.point}>
                                             {grade.name}
                                         </option>
                                     {/each}
