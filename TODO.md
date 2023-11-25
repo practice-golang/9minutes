@@ -23,6 +23,7 @@
         * 400: pending user
         * 500: guest
         * 600: banned user
+* [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Board managing page
     * [ ] API
         * [ ] Edit board settings
