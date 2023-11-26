@@ -1,0 +1,1 @@
+.table-container{overflow-x:auto;padding-top:1em;padding-bottom:1em}table{width:100%}tbody tr:hover{background-color:silver}th,td{text-align:center}.colFixedMin{width:3em;min-width:3em;max-width:3em}.colFixedMid{width:7em;min-width:7em;max-width:7em}.colFixedMax{width:12em;min-width:12em;max-width:12em}.colField{width:10em;min-width:10em}
