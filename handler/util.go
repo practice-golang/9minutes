@@ -11,22 +11,6 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// import (
-// 	"9minutes/auth"
-// 	"9minutes/config"
-// 	"9minutes/internal/crud"
-// 	"9minutes/internal/fd"
-// 	"9minutes/model"
-// 	"9minutes/router"
-// 	"bytes"
-// 	"errors"
-// 	"math/rand"
-// 	"os"
-// 	"path/filepath"
-// 	"strings"
-// 	"time"
-// )
-
 func LoadHTML(c *fiber.Ctx) ([]byte, error) {
 	return nil, nil
 }
@@ -50,7 +34,7 @@ func DeleteUploadFile(filepath string) {
 	}
 }
 
-func SetBoardDataALL() map[string]model.Board {
+func LoadBoardDatas() map[string]model.Board {
 	BoardListALL = map[string]model.Board{}
 
 	boardListingOptions := model.BoardListingOptions{}
@@ -65,6 +49,6 @@ func SetBoardDataALL() map[string]model.Board {
 	return BoardListALL
 }
 
-func SetUserColumnsALL() {
+func LoadUserColumnDatas() {
 	UserColumnsALL, _ = crud.GetUserColumnsList()
 }

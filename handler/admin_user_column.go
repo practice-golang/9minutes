@@ -50,7 +50,7 @@ func AddUserColumnAPI(c *fiber.Ctx) error {
 		"result": "ok",
 	}
 
-	SetUserColumnsALL()
+	LoadUserColumnDatas()
 
 	return c.Status(http.StatusOK).JSON(result)
 }
@@ -74,7 +74,7 @@ func UpdateUserColumnsAPI(c *fiber.Ctx) error {
 		"result": "ok",
 	}
 
-	SetUserColumnsALL()
+	LoadUserColumnDatas()
 
 	return c.Status(http.StatusOK).JSON(result)
 }
@@ -98,7 +98,7 @@ func DeleteUserColumnsAPI(c *fiber.Ctx) error {
 		"result": "ok",
 	}
 
-	SetUserColumnsALL()
+	LoadUserColumnDatas()
 
 	return c.Status(http.StatusOK).JSON(result)
 }

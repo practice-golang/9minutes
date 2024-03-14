@@ -80,6 +80,7 @@ func HandleHTML(c *fiber.Ctx) error {
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
+
 			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
 			templateMap["Posting"] = posting
 

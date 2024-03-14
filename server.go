@@ -97,8 +97,8 @@ func RunServer() {
 	_ = os.Mkdir(UploadPath, os.ModePerm)
 	setupConfig()
 	handler.NewSessionStore()
-	setupDB()
 
+	setupDB()
 	setupRouter()
 
 	println("Listen", ListeningAddress)

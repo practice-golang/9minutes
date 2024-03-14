@@ -277,12 +277,12 @@ func setupDB() {
 	}
 }
 
-func setBoardDataList() {
-	handler.SetBoardDataALL()
+func loadBoardDatas() {
+	handler.LoadBoardDatas()
 }
 
-func setUserColumnsList() {
-	handler.SetUserColumnsALL()
+func loadUserColumnDatas() {
+	handler.LoadUserColumnDatas()
 }
 
 func setupRouter() {
@@ -333,6 +333,6 @@ func setupRouter() {
 	setStaticFiles(app) // Files, Assets
 	setPage(app)        // HTML templates
 
-	setBoardDataList()   // Board list
-	setUserColumnsList() // User column list
+	loadBoardDatas()      // Board list
+	loadUserColumnDatas() // User column list
 }
