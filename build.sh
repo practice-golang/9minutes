@@ -10,16 +10,16 @@ rm -rf ./build
 
 cd ../..
 
-cd frontend/manager
+# cd frontend/manager
 
-yarn
-yarn build
+# yarn
+# yarn build
 
-rm -rf ../../static/html/manager/_app/*
-mv -f ./build/* ../../static/html/manager
+# rm -rf ../../static/html/manager/_app/*
+# mv -f ./build/* ../../static/html/manager
 
-rm -rf ./build
+# rm -rf ./build
 
-cd ../..
+# cd ../..
 
 go build -ldflags "-w -s" -trimpath -o bin/ ./cmd

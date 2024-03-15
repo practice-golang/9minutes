@@ -5,7 +5,6 @@ import (
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"html"
-	"log"
 	"net/http"
 	"strings"
 
@@ -17,6 +16,7 @@ import (
 )
 
 var bm = bluemonday.UGCPolicy()
+var indexPaths = []string{"", "admin", "board"}
 
 func HealthCheckAPI(c *fiber.Ctx) error {
 	return c.SendString("Ok")
@@ -31,9 +31,21 @@ func getSessionValue(sess *session.Session, key string) (result string) {
 	return result
 }
 
+func appendIndexToRoutePath(name string) string {
+	for _, p := range indexPaths {
+		if name == p {
+			name += "/index"
+			name = strings.TrimPrefix(name, "/")
+			break
+		}
+	}
+
+	return name
+}
+
 // HandleHTML - Handle HTML template layout
 func HandleHTML(c *fiber.Ctx) error {
-	name := strings.TrimSuffix(c.Path()[1:], "/")
+	routePath := strings.TrimSuffix(c.Path()[1:], "/")
 	queries := c.Queries()
 	templateMap := fiber.Map{}
 
@@ -61,22 +73,16 @@ func HandleHTML(c *fiber.Ctx) error {
 		templateMap["PendingUser"] = false
 	}
 
-	switch true {
-	case name == "":
-		name = "index"
+	routePath = appendIndexToRoutePath(routePath)
+	routePaths := strings.Split(routePath, "/")
 
-		if queries["hello"] != "" {
-			log.Printf("Hello: %s", queries["hello"])
-		}
-	case strings.HasPrefix(name, "board"):
-		switch name {
-		case "board":
-			name = "board/index"
-		case "board/read", "board/edit":
-			boardCode := queries["board_code"]
-			idx := queries["idx"]
+	switch routePaths[0] {
+	case "board":
+		boardCode := queries["board_code"]
 
-			posting, err := GetPostingData(boardCode, idx)
+		switch routePath {
+		case "board/read":
+			posting, err := GetPostingData(boardCode, queries["idx"])
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
@@ -84,38 +90,49 @@ func HandleHTML(c *fiber.Ctx) error {
 			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
 			templateMap["Posting"] = posting
 
-			if name == "board/read" {
-				comments, err := GetCommentList(boardCode, idx, map[string]string{"page": "0"})
-				if err != nil {
-					return err
-				}
-				templateMap["Comments"] = comments
+			comments, err := GetCommentList(boardCode, queries["idx"], map[string]string{"page": "0"})
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			}
+			templateMap["Comments"] = comments
+		case "board/edit":
+			posting, err := GetPostingData(boardCode, queries["idx"])
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 
+			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
+			templateMap["Posting"] = posting
 		case "board/write":
-			boardCode := queries["board_code"]
-
 			if boardCode == "" {
 				return c.Status(http.StatusBadRequest).SendString("no board code")
 			}
-
-			name = "board/write"
+		default:
+			routePath = "status/unauthorized"
 		}
-	case strings.HasPrefix(name, "mypage"):
+	case "mypage":
 		if userid == "" {
-			name = "status/unauthorized"
+			routePath = "status/unauthorized"
 			break
 		}
-	case strings.HasPrefix(name, "admin"):
+	case "admin":
 		if userid == "" {
-			name = "status/unauthorized"
+			routePath = "status/unauthorized"
 			break
 		}
 
-		name = "admin/index"
+		usergrade, err := GetSessionUserGrade(c)
+		if err != nil {
+			return err
+		}
+
+		if usergrade != "admin" {
+			routePath = "status/unauthorized"
+			break
+		}
 	}
 
-	err = c.Render(name, templateMap)
+	err = c.Render(routePath, templateMap)
 	if err != nil {
 		if strings.Contains(err.Error(), "does not exist") {
 			return c.Status(http.StatusNotFound).SendString("Page not Found")
