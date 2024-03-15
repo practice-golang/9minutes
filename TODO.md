@@ -20,7 +20,6 @@
     * [ ] API
         * [ ] Edit board settings
         * [ ] Add/edit/remove user as member
-    * [ ] HTML Page - by svelte?
 * [ ] Add manager account setting for each boards
     * [ ] DB
     * [ ] Admin page
