@@ -10,6 +10,8 @@
     const columns = data.columns;
     const grades = data.grades;
 
+    console.log(grades);
+
     let listCount = Number($page.url.searchParams.get("list-count")) || 10;
     $: boards = data["boardlist-data"]["board-list"];
 
@@ -101,6 +103,7 @@
         for (const k in boards[index]) {
             editBoard[k] = boards[index][k];
         }
+        console.log(editBoard);
     }
 
     function closeEditBoard() {
@@ -334,7 +337,7 @@
                                     bind:value={editBoard[col["column-code"]]}
                                 >
                                     {#each Object.entries(grades) as [key, grade]}
-                                        <option value={grade.point}>
+                                        <option value={grade.code}>
                                             {grade.name}
                                         </option>
                                     {/each}
@@ -372,7 +375,17 @@
                     </td>
 
                     {#each columns as col}
-                        <td>{board[col["column-code"]]}</td>
+                        <td>
+                            {#if grantSelections.includes(col["column-code"])}
+                                {#each Object.entries(grades) as [key, grade]}
+                                    {#if grade.code == board[col["column-code"]]}
+                                        {grade.name}
+                                    {/if}
+                                {/each}
+                            {:else}
+                                {board[col["column-code"]]}
+                            {/if}
+                        </td>
                     {/each}
 
                     <td>
