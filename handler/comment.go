@@ -13,15 +13,8 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetCommentList(boardCode string, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
+func GetCommentList(board model.Board, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
 	var err error
-
-	board := model.Board{}
-	board.BoardCode = null.StringFrom(boardCode)
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return model.CommentPageData{}, err
-	}
 
 	page := 1
 	count := config.CommentCountPerPage
@@ -74,10 +67,27 @@ func GetCommentList(boardCode string, postingIDX string, queries map[string]stri
 }
 
 func GetComments(c *fiber.Ctx) (err error) {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	postingIdx := c.Params("posting_idx")
 
-	comments, err := GetCommentList(boardCode, postingIdx, queries)
+	board := BoardListData[boardCode]
+	accessible := checkBoardAccessible(board.GrantRead.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
+	comments, err := GetCommentList(board, postingIdx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -86,6 +96,17 @@ func GetComments(c *fiber.Ctx) (err error) {
 }
 
 func WriteComment(c *fiber.Ctx) error {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
 	comment := model.Comment{}
 	postingIdx, err := strconv.ParseInt(c.Params("posting_idx"), 0, 64)
 	if err != nil {
@@ -98,27 +119,17 @@ func WriteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	board := model.Board{BoardCode: null.StringFrom(c.Params("board_code"))}
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("board not found")
-	}
-
-	sess, err := store.Get(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
+	accessible := checkBoardAccessible(board.GrantComment.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
 	useridx := int64(-1)
 	useridxInterface := sess.Get("idx")
 	if useridxInterface != nil {
 		useridx = useridxInterface.(int64)
-	}
-
-	userid := "guest"
-	useridInterface := sess.Get("userid")
-	if useridInterface != nil {
-		userid = useridInterface.(string)
 	}
 
 	comment.AuthorIdx = null.IntFrom(useridx)
@@ -145,16 +156,25 @@ func WriteComment(c *fiber.Ctx) error {
 }
 
 func UpdateComment(c *fiber.Ctx) error {
-	var board model.Board
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
 
 	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
 	postingIdx := c.Params("posting_idx")
 	commentIdx := c.Params("comment_idx")
 
-	board.BoardCode = null.StringFrom(boardCode)
-	board, err := crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
+	accessible := checkBoardAccessible(board.GrantComment.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
 	comment := model.Comment{}
@@ -182,19 +202,13 @@ func UpdateComment(c *fiber.Ctx) error {
 }
 
 func DeleteComment(c *fiber.Ctx) error {
-	var board model.Board
-
 	boardCode := c.Params("board_code")
 	postingIdx := c.Params("posting_idx")
 	commentIdx := c.Params("comment_idx")
 
-	board.BoardCode = null.StringFrom(boardCode)
-	board, err := crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
-	}
+	board := BoardListData[boardCode]
 
-	err = crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
+	err := crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

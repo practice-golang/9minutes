@@ -278,7 +278,7 @@ func setupDB() {
 }
 
 func loadBoardDatas() {
-	handler.LoadBoardDatas()
+	handler.LoadBoardListData()
 }
 
 func loadUserColumnDatas() {

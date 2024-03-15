@@ -13,6 +13,9 @@
     const columns = data.columns;
     const grades = data.grades;
 
+    console.log(grades)
+    console.log(columns)
+
     let listCount = Number($page.url.searchParams.get("list-count")) || 20;
     $: users = data["userlist-data"]["user-list"];
     let previousPage = -1;
@@ -140,7 +143,7 @@
         invalidateAll();
     }
 
-    async function deleteUser(index, mode = "resign") {
+    async function deleteUser(index, mode = "quit") {
         const userIDX = users[index]["idx"];
 
         let uri = "/api/admin/user";
@@ -161,7 +164,7 @@
         invalidateAll();
     }
 
-    async function deleteSelectedUsers(mode = "resign") {
+    async function deleteSelectedUsers(mode = "quit") {
         if (selectedIndices.length == 0) {
             alert("Selected nothing");
             return;
@@ -210,7 +213,7 @@
 <button
     type="button"
     on:click={() => {
-        newUser["grade"] = "pending_user";
+        newUser["grade"] = "user_hold";
         showNewUser = true;
     }}
 >
@@ -220,7 +223,7 @@
 <span>|</span>
 
 <button type="button" on:click={deleteSelectedUsers}>
-    Resign selected users
+    Quit selected users
 </button>
 
 <button type="button" on:click={() => deleteSelectedUsers("delete")}>
@@ -286,9 +289,9 @@
                         <td>
                             <select bind:value={newUser["grade"]}>
                                 {#each Object.entries(grades) as [key, grade]}
-                                    <option value={grade.point}
-                                        >{grade.name}</option
-                                    >
+                                    <option value={grade.code}>
+                                        {grade.name}
+                                    </option>
                                 {/each}
                             </select>
                         </td>
@@ -337,7 +340,7 @@
                                         ]}
                                     >
                                         {#each Object.entries(grades) as [key, grade]}
-                                            <option value={grade.point}>
+                                            <option value={grade.code}>
                                                 {grade.name}
                                             </option>
                                         {/each}
@@ -393,7 +396,15 @@
                             {/if}
                         </td>
                         {#each columns as col}
-                            {#if col["column-code"] == "regdate"}
+                            {#if col["column-code"] == "grade"}
+                                {#each Object.entries(grades) as [key, grade]}
+                                    {#if grade.code == user[col["column-code"]]}
+                                    <td>
+                                        {grade.name}
+                                    </td>
+                                    {/if}
+                                {/each}
+                            {:else if col["column-code"] == "regdate"}
                                 <td class="colFixedMid">
                                     {moment(
                                         user["regdate"],
@@ -425,7 +436,7 @@
                                 }}
                                 disabled={parseInt(user["idx"]) == 1}
                             >
-                                Resign
+                                Quit
                             </button>
 
                             <button

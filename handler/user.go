@@ -167,7 +167,7 @@ func DeleteUserAPI(c *fiber.Ctx) error {
 		if isDelete {
 			err = crud.DeleteUser(idx)
 		} else {
-			err = crud.ResignUser(idx)
+			err = crud.QuitUser(idx)
 		}
 
 		if err != nil {
@@ -264,7 +264,7 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func ResignUser(c *fiber.Ctx) error {
+func QuitUser(c *fiber.Ctx) error {
 	var err error
 
 	sess, err := store.Get(c)
@@ -283,7 +283,7 @@ func ResignUser(c *fiber.Ctx) error {
 	}
 	userData := userDataRaw.(map[string]interface{})
 
-	err = crud.ResignUser(userData["idx"].(int64))
+	err = crud.QuitUser(userData["idx"].(int64))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}

@@ -22,7 +22,7 @@ var (
 )
 
 var (
-	UserGrades = newCollection("admin", "manager", "regular_user", "pending_user", "guest", "banned_user")
+	UserGrades = newCollection("admin", "manager", "user_active", "user_hold", "guest", "user_banned")
 )
 
 var DatabaseInfoSQLite = db.DBInfo{

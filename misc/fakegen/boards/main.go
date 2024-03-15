@@ -83,9 +83,9 @@ func prepareBoardData(count int) (boards []boardData) {
 			BoardTable:   strings.ToLower("board_" + randomBoard),
 			CommentTable: strings.ToLower("comment_" + randomBoard),
 			GrantRead:    "guest",
-			GrantWrite:   "regular_user",
-			GrantComment: "regular_user",
-			GrantUpload:  "regular_user",
+			GrantWrite:   "user_active",
+			GrantComment: "user_active",
+			GrantUpload:  "user_active",
 		}
 
 		for i := 0; i < len(boardcodes); i++ {

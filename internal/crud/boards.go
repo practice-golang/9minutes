@@ -32,7 +32,7 @@ func GetBoardByIdx(board model.Board) (model.Board, error) {
 	}
 	defer r.Close()
 
-	scan.Row(&board, r)
+	err = scan.Row(&board, r)
 	if err != nil {
 		return board, err
 	}
@@ -50,6 +50,7 @@ func GetBoardByIdx(board model.Board) (model.Board, error) {
 	return board, nil
 }
 
+// Not use
 func GetBoardByCode(board model.Board) (model.Board, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(consts.TableBoards)
@@ -69,7 +70,7 @@ func GetBoardByCode(board model.Board) (model.Board, error) {
 	}
 	defer r.Close()
 
-	scan.Row(&board, r)
+	err = scan.Row(&board, r)
 	if err != nil {
 		return board, err
 	}

@@ -36,7 +36,7 @@ Cookie: {{cookie}}
     "userid": "user",
     "password": "user",
     "email": "user@example.com",
-    "grade": "pending_user",
+    "grade": "user_hold",
     "approval": "N"
 }
 
@@ -50,11 +50,11 @@ Cookie: {{cookie}}
         "idx": 204,
         "userid": "userb",
         "email": "userb@example.com",
-        "grade": "pending_user"
+        "grade": "user_hold"
     }
 ]
 
-### Delete user - Just update grade as resigned user
+### Delete user - Just update grade as Quited user
 DELETE {{uri}}/api/admin/user
 Content-Type: application/json
 Cookie: {{cookie}}

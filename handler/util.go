@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"math/rand"
@@ -34,21 +35,45 @@ func DeleteUploadFile(filepath string) {
 	}
 }
 
-func LoadBoardDatas() map[string]model.Board {
-	BoardListALL = map[string]model.Board{}
+func LoadBoardListData() map[string]model.Board {
+	BoardListData = map[string]model.Board{}
 
-	boardListingOptions := model.BoardListingOptions{}
-	boardListingOptions.Page = null.IntFrom(0)
-	boardListingOptions.ListCount = null.IntFrom(99999)
-	boardList, _ := crud.GetBoards(boardListingOptions)
+	listingOptions := model.BoardListingOptions{}
+	listingOptions.Page = null.IntFrom(0)
+	listingOptions.ListCount = null.IntFrom(99999)
+	boardList, _ := crud.GetBoards(listingOptions)
 
 	for _, b := range boardList.BoardList {
-		BoardListALL[b.BoardCode.String] = b
+		BoardListData[b.BoardCode.String] = b
 	}
 
-	return BoardListALL
+	return BoardListData
 }
 
 func LoadUserColumnDatas() {
 	UserColumnsALL, _ = crud.GetUserColumnsList()
+}
+
+func checkBoardActionExist(action string) bool {
+	result := false
+	for _, a := range boardActions {
+		if a == action {
+			result = true
+			break
+		}
+	}
+
+	return result
+}
+
+func checkBoardAccessible(boardGradeKey string, userGradeKey string) bool {
+	boardRank := consts.BoardGrades[boardGradeKey].Rank
+	userRank := consts.UserGrades[userGradeKey].Rank
+
+	result := false
+	if userRank <= boardRank {
+		result = true
+	}
+
+	return result
 }

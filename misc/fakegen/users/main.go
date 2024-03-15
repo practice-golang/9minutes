@@ -70,7 +70,7 @@ func prepareUserData(count int) (users []userData) {
 			UserID:   strings.ToLower(gofakeit.Username()),
 			Password: "1234",
 			Email:    gofakeit.Email(),
-			Grade:    "pending_user",
+			Grade:    "user_hold",
 			Approval: "N",
 		}
 

@@ -101,7 +101,7 @@ func SignupAPI(c *fiber.Ctx) error {
 
 	userData["password"] = string(password)
 	userData["regdate"] = now
-	userData["grade"] = "pending_user"
+	userData["grade"] = "user_hold"
 	userData["approval"] = "N"
 
 	switch true {

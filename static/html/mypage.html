@@ -27,7 +27,7 @@
 
 <br />
 
-<button onclick="resignUser()">Resign</button>
+<button onclick="quitUser()">Quit this account</button>
 
 <script>
     async function updateUser() {
@@ -79,14 +79,14 @@
         }
     }
 
-    async function resignUser() {
-        const confirmed = confirm("Are you sure you want to resign?")
+    async function quitUser() {
+        const confirmed = confirm("Are you sure you want to quit?")
         if (!confirmed) { return }
 
         let r = await fetch('/api/myinfo', { method: 'DELETE' })
 
         if (r.ok) {
-            alert("Resign successful")
+            alert("User quit successful")
             location.href = '/logout'
         } else {
             alert(await r.text())

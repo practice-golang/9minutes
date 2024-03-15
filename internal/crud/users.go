@@ -91,7 +91,7 @@ func GetUserByNameAndEmailMap(userid, email string) (interface{}, error) {
 	FROM ` + tablename + `
 	WHERE ` + whereUserId.Names + ` = '` + userid + `'
 		AND ` + whereEmail.Names + ` = '` + email + `'
-		AND ` + whereGrade.Names + ` != '` + "resigned_user" + `'`
+		AND ` + whereGrade.Names + ` != '` + "user_quit" + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -401,13 +401,13 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 	return nil
 }
 
-func ResignUser(idx int64) error {
+func QuitUser(idx int64) error {
 	dbType := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
 	updateset := np.CreateUpdateString(
 		map[string]interface{}{
-			"GRADE":    "resigned_user",
+			"GRADE":    "user_quit",
 			"APPROVAL": "N",
 		},
 		dbType, "", false,

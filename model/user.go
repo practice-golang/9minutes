@@ -5,9 +5,9 @@ import (
 )
 
 type UserGrade struct {
-	Name  string `json:"name"`
-	Code  string `json:"code"`
-	Point int    `json:"point"`
+	Name string `json:"name"`
+	Code string `json:"code"`
+	Rank int    `json:"rank"`
 }
 
 // UserListingOptions - Search, page

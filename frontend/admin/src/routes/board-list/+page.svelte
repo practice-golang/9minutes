@@ -10,8 +10,6 @@
     const columns = data.columns;
     const grades = data.grades;
 
-    console.log(grades);
-
     let listCount = Number($page.url.searchParams.get("list-count")) || 10;
     $: boards = data["boardlist-data"]["board-list"];
 
@@ -423,9 +421,9 @@
 <datalist id="grant-list">
     <option value="admin">Admin</option>
     <option value="manager">Manager</option>
-    <option value="regular_user">Regular user</option>
-    <option value="pending_user">Pending user</option>
-    <option value="banned_user">Banned user</option>
+    <option value="user_active">Regular user</option>
+    <option value="user_hold">Pending user</option>
+    <option value="user_banned">Banned user</option>
     <option value="guest">Guest</option>
 </datalist>
 

@@ -109,8 +109,8 @@ func GetUserGrades(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func GetUserGradesForGrant(c *fiber.Ctx) error {
-	result := consts.UserGradesForGrant
+func GetBoardGrades(c *fiber.Ctx) error {
+	result := consts.BoardGrades
 
 	return c.Status(http.StatusOK).JSON(result)
 }

@@ -10,7 +10,7 @@
     },
     {
         "email": "edp1096@naver.com",
-        "grade": "pending_user",
+        "grade": "user_hold",
         "idx": "5",
         "regdate": "20230710044824",
         "userid": "bab2"
@@ -50,7 +50,7 @@ export const load = async ({ url, fetch }) => {
         })
 
         if (rg.ok) {
-            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].point - b[1].point })
+            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].rank - b[1].rank })
             for (let el of gradesArr) { grades.push(el[1]) }
         }
 

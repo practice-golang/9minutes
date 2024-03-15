@@ -39,9 +39,9 @@ Cookie: {{cookie}}
     "board-table": "board_misc",
     "comment-table": "comment_misc",
     "grant-read": "guest",
-    "grant-write": "regular_user",
-    "grant-comment": "regular_user",
-    "grant-upload": "regular_user",
+    "grant-write": "user_active",
+    "grant-comment": "user_active",
+    "grant-upload": "user_active",
     "fields": null
 }
 
@@ -59,9 +59,9 @@ Cookie: {{cookie}}
         "board-table": "board_misc1",
         "comment-table": "comment_misc1",
         "grant-read": "guest",
-        "grant-write": "regular_user",
-        "grant-comment": "regular_user",
-        "grant-upload": "regular_user",
+        "grant-write": "user_active",
+        "grant-comment": "user_active",
+        "grant-upload": "user_active",
         "fields": null
     }
 ]

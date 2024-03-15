@@ -14,25 +14,23 @@ var (
 	TableUserColumns string = "user_fields"
 
 	UserGrades = map[string]model.UserGrade{
-		"admin":         {Name: "Admin", Code: "admin", Point: 1},
-		"regular_user":  {Name: "Regular user", Code: "regular_user", Point: 200},
-		"guest":         {Name: "Guest", Code: "guest", Point: 300},
-		"expired_user":  {Name: "Expired user", Code: "expired_user", Point: 400},
-		"pending_user":  {Name: "Pending user", Code: "pending_user", Point: 500},
-		"resigned_user": {Name: "Resigned user", Code: "resigned_user", Point: 600},
-		"banned_user":   {Name: "Banned user", Code: "banned_user", Point: 700},
+		"admin":       {Name: "Admin", Code: "admin", Rank: 1},
+		"user_active": {Name: "Active user", Code: "user_active", Rank: 200},
+		"guest":       {Name: "Guest", Code: "guest", Rank: 500},
+		"user_hold":   {Name: "Holding user", Code: "user_hold", Rank: 600},
+		"user_quit":   {Name: "Quit user", Code: "user_quit", Rank: 700},
+		"user_banned": {Name: "Banned user", Code: "user_banned", Rank: 1000},
 	}
 
-	UserGradesForGrant = map[string]model.UserGrade{
-		"admin":         {Name: "Admin", Code: "admin", Point: 1},
-		"board_manager": {Name: "Board manager", Code: "board_manager", Point: 100},
-		"board_member":  {Name: "Board member", Code: "board_member", Point: 150},
-		"regular_user":  {Name: "Regular user", Code: "regular_user", Point: 200},
-		"guest":         {Name: "Guest", Code: "guest", Point: 300},
-		"pending_user":  {Name: "Pending user", Code: "pending_user", Point: 400},
-		"expired_user":  {Name: "Expired user", Code: "expired_user", Point: 500},
-		"resigned_user": {Name: "Resigned user", Code: "resigned_user", Point: 600},
-		"banned_user":   {Name: "Banned user", Code: "banned_user", Point: 700},
+	BoardGrades = map[string]model.UserGrade{
+		"admin":         {Name: "Admin", Code: "admin", Rank: 1},
+		"board_manager": {Name: "Board manager", Code: "board_manager", Rank: 100},
+		"board_member":  {Name: "Board member", Code: "board_member", Rank: 150},
+		"user_active":   {Name: "Active user", Code: "user_active", Rank: 200},
+		"guest":         {Name: "Guest", Code: "guest", Rank: 500},
+		"user_hold":     {Name: "Holding user", Code: "user_hold", Rank: 600},
+		"user_quit":     {Name: "Quit user", Code: "user_quit", Rank: 700},
+		"user_banned":   {Name: "Banned user", Code: "user_banned", Rank: 1000},
 	}
 
 	/* Message */

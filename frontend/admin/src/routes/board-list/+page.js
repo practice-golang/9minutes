@@ -9,9 +9,9 @@
       "board-table": "board_misc1",
       "comment-table": "comment_misc1",
       "grant-read": "guest",
-      "grant-write": "regular_user",
-      "grant-comment": "regular_user",
-      "grant-upload": "regular_user",
+      "grant-write": "user_active",
+      "grant-comment": "user_active",
+      "grant-upload": "user_active",
       "fields": null
     }
   ],
@@ -38,17 +38,17 @@ export const load = async ({ url, fetch }) => {
         { "display-name": "Grant upload", "column-code": "grant-upload", "column-name": "GRANT_UPLOAD" },
     ]
 
-    async function getUserGrades() {
+    async function getBoardGrades() {
         let grades = []
 
-        const rg = await fetch("/api/admin/user-grades-for-grant", {
+        const rg = await fetch("/api/admin/board-grades", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
         })
 
         if (rg.ok) {
-            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].point - b[1].point })
+            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].rank - b[1].rank })
             for (let el of gradesArr) { grades.push(el[1]) }
         }
 
@@ -75,7 +75,7 @@ export const load = async ({ url, fetch }) => {
 
     return {
         columns: columns,
-        grades: getUserGrades(),
+        grades: getBoardGrades(),
         "boardlist-data": getBoards(page, listCount, search)
     }
 }

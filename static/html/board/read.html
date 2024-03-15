@@ -418,7 +418,10 @@
             return false
         }
 
-        alert("Write failed")
+        const response = await r.json()
+        // alert("Write failed")
+        alert(response.message)
+
         return false
     }
 

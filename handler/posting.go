@@ -15,14 +15,10 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetPostingList(boardCODE string, queries map[string]string) (model.PostingPageData, error) {
+func GetPostingList(boardCode string, queries map[string]string) (model.PostingPageData, error) {
 	var err error
 
-	board := model.Board{BoardCode: null.StringFrom(boardCODE)}
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return model.PostingPageData{}, err
-	}
+	board := BoardListData[boardCode]
 
 	page := 1
 	count := config.PostingListCountPerPage
@@ -73,17 +69,9 @@ func GetPostingList(boardCODE string, queries map[string]string) (model.PostingP
 }
 
 func GetPostingData(boardCode, idx string) (model.Posting, error) {
-	var err error
+	board := BoardListData[boardCode]
 
-	board := model.Board{BoardCode: null.StringFrom(boardCode)}
-	posting := model.Posting{}
-
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return model.Posting{}, err
-	}
-
-	posting, err = crud.GetPosting(board, idx)
+	posting, err := crud.GetPosting(board, idx)
 	if err != nil {
 		return model.Posting{}, err
 	}
@@ -111,12 +99,14 @@ func ReadPostingAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	idx := c.Params("idx")
 
+	board := BoardListData[boardCode]
+
 	posting, err := GetPostingData(boardCode, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	comments, err := GetCommentList(boardCode, idx, queries)
+	comments, err := GetCommentList(board, idx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -130,18 +120,11 @@ func ReadPostingAPI(c *fiber.Ctx) (err error) {
 
 // WritePostingAPI - Write posting API
 func WritePostingAPI(c *fiber.Ctx) (err error) {
-	board := model.Board{}
 	posting := model.Posting{}
 
 	err = c.BodyParser(&posting)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
-	}
-
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	sess, err := store.Get(c)
@@ -168,6 +151,9 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 	posting.RegDate = null.StringFrom(now)
 	posting.Views = null.IntFrom(0)
 
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
+
 	_, err = crud.WritePosting(board, posting)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
@@ -181,15 +167,8 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 }
 
 func UpdatePostingAPI(c *fiber.Ctx) (err error) {
-	var board model.Board
 	var posting model.Posting
 	var deleteList model.FilesToDelete
-
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-	board, err = crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
-	}
 
 	idx, _ := strconv.Atoi(c.Params("idx"))
 	posting.Idx = null.IntFrom(int64(idx))
@@ -200,6 +179,9 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
+
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
 
 	err = crud.UpdatePosting(board, posting, "update")
 	if err != nil {
@@ -219,16 +201,10 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 }
 
 func DeletePostingAPI(c *fiber.Ctx) error {
-	var board model.Board
-
-	board.BoardCode = null.StringFrom(c.Params("board_code"))
-
 	idx, _ := strconv.Atoi(c.Params("idx"))
 
-	board, err := crud.GetBoardByCode(board)
-	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Board was not found")
-	}
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
 
 	posting, err := crud.GetPosting(board, fmt.Sprint(idx))
 	if err != nil {

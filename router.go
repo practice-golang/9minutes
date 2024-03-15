@@ -15,10 +15,7 @@ func checkAdmin(c *fiber.Ctx) error {
 	}
 
 	if usergrade != "admin" {
-		return c.Status(403).JSON(fiber.Map{
-			"status":  403,
-			"message": "forbidden",
-		})
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
 	return c.Next()
@@ -37,11 +34,11 @@ func setApiAdmin(a *fiber.App) {
 	gauserfield.Put("/", handler.UpdateUserColumnsAPI)
 	gauserfield.Delete("/", handler.DeleteUserColumnsAPI)
 
-	/* API Admin - User grades */
+	/* API Admin - User/Board grades */
 	gauserggrades := gadmin.Group("/user-grades") // required add auth middleware
 	gauserggrades.Get("/", handler.GetUserGrades)
-	gauserggrades4grant := gadmin.Group("/user-grades-for-grant") // required add auth middleware
-	gauserggrades4grant.Get("/", handler.GetUserGradesForGrant)
+	gaboardgrades := gadmin.Group("/board-grades") // required add auth middleware
+	gaboardgrades.Get("/", handler.GetBoardGrades)
 
 	/* API Admin - Users */
 	gauser := gadmin.Group("/user") // required add auth middleware
@@ -106,7 +103,7 @@ func setAPIs(a *fiber.App) {
 	gmyinfo := gapi.Group("/myinfo") // Require add session middleware
 	gmyinfo.Get("/", handler.GetMyInfo)
 	gmyinfo.Put("/", handler.UpdateMyInfo)
-	gmyinfo.Delete("/", handler.ResignUser)
+	gmyinfo.Delete("/", handler.QuitUser)
 }
 
 // setStaticFiles - Set static files
@@ -132,6 +129,6 @@ func setStaticFiles(a *fiber.App) {
 }
 
 func setPage(a *fiber.App) {
-	a.Get("/board/list", handler.HandlePostingList)
+	// a.Get("/board/list", handler.HandlePostingList)
 	a.Get("/*", handler.HandleHTML)
 }
