@@ -61,12 +61,6 @@ func HandleHTML(c *fiber.Ctx) error {
 	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
 	templateMap["Grade"] = grade
-
-	// boardListingOptions := model.BoardListingOptions{}
-	// boardListingOptions.Page = null.IntFrom(0)
-	// boardListingOptions.ListCount = null.IntFrom(9999)
-	// boardList, _ := crud.GetBoards(boardListingOptions)
-	// templateMap["BoardPageData"] = boardList
 	templateMap["BoardList"] = BoardListData
 
 	templateMap["PendingUser"] = true
