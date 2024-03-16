@@ -129,6 +129,5 @@ func setStaticFiles(a *fiber.App) {
 }
 
 func setPage(a *fiber.App) {
-	// a.Get("/board/list", handler.HandlePostingList)
 	a.Get("/*", handler.HandleHTML)
 }

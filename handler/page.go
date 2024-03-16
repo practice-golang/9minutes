@@ -159,6 +159,8 @@ func HandleHTML(c *fiber.Ctx) error {
 			routePath = "status/unauthorized"
 			break
 		}
+
+		routePath = "admin/index"
 	}
 
 	err = c.Render(routePath, templateMap)
