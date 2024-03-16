@@ -354,17 +354,17 @@ func AddUserVerification(verificationData map[string]string) error {
 	return nil
 }
 
-func UpdateUserMap(userDataMap map[string]interface{}) error {
+func UpdateUserMap(dataMap map[string]interface{}) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
-	userData := map[string]interface{}{}
-	for k, v := range userDataMap {
-		userData[k] = v
+	data := map[string]interface{}{}
+	for k, v := range dataMap {
+		data[k] = v
 	}
 
 	var idx int64
-	switch idxUnknown := userData["idx"].(type) {
+	switch idxUnknown := data["idx"].(type) {
 	case int64:
 		idx = idxUnknown
 	case int:
@@ -375,9 +375,9 @@ func UpdateUserMap(userDataMap map[string]interface{}) error {
 		idxSTR, _ := strconv.Atoi(idxUnknown)
 		idx = int64(idxSTR)
 	}
-	delete(userData, "idx")
+	delete(data, "idx")
 
-	updateset := np.CreateUpdateString(userData, dbtype, "", false)
+	updateset := np.CreateUpdateString(data, dbtype, "", false)
 	wheres := np.CreateWhereString(
 		map[string]interface{}{"IDX": idx},
 		dbtype, "=", "AND", "", false,

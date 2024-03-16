@@ -27,7 +27,6 @@ type userData struct {
 
 func getSession(uri string) (cookieSession string) {
 	admin := LoginData{UserID: "admin", Password: "admin"}
-	// adminJSON, _ := json.MarshalIndent(admin, "", " ")
 	adminJSON, _ := json.Marshal(admin)
 	buf := bytes.NewBuffer(adminJSON)
 	response, err := http.Post(uri, "application/json", buf)

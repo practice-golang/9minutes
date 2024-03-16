@@ -19,7 +19,6 @@ type UserListingOptions struct {
 
 // UserPageData - User list
 type UserPageData struct {
-	// UserList    []UserData `json:"user-list"`
 	UserList    []map[string]interface{} `json:"user-list"`
 	TotalPage   int                      `json:"total-page"`
 	CurrentPage int                      `json:"current-page"`

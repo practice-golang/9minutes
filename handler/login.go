@@ -86,40 +86,39 @@ func SignupAPI(c *fiber.Ctx) error {
 
 	rbody := c.Request().Body()
 
-	userData := make(map[string]interface{})
+	data := make(map[string]interface{})
 
-	// err = json.NewDecoder(c.Body).Decode(&userData)
-	err = json.Unmarshal(rbody, &userData)
+	err = json.Unmarshal(rbody, &data)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).Send([]byte("Unmarshal:" + err.Error()))
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte("GenerateFromPassword:" + err.Error()))
 	}
 
-	userData["password"] = string(password)
-	userData["regdate"] = now
-	userData["grade"] = "user_hold"
-	userData["approval"] = "N"
+	data["password"] = string(password)
+	data["regdate"] = now
+	data["grade"] = "user_hold"
+	data["approval"] = "N"
 
 	switch true {
-	case userData["userid"].(string) == "":
+	case data["userid"].(string) == "":
 		return c.Status(http.StatusBadRequest).Send([]byte("User id is empty"))
-	case userData["email"].(string) == "":
+	case data["email"].(string) == "":
 		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
-	case userData["password"].(string) == "":
+	case data["password"].(string) == "":
 		return c.Status(http.StatusBadRequest).Send([]byte("Password is empty"))
 	}
 
-	err = crud.AddUserMap(userData)
+	err = crud.AddUserMap(data)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte("AddUserMap:" + err.Error()))
 	}
 
-	userid = userData["userid"].(string)
-	useremail = userData["email"].(string)
+	userid = data["userid"].(string)
+	useremail = data["email"].(string)
 
 	userInsertResult, err := crud.GetUserByNameAndEmailMap(userid, useremail)
 	if err != nil {

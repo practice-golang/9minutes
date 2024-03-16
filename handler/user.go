@@ -71,22 +71,22 @@ func AddUserAPI(c *fiber.Ctx) error {
 
 	now := time.Now().Format("20060102150405")
 
-	userData := make(map[string]interface{})
+	data := make(map[string]interface{})
 
-	err = c.BodyParser(&userData)
+	err = c.BodyParser(&data)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	userData["password"] = string(password)
-	userData["regdate"] = now
+	data["password"] = string(password)
+	data["regdate"] = now
 
-	err = crud.AddUserMap(userData)
+	err = crud.AddUserMap(data)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -101,39 +101,39 @@ func AddUserAPI(c *fiber.Ctx) error {
 func UpdateUserAPI(c *fiber.Ctx) error {
 	var err error
 
-	userDatas := []map[string]interface{}{}
-	userDatasSuccess := []map[string]interface{}{}
-	userDatasFailed := []map[string]interface{}{}
+	datas := []map[string]interface{}{}
+	datasSuccess := []map[string]interface{}{}
+	datasFailed := []map[string]interface{}{}
 
-	err = c.BodyParser(&userDatas)
+	err = c.BodyParser(&datas)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	for _, userData := range userDatas {
-		if _, ok := userData["password"]; ok {
-			password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
+	for _, data := range datas {
+		if pwd, ok := data["password"]; ok && pwd != "" {
+			password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
-			userData["password"] = string(password)
+			data["password"] = string(password)
 		}
 
-		err = crud.UpdateUserMap(userData)
+		err = crud.UpdateUserMap(data)
 		if err != nil {
-			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
-			userDatasFailed = append(userDatasFailed, responseData)
+			responseData := map[string]interface{}{"data": data, "error": err.Error()}
+			datasFailed = append(datasFailed, responseData)
 			continue
 		}
-		responseData := map[string]interface{}{"data": userData, "error": ""}
-		userDatasSuccess = append(userDatasSuccess, responseData)
+		responseData := map[string]interface{}{"data": data, "error": ""}
+		datasSuccess = append(datasSuccess, responseData)
 	}
 
 	result := map[string]interface{}{"result": "ok"}
-	if len(userDatasFailed) > 0 {
+	if len(datasFailed) > 0 {
 		result["result"] = "failed"
-		result["failed"] = userDatasFailed
-		result["success"] = userDatasSuccess
+		result["failed"] = datasFailed
+		result["success"] = datasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
@@ -146,17 +146,17 @@ func DeleteUserAPI(c *fiber.Ctx) error {
 		isDelete = true
 	}
 
-	userDatas := []map[string]interface{}{}
-	userDatasSuccess := []map[string]interface{}{}
-	userDatasFailed := []map[string]interface{}{}
+	datas := []map[string]interface{}{}
+	datasSuccess := []map[string]interface{}{}
+	datasFailed := []map[string]interface{}{}
 
-	err := c.BodyParser(&userDatas)
+	err := c.BodyParser(&datas)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	for _, userData := range userDatas {
-		idx := int64(userData["idx"].(float64))
+	for _, data := range datas {
+		idx := int64(data["idx"].(float64))
 
 		if isDelete {
 			err = crud.DeleteUser(idx)
@@ -165,19 +165,19 @@ func DeleteUserAPI(c *fiber.Ctx) error {
 		}
 
 		if err != nil {
-			responseData := map[string]interface{}{"data": userData, "error": err.Error()}
-			userDatasFailed = append(userDatasFailed, responseData)
+			responseData := map[string]interface{}{"data": data, "error": err.Error()}
+			datasFailed = append(datasFailed, responseData)
 			continue
 		}
-		responseData := map[string]interface{}{"data": userData, "error": ""}
-		userDatasSuccess = append(userDatasSuccess, responseData)
+		responseData := map[string]interface{}{"data": data, "error": ""}
+		datasSuccess = append(datasSuccess, responseData)
 	}
 
 	result := map[string]interface{}{"result": "ok"}
-	if len(userDatasFailed) > 0 {
+	if len(datasFailed) > 0 {
 		result["result"] = "failed"
-		result["failed"] = userDatasFailed
-		result["success"] = userDatasSuccess
+		result["failed"] = datasFailed
+		result["success"] = datasSuccess
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
@@ -217,36 +217,36 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userDataOldRaw, err := crud.GetUserByNameMap(userid.(string))
+	dataOldRaw, err := crud.GetUserByNameMap(userid.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
-	userDataOld := userDataOldRaw.(map[string]interface{})
+	dataOld := dataOldRaw.(map[string]interface{})
 
-	userDataNEW := make(map[string]interface{})
-	err = json.Unmarshal(c.Body(), &userDataNEW)
+	dataNew := make(map[string]interface{})
+	err = json.Unmarshal(c.Body(), &dataNew)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
 	}
 
-	userDataNEW["idx"] = fmt.Sprint(userDataOld["idx"].(int64))
+	dataNew["idx"] = fmt.Sprint(dataOld["idx"].(int64))
 
-	if _, ok := userDataNEW["password"]; ok {
-		err = bcrypt.CompareHashAndPassword([]byte(userDataOld["password"].(string)), []byte(userDataNEW["old-password"].(string)))
+	if _, ok := dataNew["password"]; ok {
+		err = bcrypt.CompareHashAndPassword([]byte(dataOld["password"].(string)), []byte(dataNew["old-password"].(string)))
 		if err != nil {
 			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
 		}
 
-		password, err := bcrypt.GenerateFromPassword([]byte(userDataNEW["password"].(string)), consts.BcryptCost)
+		password, err := bcrypt.GenerateFromPassword([]byte(dataNew["password"].(string)), consts.BcryptCost)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 		}
 
-		userDataNEW["password"] = string(password)
-		delete(userDataNEW, "old-password")
+		dataNew["password"] = string(password)
+		delete(dataNew, "old-password")
 	}
 
-	err = crud.UpdateUserMap(userDataNEW)
+	err = crud.UpdateUserMap(dataNew)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
@@ -271,13 +271,13 @@ func QuitUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
 	}
 
-	userDataRaw, err := crud.GetUserByNameMap(userid.(string))
+	dataRaw, err := crud.GetUserByNameMap(userid.(string))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
-	userData := userDataRaw.(map[string]interface{})
+	data := dataRaw.(map[string]interface{})
 
-	err = crud.QuitUser(userData["idx"].(int64))
+	err = crud.QuitUser(data["idx"].(int64))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
@@ -291,8 +291,6 @@ func QuitUser(c *fiber.Ctx) error {
 
 func ResetPasswordAPI(c *fiber.Ctx) error {
 	var err error
-
-	columnsCount, _ := crud.GetUserColumnsCount()
 
 	userid := c.FormValue("userid")
 	useremail := c.FormValue("email")
@@ -310,25 +308,13 @@ func ResetPasswordAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	switch columnsCount {
-	// case model.UserDataFieldCount:
-	// 	// Waive struct at this time
-	// 	user, err := crud.GetUserByNameAndEmail(userid, useremail)
-	// 	if err != nil {
-	// 		return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
-	// 	}
-
-	// 	user.Password = null.StringFrom(string(passwordHash))
-	// 	crud.UpdateUser(user)
-	default:
-		user, err := crud.GetUserByNameAndEmailMap(userid, useremail)
-		if err != nil {
-			return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
-		}
-
-		user.(map[string]interface{})["password"] = string(passwordHash)
-		crud.UpdateUserMap(user.(map[string]interface{}))
+	user, err := crud.GetUserByNameAndEmailMap(userid, useremail)
+	if err != nil {
+		return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
 	}
+
+	user.(map[string]interface{})["password"] = string(passwordHash)
+	crud.UpdateUserMap(user.(map[string]interface{}))
 
 	// Send password reset email
 	message := email.Message{
