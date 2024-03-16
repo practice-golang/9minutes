@@ -6,4 +6,4 @@ var StoreRoot = "../html"
 var EmbedRoot = "html"
 
 var BoardListData map[string]model.Board
-var UserColumnsALL []model.UserColumn
+var UserColumnsData []model.UserColumn

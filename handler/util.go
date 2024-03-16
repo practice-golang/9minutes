@@ -51,7 +51,7 @@ func LoadBoardListData() map[string]model.Board {
 }
 
 func LoadUserColumnDatas() {
-	UserColumnsALL, _ = crud.GetUserColumnsList()
+	UserColumnsData, _ = crud.GetUserColumnsList()
 }
 
 func checkBoardActionExist(action string) bool {

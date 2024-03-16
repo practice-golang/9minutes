@@ -24,11 +24,7 @@ func RestrictedHello(c *fiber.Ctx) error {
 }
 
 func GetUserColumnsAPI(c *fiber.Ctx) error {
-	// result, err := crud.GetUserColumnsList()
-	// if err != nil {
-	// 	return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
-	// }
-	result := UserColumnsALL
+	result := UserColumnsData
 
 	return c.Status(http.StatusOK).JSON(result)
 }

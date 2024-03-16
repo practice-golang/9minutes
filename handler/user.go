@@ -44,7 +44,7 @@ func GetUserListAPI(c *fiber.Ctx) error {
 
 	/* Todo: Move to setup */
 	// columnNames, _ := crud.GetUserColumnsList()
-	columnNames := UserColumnsALL
+	columnNames := UserColumnsData
 
 	selectUserColumnsMap := map[string]interface{}{}
 	for _, c := range columnNames {
