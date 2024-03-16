@@ -129,12 +129,13 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 
 	sess, err := store.Get(c)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte("WTF" + err.Error()))
 	}
 
-	useridx, err := strconv.ParseInt(getSessionValue(sess, "idx"), 0, 64)
-	if err != nil {
-		useridx = -1
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
 	}
 
 	userid := getSessionValue(sess, "userid")

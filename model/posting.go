@@ -26,7 +26,7 @@ type PostingPageData struct {
 type PostingList struct {
 	Idx          null.Int    `json:"idx"           db:"IDX"           npskip:"insert, update"`
 	Title        null.String `json:"title"         db:"TITLE"`
-	TitleImage   null.String `json:"title-image"   db:"TITLE_IMAGE"`
+	TitleImage   null.String `json:"title-image"   db:"TITLE_IMAGE"   npskip:"select, read"`
 	AuthorIdx    null.Int    `json:"author-idx"    db:"AUTHOR_IDX"    npskip:"insert, update"`
 	AuthorName   null.String `json:"author-name"   db:"AUTHOR_NAME"   npskip:"insert, update"`
 	CommentCount null.String `json:"comment-count" db:"COMMENT_COUNT" npskip:"insert, update, select, read"`

@@ -10,9 +10,6 @@ import (
 //go:embed config.ini
 var sampleINI string
 
-//go:embed static/html/favicon.png
-var Favicon embed.FS
-
 //go:embed all:static/html/*
 var EmbedHTML embed.FS
 

@@ -75,6 +75,9 @@
     const initialContent = ""
     const filesList = []
 
+    const imageFileExtensions = ["jpg", "jpeg", "png", "gif", "bmp"]
+    let titleImage = ""
+
     const editorEL = document.querySelector("#editor")
     const options = {
         uploadActionURI: "/api/uploader",
@@ -113,7 +116,6 @@
                 li.appendChild(btn)
 
                 fcontainer.appendChild(li)
-
                 filesList.push(f)
             })
         }
@@ -162,11 +164,26 @@
         const content = editor.getHTML()
 
         let fileIndices = ""
-        for (const f of filesList) { fileIndices += `${f.idx}|` }
-        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
+        titleImage = ""
+        for (const f of filesList) {
+            fileIndices += `${f.idx}|`
+
+            if (titleImage == "") {
+                const parts = f.filename.split(".")
+                const extension = parts[parts.length - 1].toLowerCase()
+                if (imageFileExtensions.includes(extension)) {
+                    titleImage = f.idx
+                }
+            }
+        }
+
+        if (fileIndices.length > 0) {
+            fileIndices = fileIndices.slice(0, -1)
+        }
 
         const data = {
             "title": title,
+            "title-image": titleImage,
             "content": content,
             "author-idx": 1,
             "author-name": "admin",

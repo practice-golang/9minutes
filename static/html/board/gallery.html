@@ -1,6 +1,77 @@
 {{template "layout_board_header" .}}
 
 <style>
+    html,
+    body {
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        font-family: sans-serif;
+    }
+
+    ul,
+    li {
+        margin: 0;
+        padding: 0;
+        list-style: none
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    .gallery {
+        margin: 50px -20px;
+        box-sizing: border-box;
+    }
+
+    .gallery:after {
+        content: "";
+        display: block;
+        clear: both;
+        visibility: hidden;
+    }
+
+    .gallery li {
+        width: 20%;
+        float: left;
+        box-sizing: border-box;
+        padding: 0 20px;
+        margin: 0 0 50px 0;
+    }
+
+    .gallery li img {
+        width: 100%;
+        height: auto;
+    }
+
+    @media (max-width:1200px) {
+        .gallery li {
+            width: 25%;
+        }
+    }
+
+    @media (max-width:768px) {
+        .gallery li {
+            width: 33.33333%;
+        }
+    }
+
+    @media (max-width:560px) {
+        .gallery li {
+            width: 50%;
+        }
+    }
+
+    @media (max-width:480px) {
+        .gallery li {
+            width: 100%;
+        }
+    }
+
     .cellSelector:hover {
         cursor: pointer;
         color: maroon;
@@ -23,21 +94,17 @@
 </div>
 
 <div>
-    <table>
-        <tbody>
-            {{range .Data.PostingList}}
-            <tr>
-                <td class="cellShort">{{.Idx.Int64}}</td>
-                <td class="cellSelector" onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
-                    {{.Title.String}}
-                    [{{.CommentCount.String}}]
-                </td>
-                <td class="cellMiddle">{{.AuthorName.String}}</td>
-                <td class="cellShort">{{.Views.Int64}}</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    <ul class="gallery">
+        {{range .Data.PostingList}}
+        <li onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
+            <img src="/upload/{{.TitleImage.String}}" onerror="this.onerror=null; this.src='/files/panic1.png';" />
+            <!-- {{.Idx.Int64}} -->
+            {{.Title.String}} [{{.CommentCount.String}}] | {{.Views.Int64}}
+            <br />
+            {{.AuthorName.String}}
+        </li>
+        {{end}}
+    </ul>
 
     <div>
         <span class="page-jump">

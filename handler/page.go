@@ -75,7 +75,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		case "board/list":
 			accessible := checkBoardAccessible(board.GrantRead.String, grade)
 			if !accessible {
-				return c.Status(http.StatusForbidden).SendString("Forbidden")
+				routePath = "status/unauthorized"
+				break
 			}
 
 			list, err := GetPostingList(boardCode, queries)
@@ -83,11 +84,16 @@ func HandleHTML(c *fiber.Ctx) error {
 				return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 			}
 			templateMap["BoardCode"] = boardCode
-			templateMap["PostingList"] = list
+			templateMap["Data"] = list
+
+			if board.BoardType.String == "gallery" {
+				routePath = strings.Replace(routePath, "board/list", "board/gallery", 1)
+			}
 		case "board/read":
 			accessible := checkBoardAccessible(board.GrantRead.String, grade)
 			if !accessible {
-				return c.Status(http.StatusForbidden).SendString("Forbidden")
+				routePath = "status/unauthorized"
+				break
 			}
 
 			posting, err := GetPostingData(boardCode, queries["idx"])
@@ -106,7 +112,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		case "board/write":
 			accessible := checkBoardAccessible(board.GrantWrite.String, grade)
 			if !accessible {
-				return c.Status(http.StatusForbidden).SendString("Forbidden")
+				routePath = "status/unauthorized"
+				break
 			}
 
 			if boardCode == "" {
@@ -115,7 +122,8 @@ func HandleHTML(c *fiber.Ctx) error {
 		case "board/edit":
 			accessible := checkBoardAccessible(board.GrantWrite.String, grade)
 			if !accessible {
-				return c.Status(http.StatusForbidden).SendString("Forbidden")
+				routePath = "status/unauthorized"
+				break
 			}
 
 			posting, err := GetPostingData(boardCode, queries["idx"])
