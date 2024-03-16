@@ -9,12 +9,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Not use - leave for ref.
 func RestrictedHello(c *fiber.Ctx) error {
 	sess, err := store.Get(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
-
 	userid := sess.Get("userid")
 	if userid == nil {
 		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))

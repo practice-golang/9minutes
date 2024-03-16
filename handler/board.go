@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/internal/db"
 	"9minutes/model"
@@ -278,4 +279,43 @@ func BoardListAPI(c *fiber.Ctx) (err error) {
 	}
 
 	return c.Status(http.StatusOK).JSON(result)
+}
+
+func checkBoardActionExist(action string) bool {
+	result := false
+	for _, a := range boardActions {
+		if a == action {
+			result = true
+			break
+		}
+	}
+
+	return result
+}
+
+func checkBoardAccessible(boardGradeKey string, userGradeKey string) bool {
+	boardRank := consts.BoardGrades[boardGradeKey].Rank
+	userRank := consts.UserGrades[userGradeKey].Rank
+
+	result := false
+	if userRank <= boardRank {
+		result = true
+	}
+
+	return result
+}
+
+func LoadBoardListData() map[string]model.Board {
+	BoardListData = map[string]model.Board{}
+
+	listingOptions := model.BoardListingOptions{}
+	listingOptions.Page = null.IntFrom(0)
+	listingOptions.ListCount = null.IntFrom(99999)
+	boardList, _ := crud.GetBoards(listingOptions)
+
+	for _, b := range boardList.BoardList {
+		BoardListData[b.BoardCode.String] = b
+	}
+
+	return BoardListData
 }

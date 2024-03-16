@@ -126,10 +126,9 @@ func WriteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	useridx := int64(-1)
-	useridxInterface := sess.Get("idx")
-	if useridxInterface != nil {
-		useridx = useridxInterface.(int64)
+	useridx, err := strconv.ParseInt(getSessionValue(sess, "idx"), 0, 64)
+	if err != nil {
+		useridx = -1
 	}
 
 	comment.AuthorIdx = null.IntFrom(useridx)

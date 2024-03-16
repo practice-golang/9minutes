@@ -17,19 +17,22 @@ func NewSessionStore() {
 	})
 }
 
-func GetSessionUserGrade(c *fiber.Ctx) (string, error) {
-	var userGrade string
-	var userGradeInterface interface{}
+func getSessionValue(sess *session.Session, key string) (result string) {
+	value := sess.Get(key)
+	if value != nil {
+		result = value.(string)
+	}
 
+	return result
+}
+
+func GetSessionUserGrade(c *fiber.Ctx) (string, error) {
 	sess, err := store.Get(c)
 	if err != nil {
-		return userGrade, err
+		return "", err
 	}
 
-	userGradeInterface = sess.Get("grade")
-	if userGradeInterface != nil {
-		userGrade = userGradeInterface.(string)
-	}
+	userGrade := getSessionValue(sess, "grade")
 
 	return userGrade, err
 }

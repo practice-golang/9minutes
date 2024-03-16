@@ -156,12 +156,6 @@ func DeleteUserAPI(c *fiber.Ctx) error {
 	}
 
 	for _, userData := range userDatas {
-		// idx, err := strconv.Atoi(userData["idx"].(string))
-		// if err != nil {
-		// 	responseData := map[string]interface{}{"data": userData, "error": err.Error()}
-		// 	userDatasFailed = append(userDatasFailed, responseData)
-		// 	continue
-		// }
 		idx := int64(userData["idx"].(float64))
 
 		if isDelete {
@@ -358,6 +352,10 @@ func ResetPasswordAPI(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetEmail))
+}
+
+func LoadUserColumnDatas() {
+	UserColumnsData, _ = crud.GetUserColumnsList()
 }
 
 func Get2FaQR(c *fiber.Ctx) error {

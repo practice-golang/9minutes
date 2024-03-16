@@ -132,16 +132,14 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	useridx := int64(-1)
-	useridxInterface := sess.Get("idx")
-	if useridxInterface != nil {
-		useridx = useridxInterface.(int64)
+	useridx, err := strconv.ParseInt(getSessionValue(sess, "idx"), 0, 64)
+	if err != nil {
+		useridx = -1
 	}
 
-	userid := "guest"
-	useridInterface := sess.Get("userid")
-	if useridInterface != nil {
-		userid = useridInterface.(string)
+	userid := getSessionValue(sess, "userid")
+	if userid == "" {
+		return c.Status(http.StatusBadRequest).SendString("userid is empty")
 	}
 
 	posting.AuthorIdx = null.IntFrom(useridx)

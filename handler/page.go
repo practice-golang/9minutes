@@ -8,7 +8,6 @@ import (
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -18,15 +17,6 @@ var boardActions = []string{"list", "read", "write", "edit"}
 
 func HealthCheckAPI(c *fiber.Ctx) error {
 	return c.SendString("Ok")
-}
-
-func getSessionValue(sess *session.Session, key string) (result string) {
-	value := sess.Get(key)
-	if value != nil {
-		result = value.(string)
-	}
-
-	return result
 }
 
 func appendIndexToRoutePath(name string) string {
