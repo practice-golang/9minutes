@@ -29,10 +29,10 @@ func GetPostingList(boardCode string, queries map[string]string) (model.PostingP
 		}
 	}
 	if queries["count"] != "" {
-		count, err = strconv.Atoi(queries["count"])
-		if err != nil {
-			return model.PostingPageData{}, nil
-		}
+		count, _ = strconv.Atoi(queries["count"])
+	}
+	if count < 1 {
+		count = config.PostingListCountPerPage
 	}
 
 	listingOptions := model.PostingListingOptions{}

@@ -3,6 +3,21 @@
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
 <script src="/assets/js/myeditor.js"></script>
 
+<style>
+    li>div.hover-view {
+        display: none;
+        max-width: 50vw;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 999;
+    }
+
+    li:hover>div.hover-view {
+        display: block;
+    }
+</style>
+
 <div class="input-container">
     <span>Title: </span>
     <input type="text" id="title" value="{{.Posting.Title.String}}" placeholder="Title">
@@ -39,6 +54,15 @@
                 li.setAttribute("id", `file-${f.idx}`)
                 li.appendChild(document.createTextNode(`${f.filename}`))
                 li.appendChild(btn)
+
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
+                }
 
                 fcontainer.appendChild(li)
                 filesList.push(f)
@@ -93,6 +117,15 @@
                 li.setAttribute("id", `file-${f.idx}`)
                 li.appendChild(document.createTextNode(`${f.filename}`))
                 li.appendChild(btn)
+
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
+                }
 
                 fcontainer.appendChild(li)
 
@@ -195,6 +228,15 @@
 
                 li.appendChild(document.createTextNode(`${f.filename}`))
                 li.appendChild(btn)
+
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
+                }
 
                 fcontainer.appendChild(li)
                 filesList.push(f)

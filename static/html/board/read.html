@@ -8,6 +8,19 @@
         cursor: pointer;
     }
 
+    a>div.hover-view {
+        display: none;
+        max-width: 50vw;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 999;
+    }
+
+    a:hover>div.hover-view {
+        display: block;
+    }
+
     .page-jump {
         display: none;
     }
@@ -472,6 +485,16 @@
                     a.setAttribute("href", `/upload/${f.storagename}`)
                     a.setAttribute("target", "_blank")
                     a.appendChild(document.createTextNode(`${f.filename}`))
+
+                    if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                        const im = document.createElement("img")
+                        im.setAttribute("src", `/upload/${f.storagename}`)
+                        const d = document.createElement("div")
+                        d.setAttribute("class", "hover-view")
+                        d.appendChild(im)
+                        a.appendChild(d)
+                    }
+
                     li.appendChild(a)
                 } else {
                     const btn = document.createElement("button")
