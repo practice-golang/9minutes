@@ -16,6 +16,11 @@
         list-style: none
     }
 
+    a:hover {
+        text-decoration: none;
+        border-bottom-width: 0;
+    }
+
     .container {
         width: 100%;
         max-width: 1400px;
@@ -71,20 +76,6 @@
             width: 100%;
         }
     }
-
-    .cellSelector:hover {
-        cursor: pointer;
-        color: maroon;
-        font-weight: bolder;
-    }
-
-    .cellMiddle {
-        width: 7em;
-    }
-
-    .cellShort {
-        width: 3em;
-    }
 </style>
 
 <div>
@@ -96,11 +87,13 @@
 <div>
     <ul class="gallery">
         {{range .Data.PostingList}}
-        <li onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
-            <img src="/upload/{{.TitleImage.String}}" onerror="this.onerror=null; this.src='/files/panic1.png';" />
-            {{.Title.String}} [{{.CommentCount.String}}] | {{.Views.Int64}}
-            <br />
-            {{.AuthorName.String}}
+        <li>
+            <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
+                <img src="/upload/{{.TitleImage.String}}" onerror="this.onerror=null; this.src='/files/panic1.png';" />
+                {{.Title.String}} [{{.CommentCount.String}}] | {{.Views.Int64}}
+                <br />
+                {{.AuthorName.String}}
+            </a>
         </li>
         {{end}}
     </ul>
