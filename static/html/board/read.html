@@ -300,7 +300,10 @@
         uploadAccessURI: "/upload",
         uploadCallback: imageUploadCallback(null),
     }
-    const editor = new MyEditor(initialContent, editorEL, options)
+
+    if (editorEL) {
+        const editor = new MyEditor(initialContent, editorEL, options)
+    }
 
     class modifierElement extends HTMLElement {
         constructor() {
