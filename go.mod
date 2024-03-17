@@ -3,6 +3,7 @@ module 9minutes
 go 1.21.0
 
 require (
+	github.com/anthonynsimon/bild v0.13.0
 	github.com/blockloop/scan v1.3.0
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/emersion/go-msgauth v0.6.8
@@ -45,6 +46,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.52.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

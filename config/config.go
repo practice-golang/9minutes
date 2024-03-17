@@ -7,10 +7,9 @@ import (
 )
 
 var (
-	AdminUserCountPerPage  int = 10
-	AdminBoardCountPerPage int = 10
-	// PostingListCountPerPage   int = 25
-	PostingListCountPerPage int = 5
+	AdminUserCountPerPage   int = 10
+	AdminBoardCountPerPage  int = 10
+	PostingListCountPerPage int = 30
 	CommentCountPerPage     int = 3
 )
 

@@ -19,13 +19,11 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	commentTableName := db.GetFullTableName(board.CommentTable.String)
-	uploadsTableName := db.GetFullTableName("uploads")
 
 	column := np.CreateString(model.PostingList{}, dbtype, "select", false)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnTitle := np.CreateString(map[string]interface{}{"TITLE": nil}, dbtype, "", false)
-	columnTitleImage := np.CreateString(map[string]interface{}{"TITLE_IMAGE": nil}, dbtype, "", false)
 	columnContent := np.CreateString(map[string]interface{}{"CONTENT": nil}, dbtype, "", false)
 	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, dbtype, "", false)
 	columnCommentCount := np.CreateString(map[string]interface{}{"COMMENT_COUNT": nil}, dbtype, "", false)
@@ -50,13 +48,7 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 				COUNT(` + columnIdx.Names + `)
 			FROM ` + commentTableName + `
 			WHERE ` + columnPostingIdx.Names + ` = A.` + columnIdx.Names + `
-		) AS ` + columnCommentCount.Names + `,
-		(
-			SELECT
-				STORAGE_NAME
-			FROM ` + uploadsTableName + `
-			WHERE IDX = A.` + columnTitleImage.Names + `
-		) AS TITLE_IMAGE
+		) AS ` + columnCommentCount.Names + `
 	FROM ` + tableName + ` A
 	` + sqlSearch + `
 	ORDER BY ` + columnIdx.Names + ` DESC

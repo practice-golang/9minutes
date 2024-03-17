@@ -5,8 +5,8 @@ import (
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -64,6 +64,8 @@ func GetPostingList(boardCode string, queries map[string]string) (model.PostingP
 	if list.JumpNext > list.TotalPage {
 		list.JumpNext = list.TotalPage
 	}
+
+	list.ListCount = count
 
 	return list, err
 }
@@ -129,7 +131,7 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 
 	sess, err := store.Get(c)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).Send([]byte("WTF" + err.Error()))
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
 	useridx := int64(-1)
@@ -153,6 +155,38 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
+	if strings.TrimSpace(posting.Files.String) != "" {
+		var imIndices []int
+		imIndicesStr := strings.Split(posting.Files.String, "|")
+
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fileDatas, _ := crud.GetUploadedFiles(imIndices)
+		for _, fileData := range fileDatas {
+			filename := fileData.StorageName.String
+			fext := filepath.Ext(filename)
+			fname := filename[0 : len(filename)-len(fext)]
+
+			fpathFrom := "upload/" + filename
+			fnameTo := fname + "_thumb.png"
+			fpathTo := "upload/" + fnameTo
+
+			if !CheckFileExtensionIsImage(filename) {
+				continue
+			}
+
+			if CopyResizeImagePNG(fpathFrom, fpathTo, 800, 800) != nil {
+				continue
+			}
+
+			posting.TitleImage = null.StringFrom(fnameTo)
+			break
+		}
+	}
+
 	_, err = crud.WritePosting(board, posting)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
@@ -169,18 +203,55 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 	var posting model.Posting
 	var deleteList model.FilesToDelete
 
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
+
 	idx, _ := strconv.Atoi(c.Params("idx"))
 	posting.Idx = null.IntFrom(int64(idx))
 
 	rbody := c.Body()
+
+	postingPrev, err := crud.GetPosting(board, c.Params("idx"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
 
 	err = json.Unmarshal(rbody, &posting)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	boardCode := c.Params("board_code")
-	board := BoardListData[boardCode]
+	if strings.TrimSpace(posting.Files.String) != "" {
+		var imIndices []int
+		imIndicesStr := strings.Split(posting.Files.String, "|")
+
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fileDatas, _ := crud.GetUploadedFiles(imIndices)
+		for _, fileData := range fileDatas {
+			filename := fileData.StorageName.String
+			fext := filepath.Ext(filename)
+			fname := filename[0 : len(filename)-len(fext)]
+
+			fpathFrom := "upload/" + filename
+			fnameTo := fname + "_thumb.png"
+			fpathTo := "upload/" + fnameTo
+
+			if !CheckFileExtensionIsImage(filename) {
+				continue
+			}
+
+			if CopyResizeImagePNG(fpathFrom, fpathTo, 800, 800) != nil {
+				continue
+			}
+
+			posting.TitleImage = null.StringFrom(fnameTo)
+			break
+		}
+	}
 
 	err = crud.UpdatePosting(board, posting, "update")
 	if err != nil {
@@ -192,6 +263,8 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
+	DeleteUploadFile("upload/" + postingPrev.TitleImage.String)
+
 	result := map[string]interface{}{
 		"result": "success",
 	}
@@ -200,12 +273,20 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 }
 
 func DeletePostingAPI(c *fiber.Ctx) error {
-	idx, _ := strconv.Atoi(c.Params("idx"))
-
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
-	posting, err := crud.GetPosting(board, fmt.Sprint(idx))
+	// idx, _ := strconv.Atoi(c.Params("idx"))
+	idx := c.Params("idx")
+	if strings.TrimSpace(idx) == "" {
+		result := map[string]interface{}{
+			"result": "fail",
+			"msg":    "index is empty",
+		}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+
+	posting, err := crud.GetPosting(board, idx)
 	if err != nil {
 		return c.Status(http.StatusNotFound).SendString("Posting was not found")
 	}
@@ -234,15 +315,17 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 		DeleteUploadFile(filepath)
 	}
 
-	err = crud.DeletePosting(board, fmt.Sprint(idx))
+	err = crud.DeletePosting(board, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	err = crud.DeleteComments(board, fmt.Sprint(idx))
+	err = crud.DeleteComments(board, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
+
+	DeleteUploadFile("upload/" + posting.TitleImage.String)
 
 	result := map[string]interface{}{
 		"result": "success",

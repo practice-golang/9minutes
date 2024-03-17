@@ -35,19 +35,6 @@
 
 <script>
     const imageUploadCallback = function (response) {
-        /*
-        {
-            "files": [
-                {
-                    "filename": "usmc.jpg",
-                    "idx": "5",
-                    "storagename": "WoOgzrwn5EjHCPJNwKjEw8tP45KAE4QZX3kfuNjoLxAOSICenUveeVdv_20231102183553.jpg"
-                }
-            ],
-            "message": "success"
-        }
-        */
-
         if (response.message == "success") {
             const fcontainer = document.querySelector("#fileslist-container > ul")
             response.files.forEach((f) => {
@@ -75,9 +62,6 @@
     const initialContent = ""
     const filesList = []
 
-    const imageFileExtensions = ["jpg", "jpeg", "png", "gif", "bmp"]
-    let titleImage = ""
-
     const editorEL = document.querySelector("#editor")
     const options = {
         uploadActionURI: "/api/uploader",
@@ -94,7 +78,6 @@
             formData.append("upload-files", blob)
         }
 
-        // const uri = "/api/uploader"
         const uri = options.uploadActionURI
         const r = await fetch(uri, {
             method: "POST",
@@ -123,7 +106,6 @@
 
     async function deleteFile(idx, storagename) {
         const data = [{ "idx": parseInt(idx) }]
-        // const uri = "/api/uploader"
         const uri = options.uploadActionURI
 
         const r = await fetch(uri, {
@@ -164,26 +146,11 @@
         const content = editor.getHTML()
 
         let fileIndices = ""
-        titleImage = ""
-        for (const f of filesList) {
-            fileIndices += `${f.idx}|`
-
-            if (titleImage == "") {
-                const parts = f.filename.split(".")
-                const extension = parts[parts.length - 1].toLowerCase()
-                if (imageFileExtensions.includes(extension)) {
-                    titleImage = f.idx
-                }
-            }
-        }
-
-        if (fileIndices.length > 0) {
-            fileIndices = fileIndices.slice(0, -1)
-        }
+        for (const f of filesList) { fileIndices += `${f.idx}|` }
+        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
 
         const data = {
             "title": title,
-            "title-image": titleImage,
             "content": content,
             "author-idx": 1,
             "author-name": "admin",

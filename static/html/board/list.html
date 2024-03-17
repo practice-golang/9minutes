@@ -41,21 +41,21 @@
 
     <div>
         <span class="page-jump">
-            <a href="?board_code={{.BoardCode}}&search={{.Data.SearchKeyword}}">&laquo;</a>
-            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpPrev}}&search={{.Data.SearchKeyword}}">&lt;</a>
+            <a href="?board_code={{.BoardCode}}&search={{.Data.SearchKeyword}}&count={{.Data.ListCount}}">&laquo;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpPrev}}&search={{.Data.SearchKeyword}}&count={{.Data.ListCount}}">&lt;</a>
         </span>
 
         {{range .Data.PageList}}
         {{if eq . $.Data.CurrentPage}}
         <b>{{.}}</b>
         {{else}}
-        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.Data.SearchKeyword}}">{{.}}</a>
+        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.Data.SearchKeyword}}&count={{$.Data.ListCount}}">{{.}}</a>
         {{end}}
         {{end}}
 
         <span class="page-jump">
-            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpNext}}&search={{.Data.SearchKeyword}}">&gt;</a>
-            <a href="?board_code={{.BoardCode}}&page={{.Data.TotalPage}}&search={{.Data.SearchKeyword}}">&raquo;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpNext}}&search={{.Data.SearchKeyword}}&count={{.Data.ListCount}}">&gt;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.Data.TotalPage}}&search={{.Data.SearchKeyword}}&count={{.Data.ListCount}}">&raquo;</a>
         </span>
     </div>
 </div>
@@ -67,7 +67,7 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    // const boardCode = "{{.BoardCode}}"
+    const listCount = queries.get("count")
 
     function doSearch() {
         switch (globalThis.event.type) {
@@ -76,7 +76,7 @@
                 break
         }
 
-        let params = `?board_code=${boardCode}`
+        let params = `?board_code=${boardCode}&count=${listCount}`
         const keyword = document.querySelector("input[name=search]").value
         if (keyword == "") {
             const search = new URLSearchParams(globalThis.location.search).get("search")
