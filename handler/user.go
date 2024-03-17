@@ -111,12 +111,15 @@ func UpdateUserAPI(c *fiber.Ctx) error {
 	}
 
 	for _, data := range datas {
-		if pwd, ok := data["password"]; ok && pwd != "" {
+
+		if _, ok := data["password"]; ok && data["password"].(string) != "" {
 			password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 			data["password"] = string(password)
+		} else {
+			delete(data, "password")
 		}
 
 		err = crud.UpdateUserMap(data)
@@ -231,7 +234,7 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 
 	dataNew["idx"] = fmt.Sprint(dataOld["idx"].(int64))
 
-	if _, ok := dataNew["password"]; ok {
+	if _, ok := dataNew["password"]; ok && dataNew["password"].(string) != "" {
 		err = bcrypt.CompareHashAndPassword([]byte(dataOld["password"].(string)), []byte(dataNew["old-password"].(string)))
 		if err != nil {
 			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
@@ -243,6 +246,9 @@ func UpdateMyInfo(c *fiber.Ctx) error {
 		}
 
 		dataNew["password"] = string(password)
+		delete(dataNew, "old-password")
+	} else {
+		delete(dataNew, "password")
 		delete(dataNew, "old-password")
 	}
 

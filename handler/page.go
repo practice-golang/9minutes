@@ -44,14 +44,15 @@ func HandleHTML(c *fiber.Ctx) error {
 
 	userid := getSessionValue(sess, "userid")
 	grade := getSessionValue(sess, "grade")
-	if userid == "" {
-		grade = "guest"
-	}
 
 	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
 	templateMap["Grade"] = grade
 	templateMap["BoardList"] = BoardListData
+
+	if userid == "" {
+		grade = "guest"
+	}
 
 	templateMap["PendingUser"] = true
 	if grade != "user_hold" {
