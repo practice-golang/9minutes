@@ -67,7 +67,7 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const listCount = queries.get("count")
+    const listCount = queries.get("count") != null ? queries.get("count") : "{{.ListCount}}"
 
     function doSearch() {
         switch (globalThis.event.type) {

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/config"
 	"html"
 	"net/http"
 	"strings"
@@ -49,6 +50,7 @@ func HandleHTML(c *fiber.Ctx) error {
 	templateMap["UserId"] = userid
 	templateMap["Grade"] = grade
 	templateMap["BoardList"] = BoardListData
+	templateMap["ListCount"] = config.PostingListCountPerPage
 
 	if userid == "" {
 		grade = "guest"
