@@ -3,14 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	gohtml "html"
-	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"strings"
-	"time"
 
 	"9minutes/config"
 	"9minutes/handler"
@@ -298,19 +294,12 @@ func setupRouter() {
 		engine = html.New("./static/html", ".html")
 	}
 
-	engine.AddFunc("unescape", func(s string) template.HTML {
-		return template.HTML(gohtml.UnescapeString(s))
-	})
-	engine.AddFunc("format_date", func(s string) string {
-		t, err := time.Parse("20060102150405", s)
-		if err != nil {
-			return ""
-		}
-		return t.Format("2006-01-02 15:04:05")
-	})
-	engine.AddFunc("js_array", func(s []int) string {
-		return strings.Trim(strings.Replace(fmt.Sprint(s), " ", ",", -1), "[]")
-	})
+	engine.AddFunc("unescape", unEscape)
+	engine.AddFunc("format_date", formatDate)
+	engine.AddFunc("js_array", jsArray)
+	engine.AddFunc("more_eq", moreEQ)
+	engine.AddFunc("less_eq", lessEQ)
+	engine.AddFunc("slice_value", sliceValue)
 
 	// engine.Debug(true)
 

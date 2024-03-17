@@ -2,6 +2,7 @@ package handler
 
 import (
 	"9minutes/config"
+	"9minutes/consts"
 	"html"
 	"net/http"
 	"strings"
@@ -48,13 +49,15 @@ func HandleHTML(c *fiber.Ctx) error {
 
 	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["UserId"] = userid
-	templateMap["Grade"] = grade
 	templateMap["BoardList"] = BoardListData
 	templateMap["ListCount"] = config.PostingListCountPerPage
+	templateMap["BoardGrades"] = consts.BoardGrades
+	templateMap["UserGrades"] = consts.UserGrades
 
 	if userid == "" {
 		grade = "guest"
 	}
+	templateMap["Grade"] = grade
 
 	templateMap["PendingUser"] = true
 	if grade != "user_hold" {
@@ -63,6 +66,13 @@ func HandleHTML(c *fiber.Ctx) error {
 
 	routePath = appendIndexToRoutePath(routePath)
 	routePaths := strings.Split(routePath, "/")
+
+	templateMap["UserGradeRank"] = consts.UserGrades[grade].Rank
+	boardGradeRanks := []int{}
+	for _, d := range BoardListData {
+		boardGradeRanks = append(boardGradeRanks, consts.BoardGrades[d.GrantRead.String].Rank)
+	}
+	templateMap["BoardGradeRanks"] = boardGradeRanks
 
 	switch routePaths[0] {
 	case "board":
