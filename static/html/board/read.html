@@ -1,7 +1,9 @@
 {{template "layout_board_header" .}}
 
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
+{{if eq .GrantComment true}}
 <script src="/assets/js/myeditor.js"></script>
+{{end}}
 
 <style>
     a:hover {
@@ -92,8 +94,10 @@
         {{range .Comments.CommentList}}
         <span>{{.AuthorName.String}}</span>|
         <span>{{format_date .RegDate.String}}</span>|
+        {{if eq $.GrantComment true}}
         <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
+        {{end}}
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
         <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
         <a onclick="getFilesInfo(parseInt('{{.Idx.Int64}}'))">Attachment</a>
@@ -127,17 +131,19 @@
 
 </div>
 
-<div>
-    <button type="button" onclick="backToList()">List</button>
-    <button type="button" onclick="moveToEdit()">Edit</button>
-    <button type="button" onclick="deletePosting()">Delete</button>
-</div>
+<div id="posting-buttons-second">
+    <div>
+        <button type="button" onclick="backToList()">List</button>
+        <button type="button" onclick="moveToEdit()">Edit</button>
+        <button type="button" onclick="deletePosting()">Delete</button>
+    </div>
 
-<hr />
+    <hr />
+</div>
 
 {{if eq .GrantComment true}}
 <div id="writer" class="comment-editor"></div>
-
+{{end}}
 <div id="writer-fileslist-container">
     <ul></ul>
 </div>
@@ -145,7 +151,6 @@
 <div>
     <button type="button" onclick="writeComment()">Write comment</button>
 </div>
-{{end}}
 
 <!-- Comment modification editor -->
 <template id="modifier-template">
@@ -234,6 +239,7 @@
     "{{range .Comments.CommentList}}"
     commentsFileIdxes[parseInt("{{.Idx.Int64}}")] = "{{.Files.String}}"
     "{{end}}"
+    const grantComment = (/^true$/).test(("{{.GrantComment}}").toLowerCase())
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
@@ -301,9 +307,9 @@
         uploadCallback: imageUploadCallback(null),
     }
 
-    if (editorEL) {
-        const editor = new MyEditor(initialContent, editorEL, options)
-    }
+    "{{if eq .GrantComment true}}"
+    const editor = new MyEditor(initialContent, editorEL, options)
+    "{{end}}"
 
     class modifierElement extends HTMLElement {
         constructor() {
@@ -322,11 +328,13 @@
     function showCommentPageJumper() {
         const commentPages = document.querySelector("#comment-pages")
         const pageJumper = document.querySelectorAll(".page-jump")
+        const postingButtonsSecond = document.querySelector("#posting-buttons-second")
 
         let displayMode = "initial"
         if (commentPages.innerHTML.trim() == "") { displayMode = "none" }
 
         pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
+        postingButtonsSecond.style.display = displayMode
     }
 
     /*
@@ -334,7 +342,6 @@
     page: number - If page is 1, last comment page
      */
     async function getComments(page = 1) {
-        // filesList = []
         attachIdxList["comment-mod"] = []
 
         page = parseInt(page)
@@ -351,7 +358,6 @@
         if (r.ok) {
             const data = await r.json()
             totalCommentPage = data["total-page"]
-
             commentsFileIdxes = {}
 
             data["comment-list"] && data["comment-list"].forEach((comment) => {
@@ -360,8 +366,7 @@
                 commentsHTML += `
                 <span>${comment["author-name"]}</span>|
                 <span>${regdate}</span>|
-                <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
-                <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
+                %%_BUTTON_EDIT_DELETE_%%
                 <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
                 <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
                 <a onclick="getFilesInfo(parseInt('${comment["idx"]}'))">Attachment</a>
@@ -369,6 +374,12 @@
                     <ul></ul>
                 </div>
                 `
+                const buttonEditDelete = `
+                <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
+                <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
+                `
+                if (grantComment) { commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete) }
+                commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
 
                 commentsFileIdxes[parseInt(comment["idx"])] = comment.files
             })
