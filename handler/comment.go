@@ -121,8 +121,7 @@ func WriteComment(c *fiber.Ctx) error {
 
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
-	accessible := checkBoardAccessible(board.GrantComment.String, grade)
-	if !accessible {
+	if !checkBoardAccessible(board.GrantComment.String, grade) {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 

@@ -135,6 +135,7 @@
 
 <hr />
 
+{{if eq .GrantComment true}}
 <div id="writer" class="comment-editor"></div>
 
 <div id="writer-fileslist-container">
@@ -144,6 +145,7 @@
 <div>
     <button type="button" onclick="writeComment()">Write comment</button>
 </div>
+{{end}}
 
 <!-- Comment modification editor -->
 <template id="modifier-template">

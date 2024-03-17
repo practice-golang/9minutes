@@ -107,6 +107,11 @@ func HandleHTML(c *fiber.Ctx) error {
 			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
 			templateMap["Posting"] = posting
 
+			templateMap["GrantComment"] = false
+			if checkBoardAccessible(board.GrantComment.String, grade) {
+				templateMap["GrantComment"] = true
+			}
+
 			comments, err := GetCommentList(board, queries["idx"], map[string]string{"page": "0"})
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
