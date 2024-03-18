@@ -3,12 +3,16 @@
 * [x] Control edit/delete button for author only
 * [ ] Grant routine for guest
     * [ ] Control by ip address if guest & table column
+        * [ ] Add IP_ADDRESS to each db table creation functions
     * [ ] Edit/Delete posting
     * [ ] Edit/Delete comment
     * [ ] Write use password if guest
     * [ ] Edit use password if guest
 
 * [ ] Logger
+* [ ] Separate upload FILES and IMAGES
+    * [ ] Create Image upload api - copy from upload api
+    * [ ] Add image upload path for web editor
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
