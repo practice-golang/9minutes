@@ -17,7 +17,9 @@ func NewSessionStore() {
 	})
 }
 
-func getSessionValue(sess *session.Session, key string) (result string) {
+func getSessionValue(sess *session.Session, key string) string {
+	var result string
+
 	value := sess.Get(key)
 	if value != nil {
 		result = value.(string)
@@ -32,7 +34,7 @@ func GetSessionUserGrade(c *fiber.Ctx) (string, error) {
 		return "", err
 	}
 
-	userGrade := getSessionValue(sess, "grade")
+	result := getSessionValue(sess, "grade")
 
-	return userGrade, err
+	return result, nil
 }

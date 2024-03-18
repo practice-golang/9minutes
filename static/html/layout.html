@@ -44,7 +44,7 @@
                 <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
                 <datalist id="board-list">
                     {{range $i, $b := .BoardList}}
-                    {{if less_eq $.UserGradeRank (slice_value $.BoardGradeRanks $i)}}
+                    {{if less_eq $.UserInfo.UserGradeRank (slice_value $.BoardGradeRanks $i)}}
                     <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
                     {{end}}
                     {{end}}
@@ -71,13 +71,13 @@
             |
 
             <span>
-                {{if ne .UserId ""}}
-                <a href="/mypage">{{.UserId}}</a> | <a href="/logout">Logout</a>
+                {{if ne .UserInfo.UserID ""}}
+                <a href="/mypage">{{.UserInfo.UserID}}</a> | <a href="/logout">Logout</a>
                 {{else}}
                 <a href="/login">Login</a>
                 {{end}}
 
-                {{if eq .Grade "admin"}}
+                {{if eq .UserInfo.UserGrade "admin"}}
                 | <a href="/admin">Admin</a>
                 {{end}}
             </span>

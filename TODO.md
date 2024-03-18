@@ -1,6 +1,7 @@
 # Todo
 
-* [ ] Control edit/delete button for author only
+* [x] Control edit/delete button for author only
+* [ ] grant routine for guest
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML

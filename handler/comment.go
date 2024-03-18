@@ -95,6 +95,36 @@ func GetComments(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(comments)
 }
 
+func GetComment(c *fiber.Ctx) (err error) {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
+	boardCode := c.Params("board_code")
+	postingIdx := c.Params("posting_idx")
+	commentIdx := c.Params("comment_idx")
+
+	board := BoardListData[boardCode]
+	accessible := checkBoardAccessible(board.GrantRead.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
+	comment, err := crud.GetComment(board, postingIdx, commentIdx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(http.StatusOK).JSON(comment)
+}
+
 func WriteComment(c *fiber.Ctx) error {
 	sess, err := store.Get(c)
 	if err != nil {
@@ -147,33 +177,46 @@ func WriteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	result := map[string]interface{}{
-		"result": "success",
-	}
-
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
 
 func UpdateComment(c *fiber.Ctx) error {
+	boardCode := c.Params("board_code")
+	postingIdx := c.Params("posting_idx")
+	commentIdx := c.Params("comment_idx")
+
 	sess, err := store.Get(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
 	userid := getSessionValue(sess, "userid")
 	grade := getSessionValue(sess, "grade")
 	if userid == "" {
 		grade = "guest"
 	}
 
-	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
-	postingIdx := c.Params("posting_idx")
-	commentIdx := c.Params("comment_idx")
 
 	accessible := checkBoardAccessible(board.GrantComment.String, grade)
 	if !accessible {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
+	commentPrev, err := crud.GetComment(board, postingIdx, commentIdx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	if commentPrev.AuthorIdx.Int64 != useridx || grade == "admin" {
+		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
+		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
 	comment := model.Comment{}
@@ -193,10 +236,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	result := map[string]interface{}{
-		"result": "success",
-	}
-
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -205,16 +245,44 @@ func DeleteComment(c *fiber.Ctx) error {
 	postingIdx := c.Params("posting_idx")
 	commentIdx := c.Params("comment_idx")
 
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
 	board := BoardListData[boardCode]
 
-	err := crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
+	accessible := checkBoardAccessible(board.GrantComment.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
+	comment, err := crud.GetComment(board, postingIdx, commentIdx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	result := map[string]interface{}{
-		"result": "success",
+	if comment.AuthorIdx.Int64 != useridx || grade == "admin" {
+		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
+		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
+	err = crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }

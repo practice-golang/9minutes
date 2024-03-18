@@ -44,35 +44,43 @@ func HandleHTML(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
 	userid := getSessionValue(sess, "userid")
 	grade := getSessionValue(sess, "grade")
-
-	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
-	templateMap["UserId"] = userid
-	templateMap["BoardList"] = BoardListData
-	templateMap["ListCount"] = config.PostingListCountPerPage
-	templateMap["BoardGrades"] = consts.BoardGrades
-	templateMap["UserGrades"] = consts.UserGrades
-
 	if userid == "" {
 		grade = "guest"
 	}
-	templateMap["Grade"] = grade
 
-	templateMap["PendingUser"] = true
-	if grade != "user_hold" {
-		templateMap["PendingUser"] = false
+	userInfo := map[string]interface{}{
+		"UserIdx":       useridx,
+		"UserID":        userid,
+		"UserGrade":     grade,
+		"UserGradeRank": consts.UserGrades[grade].Rank,
+		"PendingUser":   (grade == "user_hold"),
 	}
 
-	routePath = appendIndexToRoutePath(routePath)
-	routePaths := strings.Split(routePath, "/")
-
-	templateMap["UserGradeRank"] = consts.UserGrades[grade].Rank
+	// Todo: create template func and remove this
 	boardGradeRanks := []int{}
 	for _, d := range BoardListData {
 		boardGradeRanks = append(boardGradeRanks, consts.BoardGrades[d.GrantRead.String].Rank)
 	}
+
+	templateMap["UserGrades"] = consts.UserGrades
+	templateMap["BoardGrades"] = consts.BoardGrades
+
+	templateMap["UserInfo"] = userInfo
 	templateMap["BoardGradeRanks"] = boardGradeRanks
+
+	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
+	templateMap["BoardList"] = BoardListData
+	templateMap["ListCount"] = config.PostingListCountPerPage
+
+	routePath = appendIndexToRoutePath(routePath)
+	routePaths := strings.Split(routePath, "/")
 
 	switch routePaths[0] {
 	case "board":

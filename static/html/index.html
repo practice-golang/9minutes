@@ -2,15 +2,15 @@
 
 It works!!
 
-{{if .PendingUser}}
+{{if .UserInfo.PendingUser}}
 <div>
     <p>Your account is pending approval. Check email and verify it.</p>
 </div>
-{{else if eq .Grade "admin"}}
+{{else if eq .UserInfo.UserGrade "admin"}}
 <div>
     <p>Admin account</p>
 </div>
-{{else if eq .Grade "manager"}}
+{{else if eq .UserInfo.UserGrade "manager"}}
 <div>
     <p>Manager account</p>
 </div>

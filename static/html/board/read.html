@@ -82,8 +82,10 @@
 
 <div>
     <button type="button" onclick="backToList()">List</button>
+    {{if or (eq .UserInfo.UserIdx .Posting.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
     <button type="button" onclick="moveToEdit()">Edit</button>
     <button type="button" onclick="deletePosting()">Delete</button>
+    {{end}}
 </div>
 
 <hr />
@@ -93,8 +95,9 @@
     <div id="comments">
         {{range .Comments.CommentList}}
         <span>{{.AuthorName.String}}</span>|
-        <span>{{format_date .RegDate.String}}</span>|
-        {{if eq $.GrantComment true}}
+        <span>{{format_date .RegDate.String}}</span>
+        {{if or (and (eq $.GrantComment true) (eq $.UserInfo.UserIdx .AuthorIdx.Int64)) (eq $.UserInfo.UserGrade "admin")}}
+        |
         <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         {{end}}
@@ -134,8 +137,10 @@
 <div id="posting-buttons-second">
     <div>
         <button type="button" onclick="backToList()">List</button>
+        {{if or (eq .UserInfo.UserIdx .Posting.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
         <button type="button" onclick="moveToEdit()">Edit</button>
         <button type="button" onclick="deletePosting()">Delete</button>
+        {{end}}
     </div>
 
     <hr />
@@ -143,7 +148,7 @@
 
 {{if eq .GrantComment true}}
 <div id="writer" class="comment-editor"></div>
-{{end}}
+
 <div id="writer-fileslist-container">
     <ul></ul>
 </div>
@@ -151,6 +156,7 @@
 <div>
     <button type="button" onclick="writeComment()">Write comment</button>
 </div>
+{{end}}
 
 <!-- Comment modification editor -->
 <template id="modifier-template">
@@ -378,7 +384,9 @@
                 <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 `
-                if (grantComment) { commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete) }
+                if ((grantComment && comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || (".UserInfo.UserGrade" == "admin"))) {
+                    commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete)
+                }
                 commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
 
                 commentsFileIdxes[parseInt(comment["idx"])] = comment.files

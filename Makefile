@@ -1,6 +1,9 @@
 build:
 	go build -ldflags "-w -s" -trimpath -o bin/ ./cmd
 
+debug:
+	go build -o bin/ ./cmd
+
 dist:
 	go get -d github.com/mitchellh/gox
 	go build -mod=readonly -o ./bin/ github.com/mitchellh/gox

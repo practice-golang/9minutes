@@ -192,10 +192,7 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	result := map[string]interface{}{
-		"result": "success",
-	}
-
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -206,14 +203,42 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
-	idx, _ := strconv.Atoi(c.Params("idx"))
-	posting.Idx = null.IntFrom(int64(idx))
+	// idx, _ := strconv.Atoi(c.Params("idx"))
+	idx := c.Params("idx")
+	if strings.TrimSpace(idx) == "" {
+		result := map[string]interface{}{"result": "fail", "msg": "empty index"}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+
+	idxNUM, _ := strconv.Atoi(idx)
+	posting.Idx = null.IntFrom(int64(idxNUM))
 
 	rbody := c.Body()
 
-	postingPrev, err := crud.GetPosting(board, c.Params("idx"))
+	postingPrev, err := crud.GetPosting(board, idx)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
+	if posting.AuthorIdx.Int64 != useridx || grade == "admin" {
+		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
+		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
 	err = json.Unmarshal(rbody, &posting)
@@ -265,10 +290,7 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 
 	DeleteUploadFile("upload/" + postingPrev.TitleImage.String)
 
-	result := map[string]interface{}{
-		"result": "success",
-	}
-
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
 
@@ -279,16 +301,35 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 	// idx, _ := strconv.Atoi(c.Params("idx"))
 	idx := c.Params("idx")
 	if strings.TrimSpace(idx) == "" {
-		result := map[string]interface{}{
-			"result": "fail",
-			"msg":    "index is empty",
-		}
+		result := map[string]interface{}{"result": "fail", "msg": "empty index"}
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
 	posting, err := crud.GetPosting(board, idx)
 	if err != nil {
-		return c.Status(http.StatusNotFound).SendString("Posting was not found")
+		result := map[string]interface{}{"result": "fail", "msg": err.Error()}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	useridx := int64(-1)
+	useridxInterface := sess.Get("idx")
+	if useridxInterface != nil {
+		useridx = useridxInterface.(int64)
+	}
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
+	if posting.AuthorIdx.Int64 != useridx || grade == "admin" {
+		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
+		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
 	uploadIndices := strings.Split(posting.Files.String, "|")
@@ -327,9 +368,6 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 
 	DeleteUploadFile("upload/" + posting.TitleImage.String)
 
-	result := map[string]interface{}{
-		"result": "success",
-	}
-
+	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }

@@ -4,10 +4,10 @@
     document.title = "Hello!!"
 </script>
 
-{{if eq .UserId ""}}
+{{if eq .UserInfo.UserID ""}}
 Hello <b>Guest</b>!!
 {{else}}
-Hello <b>{{.UserId}}</b>!!
+Hello <b>{{.UserInfo.UserID}}</b>!!
 {{end}}
 
 {{template "layout_footer" .}}
