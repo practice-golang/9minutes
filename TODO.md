@@ -1,7 +1,12 @@
 # Todo
 
 * [x] Control edit/delete button for author only
-* [ ] grant routine for guest
+* [ ] Grant routine for guest
+    * [ ] Control by ip address if guest & table column
+    * [ ] Edit/Delete posting
+    * [ ] Edit/Delete comment
+    * [ ] Write use password if guest
+    * [ ] Edit use password if guest
 
 * [ ] Logger
 
