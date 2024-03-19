@@ -303,7 +303,6 @@ func setupRouter() {
 	engine.AddFunc("js_array", jsArray)
 	engine.AddFunc("more_eq", moreEQ)
 	engine.AddFunc("less_eq", lessEQ)
-	engine.AddFunc("slice_value", sliceValue)
 
 	// engine.Debug(true)
 

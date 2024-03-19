@@ -63,18 +63,11 @@ func HandleHTML(c *fiber.Ctx) error {
 		"PendingUser":   (grade == "user_hold"),
 	}
 
-	// Todo: create template func and remove this
-	boardGradeRanks := []int{}
-	for _, d := range BoardListData {
-		boardGradeRanks = append(boardGradeRanks, consts.BoardGrades[d.GrantRead.String].Rank)
-	}
-
 	templateMap["SiteName"] = config.SiteName
 
 	templateMap["UserInfo"] = userInfo
 	templateMap["UserGrades"] = consts.UserGrades
 	templateMap["BoardGrades"] = consts.BoardGrades
-	templateMap["BoardGradeRanks"] = boardGradeRanks
 
 	templateMap["BoardList"] = BoardListData
 	templateMap["TopicListCount"] = config.TopicCountPerPage

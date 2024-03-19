@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"html/template"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -41,9 +40,4 @@ func lessEQ(a, b int) bool {
 	}
 
 	return result
-}
-
-func sliceValue(s []int, idx string) int {
-	i, _ := strconv.Atoi(idx)
-	return s[i]
 }

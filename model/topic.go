@@ -45,7 +45,7 @@ type Topic struct {
 	AuthorName   null.String `json:"author-name"    db:"AUTHOR_NAME"   npskip:"update, viewcount"`
 	AuthorIpFull null.String `json:"author-ip-full" db:"AUTHOR_IP"     npskip:"select, update, read"`
 	AuthorIP     null.String `json:"author-ip"      db:"AUTHOR_IP_CUT" npskip:"update"`
-	EditPassword null.String `json:"edit-password"  db:"EDIT_PASSWORD" npskip:"read"`
+	EditPassword null.String `json:"edit-password"  db:"EDIT_PASSWORD" npskip:"select read"`
 	Files        null.String `json:"files"          db:"FILES"         npskip:"viewcount"`
 	Views        null.Int    `json:"views"          db:"VIEWS"         npskip:"update"`
 	RegDate      null.String `json:"regdate"        db:"REGDATE"       npskip:"update, viewcount"`

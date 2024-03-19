@@ -336,6 +336,10 @@
 
     function showCommentPageJumper() {
         const commentPages = document.querySelector("#comment-pages")
+        if (!commentPages) {
+            return false
+        }
+
         const pageJumper = document.querySelectorAll(".page-jump")
         const topicButtonsSecond = document.querySelector("#topic-buttons-second")
 

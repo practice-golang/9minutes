@@ -5,8 +5,8 @@
     * [ ] Control by ip address if guest & table column
         * [x] Add IP_ADDRESS to each db table creation functions
         * [ ] Edit password for guest
-    * [ ] Appear board list in selector
-    * [ ] Edit/Delete posting
+    * [x] Appear guest board in list selector
+    * [ ] Edit/Delete topic
     * [ ] Edit/Delete comment
     * [ ] Write use password if guest
     * [ ] Edit use password if guest
