@@ -4,7 +4,6 @@ import (
 	"9minutes/config"
 	"9minutes/consts"
 	"html"
-	"log"
 	"net/http"
 	"strings"
 
@@ -39,9 +38,6 @@ func HandleHTML(c *fiber.Ctx) error {
 	routePath := strings.TrimSuffix(c.Path()[1:], "/")
 	queries := c.Queries()
 	templateMap := fiber.Map{}
-
-	clientIP := c.Context().RemoteIP()
-	log.Println("Client IP:", clientIP)
 
 	sess, err := store.Get(c)
 	if err != nil {

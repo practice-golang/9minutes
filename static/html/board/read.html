@@ -64,7 +64,7 @@
     </div>
 
     <div>
-        <span>{{.Topic.AuthorName.String}}</span> |
+        <span>{{.Topic.AuthorName.String}}</span> <span>({{.Topic.AuthorIP.String}})</span> |
         <span>{{format_date .Topic.RegDate.String}}</span> |
         <span>{{.Topic.Views.Int64}}</span>
     </div>

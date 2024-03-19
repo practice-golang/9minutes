@@ -148,6 +148,11 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	topic.AuthorIdx = null.IntFrom(useridx)
 	topic.AuthorName = null.StringFrom(userid)
 
+	clientIP := c.Context().RemoteIP().String()
+	clientIPs := strings.Split(clientIP, ".")
+	topic.AuthorIpFull = null.StringFrom(clientIP)
+	topic.AuthorIP = null.StringFrom(clientIPs[0] + "." + clientIPs[1])
+
 	now := time.Now().Format("20060102150405")
 	topic.RegDate = null.StringFrom(now)
 	topic.Views = null.IntFrom(0)

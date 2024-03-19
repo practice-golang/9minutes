@@ -1,9 +1,9 @@
 # Todo
 
 * [x] Control edit/delete button for author only
-* [ ] Grant routine for guest
+* [ ] Grant,confirm routine for guest
     * [ ] Control by ip address if guest & table column
-        * [ ] Add IP_ADDRESS to each db table creation functions
+        * [x] Add IP_ADDRESS to each db table creation functions
         * [ ] Edit password for guest
     * [ ] Edit/Delete posting
     * [ ] Edit/Delete comment
@@ -12,7 +12,6 @@
 
 * [ ] Logger
 * [x] Rename all post, posting to topic
-* [ ] comment list pagination
 * [ ] Separate upload FILES and IMAGES
     * [ ] Create Image upload api - copy from upload api
     * [ ] Add image upload path for web editor
