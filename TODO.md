@@ -2,20 +2,34 @@
 
 * [x] Control edit/delete button for author only
 * [ ] Grant,confirm routine for guest
-    * [ ] Control by ip address if guest & table column
-        * [x] Add IP_ADDRESS to each db table creation functions
-        * [ ] Edit password for guest
+    * [x] ip address - Add IP_ADDRESS to each db table creation functions
     * [x] Appear guest board in list selector
-    * [ ] Edit/Delete topic
-    * [ ] Edit/Delete comment
-    * [ ] Write use password if guest
-    * [ ] Edit use password if guest
+    * [ ] Control topic
+        * [ ] Password check if user or author is guest
+            * [x] Write
+            * [ ] Edit
+            * [x] Delete
+    * [ ] Control comment
+        * [ ] Password check if user or author is guest
+            * [ ] Write
+            * [ ] Edit
+            * [ ] Delete
+    * [ ] password encryption
+        * Topic
+            * [ ] Write
+            * [ ] Edit
+            * [ ] Delete
+        * Comment
+            * [ ] Write
+            * [ ] Edit
+            * [ ] Delete
+* [ ] Change less_eq, more_eq to le, ge
+    * https://pkg.go.dev/text/template
+    * [ ] change less_eq, more_eq
+    * [ ] delete less_eq, more_eq
 
 * [ ] Logger
 * [x] Rename all post, posting to topic
-* [ ] Separate upload FILES and IMAGES
-    * [ ] Create Image upload api - copy from upload api
-    * [ ] Add image upload path for web editor
 * [ ] Add user login history - useridx, ip, regdate
 * [ ] Board managing page - Add manager account setting for each boards
     * [ ] API

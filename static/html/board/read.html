@@ -65,8 +65,13 @@
     </div>
 
     <div>
-        <span>{{.Topic.AuthorName.String}}</span> <span>({{.Topic.AuthorIP.String}})</span> |
-        <span>{{format_date .Topic.RegDate.String}}</span> |
+        <span>
+            {{.Topic.AuthorName.String}}
+            {{if le .Topic.AuthorIdx.Int64 0}}
+            ({{.Topic.AuthorIP.String}})
+            {{end}}
+        </span>|
+        <span>{{format_date .Topic.RegDate.String}}</span>|
         <span>{{.Topic.Views.Int64}}</span>
     </div>
 
@@ -83,7 +88,7 @@
 
 <div>
     <button type="button" onclick="backToList()">List</button>
-    {{if or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
+    {{if or (le .Topic.AuthorIdx.Int64 0) (or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin"))}}
     <button type="button" onclick="moveToEdit()">Edit</button>
     <button type="button" onclick="deleteTopic()">Delete</button>
     {{end}}
@@ -254,12 +259,28 @@
     function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${topicIdx}` }
     async function deleteTopic() {
         const uri = `/api/board/${boardCode}/topic/${topicIdx}`
-        const r = await fetch(uri, { method: "DELETE" })
+        const req = { method: "DELETE" }
 
+        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+            const password = prompt("Enter password", "")
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            req.headers = { "Delete-Password": password }
+        }
+
+        const r = await fetch(uri, req)
         if (r.ok) {
             alert("Deleted")
             backToList()
+            return
         }
+
+        const response = await r.json()
+        alert(response.msg)
 
         return false
     }

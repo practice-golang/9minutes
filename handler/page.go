@@ -118,6 +118,8 @@ func HandleHTML(c *fiber.Ctx) error {
 				break
 			}
 
+			topic.EditPassword = null.NewString("", false)
+
 			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
 			templateMap["Topic"] = topic
 

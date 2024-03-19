@@ -2,6 +2,7 @@ package handler
 
 import (
 	"9minutes/config"
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"encoding/json"
@@ -124,6 +125,9 @@ func ReadTopicAPI(c *fiber.Ctx) (err error) {
 func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	topic := model.Topic{}
 
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
+
 	err = c.BodyParser(&topic)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
@@ -141,12 +145,21 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	}
 
 	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
 	if userid == "" {
+		grade = "guest"
+	}
+
+	usergrade := consts.UserGrades[grade].Rank
+	boardgrade := consts.UserGrades[board.GrantWrite.String].Rank
+	if usergrade > boardgrade {
 		return c.Status(http.StatusBadRequest).SendString("userid is empty")
 	}
 
-	topic.AuthorIdx = null.IntFrom(useridx)
-	topic.AuthorName = null.StringFrom(userid)
+	if userid != "" {
+		topic.AuthorIdx = null.IntFrom(useridx)
+		topic.AuthorName = null.StringFrom(userid)
+	}
 
 	clientIP := c.Context().RemoteIP().String()
 	clientIPs := strings.Split(clientIP, ".")
@@ -156,9 +169,6 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	now := time.Now().Format("20060102150405")
 	topic.RegDate = null.StringFrom(now)
 	topic.Views = null.IntFrom(0)
-
-	boardCode := c.Params("board_code")
-	board := BoardListData[boardCode]
 
 	if strings.TrimSpace(topic.Files.String) != "" {
 		var imIndices []int
@@ -303,7 +313,6 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
-	// idx, _ := strconv.Atoi(c.Params("idx"))
 	idx := c.Params("idx")
 	if strings.TrimSpace(idx) == "" {
 		result := map[string]interface{}{"result": "fail", "msg": "empty index"}
@@ -332,7 +341,19 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 		grade = "guest"
 	}
 
-	if topic.AuthorIdx.Int64 != useridx || grade == "admin" {
+	switch true {
+	case useridx < 0 || userid == "" || topic.AuthorIdx.Int64 < 0:
+		deletePassword := ""
+		deletePasswords := c.GetReqHeaders()["Delete-Password"]
+		if len(deletePasswords) > 0 {
+			deletePassword = deletePasswords[0]
+		}
+
+		if topic.EditPassword.String != deletePassword {
+			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
+			return c.Status(http.StatusBadRequest).JSON(result)
+		}
+	case grade != "admin" && topic.AuthorIdx.Int64 != useridx:
 		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}

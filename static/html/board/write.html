@@ -18,8 +18,16 @@
     }
 </style>
 
-<div class="input-container">
-    <span>Title: </span>
+{{if or (eq .UserInfo.UserID "") (le .UserInfo.UserIdx 0)}}
+<label for="nickname">Nickname:</label>
+<input type="text" id="nickname" placeholder="Nickname">
+<label for="password">Password:</label>
+<input type="password" id="password" placeholder="Password">
+{{end}}
+<div class="title-wrapper">
+    <span>
+        <label>Title: </label>
+    </span>
     <input type="text" id="title" placeholder="Title">
 </div>
 
@@ -175,6 +183,26 @@
     async function writeTopic() {
         const uri = `/api/board/${boardCode}/topic`
 
+        let authoridx = "{{.UserInfo.UserIdx}}"
+        let authorname = "{{.UserInfo.UserID}}"
+        let nickname, password = ""
+        if (authorname.trim() == "" || authoridx.trim() == "") {
+            nickname = document.querySelector("#nickname").value
+            password = document.querySelector("#password").value
+
+            if (!nickname) {
+                alert("Nickname is required")
+                return false
+            }
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            authoridx = "-1"
+            authorname = nickname
+        }
+
         const title = document.querySelector("#title").value
         const content = editor.getHTML()
 
@@ -185,8 +213,9 @@
         const data = {
             "title": title,
             "content": content,
-            "author-idx": 1,
-            "author-name": "admin",
+            "author-idx": parseInt(authoridx),
+            "author-name": authorname,
+            "edit-password": password,
             "files": fileIndices
         }
 

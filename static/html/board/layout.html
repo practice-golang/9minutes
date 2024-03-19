@@ -28,17 +28,26 @@
     }
 
     @media(max-width: 960px) {
-        input {
+        body input {
             max-width: 7em;
+        }
+
+        .title-wrapper {
+            width: 100%;
+        }
+
+        .title-wrapper input {
+            max-width: unset;
+            width: calc(100% - 3.8em) !important;
         }
     }
 
-    .input-container {
+    .title-wrapper {
         width: 100%;
     }
 
-    .input-container input {
-        width: calc(100% - 3.3em);
+    .title-wrapper input {
+        width: calc(100% - 3.8em);
     }
 
     .topic-editor {
@@ -100,10 +109,10 @@
 
         <hr />
     </div>
-{{end}}
+    {{end}}
 
 
-{{define "layout_board_footer"}}
+    {{define "layout_board_footer"}}
     <footer>
         <hr />
         Template board footer
