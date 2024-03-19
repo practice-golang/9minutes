@@ -5,12 +5,14 @@
     * [x] ip address - Add IP_ADDRESS to each db table creation functions
     * [x] Appear guest board in list selector
     * [ ] Control topic
-        * [ ] Password check if user or author is guest
+        * [x] Password check if user or author is guest
             * [x] Write
-            * [ ] Edit
+            * [x] Edit
             * [x] Delete
     * [ ] Control comment
         * [ ] Password check if user or author is guest
+            * [x] DB
+            * [ ] bug - no authorname
             * [ ] Write
             * [ ] Edit
             * [ ] Delete

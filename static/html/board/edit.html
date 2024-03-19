@@ -18,9 +18,15 @@
     }
 </style>
 
+{{if le .Topic.AuthorIdx.Int64 0}}
+<label for="nickname">Nickname:</label>
+<input type="text" id="nickname" value="{{.Topic.AuthorName.String}}" placeholder="Nickname" disabled />
+<label for="password">Password:</label>
+<input type="password" id="password" value="{{.Topic.EditPassword.String}}" placeholder="Password" disabled />
+{{end}}
 <div class="title-wrapper">
     <span>Title: </span>
-    <input type="text" id="title" value="{{.Topic.Title.String}}" placeholder="Title">
+    <input type="text" id="title" value="{{.Topic.Title.String}}" placeholder="Title" />
 </div>
 
 <div id="editor" class="topic-editor"></div>
@@ -38,7 +44,7 @@
 
 <div>
     <button type="button" onclick="backToList()">Cancel</button>
-    <button type="button" onclick="writeTopic()">Save</button>
+    <button type="button" onclick="updateTopic()">Save</button>
 </div>
 
 <script>
@@ -169,8 +175,14 @@
         }
     }
 
-    async function writeTopic() {
+    async function updateTopic() {
         const uri = `/api/board/${boardCode}/topic/${topicIdx}`
+
+        let authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        let password = ""
+        if (authoridx.trim() == "-1") {
+            password = document.querySelector("#password").value
+        }
 
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()
@@ -182,6 +194,7 @@
         const data = {
             "title": title,
             "content": initialContent,
+            "edit-password": password,
             "files": fileIndices
         }
 

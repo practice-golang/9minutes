@@ -95,7 +95,6 @@
 </div>
 
 <!-- Comment -->
-{{if .Comments.CommentList}}
 <hr />
 
 <div>
@@ -149,7 +148,6 @@
         {{end}}
     </div>
 </div>
-{{end}}
 
 {{if eq .GrantComment true}}
 <script src="/assets/js/myeditor.js"></script>
@@ -256,7 +254,22 @@
     const grantComment = (/^true$/).test(("{{.GrantComment}}").toLowerCase())
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
-    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${topicIdx}` }
+
+    function moveToEdit() {
+        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+            const password = prompt("Enter password", "")
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            document.cookie = `password=${password}`
+        }
+
+        location.href = `/board/edit?board_code=${boardCode}&idx=${topicIdx}`
+    }
+
     async function deleteTopic() {
         const uri = `/api/board/${boardCode}/topic/${topicIdx}`
         const req = { method: "DELETE" }
@@ -419,6 +432,7 @@
 
                 commentsFileIdxes[parseInt(comment["idx"])] = comment.files
             })
+
             commentsContainer.innerHTML = commentsHTML
 
             // paging

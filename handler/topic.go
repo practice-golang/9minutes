@@ -2,7 +2,6 @@ package handler
 
 import (
 	"9minutes/config"
-	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"encoding/json"
@@ -150,10 +149,9 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 		grade = "guest"
 	}
 
-	usergrade := consts.UserGrades[grade].Rank
-	boardgrade := consts.UserGrades[board.GrantWrite.String].Rank
-	if usergrade > boardgrade {
-		return c.Status(http.StatusBadRequest).SendString("userid is empty")
+	accessible := checkBoardAccessible(board.GrantWrite.String, grade)
+	if !accessible {
+		return c.Status(http.StatusBadRequest).SendString("access denied")
 	}
 
 	if userid != "" {
@@ -251,14 +249,20 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 		grade = "guest"
 	}
 
-	if topic.AuthorIdx.Int64 != useridx || grade == "admin" {
-		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
-		return c.Status(http.StatusBadRequest).JSON(result)
-	}
-
 	err = json.Unmarshal(rbody, &topic)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	switch true {
+	case topicPrev.AuthorIdx.Int64 < 0:
+		if topic.EditPassword.String != topicPrev.EditPassword.String {
+			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
+			return c.Status(http.StatusBadRequest).JSON(result)
+		}
+	case grade != "admin" && topicPrev.AuthorIdx.Int64 != useridx:
+		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
+		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
 	if strings.TrimSpace(topic.Files.String) != "" {

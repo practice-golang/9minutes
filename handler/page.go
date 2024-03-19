@@ -155,7 +155,20 @@ func HandleHTML(c *fiber.Ctx) error {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 
+			switch true {
+			case useridx < 0 || userid == "" || topic.AuthorIdx.Int64 < 0:
+				editPassword := string(c.Request().Header.Cookie("password"))
+				c.ClearCookie("password")
+
+				if topic.EditPassword.String != editPassword {
+					routePath = "status/access_denied"
+				}
+			case grade != "admin" && topic.AuthorIdx.Int64 != useridx:
+				routePath = "status/access_denied"
+			}
+
 			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
+
 			templateMap["Topic"] = topic
 		default:
 			routePath = "status/unauthorized"
