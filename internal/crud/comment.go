@@ -12,21 +12,21 @@ import (
 )
 
 // GetComment - get comment
-func GetComment(board model.Board, postingIdx, commentIdx string) (model.Comment, error) {
+func GetComment(board model.Board, topicIdx, commentIdx string) (model.Comment, error) {
 	var comment model.Comment
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.CommentTable.String)
 
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
-	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, dbtype, "", false)
+	columnTopicIdx := np.CreateString(map[string]interface{}{"TOPIC_IDX": nil}, dbtype, "", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 
 	sql := `
 	SELECT
 		` + column.Names + `
 	FROM ` + tableName + `
-	WHERE ` + columnPostingIdx.Names + ` = ` + postingIdx + `
+	WHERE ` + columnTopicIdx.Names + ` = ` + topicIdx + `
 		AND ` + columnIdx.Names + ` = ` + commentIdx
 
 	r, err := db.Con.Query(sql)
@@ -44,7 +44,7 @@ func GetComment(board model.Board, postingIdx, commentIdx string) (model.Comment
 }
 
 // GetComments - get comment list
-func GetComments(board model.Board, contentIdx string, options model.CommentListingOptions) (model.CommentPageData, error) {
+func GetComments(board model.Board, contentIdx string, commentListOption model.CommentListingOptions) (model.CommentPageData, error) {
 	result := model.CommentPageData{}
 
 	dbtype := db.GetDatabaseTypeString()
@@ -54,14 +54,14 @@ func GetComments(board model.Board, contentIdx string, options model.CommentList
 	column := np.CreateString(model.Comment{}, dbtype, "select", false)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
-	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, dbtype, "", false)
+	columnTopicIdx := np.CreateString(map[string]interface{}{"TOPIC_IDX": nil}, dbtype, "", false)
 
 	var totalCount int64
 	sql := `
 	SELECT
 		COUNT(` + columnIdx.Names + `)
 	FROM ` + tableName + `
-	WHERE ` + columnPostingIdx.Names + ` = ` + contentIdx
+	WHERE ` + columnTopicIdx.Names + ` = ` + contentIdx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -74,26 +74,26 @@ func GetComments(board model.Board, contentIdx string, options model.CommentList
 		return result, err
 	}
 
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	totalPage := math.Ceil(float64(totalCount) / float64(commentListOption.ListCount.Int64))
 	currentPage := int64(totalPage)
 
 	offset := 0
 	if totalCount > 0 {
-		offset = int(int64(totalPage)*options.ListCount.Int64 - options.ListCount.Int64)
+		offset = int(int64(totalPage)*commentListOption.ListCount.Int64 - commentListOption.ListCount.Int64)
 
-		if options.Page.Valid && options.Page.Int64 > -1 && options.ListCount.Valid {
-			currentPage = options.Page.Int64 + 1
-			offset = int(options.Page.Int64 * options.ListCount.Int64)
+		if commentListOption.Page.Valid && commentListOption.Page.Int64 > -1 && commentListOption.ListCount.Valid {
+			currentPage = commentListOption.Page.Int64 + 1
+			offset = int(commentListOption.Page.Int64 * commentListOption.ListCount.Int64)
 		}
 	}
 
-	paging := db.Obj.GetPagingQuery(offset, int(options.ListCount.Int64))
+	paging := db.Obj.GetPagingQuery(offset, int(commentListOption.ListCount.Int64))
 
 	sql = `
 	SELECT
 		` + column.Names + `
 	FROM ` + tableName + `
-	WHERE ` + columnPostingIdx.Names + ` = ` + contentIdx + `
+	WHERE ` + columnTopicIdx.Names + ` = ` + contentIdx + `
 	ORDER BY ` + columnIdx.Names + ` ASC
 	` + paging
 
@@ -140,7 +140,7 @@ func WriteComment(board model.Board, content model.Comment) error {
 	return nil
 }
 
-func UpdateComment(board model.Board, comment model.Comment, postingIdx string) error {
+func UpdateComment(board model.Board, comment model.Comment, topicIdx string) error {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 	commentIDX := strconv.Itoa(int(comment.Idx.Int64))
 
@@ -174,16 +174,16 @@ func UpdateComment(board model.Board, comment model.Comment, postingIdx string) 
 	return nil
 }
 
-func DeleteComment(board model.Board, postingIdx, commentIdx string) error {
+func DeleteComment(board model.Board, topicIdx, commentIdx string) error {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 
-	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, db.GetDatabaseTypeString(), "", false)
+	columnTopicIdx := np.CreateString(map[string]interface{}{"TOPIC_IDX": nil}, db.GetDatabaseTypeString(), "", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
 
 	sql := `
 	DELETE
 	FROM ` + tableName + `
-	WHERE ` + columnPostingIdx.Names + ` = ` + postingIdx + `
+	WHERE ` + columnTopicIdx.Names + ` = ` + topicIdx + `
 		AND ` + columnIdx.Names + ` = ` + commentIdx
 
 	_, err := db.Con.Exec(sql)
@@ -197,11 +197,11 @@ func DeleteComment(board model.Board, postingIdx, commentIdx string) error {
 func DeleteComments(board model.Board, idx string) error {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 
-	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, db.GetDatabaseTypeString(), "", false)
+	columnTopicIdx := np.CreateString(map[string]interface{}{"TOPIC_IDX": nil}, db.GetDatabaseTypeString(), "", false)
 
 	sql := `
 	DELETE FROM ` + tableName + `
-	WHERE ` + columnPostingIdx.Names + ` = ` + idx
+	WHERE ` + columnTopicIdx.Names + ` = ` + idx
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

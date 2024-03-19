@@ -10,8 +10,8 @@ type UserGrade struct {
 	Rank int    `json:"rank"`
 }
 
-// UserListingOptions - Search, page
-type UserListingOptions struct {
+// UserListingOption - Search, page
+type UserListingOption struct {
 	Search    null.String
 	Page      null.Int
 	ListCount null.Int

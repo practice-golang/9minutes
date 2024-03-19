@@ -4,6 +4,6 @@ use (
 	.
 	./cmd
 	./misc/fakegen/boards
-	./misc/fakegen/postings
+	./misc/fakegen/topics
 	./misc/fakegen/users
 )

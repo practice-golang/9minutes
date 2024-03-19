@@ -17,11 +17,11 @@ import (
 func GetBoardsAPI(c *fiber.Ctx) error {
 	queries := c.Queries()
 
-	listingOptions := model.BoardListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
+	boardListOptions := model.BoardListingOption{}
+	boardListOptions.Search = null.StringFrom(queries["search"])
 
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(20)
+	boardListOptions.Page = null.IntFrom(1)
+	boardListOptions.ListCount = null.IntFrom(20)
 
 	if queries["page"] != "" {
 		page := queries["page"]
@@ -36,15 +36,15 @@ func GetBoardsAPI(c *fiber.Ctx) error {
 				return c.Status(http.StatusBadRequest).SendString(err.Error())
 			}
 
-			listingOptions.ListCount = null.IntFrom(int64(countPerPage))
+			boardListOptions.ListCount = null.IntFrom(int64(countPerPage))
 		}
 
-		listingOptions.Page = null.IntFrom(int64(pageNum))
+		boardListOptions.Page = null.IntFrom(int64(pageNum))
 	}
 
-	listingOptions.Page.Int64--
+	boardListOptions.Page.Int64--
 
-	result, err := crud.GetBoards(listingOptions)
+	result, err := crud.GetBoards(boardListOptions)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -246,11 +246,11 @@ func DeleteBoardAPI(c *fiber.Ctx) error {
 func BoardListAPI(c *fiber.Ctx) (err error) {
 	queries := c.Queries()
 
-	listingOptions := model.BoardListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
+	boardListOption := model.BoardListingOption{}
+	boardListOption.Search = null.StringFrom(queries["search"])
 
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(10)
+	boardListOption.Page = null.IntFrom(1)
+	boardListOption.ListCount = null.IntFrom(10)
 
 	if queries["page"] != "" {
 		page := queries["page"]
@@ -265,15 +265,15 @@ func BoardListAPI(c *fiber.Ctx) (err error) {
 				return c.Status(http.StatusBadRequest).SendString(err.Error())
 			}
 
-			listingOptions.ListCount = null.IntFrom(int64(countPerPage))
+			boardListOption.ListCount = null.IntFrom(int64(countPerPage))
 		}
 
-		listingOptions.Page = null.IntFrom(int64(pageNum))
+		boardListOption.Page = null.IntFrom(int64(pageNum))
 	}
 
-	listingOptions.Page.Int64--
+	boardListOption.Page.Int64--
 
-	result, err := crud.GetBoards(listingOptions)
+	result, err := crud.GetBoards(boardListOption)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -308,10 +308,10 @@ func checkBoardAccessible(boardGradeKey string, userGradeKey string) bool {
 func LoadBoardListData() map[string]model.Board {
 	BoardListData = map[string]model.Board{}
 
-	listingOptions := model.BoardListingOptions{}
-	listingOptions.Page = null.IntFrom(0)
-	listingOptions.ListCount = null.IntFrom(99999)
-	boardList, _ := crud.GetBoards(listingOptions)
+	boardListOption := model.BoardListingOption{}
+	boardListOption.Page = null.IntFrom(0)
+	boardListOption.ListCount = null.IntFrom(99999)
+	boardList, _ := crud.GetBoards(boardListOption)
 
 	for _, b := range boardList.BoardList {
 		BoardListData[b.BoardCode.String] = b

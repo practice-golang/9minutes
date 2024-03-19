@@ -62,18 +62,18 @@ func setApiBoard(a *fiber.App) {
 	/* API Board list */
 	gbrd.Get("/list", handler.BoardListAPI)
 
-	/* API Posting */
-	gbrd.Get("/:board_code", handler.ListPostingAPI)
-	gbrd.Get("/:board_code/posting/:idx", handler.ReadPostingAPI)
-	gbrd.Post("/:board_code/posting", handler.WritePostingAPI)
-	gbrd.Put("/:board_code/posting/:idx", handler.UpdatePostingAPI)
-	gbrd.Delete("/:board_code/posting/:idx", handler.DeletePostingAPI)
+	/* API Topic */
+	gbrd.Get("/:board_code", handler.ListTopicAPI)
+	gbrd.Get("/:board_code/topic/:idx", handler.ReadTopicAPI)
+	gbrd.Post("/:board_code/topic", handler.WriteTopicAPI)
+	gbrd.Put("/:board_code/topic/:idx", handler.UpdateTopicAPI)
+	gbrd.Delete("/:board_code/topic/:idx", handler.DeleteTopicAPI)
 
 	/* API Comment */
-	gbrd.Get("/:board_code/:posting_idx/comment", handler.GetComments)
-	gbrd.Post("/:board_code/:posting_idx/comment", handler.WriteComment)
-	gbrd.Put("/:board_code/:posting_idx/comment/:comment_idx", handler.UpdateComment)
-	gbrd.Delete("/:board_code/:posting_idx/comment/:comment_idx", handler.DeleteComment)
+	gbrd.Get("/:board_code/:topic_idx/comment", handler.GetComments)
+	gbrd.Post("/:board_code/:topic_idx/comment", handler.WriteComment)
+	gbrd.Put("/:board_code/:topic_idx/comment/:comment_idx", handler.UpdateComment)
+	gbrd.Delete("/:board_code/:topic_idx/comment/:comment_idx", handler.DeleteComment)
 }
 
 func setApiUploader(r *fiber.App) {

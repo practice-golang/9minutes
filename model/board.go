@@ -4,8 +4,8 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// BoardListingOptions - Search, page
-type BoardListingOptions struct {
+// BoardListingOption - Search, page
+type BoardListingOption struct {
 	Search    null.String
 	Page      null.Int
 	ListCount null.Int

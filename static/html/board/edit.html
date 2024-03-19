@@ -20,10 +20,10 @@
 
 <div class="input-container">
     <span>Title: </span>
-    <input type="text" id="title" value="{{.Posting.Title.String}}" placeholder="Title">
+    <input type="text" id="title" value="{{.Topic.Title.String}}" placeholder="Title">
 </div>
 
-<div id="editor" class="posting-editor"></div>
+<div id="editor" class="topic-editor"></div>
 
 <div>
     <input type="file" id="upload-files" multiple />
@@ -38,7 +38,7 @@
 
 <div>
     <button type="button" onclick="backToList()">Cancel</button>
-    <button type="button" onclick="writePosting()">Save</button>
+    <button type="button" onclick="writeTopic()">Save</button>
 </div>
 
 <script>
@@ -75,12 +75,12 @@
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
 
-    const postingIdx = queries.get("idx")
-    const initialContent = "{{.Posting.Content.String}}"
-    let fileIndices = "{{.Posting.Files.String}}"
+    const topicIdx = queries.get("idx")
+    const initialContent = "{{.Topic.Content.String}}"
+    let fileIndices = "{{.Topic.Files.String}}"
     const filesList = []
 
-    function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${postingIdx}` }
+    function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${topicIdx}` }
 
     const editorEL = document.querySelector("#editor")
     const options = {
@@ -169,8 +169,8 @@
         }
     }
 
-    async function writePosting() {
-        const uri = `/api/board/${boardCode}/posting/${postingIdx}`
+    async function writeTopic() {
+        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
 
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()

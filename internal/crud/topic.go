@@ -13,31 +13,31 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetPostingList(board model.Board, options model.PostingListingOptions) (model.PostingPageData, error) {
-	result := model.PostingPageData{}
+func GetTopicList(board model.Board, topicListOption model.TopicListingOption) (model.TopicPageData, error) {
+	result := model.TopicPageData{}
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	commentTableName := db.GetFullTableName(board.CommentTable.String)
 
-	column := np.CreateString(model.PostingList{}, dbtype, "select", false)
+	column := np.CreateString(model.TopicList{}, dbtype, "select", false)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	columnTitle := np.CreateString(map[string]interface{}{"TITLE": nil}, dbtype, "", false)
 	columnContent := np.CreateString(map[string]interface{}{"CONTENT": nil}, dbtype, "", false)
-	columnPostingIdx := np.CreateString(map[string]interface{}{"POSTING_IDX": nil}, dbtype, "", false)
+	columnTopicIdx := np.CreateString(map[string]interface{}{"TOPIC_IDX": nil}, dbtype, "", false)
 	columnCommentCount := np.CreateString(map[string]interface{}{"COMMENT_COUNT": nil}, dbtype, "", false)
 
 	sqlSearch := ""
-	if options.Search.Valid && options.Search.String != "" {
+	if topicListOption.Search.Valid && topicListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE LOWER(` + columnTitle.Names + `) LIKE LOWER('%` + options.Search.String + `%')
-			OR LOWER(` + columnContent.Names + `) LIKE LOWER('%` + options.Search.String + `%')`
+		WHERE LOWER(` + columnTitle.Names + `) LIKE LOWER('%` + topicListOption.Search.String + `%')
+			OR LOWER(` + columnContent.Names + `) LIKE LOWER('%` + topicListOption.Search.String + `%')`
 	}
 
 	paging := ``
-	if options.Page.Valid && options.ListCount.Valid {
-		paging = db.Obj.GetPagingQuery(int(options.Page.Int64*options.ListCount.Int64), int(options.ListCount.Int64))
+	if topicListOption.Page.Valid && topicListOption.ListCount.Valid {
+		paging = db.Obj.GetPagingQuery(int(topicListOption.Page.Int64*topicListOption.ListCount.Int64), int(topicListOption.ListCount.Int64))
 	}
 
 	sql := `
@@ -47,7 +47,7 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 			SELECT
 				COUNT(` + columnIdx.Names + `)
 			FROM ` + commentTableName + `
-			WHERE ` + columnPostingIdx.Names + ` = A.` + columnIdx.Names + `
+			WHERE ` + columnTopicIdx.Names + ` = A.` + columnIdx.Names + `
 		) AS ` + columnCommentCount.Names + `
 	FROM ` + tableName + ` A
 	` + sqlSearch + `
@@ -60,7 +60,7 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 	}
 	defer r.Close()
 
-	var list []model.PostingList
+	var list []model.TopicList
 	err = scan.Rows(&list, r)
 	if err != nil {
 		return result, err
@@ -84,25 +84,25 @@ func GetPostingList(board model.Board, options model.PostingListingOptions) (mod
 		return result, err
 	}
 
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	totalPage := math.Ceil(float64(totalCount) / float64(topicListOption.ListCount.Int64))
 
-	result = model.PostingPageData{
+	result = model.TopicPageData{
 		BoardCode:     board.BoardCode.String,
-		SearchKeyword: options.Search.String,
-		PostingList:   list,
-		CurrentPage:   int(options.Page.Int64) + 1,
+		SearchKeyword: topicListOption.Search.String,
+		TopicList:     list,
+		CurrentPage:   int(topicListOption.Page.Int64) + 1,
 		TotalPage:     int(totalPage),
 	}
 
 	return result, err
 }
 
-func GetPosting(board model.Board, idx string) (model.Posting, error) {
+func GetTopic(board model.Board, idx string) (model.Topic, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	// userTableName := db.GetFullTableName(db.Info.UserTable)
 
-	column := np.CreateString(model.Posting{}, dbtype, "select", false)
+	column := np.CreateString(model.Topic{}, dbtype, "select", false)
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	// columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	// columnAuthorIdx := np.CreateString(map[string]interface{}{"AUTHOR_IDX": nil}, dbtype, "", false)
@@ -124,20 +124,20 @@ func GetPosting(board model.Board, idx string) (model.Posting, error) {
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
-		return model.Posting{}, err
+		return model.Topic{}, err
 	}
 	defer r.Close()
 
-	var content model.Posting
+	var content model.Topic
 	err = scan.Row(&content, r)
 	if err != nil {
-		return model.Posting{}, err
+		return model.Topic{}, err
 	}
 
 	return content, nil
 }
 
-func WritePosting(board model.Board, content model.Posting) (sql.Result, error) {
+func WriteTopic(board model.Board, content model.Topic) (sql.Result, error) {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
 	content.Title = null.StringFrom(content.Title.String)
@@ -164,7 +164,7 @@ func WritePosting(board model.Board, content model.Posting) (sql.Result, error) 
 	return result, nil
 }
 
-func UpdatePosting(board model.Board, content model.Posting, skipTag string) error {
+func UpdateTopic(board model.Board, content model.Topic, skipTag string) error {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 	idx := fmt.Sprint(content.Idx.Int64)
 
@@ -202,7 +202,7 @@ func UpdatePosting(board model.Board, content model.Posting, skipTag string) err
 	return nil
 }
 
-func DeletePosting(board model.Board, idx string) error {
+func DeleteTopic(board model.Board, idx string) error {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)

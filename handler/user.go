@@ -36,7 +36,7 @@ func GetUserListAPI(c *fiber.Ctx) error {
 		listCount, _ = strconv.Atoi(queries["list-count"])
 	}
 
-	listingOption := model.UserListingOptions{
+	listingOption := model.UserListingOption{
 		Search:    null.StringFrom(search),
 		Page:      null.IntFrom(int64(page)),
 		ListCount: null.IntFrom(int64(listCount)),

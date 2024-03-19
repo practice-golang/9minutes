@@ -12,8 +12,8 @@ Origin: {{uri}}
     "password": "admin"
 }
 
-### Posting - Write
-POST {{uri}}/api/board/misc/posting HTTP/1.1
+### Topic - Write
+POST {{uri}}/api/board/misc/topic HTTP/1.1
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -25,16 +25,16 @@ Cookie: {{cookie}}
     "files": "1"
 }
 
-### Posting - List
+### Topic - List
 GET {{uri}}/api/board/misc HTTP/1.1
 Cookie: {{cookie}}
 
-### Posting - Read
-GET {{uri}}/api/board/misc/posting/2 HTTP/1.1
+### Topic - Read
+GET {{uri}}/api/board/misc/topic/2 HTTP/1.1
 Cookie: {{cookie}}
 
-### Posting - Update
-PUT {{uri}}/api/board/misc/posting/2 HTTP/1.1
+### Topic - Update
+PUT {{uri}}/api/board/misc/topic/2 HTTP/1.1
 Content-Type: application/json
 Cookie: {{cookie}}
 
@@ -44,8 +44,8 @@ Cookie: {{cookie}}
     "files": "81|82"
 }
 
-### Posting - Delete
-DELETE {{uri}}/api/board/misc/posting/2 HTTP/1.1
+### Topic - Delete
+DELETE {{uri}}/api/board/misc/topic/2 HTTP/1.1
 Cookie: {{cookie}}
 
 ### File - Upload

@@ -156,7 +156,7 @@ func GetUserByNameMap(userid string) (interface{}, error) {
 }
 
 // GetUsersMap - Get Users List map
-func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
+func GetUsersMap(userListOption model.UserListingOption) (model.UserPageData, error) {
 	result := model.UserPageData{}
 
 	tableName := db.GetFullTableName(consts.TableUsers)
@@ -184,15 +184,15 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 
 	sqlSearch := ""
 
-	if options.Search.Valid && options.Search.String != "" {
+	if userListOption.Search.Valid && userListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + columnUserId.Names + ` LIKE '%` + options.Search.String + `%'
-			OR ` + columnEmail.Names + ` LIKE '%` + options.Search.String + `%'`
+		WHERE ` + columnUserId.Names + ` LIKE '%` + userListOption.Search.String + `%'
+			OR ` + columnEmail.Names + ` LIKE '%` + userListOption.Search.String + `%'`
 	}
 
 	paging := ``
-	if options.Page.Valid && options.ListCount.Valid {
-		paging = db.Obj.GetPagingQuery(int(options.Page.Int64*options.ListCount.Int64), int(options.ListCount.Int64))
+	if userListOption.Page.Valid && userListOption.ListCount.Valid {
+		paging = db.Obj.GetPagingQuery(int(userListOption.Page.Int64*userListOption.ListCount.Int64), int(userListOption.ListCount.Int64))
 	}
 
 	sql := `
@@ -232,11 +232,11 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 		return result, err
 	}
 
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	totalPage := math.Ceil(float64(totalCount) / float64(userListOption.ListCount.Int64))
 
 	result = model.UserPageData{
 		UserList:    users,
-		CurrentPage: int(options.Page.Int64) + 1,
+		CurrentPage: int(userListOption.Page.Int64) + 1,
 		TotalPage:   int(totalPage),
 	}
 
@@ -244,7 +244,7 @@ func GetUsersMap(options model.UserListingOptions) (model.UserPageData, error) {
 }
 
 // GetUsersListMap - API Get Users List map
-func GetUsersListMap(columnsMap map[string]interface{}, options model.UserListingOptions) (model.UserPageData, error) {
+func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.UserListingOption) (model.UserPageData, error) {
 	result := model.UserPageData{}
 	users := []map[string]interface{}{}
 
@@ -253,8 +253,8 @@ func GetUsersListMap(columnsMap map[string]interface{}, options model.UserListin
 	columns := np.CreateString(columnsMap, dbtype, "", false).Names
 
 	sqlSearch := ""
-	if options.Search.Valid && options.Search.String != "" {
-		search := options.Search.String
+	if userListOption.Search.Valid && userListOption.Search.String != "" {
+		search := userListOption.Search.String
 		sqlSearch += np.CreateWhereString(
 			map[string]interface{}{"USERID": search, "EMAIL": search},
 			db.GetDatabaseTypeString(), "LIKE", "OR", "", false,
@@ -262,8 +262,8 @@ func GetUsersListMap(columnsMap map[string]interface{}, options model.UserListin
 	}
 
 	paging := db.Obj.GetPagingQuery(
-		(int(options.Page.Int64)-1)*int(options.ListCount.Int64),
-		int(options.ListCount.Int64),
+		(int(userListOption.Page.Int64)-1)*int(userListOption.ListCount.Int64),
+		int(userListOption.ListCount.Int64),
 	)
 
 	sql := `
@@ -302,11 +302,11 @@ func GetUsersListMap(columnsMap map[string]interface{}, options model.UserListin
 		return result, err
 	}
 
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	totalPage := math.Ceil(float64(totalCount) / float64(userListOption.ListCount.Int64))
 
 	result = model.UserPageData{
 		UserList:    users,
-		CurrentPage: int(options.Page.Int64),
+		CurrentPage: int(userListOption.Page.Int64),
 		TotalPage:   int(totalPage),
 	}
 

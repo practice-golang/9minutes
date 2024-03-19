@@ -29,7 +29,7 @@
 <div>
     <table>
         <tbody>
-            {{range .Data.PostingList}}
+            {{range .Data.TopicList}}
             <tr>
                 <td class="cellShort">{{.Idx.Int64}}</td>
                 <td class="cellSelector" onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
@@ -45,6 +45,7 @@
         </tbody>
     </table>
 
+    {{if .Data.PageList}}
     <div>
         <span class="page-jump">
             <a href="?board_code={{.BoardCode}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&laquo;</a>
@@ -64,6 +65,7 @@
             <a href="?board_code={{.BoardCode}}&page={{.Data.TotalPage}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&raquo;</a>
         </span>
     </div>
+    {{end}}
 </div>
 
 <div>
@@ -73,7 +75,7 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const listCount = queries.get("count") ? queries.get("count") : "{{.ListCount}}"
+    const listCount = queries.get("count") ? queries.get("count") : "{{.TopicListCount}}"
 
     function doSearch() {
         switch (globalThis.event.type) {

@@ -258,16 +258,19 @@ func (d *SQLite) CreateBoard(tableInfo model.Board, recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS "` + tableName + `" (
-		"IDX"         INTEGER,
-		"TITLE"       TEXT,
-		"TITLE_IMAGE" TEXT,
-		"CONTENT"     TEXT,
-		"AUTHOR_IDX"  INTEGER,
-		"AUTHOR_NAME" TEXT,
-		"FILES"       TEXT,
-		"IMAGES"      TEXT,
-		"VIEWS"       TEXT,
-		"REGDATE"     TEXT,
+		"IDX"             INTEGER,
+		"TITLE"           TEXT,
+		"TITLE_IMAGE"     TEXT,
+		"CONTENT"         TEXT,
+		"AUTHOR_IDX"      INTEGER,
+		"AUTHOR_NAME"     TEXT,
+		"AUTHOR_IP"       TEXT,
+		"AUTHOR_IP_CUT"   TEXT,
+		"EDIT_PASSWORD"   TEXT,
+		"FILES"           TEXT,
+		"IMAGES"          TEXT,
+		"VIEWS"           TEXT,
+		"REGDATE"         TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 
@@ -289,14 +292,17 @@ func (d *SQLite) CreateComment(tableInfo model.Board, recreate bool) error {
 	}
 	sql += `
 	CREATE TABLE IF NOT EXISTS "` + tableName + `" (
-		"IDX"         INTEGER,
-		"POSTING_IDX" INTEGER,
-		"CONTENT"     TEXT,
-		"AUTHOR_IDX"  INTEGER,
-		"AUTHOR_NAME" TEXT,
-		"FILES"       TEXT,
-		"IMAGES"      TEXT,
-		"REGDATE"     TEXT,
+		"IDX"             INTEGER,
+		"TOPIC_IDX"       INTEGER,
+		"CONTENT"         TEXT,
+		"AUTHOR_IDX"      INTEGER,
+		"AUTHOR_NAME"     TEXT,
+		"AUTHOR_IP"       TEXT,
+		"AUTHOR_IP_CUT"   TEXT,
+		"EDIT_PASSWORD"   TEXT,
+		"FILES"           TEXT,
+		"IMAGES"          TEXT,
+		"REGDATE"         TEXT,
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
 

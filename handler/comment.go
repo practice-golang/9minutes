@@ -13,7 +13,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetCommentList(board model.Board, postingIDX string, queries map[string]string) (model.CommentPageData, error) {
+func GetCommentList(board model.Board, topicIdx string, queries map[string]string) (model.CommentPageData, error) {
 	var err error
 
 	page := 1
@@ -33,13 +33,13 @@ func GetCommentList(board model.Board, postingIDX string, queries map[string]str
 
 	commentSearch := queries["search"]
 
-	commentOptions := model.CommentListingOptions{}
-	commentOptions.Search = null.StringFrom(commentSearch)
+	commentListOption := model.CommentListingOptions{}
+	commentListOption.Search = null.StringFrom(commentSearch)
 
-	commentOptions.Page = null.IntFrom(int64(page - 1))
-	commentOptions.ListCount = null.IntFrom(int64(count))
+	commentListOption.Page = null.IntFrom(int64(page - 1))
+	commentListOption.ListCount = null.IntFrom(int64(count))
 
-	comments, err := crud.GetComments(board, postingIDX, commentOptions)
+	comments, err := crud.GetComments(board, topicIdx, commentListOption)
 	if err != nil {
 		return model.CommentPageData{}, err
 	}
@@ -79,7 +79,7 @@ func GetComments(c *fiber.Ctx) (err error) {
 	}
 
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	postingIdx := c.Params("posting_idx")
+	topicIdx := c.Params("topic_idx")
 
 	board := BoardListData[boardCode]
 	accessible := checkBoardAccessible(board.GrantRead.String, grade)
@@ -87,7 +87,7 @@ func GetComments(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	comments, err := GetCommentList(board, postingIdx, queries)
+	comments, err := GetCommentList(board, topicIdx, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -108,7 +108,7 @@ func GetComment(c *fiber.Ctx) (err error) {
 	}
 
 	boardCode := c.Params("board_code")
-	postingIdx := c.Params("posting_idx")
+	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
 
 	board := BoardListData[boardCode]
@@ -117,7 +117,7 @@ func GetComment(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	comment, err := crud.GetComment(board, postingIdx, commentIdx)
+	comment, err := crud.GetComment(board, topicIdx, commentIdx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -138,11 +138,11 @@ func WriteComment(c *fiber.Ctx) error {
 	}
 
 	comment := model.Comment{}
-	postingIdx, err := strconv.ParseInt(c.Params("posting_idx"), 0, 64)
+	topicIdx, err := strconv.ParseInt(c.Params("topic_idx"), 0, 64)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
-	comment.PostingIdx = null.IntFrom(postingIdx)
+	comment.TopicIdx = null.IntFrom(topicIdx)
 
 	err = c.BodyParser(&comment)
 	if err != nil {
@@ -183,7 +183,7 @@ func WriteComment(c *fiber.Ctx) error {
 
 func UpdateComment(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
-	postingIdx := c.Params("posting_idx")
+	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
 
 	sess, err := store.Get(c)
@@ -209,7 +209,7 @@ func UpdateComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	commentPrev, err := crud.GetComment(board, postingIdx, commentIdx)
+	commentPrev, err := crud.GetComment(board, topicIdx, commentIdx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -231,7 +231,7 @@ func UpdateComment(c *fiber.Ctx) error {
 	}
 	comment.Idx = null.IntFrom(int64(commentIdxINT))
 
-	err = crud.UpdateComment(board, comment, fmt.Sprint(postingIdx))
+	err = crud.UpdateComment(board, comment, fmt.Sprint(topicIdx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -242,7 +242,7 @@ func UpdateComment(c *fiber.Ctx) error {
 
 func DeleteComment(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
-	postingIdx := c.Params("posting_idx")
+	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
 
 	sess, err := store.Get(c)
@@ -268,7 +268,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	comment, err := crud.GetComment(board, postingIdx, commentIdx)
+	comment, err := crud.GetComment(board, topicIdx, commentIdx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -278,7 +278,7 @@ func DeleteComment(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
-	err = crud.DeleteComment(board, fmt.Sprint(postingIdx), fmt.Sprint(commentIdx))
+	err = crud.DeleteComment(board, fmt.Sprint(topicIdx), fmt.Sprint(commentIdx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}

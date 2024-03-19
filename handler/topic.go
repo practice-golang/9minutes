@@ -15,81 +15,81 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-func GetPostingList(boardCode string, queries map[string]string) (model.PostingPageData, error) {
+func GetTopicList(boardCode string, queries map[string]string) (model.TopicPageData, error) {
 	var err error
 
 	board := BoardListData[boardCode]
 
 	page := 1
-	count := config.PostingListCountPerPage
+	count := config.TopicCountPerPage
 	if queries["page"] != "" {
 		page, err = strconv.Atoi(queries["page"])
 		if err != nil {
-			return model.PostingPageData{}, nil
+			return model.TopicPageData{}, nil
 		}
 	}
 	if queries["count"] != "" {
 		count, _ = strconv.Atoi(queries["count"])
 	}
 	if count < 1 {
-		count = config.PostingListCountPerPage
+		count = config.TopicCountPerPage
 	}
 
-	listingOptions := model.PostingListingOptions{}
-	listingOptions.Search = null.StringFrom(queries["search"])
+	topicListOption := model.TopicListingOption{}
+	topicListOption.Search = null.StringFrom(queries["search"])
 
-	listingOptions.Page = null.IntFrom(int64(page - 1))
-	listingOptions.ListCount = null.IntFrom(int64(count))
+	topicListOption.Page = null.IntFrom(int64(page - 1))
+	topicListOption.ListCount = null.IntFrom(int64(count))
 
-	list, err := crud.GetPostingList(board, listingOptions)
+	topicList, err := crud.GetTopicList(board, topicListOption)
 	if err != nil {
-		return model.PostingPageData{}, nil
+		return model.TopicPageData{}, nil
 	}
 
 	pageList := []int{}
 	pageShowGap := 2
-	for i := list.CurrentPage - pageShowGap; i <= list.CurrentPage+pageShowGap; i++ {
-		if i > 0 && i <= list.CurrentPage+pageShowGap && i <= list.TotalPage {
+	for i := topicList.CurrentPage - pageShowGap; i <= topicList.CurrentPage+pageShowGap; i++ {
+		if i > 0 && i <= topicList.CurrentPage+pageShowGap && i <= topicList.TotalPage {
 			pageList = append(pageList, i)
 		}
 	}
-	list.PageList = pageList
+	topicList.PageList = pageList
 
 	pageJumpGap := 5
-	list.JumpPrev = list.CurrentPage - pageJumpGap
-	list.JumpNext = list.CurrentPage + pageJumpGap
-	if list.JumpPrev < 1 {
-		list.JumpPrev = 1
+	topicList.JumpPrev = topicList.CurrentPage - pageJumpGap
+	topicList.JumpNext = topicList.CurrentPage + pageJumpGap
+	if topicList.JumpPrev < 1 {
+		topicList.JumpPrev = 1
 	}
-	if list.JumpNext > list.TotalPage {
-		list.JumpNext = list.TotalPage
+	if topicList.JumpNext > topicList.TotalPage {
+		topicList.JumpNext = topicList.TotalPage
 	}
 
-	list.ListCount = count
+	topicList.ListCount = count
 
-	return list, err
+	return topicList, err
 }
 
-func GetPostingData(boardCode, idx string) (model.Posting, error) {
+func GetTopicData(boardCode, idx string) (model.Topic, error) {
 	board := BoardListData[boardCode]
 
-	posting, err := crud.GetPosting(board, idx)
+	topic, err := crud.GetTopic(board, idx)
 	if err != nil {
-		return model.Posting{}, err
+		return model.Topic{}, err
 	}
 
-	posting.Views = null.IntFrom(posting.Views.Int64 + 1)
-	err = crud.UpdatePosting(board, posting, "viewcount")
+	topic.Views = null.IntFrom(topic.Views.Int64 + 1)
+	err = crud.UpdateTopic(board, topic, "viewcount")
 	if err != nil {
-		return model.Posting{}, err
+		return model.Topic{}, err
 	}
 
-	return posting, nil
+	return topic, nil
 }
 
-func ListPostingAPI(c *fiber.Ctx) (err error) {
+func ListTopicAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
-	list, err := GetPostingList(boardCode, queries)
+	list, err := GetTopicList(boardCode, queries)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -97,13 +97,13 @@ func ListPostingAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(list)
 }
 
-func ReadPostingAPI(c *fiber.Ctx) (err error) {
+func ReadTopicAPI(c *fiber.Ctx) (err error) {
 	boardCode, queries := c.Params("board_code"), c.Queries()
 	idx := c.Params("idx")
 
 	board := BoardListData[boardCode]
 
-	posting, err := GetPostingData(boardCode, idx)
+	topic, err := GetTopicData(boardCode, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -114,17 +114,17 @@ func ReadPostingAPI(c *fiber.Ctx) (err error) {
 	}
 
 	result := make(map[string]interface{})
-	result["posting"] = posting
+	result["topic"] = topic
 	result["comments"] = comments
 
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-// WritePostingAPI - Write posting API
-func WritePostingAPI(c *fiber.Ctx) (err error) {
-	posting := model.Posting{}
+// WriteTopicAPI - Write topic API
+func WriteTopicAPI(c *fiber.Ctx) (err error) {
+	topic := model.Topic{}
 
-	err = c.BodyParser(&posting)
+	err = c.BodyParser(&topic)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
@@ -145,19 +145,19 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).SendString("userid is empty")
 	}
 
-	posting.AuthorIdx = null.IntFrom(useridx)
-	posting.AuthorName = null.StringFrom(userid)
+	topic.AuthorIdx = null.IntFrom(useridx)
+	topic.AuthorName = null.StringFrom(userid)
 
 	now := time.Now().Format("20060102150405")
-	posting.RegDate = null.StringFrom(now)
-	posting.Views = null.IntFrom(0)
+	topic.RegDate = null.StringFrom(now)
+	topic.Views = null.IntFrom(0)
 
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
-	if strings.TrimSpace(posting.Files.String) != "" {
+	if strings.TrimSpace(topic.Files.String) != "" {
 		var imIndices []int
-		imIndicesStr := strings.Split(posting.Files.String, "|")
+		imIndicesStr := strings.Split(topic.Files.String, "|")
 
 		for _, imIdxStr := range imIndicesStr {
 			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
@@ -182,12 +182,12 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 				continue
 			}
 
-			posting.TitleImage = null.StringFrom(fnameTo)
+			topic.TitleImage = null.StringFrom(fnameTo)
 			break
 		}
 	}
 
-	_, err = crud.WritePosting(board, posting)
+	_, err = crud.WriteTopic(board, topic)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -196,8 +196,8 @@ func WritePostingAPI(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdatePostingAPI(c *fiber.Ctx) (err error) {
-	var posting model.Posting
+func UpdateTopicAPI(c *fiber.Ctx) (err error) {
+	var topic model.Topic
 	var deleteList model.FilesToDelete
 
 	boardCode := c.Params("board_code")
@@ -211,11 +211,11 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 	}
 
 	idxNUM, _ := strconv.Atoi(idx)
-	posting.Idx = null.IntFrom(int64(idxNUM))
+	topic.Idx = null.IntFrom(int64(idxNUM))
 
 	rbody := c.Body()
 
-	postingPrev, err := crud.GetPosting(board, idx)
+	topicPrev, err := crud.GetTopic(board, idx)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
@@ -236,19 +236,19 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 		grade = "guest"
 	}
 
-	if posting.AuthorIdx.Int64 != useridx || grade == "admin" {
+	if topic.AuthorIdx.Int64 != useridx || grade == "admin" {
 		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
-	err = json.Unmarshal(rbody, &posting)
+	err = json.Unmarshal(rbody, &topic)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	if strings.TrimSpace(posting.Files.String) != "" {
+	if strings.TrimSpace(topic.Files.String) != "" {
 		var imIndices []int
-		imIndicesStr := strings.Split(posting.Files.String, "|")
+		imIndicesStr := strings.Split(topic.Files.String, "|")
 
 		for _, imIdxStr := range imIndicesStr {
 			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
@@ -273,12 +273,12 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 				continue
 			}
 
-			posting.TitleImage = null.StringFrom(fnameTo)
+			topic.TitleImage = null.StringFrom(fnameTo)
 			break
 		}
 	}
 
-	err = crud.UpdatePosting(board, posting, "update")
+	err = crud.UpdateTopic(board, topic, "update")
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -288,13 +288,13 @@ func UpdatePostingAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	DeleteUploadFile("upload/" + postingPrev.TitleImage.String)
+	DeleteUploadFile("upload/" + topicPrev.TitleImage.String)
 
 	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeletePostingAPI(c *fiber.Ctx) error {
+func DeleteTopicAPI(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
@@ -305,7 +305,7 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
-	posting, err := crud.GetPosting(board, idx)
+	topic, err := crud.GetTopic(board, idx)
 	if err != nil {
 		result := map[string]interface{}{"result": "fail", "msg": err.Error()}
 		return c.Status(http.StatusBadRequest).JSON(result)
@@ -327,12 +327,12 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 		grade = "guest"
 	}
 
-	if posting.AuthorIdx.Int64 != useridx || grade == "admin" {
+	if topic.AuthorIdx.Int64 != useridx || grade == "admin" {
 		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
-	uploadIndices := strings.Split(posting.Files.String, "|")
+	uploadIndices := strings.Split(topic.Files.String, "|")
 	for _, f := range uploadIndices {
 		if f == "" {
 			continue
@@ -356,7 +356,7 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 		DeleteUploadFile(filepath)
 	}
 
-	err = crud.DeletePosting(board, idx)
+	err = crud.DeleteTopic(board, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -366,7 +366,7 @@ func DeletePostingAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	DeleteUploadFile("upload/" + posting.TitleImage.String)
+	DeleteUploadFile("upload/" + topic.TitleImage.String)
 
 	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)

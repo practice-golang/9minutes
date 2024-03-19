@@ -1,5 +1,9 @@
 {{template "layout_header" .}}
 
+<script>
+    document.title = "{{.SiteName}}"
+</script>
+
 It works!!
 
 {{if .UserInfo.PendingUser}}
@@ -15,8 +19,6 @@ It works!!
     <p>Manager account</p>
 </div>
 {{end}}
-
-<hr />
 
 <a href="/hello">Hello</a>
 

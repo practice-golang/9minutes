@@ -60,31 +60,31 @@
 
 <div>
     <div>
-        <h3>{{.Posting.Title.String}}</h3>
+        <h3>{{.Topic.Title.String}}</h3>
     </div>
 
     <div>
-        <span>{{.Posting.AuthorName.String}}</span> |
-        <span>{{format_date .Posting.RegDate.String}}</span> |
-        <span>{{.Posting.Views.Int64}}</span>
+        <span>{{.Topic.AuthorName.String}}</span> |
+        <span>{{format_date .Topic.RegDate.String}}</span> |
+        <span>{{.Topic.Views.Int64}}</span>
     </div>
 
     <hr />
 
     <div>
-        {{unescape .Posting.Content.String}}
+        {{unescape .Topic.Content.String}}
     </div>
 
-    <div id="posting-fileslist-container">
+    <div id="topic-fileslist-container">
         <ul></ul>
     </div>
 </div>
 
 <div>
     <button type="button" onclick="backToList()">List</button>
-    {{if or (eq .UserInfo.UserIdx .Posting.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
+    {{if or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
     <button type="button" onclick="moveToEdit()">Edit</button>
-    <button type="button" onclick="deletePosting()">Delete</button>
+    <button type="button" onclick="deleteTopic()">Delete</button>
     {{end}}
 </div>
 
@@ -134,12 +134,12 @@
 
 </div>
 
-<div id="posting-buttons-second">
+<div id="topic-buttons-second">
     <div>
         <button type="button" onclick="backToList()">List</button>
-        {{if or (eq .UserInfo.UserIdx .Posting.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
+        {{if or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
         <button type="button" onclick="moveToEdit()">Edit</button>
-        <button type="button" onclick="deletePosting()">Delete</button>
+        <button type="button" onclick="deleteTopic()">Delete</button>
         {{end}}
     </div>
 
@@ -188,7 +188,7 @@
 <script>
     let filesList = []
     const attachIdxList = {
-        "posting": [],
+        "topic": [],
         "comment-new": [],
         "comment-mod": []
     }
@@ -239,8 +239,8 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const postingIdx = queries.get("idx")
-    const postingFileIdxes = "{{.Posting.Files.String}}"
+    const topicIdx = queries.get("idx")
+    const topicFileIdxes = "{{.Topic.Files.String}}"
     let commentsFileIdxes = {}
     "{{range .Comments.CommentList}}"
     commentsFileIdxes[parseInt("{{.Idx.Int64}}")] = "{{.Files.String}}"
@@ -248,9 +248,9 @@
     const grantComment = (/^true$/).test(("{{.GrantComment}}").toLowerCase())
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
-    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${postingIdx}` }
-    async function deletePosting() {
-        const uri = `/api/board/${boardCode}/posting/${postingIdx}`
+    function moveToEdit() { location.href = `/board/edit?board_code=${boardCode}&idx=${topicIdx}` }
+    async function deleteTopic() {
+        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
         const r = await fetch(uri, { method: "DELETE" })
 
         if (r.ok) {
@@ -334,13 +334,13 @@
     function showCommentPageJumper() {
         const commentPages = document.querySelector("#comment-pages")
         const pageJumper = document.querySelectorAll(".page-jump")
-        const postingButtonsSecond = document.querySelector("#posting-buttons-second")
+        const topicButtonsSecond = document.querySelector("#topic-buttons-second")
 
         let displayMode = "initial"
         if (commentPages.innerHTML.trim() == "") { displayMode = "none" }
 
         pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
-        postingButtonsSecond.style.display = displayMode
+        topicButtonsSecond.style.display = displayMode
     }
 
     /*
@@ -356,7 +356,7 @@
 
         const commentsContainer = document.querySelector("#comments")
         const pageContainer = document.querySelector("#comment-pages")
-        const uri = `/api/board/${boardCode}/${postingIdx}/comment?page=${page}`
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment?page=${page}`
 
         const r = await fetch(uri)
 
@@ -418,7 +418,7 @@
     }
 
     async function writeComment() {
-        const uri = `/api/board/${boardCode}/${postingIdx}/comment`
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment`
         const content = editor.getHTML()
 
         // const emptyContent = "<p><br></p>"
@@ -466,9 +466,9 @@
         const indexList = []
         let attachList
 
-        let fileIdxes = postingFileIdxes.split("|")
-        let targetContainer = "#posting-fileslist-container > ul"
-        let targetAttachKey = "posting"
+        let fileIdxes = topicFileIdxes.split("|")
+        let targetContainer = "#topic-fileslist-container > ul"
+        let targetAttachKey = "topic"
         if (idx) {
             fileIdxes = commentsFileIdxes[parseInt(idx)].split("|")
             targetContainer = `#comment-files-container-${idx} > ul`
@@ -572,7 +572,7 @@
     }
 
     async function deleteComment(commentIDX) {
-        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
         const r = await fetch(uri, {
             method: "DELETE"
         })
@@ -610,7 +610,7 @@
             "files": flist
         }
 
-        const uri = `/api/board/${boardCode}/${postingIdx}/comment/${commentIDX}`
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
         const r = await fetch(uri, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

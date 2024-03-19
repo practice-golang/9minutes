@@ -86,7 +86,7 @@
 
 <div>
     <ul class="gallery">
-        {{range .Data.PostingList}}
+        {{range .Data.TopicList}}
         <li>
             <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
                 <img src="/upload/{{.TitleImage.String}}" onerror="this.onerror=null; this.src='/files/panic1.png';" />
@@ -98,6 +98,7 @@
         {{end}}
     </ul>
 
+    {{if .Data.PageList}}
     <div>
         <span class="page-jump">
             <a href="?board_code={{.BoardCode}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&laquo;</a>
@@ -117,6 +118,7 @@
             <a href="?board_code={{.BoardCode}}&page={{.Data.TotalPage}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&raquo;</a>
         </span>
     </div>
+    {{end}}
 </div>
 
 <div>
@@ -126,7 +128,7 @@
 <script>
     const queries = new URLSearchParams(window.location.search)
     const boardCode = queries.get("board_code")
-    const listCount = queries.get("count") ? queries.get("count") : "{{.ListCount}}"
+    const listCount = queries.get("count") ? queries.get("count") : "{{.TopicListCount}}"
 
     function doSearch() {
         switch (globalThis.event.type) {

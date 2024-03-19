@@ -1,4 +1,4 @@
-module fake-posting
+module fake-topic
 
 go 1.20
 

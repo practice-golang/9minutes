@@ -23,7 +23,7 @@
     <input type="text" id="title" placeholder="Title">
 </div>
 
-<div id="editor" class="posting-editor"></div>
+<div id="editor" class="topic-editor"></div>
 
 <div>
     <input type="file" id="upload-files" multiple />
@@ -45,7 +45,7 @@
 
 <div>
     <button type="button" onclick="backToList()">Cancel</button>
-    <button type="button" onclick="writePosting()">Save</button>
+    <button type="button" onclick="writeTopic()">Save</button>
 </div>
 
 <script>
@@ -172,8 +172,8 @@
         }
     }
 
-    async function writePosting() {
-        const uri = `/api/board/${boardCode}/posting`
+    async function writeTopic() {
+        const uri = `/api/board/${boardCode}/topic`
 
         const title = document.querySelector("#title").value
         const content = editor.getHTML()

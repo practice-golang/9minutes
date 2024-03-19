@@ -79,9 +79,9 @@ func HandleHTML(c *fiber.Ctx) error {
 	templateMap["UserInfo"] = userInfo
 	templateMap["BoardGradeRanks"] = boardGradeRanks
 
-	templateMap["Title"] = "9minutes" // Todo: Remove or change to site title
+	templateMap["SiteName"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["BoardList"] = BoardListData
-	templateMap["ListCount"] = config.PostingListCountPerPage
+	templateMap["TopicListCount"] = config.TopicCountPerPage
 
 	routePath = appendIndexToRoutePath(routePath)
 	routePaths := strings.Split(routePath, "/")
@@ -104,7 +104,7 @@ func HandleHTML(c *fiber.Ctx) error {
 				break
 			}
 
-			list, err := GetPostingList(boardCode, queries)
+			list, err := GetTopicList(boardCode, queries)
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 			}
@@ -121,13 +121,13 @@ func HandleHTML(c *fiber.Ctx) error {
 				break
 			}
 
-			posting, err := GetPostingData(boardCode, queries["idx"])
+			topic, err := GetTopicData(boardCode, queries["idx"])
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 
-			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
-			templateMap["Posting"] = posting
+			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
+			templateMap["Topic"] = topic
 
 			templateMap["GrantComment"] = false
 			if checkBoardAccessible(board.GrantComment.String, grade) {
@@ -156,13 +156,13 @@ func HandleHTML(c *fiber.Ctx) error {
 				break
 			}
 
-			posting, err := GetPostingData(boardCode, queries["idx"])
+			topic, err := GetTopicData(boardCode, queries["idx"])
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
 
-			posting.Content = null.StringFrom(html.UnescapeString(posting.Content.String))
-			templateMap["Posting"] = posting
+			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
+			templateMap["Topic"] = topic
 		default:
 			routePath = "status/unauthorized"
 		}

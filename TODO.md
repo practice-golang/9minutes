@@ -4,15 +4,22 @@
 * [ ] Grant routine for guest
     * [ ] Control by ip address if guest & table column
         * [ ] Add IP_ADDRESS to each db table creation functions
+        * [ ] Edit password for guest
     * [ ] Edit/Delete posting
     * [ ] Edit/Delete comment
     * [ ] Write use password if guest
     * [ ] Edit use password if guest
 
 * [ ] Logger
+* [x] Rename all post, posting to topic
+* [ ] comment list pagination
 * [ ] Separate upload FILES and IMAGES
     * [ ] Create Image upload api - copy from upload api
     * [ ] Add image upload path for web editor
+* [ ] Board managing page
+    * [ ] API
+        * [ ] Edit board settings
+        * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
@@ -30,10 +37,7 @@
 * [x] User grade from numbers
     * [x] API - User grade list
     * Refs. - consts/contant.go
-* [ ] Board managing page
-    * [ ] API
-        * [ ] Edit board settings
-        * [ ] Add/edit/remove user as member
+
 * [ ] Add manager account setting for each boards
     * [ ] DB
     * [ ] Admin page

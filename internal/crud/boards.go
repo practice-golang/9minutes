@@ -78,7 +78,7 @@ func GetBoardByCode(board model.Board) (model.Board, error) {
 	return board, nil
 }
 
-func GetBoards(options model.BoardListingOptions) (model.BoardPageData, error) {
+func GetBoards(boardListOption model.BoardListingOption) (model.BoardPageData, error) {
 	result := model.BoardPageData{}
 
 	dbtype := db.GetDatabaseTypeString()
@@ -91,15 +91,15 @@ func GetBoards(options model.BoardListingOptions) (model.BoardPageData, error) {
 
 	sqlSearch := ""
 
-	if options.Search.Valid && options.Search.String != "" {
+	if boardListOption.Search.Valid && boardListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + whereBoardName.Names + ` LIKE '%` + options.Search.String + `%'
-			OR ` + whereBoardCode.Names + ` LIKE '%` + options.Search.String + `%'`
+		WHERE ` + whereBoardName.Names + ` LIKE '%` + boardListOption.Search.String + `%'
+			OR ` + whereBoardCode.Names + ` LIKE '%` + boardListOption.Search.String + `%'`
 	}
 
 	paging := ``
-	if options.Page.Valid && options.ListCount.Valid {
-		paging = db.Obj.GetPagingQuery(int(options.Page.Int64*options.ListCount.Int64), int(options.ListCount.Int64))
+	if boardListOption.Page.Valid && boardListOption.ListCount.Valid {
+		paging = db.Obj.GetPagingQuery(int(boardListOption.Page.Int64*boardListOption.ListCount.Int64), int(boardListOption.ListCount.Int64))
 	}
 
 	sql := `
@@ -140,11 +140,11 @@ func GetBoards(options model.BoardListingOptions) (model.BoardPageData, error) {
 		return result, err
 	}
 
-	totalPage := math.Ceil(float64(totalCount) / float64(options.ListCount.Int64))
+	totalPage := math.Ceil(float64(totalCount) / float64(boardListOption.ListCount.Int64))
 
 	result = model.BoardPageData{
 		BoardList:   boards,
-		CurrentPage: int(options.Page.Int64) + 1,
+		CurrentPage: int(boardListOption.Page.Int64) + 1,
 		TotalPage:   int(totalPage),
 	}
 
