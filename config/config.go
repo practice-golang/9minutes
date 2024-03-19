@@ -7,6 +7,10 @@ import (
 )
 
 var (
+	SiteName = "9minutes"
+)
+
+var (
 	AdminUserCountPerPage  int = 10
 	AdminBoardCountPerPage int = 10
 	TopicCountPerPage      int = 30
@@ -20,9 +24,10 @@ var (
 	UploadPath string = "upload"
 )
 
-var (
-	UserGrades = newCollection("admin", "manager", "user_active", "user_hold", "guest", "user_banned")
-)
+// Maybe not use
+// var (
+// 	UserGrades = newCollection("admin", "manager", "user_active", "user_hold", "guest", "user_banned")
+// )
 
 var DatabaseInfoSQLite = db.DBInfo{
 	DatabaseType: model.SQLITE,

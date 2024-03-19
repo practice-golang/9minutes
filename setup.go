@@ -51,6 +51,10 @@ func setupINI() {
 	}
 
 	if cfg != nil {
+		if cfg.Section("").HasKey("SITE_NAME") {
+			config.SiteName = cfg.Section("").Key("SITE_NAME").String()
+		}
+
 		if cfg.Section("server").HasKey("ADDRESS") {
 			ListeningIP = cfg.Section("server").Key("ADDRESS").String()
 		}

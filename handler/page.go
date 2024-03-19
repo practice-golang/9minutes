@@ -69,13 +69,13 @@ func HandleHTML(c *fiber.Ctx) error {
 		boardGradeRanks = append(boardGradeRanks, consts.BoardGrades[d.GrantRead.String].Rank)
 	}
 
-	templateMap["UserGrades"] = consts.UserGrades
-	templateMap["BoardGrades"] = consts.BoardGrades
+	templateMap["SiteName"] = config.SiteName
 
 	templateMap["UserInfo"] = userInfo
+	templateMap["UserGrades"] = consts.UserGrades
+	templateMap["BoardGrades"] = consts.BoardGrades
 	templateMap["BoardGradeRanks"] = boardGradeRanks
 
-	templateMap["SiteName"] = "9minutes" // Todo: Remove or change to site title
 	templateMap["BoardList"] = BoardListData
 	templateMap["TopicListCount"] = config.TopicCountPerPage
 
@@ -92,6 +92,9 @@ func HandleHTML(c *fiber.Ctx) error {
 		boardCode := queries["board_code"]
 		board := BoardListData[boardCode]
 
+		templateMap["BoardCode"] = boardCode
+		templateMap["BoardName"] = board.BoardName.String
+
 		switch routePath {
 		case "board/list":
 			accessible := checkBoardAccessible(board.GrantRead.String, grade)
@@ -104,7 +107,6 @@ func HandleHTML(c *fiber.Ctx) error {
 			if err != nil {
 				return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 			}
-			templateMap["BoardCode"] = boardCode
 			templateMap["Data"] = list
 
 			if board.BoardType.String == "gallery" {

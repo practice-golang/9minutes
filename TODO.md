@@ -15,10 +15,15 @@
 * [ ] Separate upload FILES and IMAGES
     * [ ] Create Image upload api - copy from upload api
     * [ ] Add image upload path for web editor
+* [ ] Add user login history - useridx, ip, regdate
 * [ ] Board managing page
     * [ ] API
         * [ ] Edit board settings
         * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
+* [ ] Resurrect session storage - etcd, redis..
+* [ ] Add like button
+    * [ ] topic
+    * [ ] comment
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML

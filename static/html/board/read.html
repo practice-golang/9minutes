@@ -1,9 +1,10 @@
 {{template "layout_board_header" .}}
 
+<script>
+    document.title = "{{.Topic.Title.String}} - {{.BoardName}}"
+</script>
+
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
-{{if eq .GrantComment true}}
-<script src="/assets/js/myeditor.js"></script>
-{{end}}
 
 <style>
     a:hover {
@@ -88,9 +89,10 @@
     {{end}}
 </div>
 
+<!-- Comment -->
+{{if .Comments.CommentList}}
 <hr />
 
-<!-- Comment -->
 <div>
     <div id="comments">
         {{range .Comments.CommentList}}
@@ -131,7 +133,6 @@
         <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
         <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
     </span>
-
 </div>
 
 <div id="topic-buttons-second">
@@ -142,11 +143,13 @@
         <button type="button" onclick="deleteTopic()">Delete</button>
         {{end}}
     </div>
-
-    <hr />
 </div>
+{{end}}
 
 {{if eq .GrantComment true}}
+<script src="/assets/js/myeditor.js"></script>
+
+<hr />
 <div id="writer" class="comment-editor"></div>
 
 <div id="writer-fileslist-container">
