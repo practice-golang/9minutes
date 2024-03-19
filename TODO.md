@@ -17,12 +17,14 @@
     * [ ] Create Image upload api - copy from upload api
     * [ ] Add image upload path for web editor
 * [ ] Add user login history - useridx, ip, regdate
-* [ ] Board managing page
+* [ ] Board managing page - Add manager account setting for each boards
     * [ ] API
         * [ ] Edit board settings
         * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
+    * [ ] DB
+    * [ ] Admin page
 * [ ] Resurrect session storage - etcd, redis..
-* [ ] Add like button
+* [ ] Add like/dislike button
     * [ ] topic
     * [ ] comment
 
@@ -43,10 +45,6 @@
     * [x] API - User grade list
     * Refs. - consts/contant.go
 
-* [ ] Add manager account setting for each boards
-    * [ ] DB
-    * [ ] Admin page
-    * [ ] Control API
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
 * [ ] escape/unscape comment writing/reading

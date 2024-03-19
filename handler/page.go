@@ -114,7 +114,8 @@ func HandleHTML(c *fiber.Ctx) error {
 
 			topic, err := GetTopicData(boardCode, queries["idx"])
 			if err != nil {
-				return c.Status(http.StatusInternalServerError).SendString(err.Error())
+				routePath = "status/page_not_found"
+				break
 			}
 
 			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
