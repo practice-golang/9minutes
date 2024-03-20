@@ -19,15 +19,11 @@
 </style>
 
 {{if or (eq .UserInfo.UserID "") (le .UserInfo.UserIdx 0)}}
-<label for="nickname">Nickname:</label>
 <input type="text" id="nickname" placeholder="Nickname" />
-<label for="password">Password:</label>
 <input type="password" id="password" placeholder="Password" />
 {{end}}
+
 <div class="title-wrapper">
-    <span>
-        <label>Title: </label>
-    </span>
     <input type="text" id="title" placeholder="Title">
 </div>
 
@@ -212,10 +208,10 @@
 
         const data = {
             "title": title,
-            "content": content,
             "author-idx": parseInt(authoridx),
             "author-name": authorname,
             "edit-password": password,
+            "content": content,
             "files": fileIndices
         }
 

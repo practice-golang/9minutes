@@ -12,10 +12,12 @@
     * [ ] Control comment
         * [ ] Password check if user or author is guest
             * [x] DB
-            * [ ] bug - no authorname
-            * [ ] Write
+            * [x] bug - no authorname
+            * [x] Write
             * [ ] Edit
-            * [ ] Delete
+            * [x] Delete
+    * [ ] Change js prompt to input - password masking
+    * [ ] show comment edit/delete button for normal user
     * [ ] password encryption
         * Topic
             * [ ] Write

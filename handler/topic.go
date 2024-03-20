@@ -149,8 +149,7 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 		grade = "guest"
 	}
 
-	accessible := checkBoardAccessible(board.GrantWrite.String, grade)
-	if !accessible {
+	if !checkBoardAccessible(board.GrantWrite.String, grade) {
 		return c.Status(http.StatusBadRequest).SendString("access denied")
 	}
 
@@ -345,6 +344,11 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 		grade = "guest"
 	}
 
+	accessible := checkBoardAccessible(board.GrantComment.String, grade)
+	if !accessible {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
 	switch true {
 	case useridx < 0 || userid == "" || topic.AuthorIdx.Int64 < 0:
 		deletePassword := ""
@@ -391,12 +395,48 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
+	DeleteUploadFile("upload/" + topic.TitleImage.String)
+
+	commentListOption := model.CommentListingOptions{}
+	commentListOption.Page = null.IntFrom(int64(0))
+	commentListOption.ListCount = null.IntFrom(int64(99999))
+
+	uploadIndices = []string{}
+	comments, err := crud.GetComments(board, idx, commentListOption)
+	if err == nil {
+		for _, c := range comments.CommentList {
+			indices := strings.Split(c.Files.String, "|")
+			uploadIndices = append(uploadIndices, indices...)
+		}
+	}
+
+	for _, f := range uploadIndices {
+		if f == "" {
+			continue
+		}
+		fidx, err := strconv.Atoi(f)
+		if err != nil {
+			continue
+		}
+
+		fdata, err := crud.GetUploadedFile(fidx)
+		if err != nil {
+			continue
+		}
+
+		err = crud.DeleteUploadedFile(int64(fidx))
+		if err != nil {
+			continue
+		}
+
+		filepath := config.UploadPath + "/" + fdata.StorageName.String
+		DeleteUploadFile(filepath)
+	}
+
 	err = crud.DeleteComments(board, idx)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
-
-	DeleteUploadFile("upload/" + topic.TitleImage.String)
 
 	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -66,7 +67,7 @@ func GetCommentList(board model.Board, topicIdx string, queries map[string]strin
 	return comments, nil
 }
 
-func GetComments(c *fiber.Ctx) (err error) {
+func GetCommentsAPI(c *fiber.Ctx) (err error) {
 	sess, err := store.Get(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
@@ -125,34 +126,20 @@ func GetComment(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(comment)
 }
 
-func WriteComment(c *fiber.Ctx) error {
-	sess, err := store.Get(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
-	userid := getSessionValue(sess, "userid")
-	grade := getSessionValue(sess, "grade")
-	if userid == "" {
-		grade = "guest"
-	}
-
+func WriteCommentAPI(c *fiber.Ctx) (err error) {
 	comment := model.Comment{}
-	topicIdx, err := strconv.ParseInt(c.Params("topic_idx"), 0, 64)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(err.Error())
-	}
-	comment.TopicIdx = null.IntFrom(topicIdx)
+
+	boardCode := c.Params("board_code")
+	board := BoardListData[boardCode]
 
 	err = c.BodyParser(&comment)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	boardCode := c.Params("board_code")
-	board := BoardListData[boardCode]
-	if !checkBoardAccessible(board.GrantComment.String, grade) {
-		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	useridx := int64(-1)
@@ -161,8 +148,31 @@ func WriteComment(c *fiber.Ctx) error {
 		useridx = useridxInterface.(int64)
 	}
 
-	comment.AuthorIdx = null.IntFrom(useridx)
-	comment.AuthorName = null.StringFrom(userid)
+	userid := getSessionValue(sess, "userid")
+	grade := getSessionValue(sess, "grade")
+	if userid == "" {
+		grade = "guest"
+	}
+
+	if !checkBoardAccessible(board.GrantComment.String, grade) {
+		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
+	}
+
+	if userid != "" {
+		comment.AuthorIdx = null.IntFrom(useridx)
+		comment.AuthorName = null.StringFrom(userid)
+	}
+
+	clientIP := c.Context().RemoteIP().String()
+	clientIPs := strings.Split(clientIP, ".")
+	comment.AuthorIpFull = null.StringFrom(clientIP)
+	comment.AuthorIP = null.StringFrom(clientIPs[0] + "." + clientIPs[1])
+
+	topicIdx, err := strconv.ParseInt(c.Params("topic_idx"), 0, 64)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+	comment.TopicIdx = null.IntFrom(topicIdx)
 
 	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))
 	if comment.Content.String == "" {
@@ -181,7 +191,7 @@ func WriteComment(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UpdateComment(c *fiber.Ctx) error {
+func UpdateCommentAPI(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
 	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
@@ -240,10 +250,25 @@ func UpdateComment(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
-func DeleteComment(c *fiber.Ctx) error {
+func DeleteCommentAPI(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
 	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
+	board := BoardListData[boardCode]
+
+	if strings.TrimSpace(topicIdx) == "" {
+		result := map[string]interface{}{"result": "fail", "msg": "empty topic index"}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+	if strings.TrimSpace(commentIdx) == "" {
+		result := map[string]interface{}{"result": "fail", "msg": "empty comment index"}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+
+	comment, err := crud.GetComment(board, topicIdx, commentIdx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
 
 	sess, err := store.Get(c)
 	if err != nil {
@@ -261,21 +286,50 @@ func DeleteComment(c *fiber.Ctx) error {
 		grade = "guest"
 	}
 
-	board := BoardListData[boardCode]
-
 	accessible := checkBoardAccessible(board.GrantComment.String, grade)
 	if !accessible {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
-	comment, err := crud.GetComment(board, topicIdx, commentIdx)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
+	switch true {
+	case useridx < 0 || userid == "" || comment.AuthorIdx.Int64 < 0:
+		deletePassword := ""
+		deletePasswords := c.GetReqHeaders()["Delete-Password"]
+		if len(deletePasswords) > 0 {
+			deletePassword = deletePasswords[0]
+		}
 
-	if comment.AuthorIdx.Int64 != useridx || grade == "admin" {
+		if comment.EditPassword.String != deletePassword {
+			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
+			return c.Status(http.StatusBadRequest).JSON(result)
+		}
+	case grade != "admin" && comment.AuthorIdx.Int64 != useridx:
 		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
 		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+
+	uploadIndices := strings.Split(comment.Files.String, "|")
+	for _, f := range uploadIndices {
+		if f == "" {
+			continue
+		}
+		fidx, err := strconv.Atoi(f)
+		if err != nil {
+			continue
+		}
+
+		fdata, err := crud.GetUploadedFile(fidx)
+		if err != nil {
+			continue
+		}
+
+		err = crud.DeleteUploadedFile(int64(fidx))
+		if err != nil {
+			continue
+		}
+
+		filepath := config.UploadPath + "/" + fdata.StorageName.String
+		DeleteUploadFile(filepath)
 	}
 
 	err = crud.DeleteComment(board, fmt.Sprint(topicIdx), fmt.Sprint(commentIdx))

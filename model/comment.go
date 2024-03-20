@@ -22,11 +22,14 @@ type CommentPageData struct {
 }
 
 type Comment struct {
-	Idx        null.Int    `json:"idx"         db:"IDX"         npskip:"insert, update"`
-	TopicIdx   null.Int    `json:"topic-idx"   db:"TOPIC_IDX"   npskip:"update"`
-	Content    null.String `json:"content"     db:"CONTENT"`
-	AuthorIdx  null.Int    `json:"author-idx"  db:"AUTHOR_IDX"  npskip:"update"`
-	AuthorName null.String `json:"author-name" db:"AUTHOR_NAME" npskip:"update"`
-	Files      null.String `json:"files"       db:"FILES"`
-	RegDate    null.String `json:"regdate"     db:"REGDATE"     npskip:"update"`
+	Idx          null.Int    `json:"idx"            db:"IDX"            npskip:"insert, update"`
+	TopicIdx     null.Int    `json:"topic-idx"      db:"TOPIC_IDX"      npskip:"update"`
+	Content      null.String `json:"content"        db:"CONTENT"`
+	AuthorIdx    null.Int    `json:"author-idx"     db:"AUTHOR_IDX"     npskip:"update"`
+	AuthorName   null.String `json:"author-name"    db:"AUTHOR_NAME"    npskip:"update"`
+	AuthorIpFull null.String `json:"-"              db:"AUTHOR_IP"      npskip:"select, update, read, viewcount"`
+	AuthorIP     null.String `json:"author-ip"      db:"AUTHOR_IP_CUT"  npskip:"update, viewcount"`
+	EditPassword null.String `json:"edit-password"  db:"EDIT_PASSWORD"  npskip:"update, viewcount"`
+	Files        null.String `json:"files"          db:"FILES"`
+	RegDate      null.String `json:"regdate"        db:"REGDATE"        npskip:"update"`
 }

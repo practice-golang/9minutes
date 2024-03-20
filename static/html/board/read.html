@@ -100,9 +100,14 @@
 <div>
     <div id="comments">
         {{range .Comments.CommentList}}
-        <span>{{.AuthorName.String}}</span>|
+        <span>{{.AuthorName.String}}</span> |
         <span>{{format_date .RegDate.String}}</span>
-        {{if or (and (eq $.GrantComment true) (eq $.UserInfo.UserIdx .AuthorIdx.Int64)) (eq $.UserInfo.UserGrade "admin")}}
+        {{if or
+        (and
+        (eq $.GrantComment true) (or (eq $.UserInfo.UserIdx .AuthorIdx.Int64) (le .AuthorIdx.Int64 0))
+        )
+        (eq $.UserInfo.UserGrade "admin")
+        }}
         |
         <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
@@ -153,6 +158,13 @@
 <script src="/assets/js/myeditor.js"></script>
 
 <hr />
+{{if or (eq .UserInfo.UserID "") (le .UserInfo.UserIdx 0)}}
+<input type="text" id="comment-nickname" placeholder="Nickname" />
+<input type="password" id="comment-password" placeholder="Password" />
+{{else}}
+{{.UserInfo.UserID}}
+{{end}}
+
 <div id="writer" class="comment-editor"></div>
 
 <div id="writer-fileslist-container">
@@ -177,6 +189,9 @@
             border: 1px solid silver;
         }
     </style>
+
+    <input type="text" id="comment-edit-nickname" placeholder="Nickname" disabled />
+    <input type="password" id="comment-edit-password" placeholder="Password" disabled />
 
     <div id="modifier" class="comment-modifier"></div>
 
@@ -411,8 +426,8 @@
                 const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
 
                 commentsHTML += `
-                <span>${comment["author-name"]}</span>|
-                <span>${regdate}</span>|
+                <span>${comment["author-name"]}</span> |
+                <span>${regdate}</span> |
                 %%_BUTTON_EDIT_DELETE_%%
                 <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
                 <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
@@ -425,7 +440,8 @@
                 <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 `
-                if ((grantComment && comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || (".UserInfo.UserGrade" == "admin"))) {
+                if ((grantComment && (comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || comment["author-idx"] <= 0))
+                    || (".UserInfo.UserGrade" == "admin")) {
                     commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete)
                 }
                 commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
@@ -461,9 +477,28 @@
 
     async function writeComment() {
         const uri = `/api/board/${boardCode}/${topicIdx}/comment`
-        const content = editor.getHTML()
 
-        // const emptyContent = "<p><br></p>"
+        let authoridx = "{{.UserInfo.UserIdx}}"
+        let authorname = "{{.UserInfo.UserID}}"
+        let nickname, password = ""
+        if (authorname.trim() == "" || authoridx.trim() == "") {
+            nickname = document.querySelector("#comment-nickname").value
+            password = document.querySelector("#comment-password").value
+
+            if (!nickname) {
+                alert("Nickname is required")
+                return false
+            }
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            authoridx = "-1"
+            authorname = nickname
+        }
+
+        const content = editor.getHTML()
         const emptyContent = "<p></p>"
         if (content.trim() == emptyContent) {
             alert("Text is empty")
@@ -475,8 +510,9 @@
         if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
 
         const data = {
-            "author-idx": 1,
-            "author-name": "admin",
+            "author-idx": parseInt(authoridx),
+            "author-name": authorname,
+            "edit-password": password,
             "content": content,
             "files": fileIndices
         }
@@ -609,16 +645,27 @@
 
         modifierEL.style.display = "block"
 
-        const scrollOffsetY = editorEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
+        // const scrollOffsetY = editorEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
+        const scrollOffsetY = modifierEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
         window.scroll(window.scrollX, scrollOffsetY)
     }
 
     async function deleteComment(commentIDX) {
         const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
-        const r = await fetch(uri, {
-            method: "DELETE"
-        })
+        const req = { method: "DELETE" }
 
+        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+            const password = prompt("Enter password", "")
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            req.headers = { "Delete-Password": password }
+        }
+
+        const r = await fetch(uri, req)
         if (r.ok) {
             const response = await r.json()
 

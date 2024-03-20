@@ -70,10 +70,10 @@ func setApiBoard(a *fiber.App) {
 	gbrd.Delete("/:board_code/topic/:idx", handler.DeleteTopicAPI)
 
 	/* API Comment */
-	gbrd.Get("/:board_code/:topic_idx/comment", handler.GetComments)
-	gbrd.Post("/:board_code/:topic_idx/comment", handler.WriteComment)
-	gbrd.Put("/:board_code/:topic_idx/comment/:comment_idx", handler.UpdateComment)
-	gbrd.Delete("/:board_code/:topic_idx/comment/:comment_idx", handler.DeleteComment)
+	gbrd.Get("/:board_code/:topic_idx/comment", handler.GetCommentsAPI)
+	gbrd.Post("/:board_code/:topic_idx/comment", handler.WriteCommentAPI)
+	gbrd.Put("/:board_code/:topic_idx/comment/:comment_idx", handler.UpdateCommentAPI)
+	gbrd.Delete("/:board_code/:topic_idx/comment/:comment_idx", handler.DeleteCommentAPI)
 }
 
 func setApiUploader(r *fiber.App) {
