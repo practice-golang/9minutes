@@ -14,6 +14,8 @@
     * [ ] DB
     * [ ] Admin page
 * [ ] Resurrect session storage - etcd, redis..
+* [ ] Resurrect verification table usage
+
 * [ ] Add like/dislike button
     * [ ] topic
     * [ ] comment
