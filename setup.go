@@ -301,8 +301,6 @@ func setupRouter() {
 	engine.AddFunc("unescape", unEscape)
 	engine.AddFunc("format_date", formatDate)
 	engine.AddFunc("js_array", jsArray)
-	engine.AddFunc("more_eq", moreEQ)
-	engine.AddFunc("less_eq", lessEQ)
 
 	// engine.Debug(true)
 

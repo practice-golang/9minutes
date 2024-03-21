@@ -215,7 +215,6 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
 
-	// idx, _ := strconv.Atoi(c.Params("idx"))
 	idx := c.Params("idx")
 	if strings.TrimSpace(idx) == "" {
 		result := map[string]interface{}{"result": "fail", "msg": "empty index"}

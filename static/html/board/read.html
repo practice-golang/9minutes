@@ -113,7 +113,7 @@
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         {{end}}
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
-        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}" data-author-name="{{.AuthorName.String}}"></comment-modifier>
+        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}" data-author-idx="{{.AuthorIdx.Int64}}" data-author-name="{{.AuthorName.String}}"></comment-modifier>
         <a onclick="getFilesInfo(parseInt('{{.Idx.Int64}}'))">Attachment</a>
         <div id="comment-files-container-{{.Idx.Int64}}">
             <ul></ul>
@@ -182,6 +182,10 @@
     <link rel="stylesheet" href="/assets/css/myeditor.css" />
 
     <style>
+        input {
+            margin-right: 0;
+        }
+
         .comment-modifier {
             resize: vertical;
             overflow: hidden;
@@ -190,7 +194,7 @@
         }
     </style>
 
-    <input type="text" id="comment-edit-nickname" placeholder="Nickname" disabled />
+    <span id="comment-edit-nickname"></span>
     <input type="password" id="comment-edit-password" placeholder="Password" />
 
     <div id="modifier" class="comment-modifier"></div>
@@ -430,7 +434,7 @@
                 <span>${regdate}</span> |
                 %%_BUTTON_EDIT_DELETE_%%
                 <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
-                <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}"></comment-modifier>
+                <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}" data-author-idx="${comment["author-idx"]}" data-author-name="${comment["author-name"]}"></comment-modifier>
                 <a onclick="getFilesInfo(parseInt('${comment["idx"]}'))">Attachment</a>
                 <div id="comment-files-container-${comment["idx"]}">
                     <ul></ul>
@@ -441,7 +445,7 @@
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 `
                 if ((grantComment && (comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || comment["author-idx"] <= 0))
-                    || (".UserInfo.UserGrade" == "admin")) {
+                    || ("{{.UserInfo.UserGrade}}" == "admin")) {
                     commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete)
                 }
                 commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
@@ -633,7 +637,12 @@
         }
 
         if (modifierEL.style.display != "block") {
-            modifierROOT.querySelector("#comment-edit-nickname").value = modifierEL.dataset.authorName
+            modifierROOT.querySelector("#comment-edit-nickname").innerHTML = modifierEL.dataset.authorName
+            if (parseInt(modifierEL.dataset.authorIdx) > 0) {
+                modifierROOT.querySelector("#comment-edit-password").style.display = "none"
+            } else {
+                modifierROOT.querySelector("#comment-edit-password").style.display = "inline-block"
+            }
             commentModifiers[`modifier-${idx}`].setHTML(modContent)
         }
 
@@ -646,7 +655,6 @@
 
         modifierEL.style.display = "block"
 
-        // const scrollOffsetY = editorEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
         const scrollOffsetY = modifierEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
         window.scroll(window.scrollX, scrollOffsetY)
     }
@@ -655,8 +663,9 @@
         const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
         const req = { method: "DELETE" }
 
-        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
-        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+        const modifierEL = document.querySelector(`comment-modifier#modifier-${commentIDX}`)
+        const authoridx = parseInt(modifierEL.dataset.authorIdx)
+        if ("{{.UserInfo.UserGrade}}" != "admin" && authoridx < 0) {
             const password = prompt("Enter password", "")
             if (!password) {
                 alert("Password is required")
@@ -686,16 +695,8 @@
 
     async function updateComment(self) {
         const modifierEL = self.getRootNode().host
-        const modifierROOT = modifierEL.shadowRoot
         const commentIDX = self.getRootNode().host.dataset.idx
-        const authorName = modifierEL.dataset.authorName
-        const password = modifierROOT.querySelector("#comment-edit-password").value
         const content = commentModifiers[modifierEL.id].getHTML()
-
-        if (!password) {
-            alert("Password is required")
-            return false
-        }
 
         let flist = ""
         for (f of attachIdxList["comment-mod"]) {
@@ -709,11 +710,24 @@
         }
 
         const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
-        const r = await fetch(uri, {
+        const req = {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
-        })
+        }
+
+        const authoridx = parseInt(modifierEL.dataset.authorIdx)
+        if ("{{.UserInfo.UserGrade}}" != "admin" && authoridx < 0) {
+            const modifierROOT = modifierEL.shadowRoot
+            const password = modifierROOT.querySelector("#comment-edit-password").value
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+            req.headers["Edit-Password"] = password
+        }
+
+        const r = await fetch(uri, req)
 
         if (r.ok) {
             if (currentCommentPage == totalCommentPage) {
@@ -723,6 +737,7 @@
             }
         } else {
             alert("Failed to update")
+            return false
         }
 
         modifierEL.style.display = "none"

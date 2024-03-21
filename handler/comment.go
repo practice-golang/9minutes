@@ -195,6 +195,16 @@ func UpdateCommentAPI(c *fiber.Ctx) error {
 	boardCode := c.Params("board_code")
 	topicIdx := c.Params("topic_idx")
 	commentIdx := c.Params("comment_idx")
+	board := BoardListData[boardCode]
+
+	if strings.TrimSpace(topicIdx) == "" {
+		result := map[string]interface{}{"result": "fail", "msg": "empty topic index"}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
+	if strings.TrimSpace(commentIdx) == "" {
+		result := map[string]interface{}{"result": "fail", "msg": "empty comment index"}
+		return c.Status(http.StatusBadRequest).JSON(result)
+	}
 
 	sess, err := store.Get(c)
 	if err != nil {
@@ -212,8 +222,6 @@ func UpdateCommentAPI(c *fiber.Ctx) error {
 		grade = "guest"
 	}
 
-	board := BoardListData[boardCode]
-
 	accessible := checkBoardAccessible(board.GrantComment.String, grade)
 	if !accessible {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
@@ -224,7 +232,19 @@ func UpdateCommentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	if commentPrev.AuthorIdx.Int64 != useridx || grade == "admin" {
+	switch true {
+	case grade != "admin" && commentPrev.AuthorIdx.Int64 < 0:
+		editPassword := ""
+		editPasswords := c.GetReqHeaders()["Edit-Password"]
+		if len(editPasswords) > 0 {
+			editPassword = editPasswords[0]
+		}
+
+		if commentPrev.EditPassword.String != editPassword {
+			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
+			return c.Status(http.StatusBadRequest).JSON(result)
+		}
+	case grade != "admin" && commentPrev.AuthorIdx.Int64 != useridx:
 		result := map[string]interface{}{"result": "fail", "msg": "user is not author"}
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
@@ -265,11 +285,6 @@ func DeleteCommentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
-	comment, err := crud.GetComment(board, topicIdx, commentIdx)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
-	}
-
 	sess, err := store.Get(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
@@ -291,8 +306,13 @@ func DeleteCommentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"status": 403, "message": "forbidden"})
 	}
 
+	comment, err := crud.GetComment(board, topicIdx, commentIdx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
 	switch true {
-	case useridx < 0 || userid == "" || comment.AuthorIdx.Int64 < 0:
+	case grade != "admin" && comment.AuthorIdx.Int64 < 0:
 		deletePassword := ""
 		deletePasswords := c.GetReqHeaders()["Delete-Password"]
 		if len(deletePasswords) > 0 {

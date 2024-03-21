@@ -23,21 +23,3 @@ func formatDate(s string) string {
 func jsArray(s []int) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(s), " ", ",", -1), "[]")
 }
-
-func moreEQ(a, b int) bool {
-	result := false
-	if a >= b {
-		result = true
-	}
-
-	return result
-}
-
-func lessEQ(a, b int) bool {
-	result := false
-	if a <= b {
-		result = true
-	}
-
-	return result
-}

@@ -4,20 +4,22 @@
 * [ ] Grant,confirm routine for guest
     * [x] ip address - Add IP_ADDRESS to each db table creation functions
     * [x] Appear guest board in list selector
-    * [ ] Control topic
+    * [x] Control topic
         * [x] Password check if user or author is guest
             * [x] Write
             * [x] Edit
             * [x] Delete
-    * [ ] Control comment
-        * [ ] Password check if user or author is guest
+    * [x] Control comment
+        * [x] Password check if author is guest
             * [x] DB
             * [x] bug - no authorname
             * [x] Write
-            * [ ] Edit
+            * [x] Edit
             * [x] Delete
-    * [ ] Change js prompt to input - password masking
-    * [ ] show comment edit/delete button for normal user
+    * [x] show edit/delete button of guest comment for normal user
+    * [x] Admin allow comment control without password
+        * [x] Edit
+        * [x] Delete
     * [ ] password encryption
         * Topic
             * [ ] Write
@@ -27,10 +29,11 @@
             * [ ] Write
             * [ ] Edit
             * [ ] Delete
-* [ ] Change less_eq, more_eq to le, ge
+    * [ ] Change js prompt to input - password masking
+* [x] Change less_eq, more_eq to le, ge
     * https://pkg.go.dev/text/template
-    * [ ] change less_eq, more_eq
-    * [ ] delete less_eq, more_eq
+    * [x] change less_eq, more_eq
+    * [x] delete less_eq, more_eq
 
 * [ ] Logger
 * [x] Rename all post, posting to topic

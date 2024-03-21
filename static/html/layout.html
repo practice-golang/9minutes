@@ -43,7 +43,7 @@
                 <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
                 <datalist id="board-list">
                     {{range $i, $b := .BoardList}}
-                    {{if less_eq $.UserInfo.UserGradeRank (index $.BoardGrades $b.GrantRead.String).Rank}}
+                    {{if le $.UserInfo.UserGradeRank (index $.BoardGrades $b.GrantRead.String).Rank}}
                     <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
                     {{end}}
                     {{end}}
