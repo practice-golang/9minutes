@@ -1,39 +1,7 @@
 # Todo
 
 * [x] Control edit/delete button for author only
-* [ ] Grant,confirm routine for guest
-    * [x] ip address - Add IP_ADDRESS to each db table creation functions
-    * [x] Appear guest board in list selector
-    * [x] Control topic
-        * [x] Password check if user or author is guest
-            * [x] Write
-            * [x] Edit
-            * [x] Delete
-    * [x] Control comment
-        * [x] Password check if author is guest
-            * [x] DB
-            * [x] bug - no authorname
-            * [x] Write
-            * [x] Edit
-            * [x] Delete
-    * [x] show edit/delete button of guest comment for normal user
-    * [x] Admin allow comment control without password
-        * [x] Edit
-        * [x] Delete
-    * [x] password encryption
-        * Topic
-            * [x] Write
-            * [x] Edit
-            * [x] Delete
-        * Comment
-            * [x] Write
-            * [x] Edit
-            * [x] Delete
-    * [ ] Change js prompt to input - password masking
-* [x] Change less_eq, more_eq to le, ge
-    * https://pkg.go.dev/text/template
-    * [x] change less_eq, more_eq
-    * [x] delete less_eq, more_eq
+* [ ] Change js prompt to input - password masking
 
 * [ ] Logger
 * [x] Rename all post, posting to topic
@@ -65,6 +33,38 @@
 * [x] User grade from numbers
     * [x] API - User grade list
     * Refs. - consts/contant.go
+* [x] Grant,confirm routine for guest
+    * [x] ip address - Add IP_ADDRESS to each db table creation functions
+    * [x] Appear guest board in list selector
+    * [x] Control topic
+        * [x] Password check if user or author is guest
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+    * [x] Control comment
+        * [x] Password check if author is guest
+            * [x] DB
+            * [x] bug - no authorname
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+    * [x] show edit/delete button of guest comment for normal user
+    * [x] Admin allow comment control without password
+        * [x] Edit
+        * [x] Delete
+    * [x] password encryption
+        * Topic
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+        * Comment
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+* [x] Change less_eq, more_eq to le, ge
+    * https://pkg.go.dev/text/template
+    * [x] change less_eq, more_eq
+    * [x] delete less_eq, more_eq
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
