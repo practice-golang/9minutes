@@ -5,9 +5,9 @@
 </script>
 
 <style>
-    a:hover {
+    /* a:hover {
         text-decoration: none;
-    }
+    } */
 
     .cellSelector:hover {
         cursor: pointer;
@@ -37,10 +37,8 @@
             <tr>
                 <td class="cellShort">{{.Idx.Int64}}</td>
                 <td class="cellSelector" onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
-                    <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
-                        {{.Title.String}}
-                        [{{.CommentCount.String}}]
-                    </a>
+                    {{.Title.String}}
+                    [{{.CommentCount.String}}]
                 </td>
                 <td class="cellMiddle">{{.AuthorName.String}}</td>
                 <td class="cellShort">{{.Views.Int64}}</td>

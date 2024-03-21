@@ -113,7 +113,7 @@
         <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
         {{end}}
         <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
-        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}"></comment-modifier>
+        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}" data-author-name="{{.AuthorName.String}}"></comment-modifier>
         <a onclick="getFilesInfo(parseInt('{{.Idx.Int64}}'))">Attachment</a>
         <div id="comment-files-container-{{.Idx.Int64}}">
             <ul></ul>
@@ -191,7 +191,7 @@
     </style>
 
     <input type="text" id="comment-edit-nickname" placeholder="Nickname" disabled />
-    <input type="password" id="comment-edit-password" placeholder="Password" disabled />
+    <input type="password" id="comment-edit-password" placeholder="Password" />
 
     <div id="modifier" class="comment-modifier"></div>
 
@@ -633,6 +633,7 @@
         }
 
         if (modifierEL.style.display != "block") {
+            modifierROOT.querySelector("#comment-edit-nickname").value = modifierEL.dataset.authorName
             commentModifiers[`modifier-${idx}`].setHTML(modContent)
         }
 
@@ -685,8 +686,16 @@
 
     async function updateComment(self) {
         const modifierEL = self.getRootNode().host
+        const modifierROOT = modifierEL.shadowRoot
         const commentIDX = self.getRootNode().host.dataset.idx
+        const authorName = modifierEL.dataset.authorName
+        const password = modifierROOT.querySelector("#comment-edit-password").value
         const content = commentModifiers[modifierEL.id].getHTML()
+
+        if (!password) {
+            alert("Password is required")
+            return false
+        }
 
         let flist = ""
         for (f of attachIdxList["comment-mod"]) {
