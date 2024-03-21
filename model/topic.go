@@ -25,13 +25,14 @@ type TopicPageData struct {
 }
 
 type TopicList struct {
-	Idx          null.Int    `json:"idx"            db:"IDX"           npskip:"insert, update"`
+	Idx          null.Int    `json:"idx"            db:"IDX"            npskip:"insert, update"`
 	Title        null.String `json:"title"          db:"TITLE"`
 	TitleImage   null.String `json:"title-image"    db:"TITLE_IMAGE"`
-	AuthorIdx    null.Int    `json:"author-idx"     db:"AUTHOR_IDX"    npskip:"insert, update"`
-	AuthorName   null.String `json:"author-name"    db:"AUTHOR_NAME"   npskip:"insert, update"`
+	AuthorIdx    null.Int    `json:"author-idx"     db:"AUTHOR_IDX"     npskip:"insert, update"`
+	AuthorName   null.String `json:"author-name"    db:"AUTHOR_NAME"    npskip:"insert, update"`
 	AuthorIpFull null.String `json:"-"              db:"AUTHOR_IP"`
-	CommentCount null.String `json:"comment-count"  db:"COMMENT_COUNT" npskip:"insert, update, select, read"`
+	AuthorIP     null.String `json:"author-ip"      db:"AUTHOR_IP_CUT"  npskip:"update, viewcount"`
+	CommentCount null.String `json:"comment-count"  db:"COMMENT_COUNT"  npskip:"insert, update, select, read"`
 	Views        null.Int    `json:"views"          db:"VIEWS"`
 	RegDate      null.String `json:"regdate"        db:"REGDATE"`
 }

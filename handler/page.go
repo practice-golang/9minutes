@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/gofiber/fiber/v2"
@@ -160,15 +161,17 @@ func HandleHTML(c *fiber.Ctx) error {
 				editPassword := string(c.Request().Header.Cookie("password"))
 				c.ClearCookie("password")
 
-				if topic.EditPassword.String != editPassword {
+				err = bcrypt.CompareHashAndPassword([]byte(topic.EditPassword.String), []byte(editPassword))
+				if err != nil {
 					routePath = "status/access_denied"
 				}
+
+				topic.EditPassword = null.StringFrom(editPassword)
 			case grade != "admin" && topic.AuthorIdx.Int64 != useridx:
 				routePath = "status/access_denied"
 			}
 
 			topic.Content = null.StringFrom(html.UnescapeString(topic.Content.String))
-
 			templateMap["Topic"] = topic
 		default:
 			routePath = "status/unauthorized"

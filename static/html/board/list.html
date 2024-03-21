@@ -40,7 +40,12 @@
                     {{.Title.String}}
                     [{{.CommentCount.String}}]
                 </td>
-                <td class="cellMiddle">{{.AuthorName.String}}</td>
+                <td class="cellMiddle">
+                    {{.AuthorName.String}}
+                    {{if le .AuthorIdx.Int64 0}}
+                    ({{.AuthorIP.String}})
+                    {{end}}
+                </td>
                 <td class="cellShort">{{.Views.Int64}}</td>
             </tr>
             {{end}}

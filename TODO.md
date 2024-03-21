@@ -20,15 +20,15 @@
     * [x] Admin allow comment control without password
         * [x] Edit
         * [x] Delete
-    * [ ] password encryption
+    * [x] password encryption
         * Topic
-            * [ ] Write
-            * [ ] Edit
-            * [ ] Delete
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
         * Comment
-            * [ ] Write
-            * [ ] Edit
-            * [ ] Delete
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
     * [ ] Change js prompt to input - password masking
 * [x] Change less_eq, more_eq to le, ge
     * https://pkg.go.dev/text/template

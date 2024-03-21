@@ -100,7 +100,12 @@
 <div>
     <div id="comments">
         {{range .Comments.CommentList}}
-        <span>{{.AuthorName.String}}</span> |
+        <span>
+            {{.AuthorName.String}}
+            {{if le .AuthorIdx.Int64 0}}
+            ({{.AuthorIP.String}})
+            {{end}}
+        </span> |
         <span>{{format_date .RegDate.String}}</span>
         {{if or
         (and
@@ -430,7 +435,7 @@
                 const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
 
                 commentsHTML += `
-                <span>${comment["author-name"]}</span> |
+                <span>${comment["author-name"]} %%_AUTHOR_IP_ADDRESS_%%</span> |
                 <span>${regdate}</span> |
                 %%_BUTTON_EDIT_DELETE_%%
                 <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
@@ -444,10 +449,14 @@
                 <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
                 <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
                 `
-                if ((grantComment && (comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || comment["author-idx"] <= 0))
+                if ((grantComment && (comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || comment["author-idx"] < 0))
                     || ("{{.UserInfo.UserGrade}}" == "admin")) {
                     commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete)
                 }
+                if (comment["author-idx"] < 0) {
+                    commentsHTML = commentsHTML.replace("%%_AUTHOR_IP_ADDRESS_%%", `(${comment["author-ip"]})`)
+                }
+                commentsHTML = commentsHTML.replace("%%_AUTHOR_IP_ADDRESS_%%", "")
                 commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
 
                 commentsFileIdxes[parseInt(comment["idx"])] = comment.files

@@ -21,8 +21,8 @@
 {{if le .Topic.AuthorIdx.Int64 0}}
 <label for="nickname">Nickname:</label>
 <input type="text" id="nickname" value="{{.Topic.AuthorName.String}}" placeholder="Nickname" disabled />
-<label for="password">Password:</label>
-<input type="password" id="password" value="{{.Topic.EditPassword.String}}" placeholder="Password" disabled />
+<!-- <label for="password">Password:</label> -->
+<input style="display: none" type="password" id="password" value="{{.Topic.EditPassword.String}}" placeholder="Password" disabled />
 {{end}}
 <div class="title-wrapper">
     <span>Title: </span>
@@ -176,14 +176,6 @@
     }
 
     async function updateTopic() {
-        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
-
-        let authoridx = "{{.Topic.AuthorIdx.Int64}}"
-        let password = ""
-        if (authoridx.trim() == "-1") {
-            password = document.querySelector("#password").value
-        }
-
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()
 
@@ -193,16 +185,23 @@
 
         const data = {
             "title": title,
-            "edit-password": password,
             "content": initialContent,
             "files": fileIndices
         }
 
-        const r = await fetch(uri, {
+        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
+        const req = {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
-        })
+        }
+
+        const authoridx = parseInt("{{.Topic.AuthorIdx.Int64}}")
+        if (authoridx < 0) {
+            req.headers["Edit-Password"] = document.querySelector("#password").value
+        }
+
+        const r = await fetch(uri, req)
 
         if (r.ok) {
             location.href = `/board/list?board_code=${boardCode}`

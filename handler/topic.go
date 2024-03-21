@@ -2,6 +2,7 @@ package handler
 
 import (
 	"9minutes/config"
+	"9minutes/consts"
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -156,6 +158,12 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	if userid != "" {
 		topic.AuthorIdx = null.IntFrom(useridx)
 		topic.AuthorName = null.StringFrom(userid)
+	} else {
+		passwordEncrypted, err := bcrypt.GenerateFromPassword([]byte(topic.EditPassword.String), consts.BcryptCost)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		}
+		topic.EditPassword = null.StringFrom(string(passwordEncrypted))
 	}
 
 	clientIP := c.Context().RemoteIP().String()
@@ -254,7 +262,14 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 
 	switch true {
 	case topicPrev.AuthorIdx.Int64 < 0:
-		if topic.EditPassword.String != topicPrev.EditPassword.String {
+		editPassword := ""
+		editPasswords := c.GetReqHeaders()["Edit-Password"]
+		if len(editPasswords) > 0 {
+			editPassword = editPasswords[0]
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(topicPrev.EditPassword.String), []byte(editPassword))
+		if err != nil {
 			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
 			return c.Status(http.StatusBadRequest).JSON(result)
 		}
@@ -356,7 +371,8 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 			deletePassword = deletePasswords[0]
 		}
 
-		if topic.EditPassword.String != deletePassword {
+		err = bcrypt.CompareHashAndPassword([]byte(topic.EditPassword.String), []byte(deletePassword))
+		if err != nil {
 			result := map[string]interface{}{"result": "fail", "msg": "incorrect password"}
 			return c.Status(http.StatusBadRequest).JSON(result)
 		}
