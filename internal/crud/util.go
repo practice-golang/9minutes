@@ -5,6 +5,7 @@ import (
 	"9minutes/model"
 	"database/sql"
 	"html"
+	"reflect"
 	"strings"
 )
 
@@ -34,7 +35,12 @@ func scanMap(r *sql.Rows) (map[string]interface{}, error) {
 		switch db.Info.DatabaseType {
 		case model.MYSQL:
 			if values[i] != nil {
-				result[jsonColumnName] = string(values[i].([]byte))
+				switch reflect.TypeOf(values[i]).Kind() {
+				case reflect.Slice: // string
+					result[jsonColumnName] = string(values[i].([]byte))
+				default:
+					result[jsonColumnName] = values[i]
+				}
 			} else {
 				result[jsonColumnName] = ""
 			}
