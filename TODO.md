@@ -2,6 +2,7 @@
 
 * [x] Control edit/delete button for author only
 * [ ] Change js prompt to input - password masking
+* [ ] Upload limit
 
 * [ ] Logger
 * [x] Rename all post, posting to topic
