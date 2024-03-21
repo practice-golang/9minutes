@@ -3,10 +3,10 @@
 * [x] Control edit/delete button for author only
 * [ ] Change js prompt to input - password masking
 * [ ] Upload limit
-
 * [ ] Logger
+    * [ ] Add user login history - useridx, ip, regdate
+
 * [x] Rename all post, posting to topic
-* [ ] Add user login history - useridx, ip, regdate
 * [ ] Board managing page - Add manager account setting for each boards
     * [ ] API
         * [ ] Edit board settings
