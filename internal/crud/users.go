@@ -29,7 +29,6 @@ func GetUserByUserIdAndPassword(name, password string) (interface{}, error) {
 			columns += column.ColumnName.String + ","
 		}
 	}
-
 	columns = strings.TrimSuffix(columns, ",")
 
 	sql := `
@@ -261,6 +260,8 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 		)
 	}
 
+	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
+
 	paging := db.Obj.GetPagingQuery(
 		(int(userListOption.Page.Int64)-1)*int(userListOption.ListCount.Int64),
 		int(userListOption.ListCount.Int64),
@@ -271,7 +272,7 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 		` + columns + `
 	FROM ` + tableName + `
 	` + sqlSearch + `
-	ORDER BY IDX ASC ` + `
+	ORDER BY ` + columnIdx.Names + ` ASC ` + `
 	` + paging
 
 	r, err := db.Con.Query(sql)

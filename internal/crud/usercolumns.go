@@ -38,12 +38,13 @@ func GetUserColumnsList() ([]model.UserColumn, error) {
 	tablename := db.GetFullTableName(consts.TableUserColumns)
 
 	columns := np.CreateString(model.UserColumn{}, dbtype, "", false).Names
+	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 
 	sql := `
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	ORDER BY IDX ASC`
+	ORDER BY ` + columnIdx.Names + ` ASC`
 
 	// where := []interface{}{}
 	// r, err := db.Con.Query(sql, where...)
