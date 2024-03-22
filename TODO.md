@@ -1,8 +1,11 @@
 # Todo
 
 * [x] Control edit/delete button for author only
-* [ ] Add timestamp at list
+* [x] Add timestamp at list
 * [ ] Change js prompt to input - password masking
+    * [ ] Topic edit
+    * [ ] Topic delete
+    * [ ] Comment delete
 * [ ] Upload limit
 * [ ] Logger
     * [ ] Add user login history - useridx, ip, regdate

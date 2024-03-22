@@ -9,18 +9,30 @@
         text-decoration: none;
     } */
 
+    thead > * {
+        text-align: center;
+    }
+
     .cellSelector:hover {
         cursor: pointer;
         color: maroon;
         font-weight: bolder;
     }
 
-    .cellMiddle {
-        width: 7em;
+    .cell14em {
+        width: 14em;
     }
 
-    .cellShort {
+    .cell10em {
+        width: 10em;
+    }
+
+    .cell3em {
         width: 3em;
+    }
+
+    .center {
+        text-align: center;
     }
 </style>
 
@@ -32,21 +44,29 @@
 
 <div>
     <table>
+        <thead>
+            <th>No.</th>
+            <th>Title</th>
+            <th>Writer</th>
+            <th>Date</th>
+            <th>Read</th>
+        </thead>
         <tbody>
             {{range .Data.TopicList}}
             <tr>
-                <td class="cellShort">{{.Idx.Int64}}</td>
+                <td class="cell3em center">{{.Idx.Int64}}</td>
                 <td class="cellSelector" onclick="location.href='/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}'">
                     {{.Title.String}}
                     [{{.CommentCount.String}}]
                 </td>
-                <td class="cellMiddle">
+                <td class="cell10em center">
                     {{.AuthorName.String}}
                     {{if le .AuthorIdx.Int64 0}}
                     ({{.AuthorIP.String}})
                     {{end}}
                 </td>
-                <td class="cellShort">{{.Views.Int64}}</td>
+                <td class="cell14em center">{{format_date .RegDate.String}}</td>
+                <td class="cell3em center">{{.Views.Int64}}</td>
             </tr>
             {{end}}
         </tbody>
