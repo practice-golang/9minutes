@@ -204,7 +204,7 @@ func (d *Postgres) CreateUserTable() error {
 // CreateUserVerificationTable - Create user verification table
 func (d *Postgres) CreateUserVerificationTable() error {
 	sql := `
-	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + ` (
+	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + `_verification` + ` (
 		"IDX"      SERIAL       PRIMARY KEY,
 		"USER_IDX" INTEGER      NULL DEFAULT NULL,
 		"TOKEN"    VARCHAR(128) NULL DEFAULT NULL,
@@ -260,7 +260,7 @@ func (d *Postgres) EditTableColumn(tableName string, columnOld model.UserColumn,
 
 // DeleteTableColumn - Delete table column
 func (d *Postgres) DeleteTableColumn(tableName string, column model.UserColumn) error {
-	sql := `ALTER TABLE ` + Info.UserTable + ` `
+	sql := `ALTER TABLE ` + tableName + ` `
 	sql += ` DROP COLUMN "` + column.ColumnName.String + `";`
 
 	_, err := Con.Exec(sql)

@@ -145,7 +145,7 @@ func SignupAPI(c *fiber.Ctx) error {
 		AppendFromToName: false,
 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
 		To:               email.To{Email: useremail, Name: userid},
-		Subject:          "EnjoyTools - Email Verification",
+		Subject:          "Sign up Verification",
 		Body: `
 		Please click the link below to verify your email address.
 		<br />

@@ -4,7 +4,6 @@ import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
 	"9minutes/model"
-	"database/sql"
 
 	"github.com/blockloop/scan"
 )
@@ -82,7 +81,7 @@ func GetUploadedFiles(idxes []int) ([]model.StoredFileInfo, error) {
 	return finfos, nil
 }
 
-func AddUploadedFile(fileName, storageName string) (sql.Result, error) {
+func AddUploadedFile(fileName, storageName string) (int64, int64, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
 	columnsFileName := np.CreateString(map[string]interface{}{"FILE_NAME": nil}, dbtype, "", false)
@@ -95,12 +94,12 @@ func AddUploadedFile(fileName, storageName string) (sql.Result, error) {
 		'` + fileName + `', '` + storageName + `'
 	)`
 
-	result, err := db.Con.Exec(sql)
+	count, idx, err := db.Obj.Exec(sql, []interface{}{}, "IDX")
 	if err != nil {
-		return nil, err
+		return -1, -1, err
 	}
 
-	return result, nil
+	return count, idx, nil
 }
 
 func DeleteUploadedFile(idx int64) (err error) {

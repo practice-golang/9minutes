@@ -71,25 +71,26 @@ func GetUserByNameAndEmailMap(userid, email string) (interface{}, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
-	columns := ""
 	whereUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
 	whereEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
 	whereGrade := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
 
 	// Use map with default and user defined columns
 	columnList, _ := GetUserColumnsList()
+	columnNames := map[string]interface{}{}
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
-			columns += column.ColumnName.String + ","
-			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
+			// columns += column.ColumnName.String + ","
+			columnNames[column.ColumnName.String] = nil
 		}
 	}
 
-	columns = strings.TrimSuffix(columns, ",")
+	// columns = strings.TrimSuffix(columns, ",")
+	columns := np.CreateString(columnNames, dbtype, "", false)
 
 	sql := `
 	SELECT
-		` + columns + `
+		` + columns.Names + `
 	FROM ` + tablename + `
 	WHERE ` + whereUserId.Names + ` = '` + userid + `'
 		AND ` + whereEmail.Names + ` = '` + email + `'
@@ -116,25 +117,27 @@ func GetUserByNameAndEmailMap(userid, email string) (interface{}, error) {
 
 func GetUserByNameMap(userid string) (interface{}, error) {
 	var result interface{}
+	dbtype := db.GetDatabaseTypeString()
 
 	tablename := db.GetFullTableName(consts.TableUsers)
-	columns := ""
 	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, db.GetDatabaseTypeString(), "", false)
 
 	// Use map with default and user defined columns
 	columnList, _ := GetUserColumnsList()
+	columnNames := map[string]interface{}{}
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
-			columns += column.ColumnName.String + ","
-			// jsonName := strings.ReplaceAll(strings.ToLower(column.ColumnName.String), "_", "-")
+			// columns += column.ColumnName.String + ","
+			columnNames[column.ColumnName.String] = nil
 		}
 	}
 
-	columns = strings.TrimSuffix(columns, ",")
+	// columns = strings.TrimSuffix(columns, ",")
+	columns := np.CreateString(columnNames, dbtype, "", false)
 
 	sql := `
 	SELECT
-		` + columns + `
+		` + columns.Names + `
 	FROM ` + tablename + `
 	WHERE ` + columnUserId.Names + ` = '` + userid + `'`
 
@@ -292,7 +295,7 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 	var totalCount int64
 	sql = `
 	SELECT
-		COUNT(IDX)
+		COUNT(` + columnIdx.Names + `)
 	FROM ` + tableName + `
 	` + sqlSearch
 

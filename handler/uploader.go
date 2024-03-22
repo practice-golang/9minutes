@@ -43,15 +43,15 @@ func UploadFile(c *fiber.Ctx) (err error) {
 			return err
 		}
 
-		r, err := crud.AddUploadedFile(fname, storageName)
+		_, fidx, err := crud.AddUploadedFile(fname, storageName)
 		if err != nil {
 			return err
 		}
 
-		fidx, err := r.LastInsertId()
-		if err != nil {
-			return err
-		}
+		// fidx, err := r.LastInsertId()
+		// if err != nil {
+		// 	return err
+		// }
 
 		files := map[string]string{
 			"idx":         strconv.FormatInt(fidx, 10),

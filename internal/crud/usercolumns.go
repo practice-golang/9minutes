@@ -77,12 +77,14 @@ func AddUserColumn(userColumn model.UserColumn) error {
 		` + column.Values + `, (SELECT (MAX(B.` + columnSortOrder.Names + `) + 1) FROM ` + tablename + ` B)
 	)`
 
-	_, err := db.Con.Exec(sql)
+	// _, err := db.Con.Exec(sql)
+	_, _, err := db.Obj.Exec(sql, []interface{}{}, "IDX")
 	if err != nil {
 		return err
 	}
 
-	err = db.Obj.AddTableColumn(db.Info.UserTable, userColumn)
+	usertable := db.GetFullTableName(db.Info.UserTable)
+	err = db.Obj.AddTableColumn(usertable, userColumn)
 	if err != nil {
 		return err
 	}
@@ -137,7 +139,8 @@ func UpdateUserColumn(userColumnNew model.UserColumn) error {
 		return err
 	}
 
-	err = db.Obj.EditTableColumn(db.Info.UserTable, userColumnOld, userColumnNew)
+	usertable := db.GetFullTableName(db.Info.UserTable)
+	err = db.Obj.EditTableColumn(usertable, userColumnOld, userColumnNew)
 	if err != nil {
 		return err
 	}
@@ -182,7 +185,8 @@ func DeleteUserColumn(userColumn model.UserColumn) error {
 		return err
 	}
 
-	err = db.Obj.DeleteTableColumn(db.Info.UserTable, userColumn)
+	usertable := db.GetFullTableName(db.Info.UserTable)
+	err = db.Obj.DeleteTableColumn(usertable, userColumn)
 	if err != nil {
 		return err
 	}
