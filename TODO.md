@@ -1,5 +1,4 @@
 # Todo
-* [ ] pgsql - bug at admin
 
 * [x] Control edit/delete button for author only
 * [ ] Add timestamp at list
@@ -70,6 +69,7 @@
     * https://pkg.go.dev/text/template
     * [x] change less_eq, more_eq
     * [x] delete less_eq, more_eq
+* [x] pgsql - correct bugs
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
