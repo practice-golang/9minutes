@@ -93,6 +93,8 @@
                 {{.Title.String}} [{{.CommentCount.String}}] | {{.Views.Int64}}
                 <br />
                 {{.AuthorName.String}}
+                <br />
+                {{format_date .RegDate.String}}
             </a>
         </li>
         {{end}}

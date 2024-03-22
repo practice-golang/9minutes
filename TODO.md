@@ -1,14 +1,8 @@
 # Todo
 
-* [x] Control edit/delete button for author only
-* [x] Add timestamp at list
 * [ ] Upload limit
 * [ ] Logger
     * [ ] Add user login history - useridx, ip, regdate
-* [ ] Change js prompt to input - password masking
-    * [ ] Topic edit
-    * [ ] Topic delete
-    * [ ] Comment delete
 
 * [x] Rename all post, posting to topic
 * [ ] Board managing page - Add manager account setting for each boards
@@ -73,6 +67,12 @@
     * [x] change less_eq, more_eq
     * [x] delete less_eq, more_eq
 * [x] pgsql - correct bugs
+* [x] Control edit/delete button for author only
+* [x] Add timestamp at list
+* [x] Change js prompt to input - password masking
+    * [x] Topic edit
+    * [x] Topic delete
+    * [x] Comment delete
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function

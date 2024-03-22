@@ -7,6 +7,53 @@
 <link rel="stylesheet" href="/assets/css/myeditor.css" />
 
 <style>
+    .modal {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1200;
+    }
+
+    .modal-content {
+        position: fixed;
+        width: 70%;
+        max-width: 15em;
+        background-color: #fefefe;
+        border: 1px solid #888;
+        padding: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, calc(-50% - 68px));
+    }
+
+    .modal-close {
+        float: right;
+        color: #aaa;
+        font-size: 1.85em;
+        font-weight: bold;
+        transform: translateY(-0.65em);
+    }
+
+    .modal-close:hover,
+    .modal-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal-content input {
+        max-width: 70%;
+    }
+
+    .modal-content button {
+        float: right;
+    }
+
     a:hover {
         cursor: pointer;
     }
@@ -58,6 +105,19 @@
         }
     }
 </style>
+
+<!-- Modal -->
+<div id="password-modal" class="modal">
+    <div class="modal-content">
+        <p>
+            <span onclick="closePasswordModal()" class="modal-close">&times;</span>
+            <span>Enter password:</span>
+        </p>
+        <input onkeypress="passwordInputKeyPress(event)" type="password" id="input-password" />
+        <button onclick="handleInput()">Ok</button>
+    </div>
+</div>
+<!-- Modal -->
 
 <div>
     <div>
@@ -215,6 +275,36 @@
 </template>
 <!-- Comment modification editor -->
 
+
+<script>
+    const passwordModal = document.querySelector("#password-modal")
+
+    function openPasswordModal() {
+        const modalPromise = new Promise((resolve, reject) => {
+            passwordModal.style.display = "block"
+            document.querySelector("#input-password").focus()
+
+            window.handleInput = () => {
+                const inputText = document.querySelector("#input-password").value
+                resolve(inputText)
+                closePasswordModal()
+                delete window.handleInput
+            }
+        })
+
+        return modalPromise
+    }
+
+    function passwordInputKeyPress(event) {
+        if (event.key == "Enter") { handleInput() }
+    }
+
+    function closePasswordModal() {
+        document.querySelector("#input-password").value = ""
+        passwordModal.style.display = "none"
+    }
+</script>
+
 <script>
     let filesList = []
     const attachIdxList = {
@@ -222,9 +312,7 @@
         "comment-new": [],
         "comment-mod": []
     }
-</script>
 
-<script>
     const imageUploadCallback = (idx) => function (response) {
         if (response.message == "success") {
             let fcontainer = document.querySelector("#writer-fileslist-container > ul")
@@ -279,10 +367,10 @@
 
     function backToList() { location.href = `/board/list?board_code=${boardCode}` }
 
-    function moveToEdit() {
+    async function moveToEdit() {
         const authoridx = "{{.Topic.AuthorIdx.Int64}}"
         if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
-            const password = prompt("Enter password", "")
+            const password = await openPasswordModal()
             if (!password) {
                 alert("Password is required")
                 return false
@@ -300,7 +388,7 @@
 
         const authoridx = "{{.Topic.AuthorIdx.Int64}}"
         if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
-            const password = prompt("Enter password", "")
+            const password = await openPasswordModal()
             if (!password) {
                 alert("Password is required")
                 return false
@@ -675,7 +763,7 @@
         const modifierEL = document.querySelector(`comment-modifier#modifier-${commentIDX}`)
         const authoridx = parseInt(modifierEL.dataset.authorIdx)
         if ("{{.UserInfo.UserGrade}}" != "admin" && authoridx < 0) {
-            const password = prompt("Enter password", "")
+            const password = await openPasswordModal()
             if (!password) {
                 alert("Password is required")
                 return false
@@ -698,7 +786,13 @@
                 await getComments(totalCommentPage)
             }
         } else {
-            alert("Failed to delete")
+            const contentType = r.headers.get("content-type")
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const response = await r.json()
+                alert(response.msg)
+            } else {
+                alert("Failed to delete")
+            }
         }
     }
 
