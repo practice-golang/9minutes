@@ -1,4 +1,5 @@
 # Todo
+* [ ] pgsql - bug at admin
 
 * [x] Control edit/delete button for author only
 * [ ] Add timestamp at list
