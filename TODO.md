@@ -2,13 +2,13 @@
 
 * [x] Control edit/delete button for author only
 * [x] Add timestamp at list
+* [ ] Upload limit
+* [ ] Logger
+    * [ ] Add user login history - useridx, ip, regdate
 * [ ] Change js prompt to input - password masking
     * [ ] Topic edit
     * [ ] Topic delete
     * [ ] Comment delete
-* [ ] Upload limit
-* [ ] Logger
-    * [ ] Add user login history - useridx, ip, regdate
 
 * [x] Rename all post, posting to topic
 * [ ] Board managing page - Add manager account setting for each boards
