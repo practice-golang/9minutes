@@ -93,21 +93,6 @@ server {
 caddy reverse-proxy --from :80 --to 127.0.0.1:5525
 ```
 
-### Heroku
-
-* Append following variables to environment setting of dyno
-* Oracle wallet is not supported
-```
-PORT
-DATABASE_TYPE
-DATABASE_ADDRESS
-DATABASE_PORT
-DATABASE_PROTOCOL -> tcp
-DATABASE_NAME
-DATABASE_ID
-DATABASE_PASSWORD
-```
-
 
 ## License
 
