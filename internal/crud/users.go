@@ -20,20 +20,23 @@ func GetUserByUserIdAndPassword(name, password string) (interface{}, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUsers)
 
-	columns := ""
+	// columns := ""
 	wheres := np.CreateWhereString(map[string]interface{}{"USERID": name}, dbtype, "=", "AND", "", false)
 
 	columnList, _ := GetUserColumnsList()
+	columnNames := map[string]interface{}{}
 	for _, column := range columnList {
 		if column.ColumnName.Valid {
-			columns += column.ColumnName.String + ","
+			// columns += column.ColumnName.String + ","
+			columnNames[column.ColumnName.String] = nil
 		}
 	}
-	columns = strings.TrimSuffix(columns, ",")
+	// columns = strings.TrimSuffix(columns, ",")
+	columns := np.CreateString(columnNames, dbtype, "", false)
 
 	sql := `
 	SELECT
-		` + columns + `
+		` + columns.Names + `
 	FROM ` + tablename +
 		wheres
 
@@ -158,11 +161,12 @@ func GetUserByNameMap(userid string) (interface{}, error) {
 func GetUsersMap(userListOption model.UserListingOption) (model.UserPageData, error) {
 	result := model.UserPageData{}
 
+	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(consts.TableUsers)
 	// columns := ""
-	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, db.GetDatabaseTypeString(), "", false)
-	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, db.GetDatabaseTypeString(), "", false)
-	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, db.GetDatabaseTypeString(), "", false)
+	columnUserId := np.CreateString(map[string]interface{}{"USERID": nil}, dbtype, "", false)
+	columnEmail := np.CreateString(map[string]interface{}{"EMAIL": nil}, dbtype, "", false)
+	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 
 	// Use map with default and user defined columns
 	columnList, _ := GetUserColumnsList()
