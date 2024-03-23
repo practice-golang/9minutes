@@ -53,7 +53,7 @@ func (d *Oracle) Exec(que string, colValues []interface{}, options string) (int6
 func (d *Oracle) CreateBoardTable() error {
 	var err error
 
-	var tableCNT int64
+	var tableCNT int64 = 0
 
 	sql := `
 	SELECT
@@ -62,9 +62,13 @@ func (d *Oracle) CreateBoardTable() error {
 	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
 		AND table_name = '` + strings.ToUpper(Info.BoardTable) + `'`
 
-	rows, _ := Con.Query(sql)
-	for rows.Next() {
-		_ = rows.Scan(&tableCNT)
+	rows, err := Con.Query(sql)
+	if err != nil {
+		log.Println("Oracle CreateBoardTable:", err.Error())
+	} else {
+		for rows.Next() {
+			_ = rows.Scan(&tableCNT)
+		}
 	}
 
 	if tableCNT > 0 {
