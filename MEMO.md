@@ -13,7 +13,7 @@ CREATE USER ninem IDENTIFIED BY 1111;
 GRANT CONNECT, RESOURCE TO ninem;
 GRANT CREATE TABLE TO ninem;
 GRANT CREATE SESSION TO ninem;
-
+GRANT UNLIMITED TABLESPACE TO ninem;
 ```
 
 2. By ninem schema
@@ -22,4 +22,9 @@ CREATE TABLE example_table (
     id NUMBER,
     name VARCHAR2(50)
 );
+```
+
+3. Drop schema
+```sql
+DROP USER ninem CASCADE;
 ```
