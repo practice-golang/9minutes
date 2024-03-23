@@ -183,8 +183,8 @@ func GetQuotesByDBTYPE(dbtype string) Quotation {
 	return result
 }
 
-// AddQuotesSingleString - create single quoted string
-func AddQuotesSingleString(text, dbtype, part string) string {
+// CreateSingleQuotedString - create single quoted string
+func CreateSingleQuotedString(text, dbtype, part string) string {
 	result := text
 	quotes := GetQuotesByDBTYPE(dbtype)
 
