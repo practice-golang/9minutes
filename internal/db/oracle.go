@@ -4,13 +4,10 @@ import (
 	"9minutes/consts"
 	"9minutes/model"
 	"database/sql"
-	"log"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	go_ora "github.com/sijms/go-ora/v2"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,106 +16,17 @@ type Oracle struct {
 	Version int64
 }
 
-func (d *Oracle) createAccount() {
-	var err error
-
-	tableSpace := "USERS"
-	port, _ := strconv.Atoi(InfoOracleAdmin.Port)
-	dsn := go_ora.BuildUrl(InfoOracleAdmin.Addr, port, InfoOracleAdmin.DatabaseName, InfoOracleAdmin.GrantID, InfoOracleAdmin.GrantPassword, nil)
-	if InfoOracleAdmin.FilePath != "" {
-		tableSpace = "DATA"
-		dsn += "?SSL=enable&SSL Verify=false&WALLET=" + url.QueryEscape(InfoOracleAdmin.FilePath)
-	}
-
-	conn, err := sql.Open("oracle", dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-
-	versionSTR := ""
-	sql := `SELECT version FROM V$INSTANCE`
-	err = conn.QueryRow(sql).Scan(&versionSTR)
-	if err != nil {
-		panic(err)
-	}
-
-	d.Version, _ = strconv.ParseInt(strings.Split(versionSTR, ".")[0], 10, 64)
-
-	if d.Version < 12 {
-		panic("oracle version is lower than 12")
-	}
-
-	sql = `
-	SELECT COUNT(USERID) AS COUNT
-	FROM ALL_USERS
-	WHERE USERID = '` + strings.ToUpper(Info.GrantID) + `'`
-
-	var count int64
-	_ = conn.QueryRow(sql).Scan(&count)
-	if count > 0 {
-		return
-	}
-
-	sql = `CREATE USER "` + strings.ToUpper(Info.GrantID) + `" IDENTIFIED BY "` + Info.GrantPassword + `"`
-	if InfoOracleAdmin.FilePath != "" {
-		sql += `
-		DEFAULT TABLESPACE ` + tableSpace + `
-		TEMPORARY TABLESPACE TEMP`
-	}
-	_, err = conn.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	sql = `GRANT CONNECT, RESOURCE TO ` + Info.GrantID
-	_, err = conn.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-
-	sql = `ALTER USER ` + Info.GrantID + ` DEFAULT TABLESPACE ` + tableSpace + ` QUOTA UNLIMITED ON ` + tableSpace
-	_, err = conn.Exec(sql)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (d *Oracle) connect() (*sql.DB, error) {
 	db, err := sql.Open("oracle", d.dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	go func() {
-		for {
-			time.Sleep(time.Minute * 1)
-			err = db.Ping()
-			if err != nil {
-				log.Println("Ping:", err)
-				db.Close()
-				db, err = sql.Open("oracle", d.dsn)
-				if err != nil {
-					log.Println("Oracle reconnect:", err)
-				}
-				Con = db
-			}
-		}
-	}()
-
 	return db, nil
 }
 
 func (d *Oracle) CreateDB() error {
-	err := Con.Ping()
-	if err != nil {
-		if strings.Contains(err.Error(), "ORA-01017") {
-			d.createAccount()
-			return nil
-		}
-	}
-
-	return err
+	return nil
 }
 
 func (d *Oracle) Exec(sql string, colValues []interface{}, options string) (int64, int64, error) {

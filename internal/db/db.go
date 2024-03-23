@@ -59,10 +59,9 @@ type (
 )
 
 var (
-	Info            DBInfo   // DB connection info
-	InfoOracleAdmin DBInfo   // Oracle Admin connection info
-	Obj             DBObject // Duck interface
-	Con             *sql.DB  // DB connection
+	Info DBInfo   // DB connection info
+	Obj  DBObject // Duck interface
+	Con  *sql.DB  // DB connection
 )
 
 func SetupDB() error {

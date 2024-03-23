@@ -102,7 +102,6 @@ func setupINI() {
 				db.Info = config.DatabaseInfoSqlServer
 			case "oracle":
 				db.Info = config.DatabaseInfoOracle
-				db.InfoOracleAdmin = config.DatabaseInfoOracleSystem
 			default:
 				db.Info = config.DatabaseInfoSQLite
 				if cfg.Section("database").HasKey("FILENAME") {
@@ -136,26 +135,6 @@ func setupINI() {
 					if cfg.Section("database").HasKey("FILEPATH") {
 						db.Info.FilePath = cfg.Section("database").Key("FILEPATH").String()
 					}
-
-					if cfg.Section("database_admin").HasKey("ADDRESS") {
-						db.InfoOracleAdmin.Addr = cfg.Section("database_admin").Key("ADDRESS").String()
-					}
-					if cfg.Section("database_admin").HasKey("PORT") {
-						db.InfoOracleAdmin.Port = cfg.Section("database_admin").Key("PORT").String()
-					}
-					if cfg.Section("database_admin").HasKey("USER") {
-						db.InfoOracleAdmin.GrantID = cfg.Section("database_admin").Key("USER").String()
-					}
-					if cfg.Section("database_admin").HasKey("PASSWORD") {
-						db.InfoOracleAdmin.GrantPassword = cfg.Section("database_admin").Key("PASSWORD").String()
-					}
-					if cfg.Section("database_admin").HasKey("DATABASE") {
-						db.InfoOracleAdmin.DatabaseName = cfg.Section("database_admin").Key("DATABASE").String()
-					}
-					if cfg.Section("database_admin").HasKey("FILEPATH") {
-						db.InfoOracleAdmin.FilePath = cfg.Section("database_admin").Key("FILEPATH").String()
-					}
-
 				}
 			}
 		}

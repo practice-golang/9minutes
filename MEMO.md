@@ -10,8 +10,10 @@
 1. By sys(sysdba)
 ```sql
 CREATE USER ninem IDENTIFIED BY 1111;
+GRANT CONNECT, RESOURCE TO ninem;
 GRANT CREATE TABLE TO ninem;
 GRANT CREATE SESSION TO ninem;
+
 ```
 
 2. By ninem schema
