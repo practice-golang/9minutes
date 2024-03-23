@@ -23,6 +23,11 @@ func (d *Oracle) connect() (*sql.DB, error) {
 		return nil, err
 	}
 
+	db.SetConnMaxIdleTime(-1)
+	db.SetConnMaxLifetime(-1)
+	db.SetMaxIdleConns(-1)
+	db.SetMaxOpenConns(-1)
+
 	return db, nil
 }
 
