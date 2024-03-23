@@ -310,7 +310,8 @@
     const attachIdxList = {
         "topic": [],
         "comment-new": [],
-        "comment-mod": []
+        "comment-mod": [],
+        "reserve-delete": []
     }
 
     const imageUploadCallback = (idx) => function (response) {
@@ -323,8 +324,14 @@
             }
 
             response.files.forEach((f) => {
+                let key = "comment-new"
+                let functionName = "deleteFile"
+                if (idx) {
+                    key = "comment-mod"
+                    functionName = "deleteFile"
+                }
                 const btn = document.createElement("button")
-                btn.setAttribute("onclick", `deleteFile(${idx}, ${f.idx}, '${f.storagename}')`)
+                btn.setAttribute("onclick", `${functionName}(${idx}, ${f.idx}, '${f.storagename}')`)
                 btn.appendChild(document.createTextNode("X"))
 
                 const li = document.createElement("li")
@@ -334,11 +341,7 @@
 
                 fcontainer.appendChild(li)
 
-                if (idx) {
-                    attachIdxList["comment-mod"].push(f)
-                } else {
-                    attachIdxList["comment-new"].push(f)
-                }
+                attachIdxList[$key].push(f)
             })
         }
     }
@@ -410,6 +413,40 @@
         return false
     }
 
+    function deleteFileReserve(commentIDX, fidx, storagename) {
+        const finfo = {
+            "comment-idx": commentIDX,
+            "fidx": fidx,
+            "storagename": storagename
+        }
+
+        attachIdxList["reserve-delete"].push(finfo)
+
+        let container = document.querySelector("#writer-fileslist-container > ul")
+        if (commentIDX) {
+            targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
+            container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
+        }
+        container.querySelector(`#file-${fidx}`).remove()
+        for (const i in attachIdxList) {
+            if (attachIdxList[i].idx == fidx && attachIdxList[i].storagename == storagename) {
+                attachIdxList.splice(i, 1)
+                break
+            }
+        }
+        if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+            const imgTags = targetRoot.querySelectorAll("img")
+            imgTags.forEach((img) => {
+                const fnames = img.src.split("/")
+                const fname = fnames[fnames.length - 1]
+                if (fname == storagename) {
+                    img.remove()
+                    return
+                }
+            })
+        }
+    }
+
     async function deleteFile(commentIDX, fidx, storagename) {
         const data = [{ "idx": parseInt(fidx) }]
         const uri = options.uploadActionURI
@@ -437,7 +474,6 @@
                     break
                 }
             }
-
             if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
                 const imgTags = targetRoot.querySelectorAll("img")
                 imgTags.forEach((img) => {
@@ -641,7 +677,7 @@
         return false
     }
 
-    async function getFilesInfo(idx = null, targetEL = null) {
+    async function getFilesInfo(idx = null, targetEL = null, reserveDelete = false) {
         const indexList = []
         let attachList
 
@@ -701,7 +737,13 @@
                     li.appendChild(a)
                 } else {
                     const btn = document.createElement("button")
-                    btn.setAttribute("onclick", `deleteFile(${idx}, ${f.idx}, '${f.storagename}')`)
+
+                    let deleteFunction = "deleteFile"
+                    if (reserveDelete) {
+                        deleteFunction = "deleteFileReserve"
+                    }
+
+                    btn.setAttribute("onclick", `${deleteFunction}(${idx}, ${f.idx}, '${f.storagename}')`)
                     btn.appendChild(document.createTextNode("X"))
 
                     li.appendChild(document.createTextNode(`${f.filename}`))
@@ -748,7 +790,7 @@
         }
 
         const attachList = modifierROOT.querySelector("#modifier-fileslist-container > ul")
-        getFilesInfo(idx, attachList)
+        getFilesInfo(idx, attachList, true)
 
         modifierEL.style.display = "block"
 
@@ -852,6 +894,8 @@
         const editorEL = modifierROOT.querySelector("#modifier")
 
         modifierEL.style.display = "none"
+
+        attachIdxList["reserve-delete"] = []
     }
 
     async function init() {
