@@ -166,6 +166,12 @@ func (d *Oracle) CreateUserTable() error {
 		return err
 	}
 
+	// sql = `DESC ` + userfieldTable + `;`
+	// rs, err := Con.Query(sql)
+	// if err != nil {
+	// 	log.Println("WTF", err.Error())
+	// }
+
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
 	VALUES ('Idx', 'idx', 'integer', 'IDX', 1);`
 
