@@ -1,7 +1,6 @@
 # Todo
 
-* [ ] Upload limit
-* [ ] Write/Update limit
+* [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment
 * [ ] Logger

@@ -17,7 +17,7 @@ Bulletin board
 ```
 * Modify `config.ini` then run again `9minutes` binary
 * Open `http://localhost:5525` in browser
-* Sign in with `admin` / `admin`
+* Sign in with initial account - `admin` / `admin`
 
 
 ## HTML modification
@@ -40,6 +40,7 @@ See `setup.go` and `router.go`
     * MySQL, MariaDB >= 10.3
     * PostgresSQL >= 12.3
     * SQL Server >= 2014
+    * Oracle >= 12c
 
 
 ## Email sending

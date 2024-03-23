@@ -30,29 +30,50 @@ func (d *Oracle) CreateDB() error {
 	return nil
 }
 
-func (d *Oracle) Exec(sql string, colValues []interface{}, options string) (int64, int64, error) {
+func (d *Oracle) Exec(que string, colValues []interface{}, options string) (int64, int64, error) {
 	var err error
-	var count int64 = 0
-	var idx int64 = 0
 
-	result, err := Con.Exec(sql, colValues...)
+	var count int64 = 0
+	var idx *int64
+
+	que += ` RETURNING ` + options + ` INTO :1`
+
+	result, err := Con.Exec(que, sql.Out{Dest: &idx})
 	if err != nil {
-		return count, idx, err
+		log.Println("Oracle Exec:", err.Error())
+		return 0, -1, err
 	}
 
 	count, _ = result.RowsAffected()
-	idx, _ = result.LastInsertId()
 
-	return count, idx, nil
+	return count, *idx, nil
 }
 
 // CreateBoardTable - Create board manager table
 func (d *Oracle) CreateBoardTable() error {
 	var err error
 
-	boardTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.BoardTable + `"`)
+	var tableCNT int64
 
 	sql := `
+	SELECT
+		COUNT(table_name) AS CNT
+	FROM all_tables
+	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
+		AND table_name = '` + strings.ToUpper(Info.BoardTable) + `'`
+
+	rows, _ := Con.Query(sql)
+	for rows.Next() {
+		_ = rows.Scan(&tableCNT)
+	}
+
+	if tableCNT > 0 {
+		return nil
+	}
+
+	boardTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.BoardTable + `"`)
+
+	sql = `
 	CREATE TABLE ` + boardTable + ` (
 		IDX              NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		BOARD_NAME       VARCHAR2(128),
@@ -81,15 +102,33 @@ func (d *Oracle) CreateBoardTable() error {
 func (d *Oracle) CreateUploadTable() error {
 	var err error
 
-	uploadTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UploadTable + `"`)
+	var tableCNT int64
 
 	sql := `
+	SELECT
+		COUNT(table_name) AS CNT
+	FROM all_tables
+	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
+		AND table_name = '` + strings.ToUpper(Info.UploadTable) + `'`
+
+	rows, _ := Con.Query(sql)
+	for rows.Next() {
+		_ = rows.Scan(&tableCNT)
+	}
+
+	if tableCNT > 0 {
+		return nil
+	}
+
+	uploadTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UploadTable + `"`)
+
+	sql = `
 	CREATE TABLE ` + uploadTable + ` (
 		IDX             NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		FILE_NAME       VARCHAR2(512),
 		STORAGE_NAME    VARCHAR2(512),
 
-		CONSTRAINT uploads_pk PRIMARY KEY ("IDX")
+		CONSTRAINT uploads_pk PRIMARY KEY (IDX)
 	)`
 
 	_, err = Con.Exec(sql)
@@ -104,20 +143,38 @@ func (d *Oracle) CreateUploadTable() error {
 func (d *Oracle) CreateUserTable() error {
 	var err error
 
-	userTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UserTable + `"`)
+	var tableCNT int64
 
 	sql := `
-	CREATE TABLE ` + userTable + ` (
-		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
-		USERID    VARCHAR2(128),
-		PASSWORD    VARCHAR2(128),
-		EMAIL       VARCHAR2(128),
-		GRADE       VARCHAR2(24),
-		APPROVAL    VARCHAR2(2),
-		REGDATE    VARCHAR2(14),
+	SELECT
+		COUNT(table_name) AS CNT
+	FROM all_tables
+	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
+		AND table_name = '` + strings.ToUpper(Info.UserTable) + `'`
 
-		CONSTRAINT "` + Info.UserTable + `_idx" PRIMARY KEY ("IDX"),
-		CONSTRAINT "` + Info.UserTable + `_userconstraint" UNIQUE ("USERID", "EMAIL")
+	rows, _ := Con.Query(sql)
+	for rows.Next() {
+		_ = rows.Scan(&tableCNT)
+	}
+
+	if tableCNT > 0 {
+		return nil
+	}
+
+	userTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UserTable + `"`)
+
+	sql = `
+	CREATE TABLE ` + userTable + ` (
+		IDX       NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+		USERID    VARCHAR2(128),
+		PASSWORD  VARCHAR2(128),
+		EMAIL     VARCHAR2(128),
+		GRADE     VARCHAR2(24),
+		APPROVAL  VARCHAR2(2),
+		REGDATE   VARCHAR2(14),
+
+		CONSTRAINT "` + strings.ToLower(Info.UserTable) + `_idx" PRIMARY KEY (IDX),
+		CONSTRAINT "` + strings.ToLower(Info.UserTable) + `_userconstraint" UNIQUE (USERID, EMAIL)
 	)`
 
 	_, err = Con.Exec(sql)
@@ -135,11 +192,21 @@ func (d *Oracle) CreateUserTable() error {
 
 	sql = `
 	INSERT INTO ` + userTable + ` (
-		"USERID", "PASSWORD", "EMAIL", "GRADE", "APPROVAL", "REGDATE"
+		"USERID", "PASSWORD", "EMAIL",
+		"GRADE", "APPROVAL",
+		"REGDATE"
 	)
-	SELECT 'admin', '` + string(adminPassword) + `', 'admin@please.modify', 'admin', 'Y', '` + now + `'
+	SELECT
+		'admin', '` + string(adminPassword) + `', 'admin@please.modify',
+		'admin', 'Y',
+		'` + now + `'
 	FROM DUAL
-	WHERE NOT EXISTS (SELECT * FROM ` + userTable + ` WHERE "USERID" = 'admin')`
+	WHERE NOT EXISTS (
+		SELECT
+			*
+		FROM ` + userTable + `
+		WHERE "USERID" = 'admin'
+	)`
 
 	_, err = Con.Exec(sql)
 	if err != nil {
@@ -166,66 +233,44 @@ func (d *Oracle) CreateUserTable() error {
 		return err
 	}
 
-	// sql = `DESC ` + userfieldTable + `;`
-	// rs, err := Con.Query(sql)
-	// if err != nil {
-	// 	log.Println("WTF", err.Error())
-	// }
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('Idx', 'idx', 'integer', 'IDX', 1);`
-
-	log.Println(sql)
-
-	_, err = Con.Exec(sql)
-	if err != nil {
-		log.Println("WTF")
-		return err
-	}
-
-	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('UserId', 'userid', 'text', 'USERID', 2);`
-
+	VALUES ('Idx', 'idx', 'integer', 'IDX', 1)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
 	}
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('Password', 'password', 'text', 'PASSWORD', 3);`
-
+	VALUES ('UserId', 'userid', 'text', 'USERID', 2)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
 	}
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('Email', 'email', 'text', 'EMAIL', 4);`
-
+	VALUES ('Password', 'password', 'text', 'PASSWORD', 3)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
 	}
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('Grade', 'grade', 'text', 'GRADE', 5);`
-
+	VALUES ('Email', 'email', 'text', 'EMAIL', 4)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
 	}
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('Approval', 'approval', 'text', 'APPROVAL', 6);`
-
+	VALUES ('Grade', 'grade', 'text', 'GRADE', 5)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
 	}
-
 	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
-	VALUES ('RegDate', 'regdate', 'text', 'REGDATE', 7);`
-
+	VALUES ('Approval', 'approval', 'text', 'APPROVAL', 6)`
+	_, err = Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+	sql = `INSERT INTO ` + userfieldTable + ` ("DISPLAY_NAME", "COLUMN_CODE", "COLUMN_TYPE", "COLUMN_NAME", "SORT_ORDER")
+	VALUES ('RegDate', 'regdate', 'text', 'REGDATE', 7)`
 	_, err = Con.Exec(sql)
 	if err != nil {
 		return err
@@ -238,16 +283,34 @@ func (d *Oracle) CreateUserTable() error {
 func (d *Oracle) CreateUserVerificationTable() error {
 	var err error
 
-	verificationTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UserTable + `_verification"`)
+	var tableCNT int64
 
 	sql := `
+	SELECT
+		COUNT(table_name) AS CNT
+	FROM all_tables
+	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
+		AND table_name = '` + strings.ToUpper(Info.UserTable+"_verification") + `'`
+
+	rows, _ := Con.Query(sql)
+	for rows.Next() {
+		_ = rows.Scan(&tableCNT)
+	}
+
+	if tableCNT > 0 {
+		return nil
+	}
+
+	verificationTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.UserTable + `_verification"`)
+
+	sql = `
 	CREATE TABLE ` + verificationTable + ` (
 		IDX         NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
 		USER_IDX    NUMBER(11),
 		TOKEN       VARCHAR2(128),
 		REGDATE    VARCHAR2(14),
 
-		UNIQUE("IDX")
+		UNIQUE(IDX)
 	)`
 
 	_, err = Con.Exec(sql)
@@ -348,7 +411,7 @@ func (d *Oracle) CreateBoard(tableInfo model.Board, recreate bool) error {
 		VIEWS         VARCHAR2(11),
 		REGDATE       VARCHAR2(14),
 
-		UNIQUE("IDX")
+		UNIQUE(IDX)
 	)`
 
 	_, err = Con.Exec(sql)
@@ -386,7 +449,7 @@ func (d *Oracle) CreateComment(tableInfo model.Board, recreate bool) error {
 		IMAGES        NCLOB,
 		REGDATE       VARCHAR2(14),
 		
-		UNIQUE("IDX")
+		UNIQUE(IDX)
 	)`
 
 	_, err := Con.Exec(sql)
