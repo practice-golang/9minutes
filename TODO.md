@@ -1,6 +1,9 @@
 # Todo
 
 * [ ] Upload limit
+* [ ] Write/Update limit
+    * Topic
+    * Comment
 * [ ] Logger
     * [ ] Add user login history - useridx, ip, regdate
 

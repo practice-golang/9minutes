@@ -15,6 +15,13 @@ type ColumnStrings struct {
 	Values string
 }
 
+type Quotation struct {
+	QuoteName      string
+	QuoteValue     string
+	SeparatorName  string
+	SeparatorValue string
+}
+
 var (
 	TagName       = "db"
 	TagNameNPSKIP = "npskip"
@@ -133,39 +140,72 @@ func createString(o interface{}, dbtype, skipValue, separatorNames, separatorVal
 	return result
 }
 
-// CreateString - create string from struct, map
-func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) ColumnStrings {
-	quoteNames := ""
-	quoteValues := ""
-	separatorNames := Separator
-	separatorValues := Separator
+func GetQuotesByDBTYPE(dbtype string) Quotation {
+	quoteName := ""
+	quoteValue := ""
+	separatorName := Separator
+	separatorValue := Separator
 	switch dbtype {
 	case "sqlite":
-		quoteNames = `"`
-		quoteValues = "'"
-		separatorNames = `","`
-		separatorValues = "','"
+		quoteName = `"`
+		quoteValue = "'"
+		separatorName = `","`
+		separatorValue = "','"
 	case "mysql":
-		quoteNames = "`"
-		quoteValues = "'"
-		separatorNames = "`,`"
-		separatorValues = `','`
+		quoteName = "`"
+		quoteValue = "'"
+		separatorName = "`,`"
+		separatorValue = `','`
 	case "postgres":
-		quoteNames = `"`
-		quoteValues = "'"
-		separatorNames = `","`
-		separatorValues = `','`
+		quoteName = `"`
+		quoteValue = "'"
+		separatorName = `","`
+		separatorValue = `','`
 	case "sqlserver":
-		quoteNames = `"`
-		quoteValues = "'"
-		separatorNames = `","`
-		separatorValues = `','`
+		quoteName = `"`
+		quoteValue = "'"
+		separatorName = `","`
+		separatorValue = `','`
 	case "oracle":
-		quoteNames = `"`
-		quoteValues = "'"
-		separatorNames = `","`
-		separatorValues = `','`
+		quoteName = `"`
+		quoteValue = "'"
+		separatorName = `","`
+		separatorValue = `','`
 	}
+
+	result := Quotation{
+		QuoteName:      quoteName,
+		QuoteValue:     quoteValue,
+		SeparatorName:  separatorName,
+		SeparatorValue: separatorValue,
+	}
+
+	return result
+}
+
+// AddQuotesSingleString - create single quoted string
+func AddQuotesSingleString(text, dbtype, part string) string {
+	result := text
+	quotes := GetQuotesByDBTYPE(dbtype)
+
+	switch part {
+	case "name":
+		result = quotes.QuoteName + text + quotes.QuoteName
+	case "value":
+		result = quotes.QuoteValue + text + quotes.QuoteValue
+	}
+
+	return result
+}
+
+// CreateString - create string from struct, map
+func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) ColumnStrings {
+	quotes := GetQuotesByDBTYPE(dbtype)
+
+	quoteNames := quotes.QuoteName
+	quoteValues := quotes.QuoteValue
+	separatorNames := quotes.SeparatorName
+	separatorValues := quotes.SeparatorValue
 
 	result := createString(o, dbtype, skipValue, separatorNames, separatorValues, checkValid)
 
