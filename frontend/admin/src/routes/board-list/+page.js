@@ -20,8 +20,45 @@
 }
  */
 
+const defaultCount = 10
+
+async function getBoardGrades() {
+    let grades = []
+
+    const rg = await fetch("/api/admin/board-grades", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+    })
+
+    if (rg.ok) {
+        let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].rank - b[1].rank })
+        for (let el of gradesArr) { grades.push(el[1]) }
+    }
+
+    return grades
+}
+
+async function getBoards(page, listCount, search) {
+    let boardsData = {}
+
+    let uri = `/api/admin/board?page=${page}&list-count=${listCount}`
+    if (search != "") { uri += `&search=${search}` }
+
+    const rl = await fetch(uri, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+    })
+
+    if (rl.ok) { boardsData = await rl.json() }
+    if (boardsData["board-list"] == null) { boardsData["board-list"] = [] }
+
+    return boardsData
+}
+
 export const load = async ({ url, fetch }) => {
-    const listCount = Number(url.searchParams.get("list-count")) || 20
+    const listCount = Number(url.searchParams.get("list-count")) || defaultCount
     const page = Number(url.searchParams.get("page")) || 1
     const search = url.searchParams.get("search") || ""
 
@@ -38,42 +75,8 @@ export const load = async ({ url, fetch }) => {
         { "display-name": "Grant upload", "column-code": "grant-upload", "column-name": "GRANT_UPLOAD" },
     ]
 
-    async function getBoardGrades() {
-        let grades = []
-
-        const rg = await fetch("/api/admin/board-grades", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        })
-
-        if (rg.ok) {
-            let gradesArr = Object.entries(await rg.json()).sort((a, b) => { return a[1].rank - b[1].rank })
-            for (let el of gradesArr) { grades.push(el[1]) }
-        }
-
-        return grades
-    }
-
-    async function getBoards(page, listCount, search) {
-        let boardsData = {}
-
-        let uri = `/api/admin/board?page=${page}&list-count=${listCount}`
-        if (search != "") { uri += `&search=${search}` }
-
-        const rl = await fetch(uri, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        })
-
-        if (rl.ok) { boardsData = await rl.json() }
-        if (boardsData["board-list"] == null) { boardsData["board-list"] = [] }
-
-        return boardsData
-    }
-
     return {
+        "default-count": defaultCount,
         columns: columns,
         grades: getBoardGrades(),
         "boardlist-data": getBoards(page, listCount, search)

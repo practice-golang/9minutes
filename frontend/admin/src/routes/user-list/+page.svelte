@@ -7,16 +7,16 @@
     // import "moment/dist/locale/ko";
 
     import "$lib/styles/table.css";
+    import { get } from "svelte/store";
 
     export let data;
 
+    const defaultCount = data["default-count"];
     const columns = data.columns;
     const grades = data.grades;
 
-    console.log(grades)
-    console.log(columns)
-
-    let listCount = Number($page.url.searchParams.get("list-count")) || 20;
+    let listCount =
+        Number($page.url.searchParams.get("list-count")) || defaultCount;
     $: users = data["userlist-data"]["user-list"];
     let previousPage = -1;
     $: currentPage = data["userlist-data"]["current-page"];
@@ -46,19 +46,34 @@
         }
     }
 
-    function search() {
-        if (searchKeyword != "") {
-            let params = "?search=" + searchKeyword;
-            if (listCount > 10) {
-                params += "&list-count=" + listCount;
-            }
-            location.href = params;
+    async function getUsers(page, listCount, search) {
+        let usersData = {};
+
+        let uri = `/api/admin/user?page=${page}&list-count=${listCount}`;
+        if (search != "") {
+            uri += `&search=${search}`;
         }
+
+        const rl = await fetch(uri, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+
+        if (rl.ok) {
+            usersData = await rl.json();
+        }
+
+        return usersData;
+    }
+
+    async function search() {
+        const userList = await getUsers(1, listCount, searchKeyword);
+        data["userlist-data"] = userList;
     }
 
     function pressEnter(e) {
         if (e.key == "Enter") {
-            console.log(searchKeyword);
             search();
         }
     }
@@ -193,9 +208,7 @@
         invalidateAll();
     }
 
-    onMount(() => {
-        // moment.locale("ko");
-    });
+    onMount(() => {});
 
     afterUpdate(() => {
         if (previousPage != currentPage) {
@@ -251,210 +264,208 @@
     {/each}
 </select>
 
-<div class="table-container">
-    <table id="user-list-container">
-        <!-- Column titles -->
-        <thead>
+<table id="user-list-container">
+    <!-- Column titles -->
+    <thead>
+        <tr>
+            <td>
+                <input
+                    type="checkbox"
+                    bind:checked={selectAll}
+                    on:change={toggleSelectAll}
+                />
+            </td>
+            {#each columns as col}
+                <th>{col["display-name"]}</th>
+            {/each}
+            <th>Control</th>
+        </tr>
+    </thead>
+
+    {#if showNewUser}
+        <!-- Add user -->
+        <tr id="add-user">
+            <td /><td />
+            {#each columns as col}
+                {#if col["column-code"] == "idx"}
+                    {""}
+                {:else if col["column-code"] == "password"}
+                    <td>
+                        <input
+                            type="password"
+                            bind:value={newUser["password"]}
+                            placeholder={col["display-name"]}
+                        />
+                    </td>
+                {:else if col["column-code"] == "grade"}
+                    <td>
+                        <select bind:value={newUser["grade"]}>
+                            {#each Object.entries(grades) as [key, grade]}
+                                <option value={grade.code}>
+                                    {grade.name}
+                                </option>
+                            {/each}
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "approval"}
+                    <td>
+                        <select bind:value={newUser["approval"]}>
+                            <option value="y">Y</option>
+                            <option value="n" selected>N</option>
+                        </select>
+                    </td>
+                {:else if col["column-code"] == "regdate"}
+                    <td />
+                {:else}
+                    <td>
+                        <input
+                            type="text"
+                            bind:value={newUser[col["column-code"]]}
+                            placeholder={col["display-name"]}
+                        />
+                    </td>
+                {/if}
+            {/each}
+            <td>
+                <button type="button" on:click={closeNewUser}> Cancel </button>
+                <button type="button" on:click={saveNewUser}>Save</button>
+            </td>
+        </tr>
+    {/if}
+
+    <tbody id="users-list-body">
+        {#each users as user, index}
             <tr>
-                <td>
-                    <input
-                        type="checkbox"
-                        bind:checked={selectAll}
-                        on:change={toggleSelectAll}
-                    />
-                </td>
-                {#each columns as col}
-                    <th>{col["display-name"]}</th>
-                {/each}
-                <th>Control</th>
-            </tr>
-        </thead>
-
-        {#if showNewUser}
-            <!-- Add user -->
-            <tr id="add-user">
-                <td /><td />
-                {#each columns as col}
-                    {#if col["column-code"] == "idx"}
-                        {""}
-                    {:else if col["column-code"] == "password"}
-                        <td>
-                            <input
-                                type="password"
-                                bind:value={newUser["password"]}
-                                placeholder={col["display-name"]}
-                            />
-                        </td>
-                    {:else if col["column-code"] == "grade"}
-                        <td>
-                            <select bind:value={newUser["grade"]}>
-                                {#each Object.entries(grades) as [key, grade]}
-                                    <option value={grade.code}>
-                                        {grade.name}
-                                    </option>
-                                {/each}
-                            </select>
-                        </td>
-                    {:else if col["column-code"] == "approval"}
-                        <td>
-                            <select bind:value={newUser["approval"]}>
-                                <option value="y">Y</option>
-                                <option value="n" selected>N</option>
-                            </select>
-                        </td>
-                    {:else if col["column-code"] == "regdate"}
-                        <td />
-                    {:else}
-                        <td>
-                            <input
-                                type="text"
-                                bind:value={newUser[col["column-code"]]}
-                                placeholder={col["display-name"]}
-                            />
-                        </td>
-                    {/if}
-                {/each}
-                <td>
-                    <button type="button" on:click={closeNewUser}>
-                        Cancel
-                    </button>
-                    <button type="button" on:click={saveNewUser}>Save</button>
-                </td>
-            </tr>
-        {/if}
-
-        <tbody id="users-list-body">
-            {#each users as user, index}
-                <tr>
-                    {#if editINDEX == index}
-                        <!-- Edit user -->
-                        <td />
-                        {#each columns as col}
-                            {#if col["column-code"] == "idx"}
-                                <td class="colFixedMin">{editUser["idx"]}</td>
-                            {:else if col["column-code"] == "grade"}
-                                <td class="colFixedMid">
-                                    <select
-                                        bind:value={editUser[
-                                            col["column-code"]
-                                        ]}
-                                    >
-                                        {#each Object.entries(grades) as [key, grade]}
-                                            <option value={grade.code}>
-                                                {grade.name}
-                                            </option>
-                                        {/each}
-                                    </select>
-                                </td>
-                            {:else if col["column-code"] == "approval"}
-                                <td class="colFixedMid">
-                                    <select
-                                        bind:value={editUser[
-                                            col["column-code"]
-                                        ]}
-                                    >
-                                        <option value="Y">Y</option>
-                                        <option value="N" selected>N</option>
-                                    </select>
-                                </td>
-                            {:else if col["column-code"] == "regdate"}
-                                <td class="colFixedMid">
-                                    {moment(
-                                        editUser["regdate"],
-                                        "YYYYMMDDhhmmss",
-                                    ).format("YYYY-MM-DD")}
-                                </td>
-                            {:else}
-                                <td class="colField">
-                                    <input
-                                        type="text"
-                                        bind:value={editUser[
-                                            col["column-code"]
-                                        ]}
-                                        placeholder={col["display-name"]}
-                                    />
-                                </td>
-                            {/if}
-                        {/each}
-                        <td class="colFixedMid">
-                            <button type="button" on:click={closeEditUser}>
-                                Cancel
-                            </button>
-                            <button type="button" on:click={updateEditUser}>
-                                Save
-                            </button>
-                        </td>
-                    {:else}
-                        <!-- Show user -->
-                        <td class="colFixedMin">
-                            {#if parseInt(user["idx"]) > 1}
+                {#if editINDEX == index}
+                    <!-- Edit user -->
+                    <td />
+                    {#each columns as col}
+                        {#if col["column-code"] == "idx"}
+                            <td class="colFixedMin">{editUser["idx"]}</td>
+                        {:else if col["column-code"] == "grade"}
+                            <td class="colFixedMid">
+                                <select
+                                    bind:value={editUser[col["column-code"]]}
+                                >
+                                    {#each Object.entries(grades) as [key, grade]}
+                                        <option value={grade.code}>
+                                            {grade.name}
+                                        </option>
+                                    {/each}
+                                </select>
+                            </td>
+                        {:else if col["column-code"] == "approval"}
+                            <td class="colFixedMid">
+                                <select
+                                    bind:value={editUser[col["column-code"]]}
+                                >
+                                    <option value="Y">Y</option>
+                                    <option value="N" selected>N</option>
+                                </select>
+                            </td>
+                        {:else if col["column-code"] == "regdate"}
+                            <td class="colFixedMid">
+                                {moment(
+                                    editUser["regdate"],
+                                    "YYYYMMDDhhmmss",
+                                ).format("YYYY-MM-DD")}
+                            </td>
+                        {:else}
+                            <td class="colField">
                                 <input
-                                    type="checkbox"
-                                    bind:group={selectedIndices}
-                                    value={user["idx"]}
+                                    type="text"
+                                    bind:value={editUser[col["column-code"]]}
+                                    placeholder={col["display-name"]}
                                 />
-                            {/if}
-                        </td>
-                        {#each columns as col}
-                            {#if col["column-code"] == "grade"}
-                                {#each Object.entries(grades) as [key, grade]}
-                                    {#if grade.code == user[col["column-code"]]}
-                                    <td>
+                            </td>
+                        {/if}
+                    {/each}
+                    <td class="colFixedMid">
+                        <button type="button" on:click={closeEditUser}>
+                            Cancel
+                        </button>
+                        <button type="button" on:click={updateEditUser}>
+                            Save
+                        </button>
+                    </td>
+                {:else}
+                    <!-- Show user -->
+                    <td class="colFixedMin">
+                        {#if parseInt(user["idx"]) > 1}
+                            <input
+                                type="checkbox"
+                                bind:group={selectedIndices}
+                                value={user["idx"]}
+                            />
+                        {/if}
+                    </td>
+                    {#each columns as col}
+                        {#if col["column-code"] == "idx"}
+                            <td class="colFixedMin">
+                                {user[col["column-code"]]}
+                            </td>
+                        {:else if col["column-code"] == "userid"}
+                            <td class="colFixedMax">
+                                {user[col["column-code"]]}
+                            </td>
+                        {:else if col["column-code"] == "grade"}
+                            {#each Object.entries(grades) as [key, grade]}
+                                {#if grade.code == user[col["column-code"]]}
+                                    <td class="colFixedMid">
                                         {grade.name}
                                     </td>
-                                    {/if}
-                                {/each}
-                            {:else if col["column-code"] == "regdate"}
-                                <td class="colFixedMid">
-                                    {moment(
-                                        user["regdate"],
-                                        "YYYYMMDDhhmmss",
-                                    ).format("YYYY-MM-DD")}
-                                </td>
-                            {:else}
-                                <td class="colField">
-                                    {user[col["column-code"]]}
-                                </td>
-                            {/if}
-                        {/each}
-                        <td class="colFixedMax">
-                            <button
-                                type="button"
-                                on:click={() => {
-                                    openEditUser(index);
-                                }}
-                            >
-                                Edit
-                            </button>
+                                {/if}
+                            {/each}
+                        {:else if col["column-code"] == "regdate"}
+                            <td class="colFixedMid">
+                                {moment(
+                                    user["regdate"],
+                                    "YYYYMMDDhhmmss",
+                                ).format("YYYY-MM-DD")}
+                            </td>
+                        {:else}
+                            <td class="colField">
+                                {user[col["column-code"]]}
+                            </td>
+                        {/if}
+                    {/each}
+                    <td class="colFixedMax">
+                        <button
+                            type="button"
+                            on:click={() => {
+                                openEditUser(index);
+                            }}
+                        >
+                            Edit
+                        </button>
 
-                            <span>|</span>
+                        <span>|</span>
 
-                            <button
-                                type="button"
-                                on:click={() => {
-                                    deleteUser(index);
-                                }}
-                                disabled={parseInt(user["idx"]) == 1}
-                            >
-                                Quit
-                            </button>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                deleteUser(index);
+                            }}
+                            disabled={parseInt(user["idx"]) == 1}
+                        >
+                            Quit
+                        </button>
 
-                            <button
-                                type="button"
-                                on:click={() => {
-                                    deleteUser(index, "delete");
-                                }}
-                                disabled={parseInt(user["idx"]) == 1}
-                            >
-                                Delete
-                            </button>
-                        </td>
-                    {/if}
-                </tr>
-            {/each}
-        </tbody>
-    </table>
-</div>
+                        <button
+                            type="button"
+                            on:click={() => {
+                                deleteUser(index, "delete");
+                            }}
+                            disabled={parseInt(user["idx"]) == 1}
+                        >
+                            Delete
+                        </button>
+                    </td>
+                {/if}
+            </tr>
+        {/each}
+    </tbody>
+</table>
 
 <div id="page-container">
     <a

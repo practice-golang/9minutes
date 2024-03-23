@@ -7,10 +7,12 @@
 
     export let data;
 
+    const defaultCount = data["default-count"];
     const columns = data.columns;
     const grades = data.grades;
 
-    let listCount = Number($page.url.searchParams.get("list-count")) || 10;
+    let listCount =
+        Number($page.url.searchParams.get("list-count")) || defaultCount;
     $: boards = data["boardlist-data"]["board-list"];
 
     let previousPage = -1;
@@ -64,6 +66,47 @@
         } else {
             selectedIndices = boards.map((board) => board["idx"]);
         }
+    }
+
+    async function getBoards(page, listCount, search) {
+        let boardsData = {};
+
+        let uri = `/api/admin/board?page=${page}&list-count=${listCount}`;
+        if (search != "") {
+            uri += `&search=${search}`;
+        }
+
+        const rl = await fetch(uri, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+
+        if (rl.ok) {
+            boardsData = await rl.json();
+        }
+        if (boardsData["board-list"] == null) {
+            boardsData["board-list"] = [];
+        }
+
+        return boardsData;
+    }
+
+    async function search() {
+        const boardList = await getBoards(1, listCount, searchKeyword);
+        data["boardlist-data"] = boardList;
+    }
+
+    function searchEnter(e) {
+        if (e.key === "Enter") {
+            search();
+        }
+    }
+
+    function paramsChange() {
+        location.href =
+            `?list-count=${listCount}` +
+            (searchKeyword != "" ? `&search=${searchKeyword}` : "");
     }
 
     function closeNewBoard() {
@@ -204,34 +247,42 @@
 
 <h1>Boards</h1>
 
-<div>
-    <button
-        type="button"
-        on:click={() => {
-            newBoard = { "board-type": "board" };
-            showNewBoard = true;
-        }}
-    >
-        Add board
-    </button>
+<button
+    type="button"
+    on:click={() => {
+        newBoard = { "board-type": "board" };
+        showNewBoard = true;
+    }}
+>
+    Add board
+</button>
 
-    <span>|</span>
+<span>|</span>
 
-    <button type="button" on:click={deleteSelectedBoards}>
-        Delete selected boards
-    </button>
+<button type="button" on:click={deleteSelectedBoards}>
+    Delete selected boards
+</button>
 
-    <span>|</span>
+<span>|</span>
 
-    <label for="search">Search:</label>
-    <input
-        type="text"
-        id="search"
-        onkeyup="pressEnter()"
-        placeholder="Search for..."
-    />
-    <button type="button" onclick="search()">Search</button>
-</div>
+<label for="search">Search:</label>
+<input
+    type="text"
+    id="search"
+    bind:value={searchKeyword}
+    on:keypress={searchEnter}
+    placeholder="Search for..."
+/>
+<button type="button" on:click={search}>Search</button>
+
+<span>|</span>
+
+<label for="set-list-count">List:</label>
+<select id="set-list-count" bind:value={listCount} on:change={paramsChange}>
+    {#each [5, 10, 20, 30, 50, 80] as listCountNum}
+        <option value={listCountNum}>{listCountNum}</option>
+    {/each}
+</select>
 
 <table id="boards-list-container">
     <thead>
