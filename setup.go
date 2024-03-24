@@ -227,31 +227,25 @@ func setupConfig() {
 func setupDB() {
 	var err error
 
-	err = db.SetupDB()
-	if err != nil {
+	if db.SetupDB() != nil {
 		log.Fatal("SetupDB:", err)
 	}
 
-	err = db.Obj.CreateDB()
-	if err != nil {
+	if db.Obj.CreateDB() != nil {
 		log.Fatal("CreateDB:", err)
 	}
 
-	err = db.Obj.CreateBoardTable()
-	if err != nil {
+	if db.Obj.CreateBoardTable() != nil {
 		log.Fatal("CreateBoardTable:", err)
 	}
-	err = db.Obj.CreateUploadTable()
-	if err != nil {
+	if db.Obj.CreateUploadTable() != nil {
 		log.Fatal("CreateUploadTable:", err)
 	}
 
-	err = db.Obj.CreateUserTable()
-	if err != nil {
+	if db.Obj.CreateUserTable() != nil {
 		log.Fatal("CreateUserTable:", err)
 	}
-	err = db.Obj.CreateUserVerificationTable()
-	if err != nil {
+	if db.Obj.CreateUserVerificationTable() != nil {
 		log.Fatal("CreateUserVerificationTable:", err)
 	}
 }

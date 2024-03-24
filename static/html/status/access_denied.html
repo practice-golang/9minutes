@@ -17,7 +17,8 @@
             seconds--
 
             if (seconds <= 0) {
-                history.back()
+                // history.back()
+                location.href = "/"
                 return false
             }
         }, 500)

@@ -71,7 +71,7 @@
                 }
 
                 fcontainer.appendChild(li)
-                filesList.push(f)
+                attachmentList["mod"].push(f)
             })
         }
     }
@@ -83,8 +83,12 @@
 
     const topicIdx = queries.get("idx")
     const initialContent = "{{.Topic.Content.String}}"
-    let fileIndices = "{{.Topic.Files.String}}"
-    const filesList = []
+    let flist = "{{.Topic.Files.String}}"
+    const attachmentList = {
+        "mod": [],             // new and previous files when edit topic
+        "prev": [],            // previous files when edit topic
+        "reserve-delete": [],  // previous files which will be deleted when edit topic
+    }
 
     function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${topicIdx}` }
 
@@ -135,7 +139,34 @@
 
                 fcontainer.appendChild(li)
 
-                filesList.push(f)
+                attachmentList["mod"].push(f)
+            })
+        }
+    }
+
+    function reserveFileToDelete(idx, storagename) {
+        const reserveInfo = {
+            "fidx": idx,
+            "storagename": storagename
+        }
+        attachmentList["reserve-delete"].push(reserveInfo)
+
+        document.querySelector(`#file-${idx}`).remove()
+        for (const i in attachmentList["mod"]) {
+            if (attachmentList["mod"][i].idx == idx && attachmentList["mod"][i].storagename == storagename) {
+                attachmentList["mod"].splice(i, 1)
+                break
+            }
+        }
+        if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+            const imgTags = document.querySelectorAll("img")
+            imgTags.forEach((img) => {
+                const fnames = img.src.split("/")
+                const fname = fnames[fnames.length - 1]
+                if (fname == storagename) {
+                    img.remove()
+                    return
+                }
             })
         }
     }
@@ -151,14 +182,14 @@
         })
 
         if (r.ok) {
-            document.querySelector(`#file-${idx}`).remove()
-            for (const i in filesList) {
-                if (filesList[i].idx == idx && filesList[i].storagename == storagename) {
-                    filesList.splice(i, 1)
+            const el = document.querySelector(`#file-${idx}`)
+            if (el) { el.remove() }
+            for (const i in attachmentList["mod"]) {
+                if (attachmentList["mod"][i].idx == idx && attachmentList["mod"][i].storagename == storagename) {
+                    attachmentList["mod"].splice(i, 1)
                     break
                 }
             }
-
             if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
                 const imgTags = document.querySelectorAll("img")
                 imgTags.forEach((img) => {
@@ -179,14 +210,14 @@
         const title = document.querySelector("#title").value
         const initialContent = editor.getHTML()
 
-        fileIndices = ""
-        for (const f of filesList) { fileIndices += `${f.idx}|` }
-        if (fileIndices.length > 0) { fileIndices = fileIndices.slice(0, -1) }
+        flist = ""
+        for (const f of attachmentList["mod"]) { flist += `${f.idx}|` }
+        if (flist.length > 0) { flist = flist.slice(0, -1) }
 
         const data = {
             "title": title,
             "content": initialContent,
-            "files": fileIndices
+            "files": flist
         }
 
         const uri = `/api/board/${boardCode}/topic/${topicIdx}`
@@ -204,6 +235,11 @@
         const r = await fetch(uri, req)
 
         if (r.ok) {
+            for (const i in attachmentList["reserve-delete"]) {
+                const finfo = attachmentList["reserve-delete"][i]
+                await deleteFile(finfo.fidx, finfo.storagename)
+            }
+
             location.href = `/board/list?board_code=${boardCode}`
         } else {
             alert("Write failed")
@@ -214,7 +250,7 @@
 
     async function getFilesInfo() {
         const indexList = []
-        for (const fidx of fileIndices.split("|")) {
+        for (const fidx of flist.split("|")) {
             indexList.push({ idx: parseInt(fidx) })
         }
 
@@ -235,7 +271,7 @@
                 li.setAttribute("id", `file-${f.idx}`)
 
                 const btn = document.createElement("button")
-                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.setAttribute("onclick", `reserveFileToDelete('${f.idx}', '${f.storagename}')`)
                 btn.appendChild(document.createTextNode("X"))
 
                 li.appendChild(document.createTextNode(`${f.filename}`))
@@ -251,14 +287,21 @@
                 }
 
                 fcontainer.appendChild(li)
-                filesList.push(f)
+                attachmentList["mod"].push(f)
             })
         }
     }
 
-
-    function init() {
-        getFilesInfo()
+    async function init() {
+        await getFilesInfo()
+        for (const i in attachmentList["mod"]) {
+            const finfo = {
+                "filename": attachmentList["mod"][i].filename,
+                "idx": attachmentList["mod"][i].idx,
+                "storagename": attachmentList["mod"][i].storagename
+            }
+            attachmentList["prev"].push(finfo)
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function () { init() })

@@ -230,7 +230,11 @@
         return false
     }
 
-    function backToList() {
+    async function backToList() {
+        for (const f of filesList) {
+            await deleteFile(f.idx, f.storagename)
+        }
+
         location.href = `/board/list?board_code=${boardCode}`
     }
 </script>

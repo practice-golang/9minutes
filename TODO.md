@@ -1,8 +1,11 @@
 # Todo
 
-* [ ] Attachment transaction when edit
-    * [ ] Topic
-    * [ ] Comment
+* [ ] Show `empty topic` if list is empty
+* [ ] Check grant or password when attachment delete
+* [x] Attachment transaction when edit
+    * [x] Topic write - cancel only, history.back not work
+    * [x] Topic edit
+    * [x] Comment
 * [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment
