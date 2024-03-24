@@ -184,9 +184,9 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 			imIndices = append(imIndices, int(imIdx))
 		}
 
-		fileDatas, _ := crud.GetUploadedFiles(imIndices)
-		for _, fileData := range fileDatas {
-			filename := fileData.StorageName.String
+		fdatas, _ := crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			filename := fdata.StorageName.String
 			fext := filepath.Ext(filename)
 			fname := filename[0 : len(filename)-len(fext)]
 
