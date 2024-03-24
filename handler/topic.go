@@ -6,6 +6,7 @@ import (
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"encoding/json"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -175,8 +176,9 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	topic.RegDate = null.StringFrom(now)
 	topic.Views = null.IntFrom(0)
 
+	var imIndices []int
+	var fdatas []model.StoredFileInfo
 	if strings.TrimSpace(topic.Files.String) != "" {
-		var imIndices []int
 		imIndicesStr := strings.Split(topic.Files.String, "|")
 
 		for _, imIdxStr := range imIndicesStr {
@@ -184,7 +186,7 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 			imIndices = append(imIndices, int(imIdx))
 		}
 
-		fdatas, _ := crud.GetUploadedFiles(imIndices)
+		fdatas, _ = crud.GetUploadedFiles(imIndices)
 		for _, fdata := range fdatas {
 			filename := fdata.StorageName.String
 			fext := filepath.Ext(filename)
@@ -210,6 +212,10 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	_, err = crud.WriteTopic(board, topic)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	for _, fdata := range fdatas {
+		log.Println("Indices:", fdata.Idx, fdata.TopicIdx, fdata.CommentIdx)
 	}
 
 	result := map[string]interface{}{"result": "success"}
