@@ -2,6 +2,11 @@
 
 * [ ] Check grant or password when attachment delete
     * [x] Append `TOPIC_IDX` to upload table
+    * [ ] Write IDX to upload table
+        * Topic write
+        * Topic edit
+        * Comment write
+        * Comment edit
     * [ ] Check ownership before remove
         * [ ] Delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Probably temporary upload
         * [ ] Check user grant
