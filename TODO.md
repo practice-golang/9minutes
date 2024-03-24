@@ -1,7 +1,12 @@
 # Todo
 
 * [ ] Check grant or password when attachment delete
-    * [ ] Append `TOPIC_IDX` to upload table
+    * [x] Append `TOPIC_IDX` to upload table
+    * [ ] Check ownership before remove
+        * [ ] Delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Probably temporary upload
+        * [ ] Check user grant
+            * [ ] Topic
+            * [ ] Comment
 * [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment
