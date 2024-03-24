@@ -51,12 +51,3 @@ type Topic struct {
 	Views        null.Int    `json:"views"          db:"VIEWS"          npskip:"update"`
 	RegDate      null.String `json:"regdate"        db:"REGDATE"        npskip:"update, viewcount"`
 }
-
-type FilesToDelete struct {
-	DeleteFiles []File `json:"delete-files"`
-}
-
-type File struct {
-	FileName  null.String `json:"filename"  db:"FILE_NAME"`
-	StoreName null.String `json:"storename" db:"STORAGE_NAME"`
-}

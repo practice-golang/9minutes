@@ -90,6 +90,8 @@ func (d *SQLite) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.UploadTable + `" (
 		"IDX"             INTEGER,
+		"TOPIC_IDX"       INTEGER,
+		"COMMENT_IDX"     INTEGER,
 		"FILE_NAME"       TEXT,
 		"STORAGE_NAME"    TEXT,
 

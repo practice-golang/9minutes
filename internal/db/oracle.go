@@ -134,6 +134,8 @@ func (d *Oracle) CreateUploadTable() error {
 	sql = `
 	CREATE TABLE ` + uploadTable + ` (
 		IDX             NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+		TOPIC_IDX       NUMBER(11),
+		COMMENT_IDX     NUMBER(11),
 		FILE_NAME       VARCHAR2(512),
 		STORAGE_NAME    VARCHAR2(512),
 

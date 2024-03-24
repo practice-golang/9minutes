@@ -113,6 +113,8 @@ func (d *SqlServer) CreateUploadTable() error {
 	IF OBJECT_ID(N'` + Info.UploadTable + `', N'U') IS NULL
 	CREATE TABLE "` + Info.UploadTable + `" (
 		IDX             BIGINT       NOT NULL IDENTITY PRIMARY KEY,
+		TOPIC_IDX       BIGINT       NOT NULL,
+		COMMENT_IDX     BIGINT       NOT NULL,
 		FILE_NAME       VARCHAR(512) NULL DEFAULT NULL,
 		STORAGE_NAME    VARCHAR(512) NULL DEFAULT NULL
 	)`

@@ -1,11 +1,7 @@
 # Todo
 
-* [ ] Show `empty topic` if list is empty
 * [ ] Check grant or password when attachment delete
-* [x] Attachment transaction when edit
-    * [x] Topic write - cancel only, history.back not work
-    * [x] Topic edit
-    * [x] Comment
+    * [ ] Append `TOPIC_IDX` to upload table
 * [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment
@@ -81,6 +77,11 @@
     * [x] Topic edit
     * [x] Topic delete
     * [x] Comment delete
+* [x] Show `empty topic` if list is empty
+* [x] Attachment transaction when edit
+    * [x] Topic write - cancel only, history.back not work
+    * [x] Topic edit
+    * [x] Comment
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function

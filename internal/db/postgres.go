@@ -108,6 +108,8 @@ func (d *Postgres) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UploadTable + ` (
 		"IDX"             SERIAL        PRIMARY KEY,
+		"TOPIC_IDX"       BIGINT,
+		"COMMENT_IDX"     BIGINT,
 		"FILE_NAME"       VARCHAR(512)  NULL DEFAULT NULL,
 		"STORAGE_NAME"    VARCHAR(512)  NULL DEFAULT NULL
 	);`

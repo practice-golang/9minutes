@@ -82,6 +82,8 @@ func (d *Mysql) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.UploadTable + ` (
 		IDX           INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
+		TOPIC_IDX     INT(11)      UNSIGNED NOT NULL,
+		COMMENT_IDX   INT(11)      UNSIGNED NOT NULL,
 		FILE_NAME     VARCHAR(512) NULL DEFAULT NULL,
 		STORAGE_NAME  VARCHAR(512) NULL DEFAULT NULL,
 

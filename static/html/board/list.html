@@ -9,7 +9,7 @@
         text-decoration: none;
     } */
 
-    thead > * {
+    thead>* {
         text-align: center;
     }
 
@@ -43,7 +43,11 @@
 </div>
 
 <div>
+    {{if not .Data.TopicList}}
+    <span>There are no topics.</span>
+    {{end}}
     <table>
+        {{if .Data.TopicList}}
         <thead>
             <th>No.</th>
             <th>Title</th>
@@ -51,6 +55,7 @@
             <th>Date</th>
             <th>Read</th>
         </thead>
+        {{end}}
         <tbody>
             {{range .Data.TopicList}}
             <tr>
