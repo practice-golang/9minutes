@@ -40,8 +40,8 @@ func TestCreateColString_null_struct(t *testing.T) {
 
 	colString := CreateString(john, "sqlite", "", false)
 
-	names := strings.Split(colString.Names, ",")
-	values := strings.Split(colString.Values, ",")
+	names := strings.Split(colString.Name, ",")
+	values := strings.Split(colString.Value, ",")
 
 	nameSample := []string{`"NAME"`, `"AGE"`, `"EMAIL_ADDRESS"`}
 	valueSample := []string{"'John'", "'777'", "'john@human.io'"}
@@ -51,7 +51,7 @@ func TestCreateColString_null_struct(t *testing.T) {
 		for j, n := range nameSample {
 			if n == name {
 				if values[i] != valueSample[j] {
-					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Values)
+					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Value)
 				}
 
 				isExist = true
@@ -59,7 +59,7 @@ func TestCreateColString_null_struct(t *testing.T) {
 			}
 		}
 		if !isExist {
-			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Names)
+			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Name)
 		}
 	}
 
@@ -74,8 +74,8 @@ func TestCreateColString_json_struct(t *testing.T) {
 
 	colString := CreateString(jane, "sqlite", "", false)
 
-	names := strings.Split(colString.Names, ",")
-	values := strings.Split(colString.Values, ",")
+	names := strings.Split(colString.Name, ",")
+	values := strings.Split(colString.Value, ",")
 
 	nameSample := []string{`"NAME"`, `"AGE"`, `"EMAIL_ADDRESS"`}
 	valueSample := []string{"'Jane'", "'999'", "'jane@human.io'"}
@@ -85,7 +85,7 @@ func TestCreateColString_json_struct(t *testing.T) {
 		for j, n := range nameSample {
 			if n == name {
 				if values[i] != valueSample[j] {
-					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Values)
+					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Value)
 				}
 				isExist = true
 
@@ -93,7 +93,7 @@ func TestCreateColString_json_struct(t *testing.T) {
 			}
 		}
 		if !isExist {
-			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Names)
+			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Name)
 		}
 	}
 }
@@ -105,8 +105,8 @@ func TestCreateColString_json_map(t *testing.T) {
 
 	colString := CreateString(james, "sqlite", "", false)
 
-	names := strings.Split(colString.Names, ",")
-	values := strings.Split(colString.Values, ",")
+	names := strings.Split(colString.Name, ",")
+	values := strings.Split(colString.Value, ",")
 
 	nameSample := []string{`"NAME"`, `"AGE"`, `"EMAIL_ADDRESS"`}
 	valueSample := []string{"'James'", "'888'", "'james@human.io'"}
@@ -116,7 +116,7 @@ func TestCreateColString_json_map(t *testing.T) {
 		for j, n := range nameSample {
 			if n == name {
 				if values[i] != valueSample[j] {
-					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Values)
+					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Value)
 				}
 
 				isExist = true
@@ -124,7 +124,7 @@ func TestCreateColString_json_map(t *testing.T) {
 			}
 		}
 		if !isExist {
-			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Names)
+			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Name)
 		}
 	}
 }
@@ -138,8 +138,8 @@ func Test_createColString_sql_null(t *testing.T) {
 
 	colString := CreateString(smith, "sqlite", "", false)
 
-	names := strings.Split(colString.Names, ",")
-	values := strings.Split(colString.Values, ",")
+	names := strings.Split(colString.Name, ",")
+	values := strings.Split(colString.Value, ",")
 
 	nameSample := []string{`"NAME"`, `"AGE"`, `"EMAIL_ADDRESS"`}
 	valueSample := []string{"'Smith'", "'222'", "'smith@machine.io'"}
@@ -149,7 +149,7 @@ func Test_createColString_sql_null(t *testing.T) {
 		for j, n := range nameSample {
 			if n == name {
 				if values[i] != valueSample[j] {
-					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Values)
+					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Value)
 				}
 
 				isExist = true
@@ -157,7 +157,7 @@ func Test_createColString_sql_null(t *testing.T) {
 			}
 		}
 		if !isExist {
-			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Names)
+			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Name)
 		}
 	}
 }
@@ -169,8 +169,8 @@ func Test_createColString_pointer(t *testing.T) {
 
 	colString := CreateString(thomas, "sqlite", "", false)
 
-	names := strings.Split(colString.Names, ",")
-	values := strings.Split(colString.Values, ",")
+	names := strings.Split(colString.Name, ",")
+	values := strings.Split(colString.Value, ",")
 
 	nameSample := []string{`"NAME"`, `"AGE"`, `"EMAIL_ADDRESS"`}
 	valueSample := []string{"'Thomas'", "'444'", "'thomas@son.io'"}
@@ -180,7 +180,7 @@ func Test_createColString_pointer(t *testing.T) {
 		for j, n := range nameSample {
 			if n == name {
 				if values[i] != valueSample[j] {
-					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Values)
+					t.Fatal("\nExpect:", strings.Join(valueSample, ","), "\nResult:", colString.Value)
 				}
 
 				isExist = true
@@ -188,7 +188,7 @@ func Test_createColString_pointer(t *testing.T) {
 			}
 		}
 		if !isExist {
-			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Names)
+			t.Fatal("\nExpect:", strings.Join(nameSample, ","), "\nResult:", colString.Name)
 		}
 	}
 }

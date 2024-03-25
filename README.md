@@ -1,13 +1,6 @@
 # 9minutes
-Bulletin board
 
-
-## Goal
-* Create
-    * HTML file server
-    * Simple Board with user account managing
-* Escape from vaporware :-p
-
+Bulletin board - Small forum application with user account managing
 
 ## Getting started
 * Download binary or build from source

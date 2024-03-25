@@ -3,7 +3,7 @@
 * [ ] Check grant or password when attachment delete
     * [x] Append `TOPIC_IDX` to upload table
     * [ ] Write IDX to upload table
-        * [ ] Topic write
+        * [x] Topic write
         * [ ] Topic edit
         * [ ] Comment write
         * [ ] Comment edit

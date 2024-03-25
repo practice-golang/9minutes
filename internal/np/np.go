@@ -11,8 +11,8 @@ import (
 
 // ColumnStrings - strings for names and values
 type ColumnStrings struct {
-	Names  string
-	Values string
+	Name  string
+	Value string
 }
 
 type Quotation struct {
@@ -79,14 +79,14 @@ func createString(o interface{}, dbtype, skipValue, separatorNames, separatorVal
 				}
 
 				if isValid {
-					if valueStruct.Names != "" {
-						names += valueStruct.Names
+					if valueStruct.Name != "" {
+						names += valueStruct.Name
 					} else {
 						names += ov.Type().Field(i).Tag.Get(TagName)
 					}
 
-					if valueStruct.Values != "" {
-						values += valueStruct.Values
+					if valueStruct.Value != "" {
+						values += valueStruct.Value
 					}
 				}
 
@@ -133,8 +133,8 @@ func createString(o interface{}, dbtype, skipValue, separatorNames, separatorVal
 	}
 
 	result := ColumnStrings{
-		Names:  names,
-		Values: values,
+		Name:  names,
+		Value: values,
 	}
 
 	return result
@@ -209,11 +209,11 @@ func CreateString(o interface{}, dbtype, skipValue string, checkValid bool) Colu
 
 	result := createString(o, dbtype, skipValue, separatorNames, separatorValues, checkValid)
 
-	result.Names = strings.TrimSuffix(result.Names, separatorNames)
-	result.Values = strings.TrimSuffix(result.Values, separatorValues)
+	result.Name = strings.TrimSuffix(result.Name, separatorNames)
+	result.Value = strings.TrimSuffix(result.Value, separatorValues)
 
-	result.Names = quoteNames + result.Names + quoteNames
-	result.Values = quoteValues + result.Values + quoteValues
+	result.Name = quoteNames + result.Name + quoteNames
+	result.Value = quoteValues + result.Value + quoteValues
 
 	return result
 }
@@ -226,8 +226,8 @@ func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue stri
 			for i, object := range objects {
 				created := CreateString(object, dbtype, skipValue, checkValid)
 
-				names := strings.Split(created.Names, ",")
-				values := strings.Split(created.Values, ",")
+				names := strings.Split(created.Name, ",")
+				values := strings.Split(created.Value, ",")
 				for j, name := range names {
 					value := values[j]
 					if opValue == "LIKE" {
@@ -248,8 +248,8 @@ func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue stri
 	} else {
 		created := CreateString(o, dbtype, skipValue, checkValid)
 
-		names := strings.Split(created.Names, ",")
-		values := strings.Split(created.Values, ",")
+		names := strings.Split(created.Name, ",")
+		values := strings.Split(created.Value, ",")
 		for i, name := range names {
 			value := values[i]
 			if opValue == "LIKE" {
@@ -270,8 +270,8 @@ func CreateWhereString(o interface{}, dbtype, opValue, opCombine, skipValue stri
 func CreateUpdateString(o interface{}, dbtype, skipValue string, checkValid bool) (result string) {
 	created := CreateString(o, dbtype, skipValue, checkValid)
 
-	names := strings.Split(created.Names, ",")
-	values := strings.Split(created.Values, ",")
+	names := strings.Split(created.Name, ",")
+	values := strings.Split(created.Value, ",")
 	for i, name := range names {
 		value := values[i]
 		if i == 0 {

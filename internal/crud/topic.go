@@ -4,7 +4,6 @@ import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
 	"9minutes/model"
-	"database/sql"
 	"fmt"
 	"math"
 	"strings"
@@ -31,8 +30,8 @@ func GetTopicList(board model.Board, topicListOption model.TopicListingOption) (
 	sqlSearch := ""
 	if topicListOption.Search.Valid && topicListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE LOWER(` + columnTitle.Names + `) LIKE LOWER('%` + topicListOption.Search.String + `%')
-			OR LOWER(` + columnContent.Names + `) LIKE LOWER('%` + topicListOption.Search.String + `%')`
+		WHERE LOWER(` + columnTitle.Name + `) LIKE LOWER('%` + topicListOption.Search.String + `%')
+			OR LOWER(` + columnContent.Name + `) LIKE LOWER('%` + topicListOption.Search.String + `%')`
 	}
 
 	paging := ``
@@ -42,16 +41,16 @@ func GetTopicList(board model.Board, topicListOption model.TopicListingOption) (
 
 	sql := `
 	SELECT
-		` + column.Names + `,
+		` + column.Name + `,
 		(
 			SELECT
-				COUNT(` + columnIdx.Names + `)
+				COUNT(` + columnIdx.Name + `)
 			FROM ` + commentTableName + `
-			WHERE ` + columnTopicIdx.Names + ` = A.` + columnIdx.Names + `
-		) AS ` + columnCommentCount.Names + `
+			WHERE ` + columnTopicIdx.Name + ` = A.` + columnIdx.Name + `
+		) AS ` + columnCommentCount.Name + `
 	FROM ` + tableName + ` A
 	` + sqlSearch + `
-	ORDER BY ` + columnIdx.Names + ` DESC
+	ORDER BY ` + columnIdx.Name + ` DESC
 	` + paging
 
 	r, err := db.Con.Query(sql)
@@ -69,7 +68,7 @@ func GetTopicList(board model.Board, topicListOption model.TopicListingOption) (
 	var totalCount int64
 	sql = `
 	SELECT
-		COUNT(` + columnIdx.Names + `)
+		COUNT(` + columnIdx.Name + `)
 	FROM ` + tableName + `
 	` + sqlSearch
 
@@ -118,9 +117,9 @@ func GetTopic(board model.Board, idx string) (model.Topic, error) {
 	*/
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -137,7 +136,8 @@ func GetTopic(board model.Board, idx string) (model.Topic, error) {
 	return content, nil
 }
 
-func WriteTopic(board model.Board, content model.Topic) (sql.Result, error) {
+// func WriteTopic(board model.Board, content model.Topic) (sql.Result, error) {
+func WriteTopic(board model.Board, content model.Topic) (int64, int64, error) {
 	tableName := db.GetFullTableName(board.BoardTable.String)
 
 	content.Title = null.StringFrom(content.Title.String)
@@ -151,17 +151,20 @@ func WriteTopic(board model.Board, content model.Topic) (sql.Result, error) {
 
 	sql := `
 	INSERT INTO ` + tableName + ` (
-		` + column.Names + `
+		` + column.Name + `
 	) VALUES (
-		` + column.Values + `
+		` + column.Value + `
 	)`
 
-	result, err := db.Con.Exec(sql)
+	// result, err := db.Con.Exec(sql)
+	count, idx, err := db.Obj.Exec(sql, []interface{}{}, "IDX")
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return 0, -1, err
 	}
 
-	return result, nil
+	// return result, nil
+	return count, idx, nil
 }
 
 func UpdateTopic(board model.Board, content model.Topic, skipTag string) error {
@@ -175,8 +178,8 @@ func UpdateTopic(board model.Board, content model.Topic, skipTag string) error {
 	content.Content.String = EscapeString(content.Content.String)
 
 	column := np.CreateString(content, db.GetDatabaseTypeString(), skipTag, false)
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
+	colNames := strings.Split(column.Name, ",")
+	colValues := strings.Split(column.Value, ",")
 
 	holder := ""
 	for i := 0; i < len(colNames); i++ {
@@ -192,7 +195,7 @@ func UpdateTopic(board model.Board, content model.Topic, skipTag string) error {
 	sql := `
 	UPDATE ` + tableName + ` SET
 		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {
@@ -209,7 +212,7 @@ func DeleteTopic(board model.Board, idx string) error {
 
 	sql := `
 	DELETE FROM ` + tableName + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

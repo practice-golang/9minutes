@@ -4,6 +4,8 @@ import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
 	"9minutes/model"
+	"strconv"
+	"strings"
 
 	"github.com/blockloop/scan"
 )
@@ -19,7 +21,7 @@ func GetUploadedFile(idx int) (model.StoredFileInfo, error) {
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName +
 		where
 
@@ -59,7 +61,7 @@ func GetUploadedFiles(idxes []int) ([]model.StoredFileInfo, error) {
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName +
 		where
 
@@ -84,14 +86,20 @@ func GetUploadedFiles(idxes []int) ([]model.StoredFileInfo, error) {
 func AddUploadedFile(fileName, storageName string) (int64, int64, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
-	columnsFileName := np.CreateString(map[string]interface{}{"FILE_NAME": nil}, dbtype, "", false)
-	columnsStorageName := np.CreateString(map[string]interface{}{"STORAGE_NAME": nil}, dbtype, "", false)
+
+	data := map[string]interface{}{
+		"FILE_NAME":    fileName,
+		"TOPIC_IDX":    -1,
+		"COMMENT_IDX":  -1,
+		"STORAGE_NAME": storageName,
+	}
+	columns := np.CreateString(data, dbtype, "", false)
 
 	sql := `
 	INSERT INTO ` + tableName + ` (
-		` + columnsFileName.Names + `,` + columnsStorageName.Names + `
+		` + columns.Name + `
 	) VALUES (
-		'` + fileName + `', '` + storageName + `'
+		` + columns.Value + `
 	)`
 
 	count, idx, err := db.Obj.Exec(sql, []interface{}{}, "IDX")
@@ -109,8 +117,45 @@ func DeleteUploadedFile(idx int64) (err error) {
 
 	sql := `
 	DELETE
-	FROM ` + tableName +
-		where
+	FROM ` + tableName + `
+	` + where
+
+	_, err = db.Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SetUploadedFileIndex(idx, topicIDX, commentIDX int64) (err error) {
+	dbtype := db.GetDatabaseTypeString()
+	tableName := db.GetFullTableName(db.Info.UploadTable)
+
+	dataWhere := map[string]interface{}{"IDX": idx}
+	where := np.CreateWhereString(dataWhere, dbtype, "=", "AND", "", false)
+
+	data := map[string]string{}
+	if topicIDX > 0 {
+		data["TOPIC_IDX"] = strconv.FormatInt(topicIDX, 10)
+	}
+	if commentIDX > 0 {
+		data["COMMENT_IDX"] = strconv.FormatInt(commentIDX, 10)
+	}
+	columns := np.CreateString(data, dbtype, "update", false)
+	colNames := strings.Split(columns.Name, ",")
+	colValues := strings.Split(columns.Value, ",")
+	holder := ""
+
+	for i := 0; i < len(colNames); i++ {
+		holder += colNames[i] + " = " + colValues[i] + ", "
+	}
+	holder = strings.TrimSuffix(holder, ", ")
+
+	sql := `
+	UPDATE ` + tableName + ` SET
+		` + holder + `
+	` + where
 
 	_, err = db.Con.Exec(sql)
 	if err != nil {

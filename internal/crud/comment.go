@@ -24,10 +24,10 @@ func GetComment(board model.Board, topicIdx, commentIdx string) (model.Comment, 
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
-	WHERE ` + columnTopicIdx.Names + ` = ` + topicIdx + `
-		AND ` + columnIdx.Names + ` = ` + commentIdx
+	WHERE ` + columnTopicIdx.Name + ` = ` + topicIdx + `
+		AND ` + columnIdx.Name + ` = ` + commentIdx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -59,9 +59,9 @@ func GetComments(board model.Board, contentIdx string, commentListOption model.C
 	var totalCount int64
 	sql := `
 	SELECT
-		COUNT(` + columnIdx.Names + `)
+		COUNT(` + columnIdx.Name + `)
 	FROM ` + tableName + `
-	WHERE ` + columnTopicIdx.Names + ` = ` + contentIdx
+	WHERE ` + columnTopicIdx.Name + ` = ` + contentIdx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -91,10 +91,10 @@ func GetComments(board model.Board, contentIdx string, commentListOption model.C
 
 	sql = `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
-	WHERE ` + columnTopicIdx.Names + ` = ` + contentIdx + `
-	ORDER BY ` + columnIdx.Names + ` ASC
+	WHERE ` + columnTopicIdx.Name + ` = ` + contentIdx + `
+	ORDER BY ` + columnIdx.Name + ` ASC
 	` + paging
 
 	r, err = db.Con.Query(sql)
@@ -127,9 +127,9 @@ func WriteComment(board model.Board, content model.Comment) error {
 
 	sql := `
 	INSERT INTO ` + tableName + ` (
-		` + column.Names + `
+		` + column.Name + `
 	) VALUES (
-		` + column.Values + `
+		` + column.Value + `
 	)`
 
 	_, err := db.Con.Exec(sql)
@@ -147,8 +147,8 @@ func UpdateComment(board model.Board, comment model.Comment, topicIdx string) er
 	comment.Content.String = EscapeString(comment.Content.String)
 
 	column := np.CreateString(comment, db.GetDatabaseTypeString(), "update", false)
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
+	colNames := strings.Split(column.Name, ",")
+	colValues := strings.Split(column.Value, ",")
 
 	holder := ""
 	for i := 0; i < len(colNames); i++ {
@@ -164,7 +164,7 @@ func UpdateComment(board model.Board, comment model.Comment, topicIdx string) er
 	sql := `
 	UPDATE ` + tableName + ` SET
 		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + commentIDX
+	WHERE ` + columnIdx.Name + ` = ` + commentIDX
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {
@@ -183,8 +183,8 @@ func DeleteComment(board model.Board, topicIdx, commentIdx string) error {
 	sql := `
 	DELETE
 	FROM ` + tableName + `
-	WHERE ` + columnTopicIdx.Names + ` = ` + topicIdx + `
-		AND ` + columnIdx.Names + ` = ` + commentIdx
+	WHERE ` + columnTopicIdx.Name + ` = ` + topicIdx + `
+		AND ` + columnIdx.Name + ` = ` + commentIdx
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {
@@ -201,7 +201,7 @@ func DeleteComments(board model.Board, idx string) error {
 
 	sql := `
 	DELETE FROM ` + tableName + `
-	WHERE ` + columnTopicIdx.Names + ` = ` + idx
+	WHERE ` + columnTopicIdx.Name + ` = ` + idx
 
 	_, err := db.Con.Exec(sql)
 	if err != nil {

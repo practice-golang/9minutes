@@ -36,7 +36,7 @@ func GetUserByUserIdAndPassword(name, password string) (interface{}, error) {
 
 	sql := `
 	SELECT
-		` + columns.Names + `
+		` + columns.Name + `
 	FROM ` + tablename +
 		wheres
 
@@ -90,11 +90,11 @@ func GetUserByNameAndEmailMap(userid, email string) (interface{}, error) {
 
 	sql := `
 	SELECT
-		` + columns.Names + `
+		` + columns.Name + `
 	FROM ` + tablename + `
-	WHERE ` + whereUserId.Names + ` = '` + userid + `'
-		AND ` + whereEmail.Names + ` = '` + email + `'
-		AND ` + whereGrade.Names + ` != '` + "user_quit" + `'`
+	WHERE ` + whereUserId.Name + ` = '` + userid + `'
+		AND ` + whereEmail.Name + ` = '` + email + `'
+		AND ` + whereGrade.Name + ` != '` + "user_quit" + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -137,9 +137,9 @@ func GetUserByNameMap(userid string) (interface{}, error) {
 
 	sql := `
 	SELECT
-		` + columns.Names + `
+		` + columns.Name + `
 	FROM ` + tablename + `
-	WHERE ` + columnUserId.Names + ` = '` + userid + `'`
+	WHERE ` + columnUserId.Name + ` = '` + userid + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -192,8 +192,8 @@ func GetUsersMap(userListOption model.UserListingOption) (model.UserPageData, er
 
 	if userListOption.Search.Valid && userListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + columnUserId.Names + ` LIKE '%` + userListOption.Search.String + `%'
-			OR ` + columnEmail.Names + ` LIKE '%` + userListOption.Search.String + `%'`
+		WHERE ` + columnUserId.Name + ` LIKE '%` + userListOption.Search.String + `%'
+			OR ` + columnEmail.Name + ` LIKE '%` + userListOption.Search.String + `%'`
 	}
 
 	paging := ``
@@ -203,10 +203,10 @@ func GetUsersMap(userListOption model.UserListingOption) (model.UserPageData, er
 
 	sql := `
 	SELECT
-		` + columns.Names + `
+		` + columns.Name + `
 	FROM ` + tableName + `
 	` + sqlSearch + `
-	ORDER BY ` + columnIdx.Names + ` ASC
+	ORDER BY ` + columnIdx.Name + ` ASC
 	` + paging
 
 	r, err := db.Con.Query(sql)
@@ -224,7 +224,7 @@ func GetUsersMap(userListOption model.UserListingOption) (model.UserPageData, er
 	var totalCount int64
 	sql = `
 	SELECT
-		COUNT(` + columnIdx.Names + `)
+		COUNT(` + columnIdx.Name + `)
 	FROM ` + tableName + ` ` + sqlSearch
 
 	r, err = db.Con.Query(sql)
@@ -256,7 +256,7 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(consts.TableUsers)
-	columns := np.CreateString(columnsMap, dbtype, "", false).Names
+	columns := np.CreateString(columnsMap, dbtype, "", false).Name
 
 	sqlSearch := ""
 	if userListOption.Search.Valid && userListOption.Search.String != "" {
@@ -279,7 +279,7 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 		` + columns + `
 	FROM ` + tableName + `
 	` + sqlSearch + `
-	ORDER BY ` + columnIdx.Names + ` ASC ` + `
+	ORDER BY ` + columnIdx.Name + ` ASC ` + `
 	` + paging
 
 	r, err := db.Con.Query(sql)
@@ -295,7 +295,7 @@ func GetUsersListMap(columnsMap map[string]interface{}, userListOption model.Use
 	var totalCount int64
 	sql = `
 	SELECT
-		COUNT(` + columnIdx.Names + `)
+		COUNT(` + columnIdx.Name + `)
 	FROM ` + tableName + `
 	` + sqlSearch
 
@@ -329,9 +329,9 @@ func AddUserMap(userMap map[string]interface{}) error {
 
 	sql := `
 	INSERT INTO ` + tablename + ` (
-		` + column.Names + `
+		` + column.Name + `
 	) VALUES (
-		` + column.Values + `
+		` + column.Value + `
 	)`
 
 	_, err := db.Con.Exec(sql)
@@ -350,9 +350,9 @@ func AddUserVerification(verificationData map[string]string) error {
 
 	sql := `
 	INSERT INTO ` + tablename + ` (
-		` + column.Names + `
+		` + column.Name + `
 	) VALUES (
-		` + column.Values + `
+		` + column.Value + `
 	)`
 	_, err := db.Con.Exec(sql)
 	if err != nil {

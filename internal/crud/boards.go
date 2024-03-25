@@ -22,9 +22,9 @@ func GetBoardByIdx(board model.Board) (model.Board, error) {
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
-	WHERE ` + where.Names + ` = ` + strconv.Itoa(int(board.Idx.Int64))
+	WHERE ` + where.Name + ` = ` + strconv.Itoa(int(board.Idx.Int64))
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -60,9 +60,9 @@ func GetBoardByCode(board model.Board) (model.Board, error) {
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
-	WHERE ` + where.Names + `='` + board.BoardCode.String + `'`
+	WHERE ` + where.Name + `='` + board.BoardCode.String + `'`
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -93,8 +93,8 @@ func GetBoards(boardListOption model.BoardListingOption) (model.BoardPageData, e
 
 	if boardListOption.Search.Valid && boardListOption.Search.String != "" {
 		sqlSearch = `
-		WHERE ` + whereBoardName.Names + ` LIKE '%` + boardListOption.Search.String + `%'
-			OR ` + whereBoardCode.Names + ` LIKE '%` + boardListOption.Search.String + `%'`
+		WHERE ` + whereBoardName.Name + ` LIKE '%` + boardListOption.Search.String + `%'
+			OR ` + whereBoardCode.Name + ` LIKE '%` + boardListOption.Search.String + `%'`
 	}
 
 	paging := ``
@@ -104,10 +104,10 @@ func GetBoards(boardListOption model.BoardListingOption) (model.BoardPageData, e
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tableName + `
 	` + sqlSearch + `
-	ORDER BY ` + columnIdx.Names + ` ASC
+	ORDER BY ` + columnIdx.Name + ` ASC
 	` + paging
 
 	r, err := db.Con.Query(sql)
@@ -125,7 +125,7 @@ func GetBoards(boardListOption model.BoardListingOption) (model.BoardPageData, e
 	var totalCount int64
 	sql = `
 	SELECT
-		COUNT(` + columnIdx.Names + `)
+		COUNT(` + columnIdx.Name + `)
 	FROM ` + tableName + `
 	` + sqlSearch
 
@@ -158,9 +158,9 @@ func AddBoard(board model.Board) error {
 	column := np.CreateString(board, dbtype, "insert", false)
 	sql := `
 	INSERT INTO ` + tableName + ` (
-		` + column.Names + `
+		` + column.Name + `
 	) VALUES (
-		` + column.Values + `
+		` + column.Value + `
 	)`
 
 	_, err := db.Con.Query(sql)
@@ -180,8 +180,8 @@ func UpdateBoard(board model.Board) error {
 	column := np.CreateString(board, dbtype, "update", false)
 	idx := strconv.Itoa(int(board.Idx.Int64))
 
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
+	colNames := strings.Split(column.Name, ",")
+	colValues := strings.Split(column.Value, ",")
 	holder := ""
 
 	for i := 0; i < len(colNames); i++ {
@@ -194,7 +194,7 @@ func UpdateBoard(board model.Board) error {
 	sql := `
 	UPDATE ` + tableName + ` SET
 		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	_, err := db.Con.Query(sql)
 	if err != nil {
@@ -213,7 +213,7 @@ func DeleteBoard(board model.Board) error {
 	sql := `
 	DELETE
 	FROM ` + tableName + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	_, err := db.Con.Query(sql)
 	if err != nil {

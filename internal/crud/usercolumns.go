@@ -37,14 +37,14 @@ func GetUserColumnsList() ([]model.UserColumn, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUserColumns)
 
-	columns := np.CreateString(model.UserColumn{}, dbtype, "", false).Names
+	columns := np.CreateString(model.UserColumn{}, dbtype, "", false).Name
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 
 	sql := `
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	ORDER BY ` + columnIdx.Names + ` ASC`
+	ORDER BY ` + columnIdx.Name + ` ASC`
 
 	// where := []interface{}{}
 	// r, err := db.Con.Query(sql, where...)
@@ -72,9 +72,9 @@ func AddUserColumn(userColumn model.UserColumn) error {
 	// sql := `INSERT INTO ` + tablename + ` (` + columns + `) VALUES (` + values + `)`
 	sql := `
 	INSERT INTO ` + tablename + ` (
-		` + column.Names + `, ` + columnSortOrder.Names + `
+		` + column.Name + `, ` + columnSortOrder.Name + `
 	) VALUES (
-		` + column.Values + `, (SELECT (MAX(B.` + columnSortOrder.Names + `) + 1) FROM ` + tablename + ` B)
+		` + column.Value + `, (SELECT (MAX(B.` + columnSortOrder.Name + `) + 1) FROM ` + tablename + ` B)
 	)`
 
 	// _, err := db.Con.Exec(sql)
@@ -104,9 +104,9 @@ func UpdateUserColumn(userColumnNew model.UserColumn) error {
 
 	sql := `
 	SELECT
-		` + column.Names + `
+		` + column.Name + `
 	FROM ` + tablename + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -120,8 +120,8 @@ func UpdateUserColumn(userColumnNew model.UserColumn) error {
 
 	userColumnOld := userColumns[0]
 
-	colNames := strings.Split(column.Names, ",")
-	colValues := strings.Split(column.Values, ",")
+	colNames := strings.Split(column.Name, ",")
+	colValues := strings.Split(column.Value, ",")
 	holder := ""
 
 	for i := 0; i < len(colNames); i++ {
@@ -132,7 +132,7 @@ func UpdateUserColumn(userColumnNew model.UserColumn) error {
 	sql = `
 	UPDATE ` + tablename + ` SET
 		` + holder + `
-	WHERE ` + columnIdx.Names + ` = ` + strconv.Itoa(int(userColumnNew.Idx.Int64))
+	WHERE ` + columnIdx.Name + ` = ` + strconv.Itoa(int(userColumnNew.Idx.Int64))
 
 	_, err = db.Con.Exec(sql)
 	if err != nil {
@@ -152,7 +152,7 @@ func DeleteUserColumn(userColumn model.UserColumn) error {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(consts.TableUserColumns)
 
-	columns := np.CreateString(model.UserColumn{}, dbtype, "", false).Names
+	columns := np.CreateString(model.UserColumn{}, dbtype, "", false).Name
 	columnIdx := np.CreateString(map[string]interface{}{"IDX": nil}, dbtype, "", false)
 	idx := strconv.Itoa(int(userColumn.Idx.Int64))
 
@@ -161,7 +161,7 @@ func DeleteUserColumn(userColumn model.UserColumn) error {
 	SELECT
 		` + columns + `
 	FROM ` + tablename + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	r, err := db.Con.Query(sql)
 	if err != nil {
@@ -178,7 +178,7 @@ func DeleteUserColumn(userColumn model.UserColumn) error {
 	sql = `
 	DELETE
 	FROM ` + tablename + `
-	WHERE ` + columnIdx.Names + ` = ` + idx
+	WHERE ` + columnIdx.Name + ` = ` + idx
 
 	_, err = db.Con.Exec(sql)
 	if err != nil {
