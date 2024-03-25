@@ -56,8 +56,6 @@ make
 ```
 
 
-## Etc.
-
 ### Reverse proxy examples
 
 * NginX
