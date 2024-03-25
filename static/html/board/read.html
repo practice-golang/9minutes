@@ -243,6 +243,7 @@
 
 <!-- Comment modification editor -->
 <template id="modifier-template">
+    <script src="/assets/js/myeditor.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/myeditor.css" />
 
@@ -315,7 +316,7 @@
     }
 
     const imageUploadCallback = (idx) => function (response) {
-        console.log(idx, response)
+        console.log(0, idx, response)
         if (response.message == "success") {
             let fcontainer = document.querySelector("#writer-fileslist-container > ul")
             if (idx) {

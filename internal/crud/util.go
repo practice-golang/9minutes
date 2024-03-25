@@ -54,7 +54,8 @@ func scanMap(r *sql.Rows) (map[string]interface{}, error) {
 
 func EscapeString(s string) string {
 	s = html.EscapeString(s)
-	s = strings.ReplaceAll(s, "\n", "%0A")
+	// s = strings.ReplaceAll(s, "\n", "%0A")
+	s = strings.ReplaceAll(s, "\n", "")
 	s = strings.ReplaceAll(s, ",", "%2C")
 
 	return s

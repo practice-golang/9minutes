@@ -14,7 +14,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-var bm = bluemonday.UGCPolicy()
+var bm = bluemonday.UGCPolicy().AllowAttrs("style").OnElements("span").AllowElements("p")
 var indexPaths = []string{"", "admin", "board"}
 var boardActions = []string{"list", "read", "write", "edit"}
 

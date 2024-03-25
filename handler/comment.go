@@ -288,6 +288,11 @@ func UpdateCommentAPI(c *fiber.Ctx) error {
 	}
 	comment.Idx = null.IntFrom(int64(commentIdxINT))
 
+	comment.Content = null.StringFrom(bm.Sanitize(comment.Content.String))
+	if comment.Content.String == "" {
+		return c.Status(http.StatusBadRequest).SendString("comment is empty")
+	}
+
 	err = crud.UpdateComment(board, comment, fmt.Sprint(topicIdx))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())

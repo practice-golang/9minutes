@@ -1,14 +1,8 @@
 # Todo
 
-
-* [ ] Check ownership before remove
-    * [ ] Check grant or password when attachment delete
-        * [ ] Topic
-        * [ ] Comment
-    * [ ] Check user grant
-        * [ ] Topic
-        * [ ] Comment
-    * [ ] Admin - delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Clean up temporary uploads
+* [ ] Add editor link target `_blank`
+* [ ] Add regdate to upload table
+* [ ] Admin - manager page to delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Clean up temporary uploads
 * [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment

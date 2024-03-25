@@ -208,6 +208,11 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 		}
 	}
 
+	topic.Content = null.StringFrom(bm.Sanitize(topic.Content.String))
+	if topic.Content.String == "" {
+		return c.Status(http.StatusBadRequest).SendString("content is empty")
+	}
+
 	_, topicIdx, err := crud.WriteTopic(board, topic)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
@@ -312,6 +317,11 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 			topic.TitleImage = null.StringFrom(fnameTo)
 			break
 		}
+	}
+
+	topic.Content = null.StringFrom(bm.Sanitize(topic.Content.String))
+	if topic.Content.String == "" {
+		return c.Status(http.StatusBadRequest).SendString("content is empty")
 	}
 
 	err = crud.UpdateTopic(board, topic, "update")
