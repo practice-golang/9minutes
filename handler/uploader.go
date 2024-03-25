@@ -102,6 +102,7 @@ func FilesInfo(c *fiber.Ctx) (err error) {
 	return c.Status(http.StatusOK).JSON(result)
 }
 
+// DeleteFiles - Delete only new uploaded
 func DeleteFiles(c *fiber.Ctx) (err error) {
 	type uploadIdx struct {
 		Idx null.Int `json:"idx" db:"IDX"`
@@ -123,7 +124,7 @@ func DeleteFiles(c *fiber.Ctx) (err error) {
 			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 		}
 
-		err = crud.DeleteUploadedFile(f.Idx.Int64)
+		err = crud.DeleteUploadedFile(f.Idx.Int64, -1, -1)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 		}

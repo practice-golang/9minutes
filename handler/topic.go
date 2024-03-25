@@ -191,9 +191,9 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 			fext := filepath.Ext(filename)
 			fname := filename[0 : len(filename)-len(fext)]
 
-			fpathFrom := "upload/" + filename
+			fpathFrom := config.UploadPath + "/" + filename
 			fnameTo := fname + "_thumb.png"
-			fpathTo := "upload/" + fnameTo
+			fpathTo := config.UploadPath + "/" + fnameTo
 
 			if !CheckFileExtensionIsImage(filename) {
 				continue
@@ -214,7 +214,7 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 	}
 
 	for _, fdata := range fdatas {
-		crud.SetUploadedFileIndex(fdata.Idx.Int64, topicIdx, int64(-1))
+		crud.SetUploadedFileIndex(fdata.Idx.Int64, topicIdx, int64(-1), "write")
 	}
 
 	result := map[string]interface{}{"result": "success"}
@@ -223,7 +223,6 @@ func WriteTopicAPI(c *fiber.Ctx) (err error) {
 
 func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 	var topic model.Topic
-	var deleteList model.FilesToDelete
 
 	boardCode := c.Params("board_code")
 	board := BoardListData[boardCode]
@@ -283,8 +282,8 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
+	var imIndices []int
 	if strings.TrimSpace(topic.Files.String) != "" {
-		var imIndices []int
 		imIndicesStr := strings.Split(topic.Files.String, "|")
 
 		for _, imIdxStr := range imIndicesStr {
@@ -298,9 +297,9 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 			fext := filepath.Ext(filename)
 			fname := filename[0 : len(filename)-len(fext)]
 
-			fpathFrom := "upload/" + filename
+			fpathFrom := config.UploadPath + "/" + filename
 			fnameTo := fname + "_thumb.png"
-			fpathTo := "upload/" + fnameTo
+			fpathTo := config.UploadPath + "/" + fnameTo
 
 			if !CheckFileExtensionIsImage(filename) {
 				continue
@@ -320,12 +319,41 @@ func UpdateTopicAPI(c *fiber.Ctx) (err error) {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	err = json.Unmarshal(rbody, &deleteList)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	imIndices = []int{}
+	var fdatas []model.StoredFileInfo
+	if strings.TrimSpace(topic.Files.String) != "" {
+		imIndicesStr := strings.Split(topic.Files.String, "|")
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fdatas, _ = crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			crud.SetUploadedFileIndex(fdata.Idx.Int64, topicPrev.Idx.Int64, -1, "update")
+		}
 	}
 
-	DeleteUploadFile("upload/" + topicPrev.TitleImage.String)
+	imIndices = []int{}
+	if strings.TrimSpace(topic.DeleteFiles.String) != "" {
+		imIndicesStr := strings.Split(topic.DeleteFiles.String, "|")
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fdatas, _ = crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			crud.DeleteUploadedFile(fdata.Idx.Int64, topicPrev.Idx.Int64, -1)
+			if fdata.StorageName.Valid && fdata.StorageName.String != "" {
+				DeleteUploadFile(config.UploadPath + "/" + fdata.StorageName.String)
+			}
+		}
+	}
+
+	if topicPrev.TitleImage.Valid && topicPrev.TitleImage.String != "" {
+		DeleteUploadFile(config.UploadPath + "/" + topicPrev.TitleImage.String)
+	}
 
 	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
@@ -386,6 +414,11 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(result)
 	}
 
+	err = crud.DeleteTopic(board, idx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
 	uploadIndices := strings.Split(topic.Files.String, "|")
 	for _, f := range uploadIndices {
 		if f == "" {
@@ -401,21 +434,20 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 			continue
 		}
 
-		err = crud.DeleteUploadedFile(int64(fidx))
+		err = crud.DeleteUploadedFile(int64(fidx), topic.Idx.Int64, -1)
 		if err != nil {
 			continue
 		}
 
 		filepath := config.UploadPath + "/" + fdata.StorageName.String
-		DeleteUploadFile(filepath)
+		if fdata.StorageName.Valid && fdata.StorageName.String != "" {
+			DeleteUploadFile(filepath)
+		}
 	}
 
-	err = crud.DeleteTopic(board, idx)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	if topic.TitleImage.Valid && topic.TitleImage.String != "" {
+		DeleteUploadFile(config.UploadPath + "/" + topic.TitleImage.String)
 	}
-
-	DeleteUploadFile("upload/" + topic.TitleImage.String)
 
 	commentListOption := model.CommentListingOptions{}
 	commentListOption.Page = null.IntFrom(int64(0))
@@ -428,6 +460,11 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 			indices := strings.Split(c.Files.String, "|")
 			uploadIndices = append(uploadIndices, indices...)
 		}
+	}
+
+	err = crud.DeleteComments(board, idx)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	for _, f := range uploadIndices {
@@ -444,18 +481,17 @@ func DeleteTopicAPI(c *fiber.Ctx) error {
 			continue
 		}
 
-		err = crud.DeleteUploadedFile(int64(fidx))
+		topicIDX, _ := strconv.ParseInt(fdata.TopicIdx.String, 10, 64)
+		commentIDX, _ := strconv.ParseInt(fdata.CommentIdx.String, 10, 64)
+		err = crud.DeleteUploadedFile(int64(fidx), topicIDX, commentIDX)
 		if err != nil {
 			continue
 		}
 
 		filepath := config.UploadPath + "/" + fdata.StorageName.String
-		DeleteUploadFile(filepath)
-	}
-
-	err = crud.DeleteComments(board, idx)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+		if fdata.StorageName.Valid && fdata.StorageName.String != "" {
+			DeleteUploadFile(filepath)
+		}
 	}
 
 	result := map[string]interface{}{"result": "success"}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -25,7 +26,11 @@ func GetRandomString(length int) string {
 
 func DeleteUploadFile(filepath string) {
 	if _, err := os.Stat(filepath); err == nil {
-		os.Remove(filepath)
+		err = os.Remove(filepath)
+		if err != nil {
+			log.Println("Remove failed:", err.Error())
+			log.Println("filepath:", filepath)
+		}
 	}
 }
 

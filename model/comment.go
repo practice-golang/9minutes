@@ -30,6 +30,7 @@ type Comment struct {
 	AuthorIpFull null.String `json:"-"              db:"AUTHOR_IP"      npskip:"select, update, read, viewcount"`
 	AuthorIP     null.String `json:"author-ip"      db:"AUTHOR_IP_CUT"  npskip:"update, viewcount"`
 	EditPassword null.String `json:"edit-password"  db:"EDIT_PASSWORD"  npskip:"update, viewcount"`
-	Files        null.String `json:"files"          db:"FILES"`
+	Files        null.String `json:"files"          db:"FILES"          npskip:"viewcount"`
+	DeleteFiles  null.String `json:"delete-files"   db:"-"              npskip:"insert, select, update, read, viewcount"`
 	RegDate      null.String `json:"regdate"        db:"REGDATE"        npskip:"update"`
 }

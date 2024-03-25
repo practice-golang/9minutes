@@ -214,10 +214,17 @@
         for (const f of attachmentList["mod"]) { flist += `${f.idx}|` }
         if (flist.length > 0) { flist = flist.slice(0, -1) }
 
+        let filesToDelete = "";
+        for (const f of attachmentList["reserve-delete"]) {
+            filesToDelete += `${f.fidx}|`
+        }
+        filesToDelete = filesToDelete.slice(0, -1)
+
         const data = {
             "title": title,
             "content": initialContent,
-            "files": flist
+            "files": flist,
+            "delete-files": filesToDelete
         }
 
         const uri = `/api/board/${boardCode}/topic/${topicIdx}`
@@ -233,18 +240,12 @@
         }
 
         const r = await fetch(uri, req)
-
         if (r.ok) {
-            for (const i in attachmentList["reserve-delete"]) {
-                const finfo = attachmentList["reserve-delete"][i]
-                await deleteFile(finfo.fidx, finfo.storagename)
-            }
-
             location.href = `/board/list?board_code=${boardCode}`
-        } else {
-            alert("Write failed")
+            return
         }
-
+        
+        alert("Write failed")
         return false
     }
 

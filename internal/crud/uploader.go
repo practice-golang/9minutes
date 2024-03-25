@@ -110,10 +110,16 @@ func AddUploadedFile(fileName, storageName string) (int64, int64, error) {
 	return count, idx, nil
 }
 
-func DeleteUploadedFile(idx int64) (err error) {
+func DeleteUploadedFile(idx, topicIDX, commentIDX int64) (err error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
-	where := np.CreateWhereString(map[string]interface{}{"IDX": idx}, dbtype, "=", "AND", "", false)
+
+	dataWhere := map[string]interface{}{
+		"IDX":         idx,
+		"TOPIC_IDX":   topicIDX,
+		"COMMENT_IDX": commentIDX,
+	}
+	where := np.CreateWhereString(dataWhere, dbtype, "=", "AND", "", false)
 
 	sql := `
 	DELETE
@@ -128,11 +134,20 @@ func DeleteUploadedFile(idx int64) (err error) {
 	return nil
 }
 
-func SetUploadedFileIndex(idx, topicIDX, commentIDX int64) (err error) {
+func SetUploadedFileIndex(idx, topicIDX, commentIDX int64, mode string) (err error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
 
 	dataWhere := map[string]interface{}{"IDX": idx}
+	switch mode {
+	case "write":
+		dataWhere["TOPIC_IDX"] = -1
+		dataWhere["COMMENT_IDX"] = -1
+	case "update":
+		dataWhere["TOPIC_IDX"] = -1
+		dataWhere["COMMENT_IDX"] = -1
+	}
+
 	where := np.CreateWhereString(dataWhere, dbtype, "=", "AND", "", false)
 
 	data := map[string]string{}

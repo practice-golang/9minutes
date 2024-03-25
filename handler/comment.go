@@ -6,6 +6,7 @@ import (
 	"9minutes/internal/crud"
 	"9minutes/model"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -190,9 +191,26 @@ func WriteCommentAPI(c *fiber.Ctx) (err error) {
 	now := time.Now().Format("20060102150405")
 	comment.RegDate = null.StringFrom(now)
 
-	err = crud.WriteComment(board, comment)
+	// err = crud.WriteComment(board, comment)
+	_, commentIdx, err := crud.WriteComment(board, comment)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	var imIndices []int
+	var fdatas []model.StoredFileInfo
+	if strings.TrimSpace(comment.Files.String) != "" {
+		imIndicesStr := strings.Split(comment.Files.String, "|")
+
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fdatas, _ = crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			crud.SetUploadedFileIndex(fdata.Idx.Int64, topicIdx, commentIdx, "write")
+		}
 	}
 
 	result := map[string]interface{}{"result": "success"}
@@ -275,6 +293,37 @@ func UpdateCommentAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
+	var imIndices []int
+	if strings.TrimSpace(comment.Files.String) != "" {
+		imIndicesStr := strings.Split(comment.Files.String, "|")
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fdatas, _ := crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			crud.SetUploadedFileIndex(fdata.Idx.Int64, commentPrev.TopicIdx.Int64, commentPrev.Idx.Int64, "update")
+		}
+	}
+
+	imIndices = []int{}
+	if strings.TrimSpace(comment.DeleteFiles.String) != "" {
+		imIndicesStr := strings.Split(comment.DeleteFiles.String, "|")
+		for _, imIdxStr := range imIndicesStr {
+			imIdx, _ := strconv.ParseInt(imIdxStr, 0, 64)
+			imIndices = append(imIndices, int(imIdx))
+		}
+
+		fdatas, _ := crud.GetUploadedFiles(imIndices)
+		for _, fdata := range fdatas {
+			crud.DeleteUploadedFile(fdata.Idx.Int64, commentPrev.TopicIdx.Int64, commentPrev.Idx.Int64)
+			if fdata.StorageName.Valid && fdata.StorageName.String != "" {
+				DeleteUploadFile(config.UploadPath + "/" + fdata.StorageName.String)
+			}
+		}
+	}
+
 	result := map[string]interface{}{"result": "success"}
 	return c.Status(http.StatusOK).JSON(result)
 }
@@ -353,13 +402,19 @@ func DeleteCommentAPI(c *fiber.Ctx) error {
 			continue
 		}
 
-		err = crud.DeleteUploadedFile(int64(fidx))
+		topicIDX, _ := strconv.ParseInt(fdata.TopicIdx.String, 10, 64)
+		commentIDX, _ := strconv.ParseInt(fdata.CommentIdx.String, 10, 64)
+		err = crud.DeleteUploadedFile(int64(fidx), topicIDX, commentIDX)
 		if err != nil {
 			continue
 		}
 
-		filepath := config.UploadPath + "/" + fdata.StorageName.String
-		DeleteUploadFile(filepath)
+		if fdata.StorageName.Valid && fdata.StorageName.String != "" {
+			filepath := config.UploadPath + "/" + fdata.StorageName.String
+			DeleteUploadFile(filepath)
+		} else {
+			log.Println("Empty filename:", fdata)
+		}
 	}
 
 	err = crud.DeleteComment(board, fmt.Sprint(topicIdx), fmt.Sprint(commentIdx))

@@ -309,12 +309,13 @@
     const attachmentList = {
         "topic": [],
         "comment-new": [],     // files when create comment
-        "comment-mod": [],     // new and previous files when edit comment
+        "comment-edit": [],     // new and previous files when edit comment
         "comment-prev": [],    // previous files when edit comment
         "reserve-delete": [],  // previous files which will be deleted when edit comment
     }
 
     const imageUploadCallback = (idx) => function (response) {
+        console.log(idx, response)
         if (response.message == "success") {
             let fcontainer = document.querySelector("#writer-fileslist-container > ul")
             if (idx) {
@@ -327,7 +328,7 @@
                 let key = "comment-new"
                 let functionName = "deleteFile"
                 if (idx) {
-                    key = "comment-mod"
+                    key = "comment-edit"
                     functionName = "deleteFile"
                 }
                 const btn = document.createElement("button")
@@ -427,7 +428,7 @@
         if (commentIDX) {
             targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
             container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
-            targetAttachKey = "comment-mod"
+            targetAttachKey = "comment-edit"
         }
 
         container.querySelector(`#file-${fidx}`).remove()
@@ -461,7 +462,7 @@
         if (commentIDX) {
             targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
             container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
-            targetAttachKey = "comment-mod"
+            targetAttachKey = "comment-edit"
         }
 
         const r = await fetch(uri, {
@@ -501,7 +502,7 @@
     const options = {
         uploadActionURI: "/api/uploader",
         uploadAccessURI: "/upload",
-        uploadCallback: imageUploadCallback(null),
+        uploadCallback: imageUploadCallback(null)
     }
 
     "{{if eq .GrantComment true}}"
@@ -544,7 +545,7 @@
      */
     async function getComments(page = 1) {
         attachmentList["comment-prev"] = []
-        attachmentList["comment-mod"] = []
+        attachmentList["comment-edit"] = []
         attachmentList["reserve-delete"] = []
 
         page = parseInt(page)
@@ -695,7 +696,7 @@
         if (idx) {
             fileIdxes = commentsFileIdxes[parseInt(idx)].split("|")
             targetContainer = `#comment-files-container-${idx} > ul`
-            targetAttachKey = "comment-mod"
+            targetAttachKey = "comment-edit"
         }
 
         if (!targetEL) {
@@ -766,7 +767,7 @@
     }
 
     async function openEditComment(idx) {
-        attachmentList["comment-mod"] = []
+        attachmentList["comment-edit"] = []
         attachmentList["comment-prev"] = []
 
         const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
@@ -777,7 +778,7 @@
         const options = {
             uploadActionURI: "/api/uploader",
             uploadAccessURI: "/upload",
-            uploadCallback: imageUploadCallback(idx),
+            uploadCallback: imageUploadCallback(idx)
         }
 
         if (!editorEL.hasChildNodes()) {
@@ -801,11 +802,11 @@
         const attachList = modifierROOT.querySelector("#modifier-fileslist-container > ul")
         await getFilesInfo(idx, attachList, true)
 
-        for (const i in attachmentList["comment-mod"]) {
+        for (const i in attachmentList["comment-edit"]) {
             const finfo = {
-                "filename": attachmentList["comment-mod"][i].filename,
-                "idx": attachmentList["comment-mod"][i].idx,
-                "storagename": attachmentList["comment-mod"][i].storagename
+                "filename": attachmentList["comment-edit"][i].filename,
+                "idx": attachmentList["comment-edit"][i].idx,
+                "storagename": attachmentList["comment-edit"][i].storagename
             }
             attachmentList["comment-prev"].push(finfo)
         }
@@ -862,7 +863,7 @@
         const content = commentModifiers[modifierEL.id].getHTML()
 
         let flist = ""
-        for (f of attachmentList["comment-mod"]) {
+        for (f of attachmentList["comment-edit"]) {
             let isDelete = false
             for (const fdelete of attachmentList["reserve-delete"]) {
                 if (f.idx == fdelete.idx) {
@@ -875,9 +876,16 @@
         }
         if (flist.length > 0) { flist = flist.slice(0, -1) }
 
+        let filesToDelete = "";
+        for (const f of attachmentList["reserve-delete"]) {
+            filesToDelete += `${f.fidx}|`
+        }
+        filesToDelete = filesToDelete.slice(0, -1)
+
         const data = {
             "content": content,
-            "files": flist
+            "files": flist,
+            "delete-files": filesToDelete
         }
 
         const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
@@ -901,11 +909,6 @@
         const r = await fetch(uri, req)
 
         if (r.ok) {
-            for (const i in attachmentList["reserve-delete"]) {
-                const finfo = attachmentList["reserve-delete"][i]
-                await deleteFile(commentIDX, finfo.fidx, finfo.storagename)
-            }
-
             if (currentCommentPage == totalCommentPage) {
                 await getComments(totalCommentPage)
             } else {
@@ -927,16 +930,15 @@
 
         modifierEL.style.display = "none"
 
-
         const fprev = attachmentList["comment-prev"].map(JSON.stringify)
-        const fnew = attachmentList["comment-mod"].map(JSON.stringify)
-        const fdeletes = attachmentList["comment-mod"].filter(obj => !fprev.includes(JSON.stringify(obj)))
+        const fnew = attachmentList["comment-edit"].map(JSON.stringify)
+        const fdeletes = attachmentList["comment-edit"].filter(obj => !fprev.includes(JSON.stringify(obj)))
         for (const i in fdeletes) {
             await deleteFile(commentIDX, fdeletes[i].idx, fdeletes[i].storagename)
         }
 
         attachmentList["comment-prev"] = []
-        attachmentList["comment-mod"] = []
+        attachmentList["comment-edit"] = []
         attachmentList["reserve-delete"] = []
     }
 

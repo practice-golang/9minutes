@@ -11,11 +11,10 @@ var (
 )
 
 var (
-	AdminUserCountPerPage  int = 10
-	AdminBoardCountPerPage int = 10
-	TopicCountPerPage      int = 30
-	// CommentCountPerPage    int = 50
-	CommentCountPerPage int = 2
+	AdminUserCountPerPage  int = 20
+	AdminBoardCountPerPage int = 20
+	TopicCountPerPage      int = 20
+	CommentCountPerPage    int = 20
 )
 
 var (

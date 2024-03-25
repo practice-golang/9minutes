@@ -118,7 +118,8 @@ func GetComments(board model.Board, contentIdx string, commentListOption model.C
 	return result, nil
 }
 
-func WriteComment(board model.Board, content model.Comment) error {
+// func WriteComment(board model.Board, content model.Comment) error {
+func WriteComment(board model.Board, content model.Comment) (int64, int64, error) {
 	tableName := db.GetFullTableName(board.CommentTable.String)
 
 	content.Content.String = EscapeString(content.Content.String)
@@ -132,12 +133,14 @@ func WriteComment(board model.Board, content model.Comment) error {
 		` + column.Value + `
 	)`
 
-	_, err := db.Con.Exec(sql)
+	count, idx, err := db.Obj.Exec(sql, []interface{}{}, "IDX")
 	if err != nil {
-		return err
+		// return err
+		return 0, -1, err
 	}
 
-	return nil
+	// return nil
+	return count, idx, nil
 }
 
 func UpdateComment(board model.Board, comment model.Comment, topicIdx string) error {

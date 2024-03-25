@@ -1,17 +1,14 @@
 # Todo
 
-* [ ] Check grant or password when attachment delete
-    * [x] Append `TOPIC_IDX` to upload table
-    * [ ] Write IDX to upload table
-        * [x] Topic write
-        * [ ] Topic edit
-        * [ ] Comment write
-        * [ ] Comment edit
-    * [ ] Check ownership before remove
-        * [ ] Delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Probably temporary upload
-        * [ ] Check user grant
-            * [ ] Topic
-            * [ ] Comment
+
+* [ ] Check ownership before remove
+    * [ ] Check grant or password when attachment delete
+        * [ ] Topic
+        * [ ] Comment
+    * [ ] Check user grant
+        * [ ] Topic
+        * [ ] Comment
+    * [ ] Admin - delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Clean up temporary uploads
 * [ ] Write/Update/Upload text/file size limit
     * Topic
     * Comment
@@ -92,6 +89,13 @@
     * [x] Topic write - cancel only, history.back not work
     * [x] Topic edit
     * [x] Comment
+* [x] Append `TOPIC_IDX` to upload table
+* [x] Write IDX to upload table
+    * [x] Topic write
+    * [x] Topic edit
+    * [x] Comment write
+    * [x] Comment edit
+    * [x] Add `no index` when delete new upload
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
