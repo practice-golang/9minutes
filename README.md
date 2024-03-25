@@ -27,17 +27,14 @@ See `setup.go` and `router.go`
 
 
 ## Database
-* Requirement - Account which possible to create/drop database, schema, table
-* Support
-    * SQLite3
-    * MySQL, MariaDB >= 10.3
-    * PostgresSQL >= 12.3
-    * SQL Server >= 2014
-    * Oracle >= 12c
+* SQLite3
+* MySQL, MariaDB >= 10.3
+* PostgresSQL >= 12.3
+* SQL Server >= 2014
+* Oracle >= 12c
 
 
 ## Email sending
-
 * For the purpose of user verification and password reset
 * See `config.ini`
 * You can choose `smtp` or `direct sending`
@@ -45,7 +42,7 @@ See `setup.go` and `router.go`
     * Also most of cloud service blocked port 25 so you probably can not use it
 * Get DKIM files - If not yet have dkim files
 ```sh
-$ ./9minutes -get dkim
+./9minutes -get dkim
 ```
 
 
