@@ -1,0 +1,75 @@
+@uri = http://localhost:5525
+@cookie = session_id=9bd0d1af-f2cc-4963-8319-62063b4fbd21; max-age=86400; path=/; HttpOnly; SameSite=Lax
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "1111"
+}
+
+### User list
+GET {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### User list - page
+GET {{uri}}/api/admin/user?page=2&list-count=5
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### User list - search
+GET {{uri}}/api/admin/user?search=ad
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Add user
+POST {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "userid": "user",
+    "password": "user",
+    "email": "user@example.com",
+    "grade": "user_hold",
+    "approval": "N"
+}
+
+### Edit user
+PUT {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    {
+        "idx": 204,
+        "userid": "userb",
+        "email": "userb@example.com",
+        "grade": "user_hold"
+    }
+]
+
+### Delete user - Just update grade as Quited user
+DELETE {{uri}}/api/admin/user
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 10 },
+    { "idx": 17 }
+]
+
+### Delete user - Delete. not default
+DELETE {{uri}}/api/admin/user?mode=delete
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": "15" },
+    { "idx": "17" }
+]

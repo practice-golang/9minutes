@@ -1,76 +1,37 @@
-<html lang="ko">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-
-    <title>Sign up</title>
-</head>
-
-<body>
-    <div>
-        <input type="text" name="username" value="" placeholder="Username" required />
-        <input type="password" name="password" value="" placeholder="Password" required />
-        <input type="text" name="email" value="" placeholder="Email" required />
-        <!-- <input type="text" name="phone" value="" placeholder="Phone" required /> -->
-    </div>
-
-    <div>
-        <img id="captcha-image" src="/api/captcha/$CAPTCHAID$.png" alt="Captcha image">
-        <a onclick="reloadCaptcha()">Reload</a>
-        <input type=hidden name="captcha-id" value="$CAPTCHAID$"><br>
-        <input name=captcha-answer placeholder="Write number in image" />
-    </div>
-
-    <button type="button" onclick="location.href='/'">Cancel</button>
-    <button type="button" onclick="signup()">Sign up</button>
-</body>
+{{template "layout_nomenu_header" .}}
 
 <script>
-    let captchaID = "$CAPTCHAID$";
+    document.title = "Sign up"
+</script>
 
+<div>
+    <input type="text" name="userid" value="" placeholder="userid" required />
+    <input type="password" name="password" value="" placeholder="Password" required />
+    <input type="text" name="email" value="" placeholder="Email" required />
+</div>
+
+<button type="button" onclick="location.href='/'">Cancel</button>
+<button type="button" onclick="signup()">Sign up</button>
+
+<script>
     async function signup() {
-        let data = {
-            username: document.querySelector('input[name="username"]').value,
+        const data = {
+            userid: document.querySelector('input[name="userid"]').value,
             password: document.querySelector('input[name="password"]').value,
             email: document.querySelector('input[name="email"]').value,
-            // phone: document.querySelector('input[name="phone"]').value
-
-            "captcha-id": document.querySelector('input[name="captcha-id"]').value,
-            "captcha-answer": document.querySelector('input[name="captcha-answer"]').value
         }
 
-        let r = await fetch('/api/signup', {
+        const r = await fetch('/api/signup', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
 
         if (r.ok) {
+            alert("Registered. Please login")
             location.href = '/'
-        } else {
-            alert(await r.text())
-            renewCaptcha()
         }
-    }
-
-    async function renewCaptcha() {
-        const r = await fetch('/api/captcha', { method: 'PATCH' })
-
-        if (r.ok) {
-            const data = await r.json()
-            captchaID = data["captcha-id"]
-
-            document.querySelector('#captcha-image').src = `/api/captcha/${captchaID}.png`
-            document.querySelector('input[name="captcha-id"]').value = captchaID
-        }
-    }
-
-    async function reloadCaptcha() {
-        const now = new Date()
-        document.querySelector('#captcha-image').src = `/api/captcha/${captchaID}.png?reload=${now.getTime()}`
     }
 </script>
 
-</html>
+{{template "layout_nomenu_footer" .}}

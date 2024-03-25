@@ -1,11 +1,13 @@
-@INCLUDE@include/header.html
+{{template "layout_header" .}}
 
 <script>
     document.title = "Hello!!"
 </script>
 
-Hello World!
-Hello $USERNAME$!!
+{{if eq .UserInfo.UserID ""}}
+Hello <b>Guest</b>!!
+{{else}}
+Hello <b>{{.UserInfo.UserID}}</b>!!
+{{end}}
 
-
-@INCLUDE@include/footer.html
+{{template "layout_footer" .}}

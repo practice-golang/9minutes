@@ -1,0 +1,18 @@
+@uri = http://localhost:5525
+@cookie = session_id=2ae039ff-f638-4fbe-99c7-9d50378eeef7;
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+
+### Get user grade list
+GET {{uri}}/api/admin/user-grades
+Cookie: {{cookie}}

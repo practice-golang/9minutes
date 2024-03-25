@@ -1,390 +1,333 @@
 package handler
 
 import (
-	"9minutes/auth"
 	"9minutes/consts"
-	"9minutes/crud"
-	"9minutes/db"
-	"9minutes/email"
+	"9minutes/internal/crud"
+	"9minutes/internal/email"
 	"9minutes/model"
-	"9minutes/np"
-	"9minutes/router"
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/blockloop/scan"
-	"github.com/dchest/captcha"
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v4"
 
-	"github.com/mileusna/useragent"
+	qrcode "github.com/skip2/go-qrcode"
+	"github.com/xlzd/gotp"
 )
 
-func Login(c *router.Context) {
-	failBody := `<meta http-equiv="refresh" content="2; url=/"></meta>`
+func GetUserListAPI(c *fiber.Ctx) error {
+	queries := c.Queries()
 
-	destination := c.FormValue("destination")
-	if destination == "" {
-		destination = "/"
+	search := strings.TrimSpace(queries["search"])
+	page := 1
+	if queries["page"] != "" {
+		page, _ = strconv.Atoi(queries["page"])
+		if page <= 0 {
+			page = 1
+		}
+	}
+	listCount := 10
+	if queries["list-count"] != "" {
+		listCount, _ = strconv.Atoi(queries["list-count"])
 	}
 
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-
-	if username == "" || password == "" {
-		c.Html(http.StatusBadRequest, []byte(failBody+`Missing parameter`))
-		return
+	listingOption := model.UserListingOption{
+		Search:    null.StringFrom(search),
+		Page:      null.IntFrom(int64(page)),
+		ListCount: null.IntFrom(int64(listCount)),
 	}
 
-	var users []model.UserData
-	table := db.GetFullTableName(db.Info.UserTable)
-	dbtype := db.GetDatabaseTypeString()
+	/* Todo: Move to setup */
+	// columnNames, _ := crud.GetUserColumnsList()
+	columnNames := UserColumnsData
 
-	column := np.CreateString(model.UserData{}, dbtype, "", false)
-	where := np.CreateString(map[string]interface{}{"USERNAME": nil}, dbtype, "", false)
-	whereAND := np.CreateString(map[string]interface{}{"GRADE": nil}, dbtype, "", false)
+	selectUserColumnsMap := map[string]interface{}{}
+	for _, c := range columnNames {
+		if c.ColumnName.Valid && c.ColumnName.String != "PASSWORD" {
+			selectUserColumnsMap[c.ColumnName.String] = nil
+		}
+	}
+	/* Todo: Move to setup */
 
-	sql := `
-	SELECT
-		` + column.Names + `
-	FROM ` + table + `
-	WHERE ` + where.Names + `='` + username + `'
-		AND ` + whereAND.Names + `!='` + "resigned_user" + `'`
-
-	rows, err := db.Con.Query(sql)
+	result, err := crud.GetUsersListMap(selectUserColumnsMap, listingOption)
 	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`DB error or User may not exists`))
-		return
-	}
-	defer rows.Close()
-
-	err = scan.Rows(&users, rows)
-	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`User may not exists`))
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	if len(users) == 0 {
-		c.Html(http.StatusBadRequest, []byte(failBody+`User not exists`))
-		return
+	for i := range result.UserList {
+		result.UserList[i]["password"] = ""
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password.String), []byte(password))
-	if err != nil {
-		c.Html(http.StatusBadRequest, []byte(failBody+`Check password`))
-		return
-	}
-
-	ua := useragent.Parse(c.Request.UserAgent())
-	deviceType := ""
-	switch true {
-	case ua.Desktop:
-		deviceType = "desktop"
-	case ua.Mobile:
-		deviceType = "mobile"
-	case ua.Tablet:
-		deviceType = "tablet"
-	case ua.Bot:
-		deviceType = "bot"
-	}
-
-	authinfo := model.AuthInfo{
-		Name:       null.NewString(username, true),
-		IpAddr:     null.NewString(c.RemoteAddr, true),
-		Device:     null.NewString(ua.Device, true),
-		DeviceType: null.NewString(deviceType, true),
-		Os:         null.NewString(ua.OS, true),
-		Browser:    null.NewString(ua.Name, true),
-		Duration:   null.NewInt(60*60*24*7, true),
-		// Duration: null.NewInt(10, true), // 10 seconds test
-	}
-
-	// auth.SetupCookieToken(c.ResponseWriter, authinfo)
-	auth.SetCookieSession(c, authinfo)
-
-	// c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
-	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=`+destination+`"></meta>`))
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-// Logout - Expire cookie
-func Logout(c *router.Context) {
-	auth.ExpireCookie(c.ResponseWriter)
-	auth.DestroyCookieSession(c)
-
-	// authinfo := model.AuthInfo{}
-	// if c.AuthInfo != nil {
-	// 	authinfo = c.AuthInfo.(model.AuthInfo)
-	// }
-	// c.Text(http.StatusOK, "Good bye "+authinfo.Name.String)
-	c.Html(http.StatusOK, []byte(`<meta http-equiv="refresh" content="0; url=/"></meta>`))
-}
-
-// Signup - Create new user
-func Signup(c *router.Context) {
+func AddUserAPI(c *fiber.Ctx) error {
 	var err error
 
 	now := time.Now().Format("20060102150405")
-	columnsCount, _ := crud.GetUserColumnsCount()
 
-	userIDX := ""
-	username := ""
-	useremail := ""
+	data := make(map[string]interface{})
 
-	rbody, err := io.ReadAll(c.Body)
+	err = c.BodyParser(&data)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	var captchaData map[string]string
-	err = json.Unmarshal(rbody, &captchaData)
+	password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	captchaResult := captcha.VerifyString(captchaData["captcha-id"], captchaData["captcha-answer"])
+	data["password"] = string(password)
+	data["regdate"] = now
 
-	if !captchaResult {
-		c.Text(http.StatusBadRequest, "Captcha is not correct")
-		return
-	}
-
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		var userData model.UserData
-
-		// err = json.NewDecoder(c.Body).Decode(&userData)
-		err = json.Unmarshal(rbody, &userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		password, err := bcrypt.GenerateFromPassword([]byte(userData.Password.String), consts.BcryptCost)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-		userData.Password = null.StringFrom(string(password))
-		userData.RegDTTM = null.StringFrom(now)
-		userData.Grade = null.StringFrom("pending_user")
-		userData.Approval = null.StringFrom("N")
-
-		if userData.UserName.String == "" {
-			c.Text(http.StatusBadRequest, "Username is empty")
-			return
-		}
-		if userData.Email.String == "" {
-			c.Text(http.StatusBadRequest, "Email is empty")
-			return
-		}
-		if userData.Password.String == "" {
-			c.Text(http.StatusBadRequest, "Password is empty")
-			return
-		}
-
-		err = crud.AddUser(userData)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		username = userData.UserName.String
-		useremail = userData.Email.String
-
-		userInsertResult, err := crud.GetUserByNameAndEmail(username, useremail)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		userIDX = fmt.Sprint(userInsertResult.Idx.Int64)
-	default:
-		userData := make(map[string]interface{})
-
-		// err = json.NewDecoder(c.Body).Decode(&userData)
-		err = json.Unmarshal(rbody, &userData)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		password, err := bcrypt.GenerateFromPassword([]byte(userData["password"].(string)), consts.BcryptCost)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		userData["password"] = string(password)
-		userData["reg-dttm"] = now
-		userData["grade"] = "pending_user"
-		userData["approval"] = "N"
-
-		if userData["username"].(string) == "" {
-			c.Text(http.StatusBadRequest, "Username is empty")
-			return
-		}
-		if userData["email"].(string) == "" {
-			c.Text(http.StatusBadRequest, "Email is empty")
-			return
-		}
-		if userData["password"].(string) == "" {
-			c.Text(http.StatusBadRequest, "Password is empty")
-			return
-		}
-
-		err = crud.AddUserMap(userData)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		username = userData["username"].(string)
-		useremail = userData["email"].(string)
-
-		userInsertResult, err := crud.GetUserByNameAndEmailMap(username, useremail)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		userIDX = userInsertResult.(map[string]interface{})["IDX"].(string)
-	}
-
-	verificationKEY := GetRandomString(32)
-	verificationData := map[string]string{
-		"USER_IDX": userIDX,
-		"TOKEN":    verificationKEY,
-	}
-
-	err = crud.AddUserVerification(verificationData)
+	err = crud.AddUserMap(data)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Send verification email
-	domain := email.Info.Domain
-	message := email.Message{
-		Service:          email.Info.Service,
-		AppendFromToName: false,
-		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
-		To:               email.To{Email: useremail, Name: username},
-		Subject:          "EnjoyTools - Email Verification",
-		Body: `
-		Please click the link below to verify your email address.
-		<br />
-		<a href='` + domain + `/verify?username=` + username + `&email=` + useremail + `&token=` + verificationKEY + `'>Click here</a>`,
-		BodyType: email.HTML,
-	}
-
-	if email.Info.UseEmail {
-		err = email.SendVerificationEmail(message)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
-		}
+		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
 	result := map[string]string{
 		"result": "ok",
 	}
 
-	c.Json(http.StatusOK, result)
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-func UserVerification(c *router.Context) {
+func UpdateUserAPI(c *fiber.Ctx) error {
 	var err error
 
-	queries := c.URL.Query()
-	username := queries.Get("username")
-	useremail := queries.Get("email")
-	token := queries.Get("token")
+	datas := []map[string]interface{}{}
+	datasSuccess := []map[string]interface{}{}
+	datasFailed := []map[string]interface{}{}
 
-	if username == "" || useremail == "" || token == "" {
-		c.Text(http.StatusBadRequest, "Not enough parameters")
-		return
-	}
-
-	result, err := crud.VerifyAndUpdateUser(username, useremail, token)
+	err = c.BodyParser(&datas)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	if !result {
-		c.Text(http.StatusBadRequest, "Invalid request")
-		return
+	for _, data := range datas {
+
+		if _, ok := data["password"]; ok && data["password"].(string) != "" {
+			password, err := bcrypt.GenerateFromPassword([]byte(data["password"].(string)), consts.BcryptCost)
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).SendString(err.Error())
+			}
+			data["password"] = string(password)
+		} else {
+			delete(data, "password")
+		}
+
+		err = crud.UpdateUserMap(data)
+		if err != nil {
+			responseData := map[string]interface{}{"data": data, "error": err.Error()}
+			datasFailed = append(datasFailed, responseData)
+			continue
+		}
+		responseData := map[string]interface{}{"data": data, "error": ""}
+		datasSuccess = append(datasSuccess, responseData)
 	}
 
-	c.Html(http.StatusOK, []byte(`
-	<script>
-		alert("Your email has been verified. You can now login.");
-		location.href = "/";
-	</script>
-	`))
+	result := map[string]interface{}{"result": "ok"}
+	if len(datasFailed) > 0 {
+		result["result"] = "failed"
+		result["failed"] = datasFailed
+		result["success"] = datasSuccess
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
 }
 
-func ResetPassword(c *router.Context) {
+func DeleteUserAPI(c *fiber.Ctx) error {
+	isDelete := false
+	queries := c.Queries()
+	if strings.TrimSpace(queries["mode"]) == "delete" {
+		isDelete = true
+	}
+
+	datas := []map[string]interface{}{}
+	datasSuccess := []map[string]interface{}{}
+	datasFailed := []map[string]interface{}{}
+
+	err := c.BodyParser(&datas)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	for _, data := range datas {
+		idx := int64(data["idx"].(float64))
+
+		if isDelete {
+			err = crud.DeleteUser(idx)
+		} else {
+			err = crud.QuitUser(idx)
+		}
+
+		if err != nil {
+			responseData := map[string]interface{}{"data": data, "error": err.Error()}
+			datasFailed = append(datasFailed, responseData)
+			continue
+		}
+		responseData := map[string]interface{}{"data": data, "error": ""}
+		datasSuccess = append(datasSuccess, responseData)
+	}
+
+	result := map[string]interface{}{"result": "ok"}
+	if len(datasFailed) > 0 {
+		result["result"] = "failed"
+		result["failed"] = datasFailed
+		result["success"] = datasSuccess
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func GetMyInfo(c *fiber.Ctx) error {
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	user, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	delete(user.(map[string]interface{}), "password")
+
+	return c.Status(http.StatusOK).JSON(user)
+}
+
+func UpdateMyInfo(c *fiber.Ctx) error {
 	var err error
 
-	columnsCount, _ := crud.GetUserColumnsCount()
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
 
-	username := c.FormValue("username")
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	dataOldRaw, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+	dataOld := dataOldRaw.(map[string]interface{})
+
+	dataNew := make(map[string]interface{})
+	err = json.Unmarshal(c.Body(), &dataNew)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).Send([]byte(err.Error()))
+	}
+
+	dataNew["idx"] = fmt.Sprint(dataOld["idx"].(int64))
+
+	if _, ok := dataNew["password"]; ok && dataNew["password"].(string) != "" {
+		err = bcrypt.CompareHashAndPassword([]byte(dataOld["password"].(string)), []byte(dataNew["old-password"].(string)))
+		if err != nil {
+			return c.Status(http.StatusBadRequest).Send([]byte("wrong password"))
+		}
+
+		password, err := bcrypt.GenerateFromPassword([]byte(dataNew["password"].(string)), consts.BcryptCost)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+		}
+
+		dataNew["password"] = string(password)
+		delete(dataNew, "old-password")
+	} else {
+		delete(dataNew, "password")
+		delete(dataNew, "old-password")
+	}
+
+	err = crud.UpdateUserMap(dataNew)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	result := map[string]string{
+		"result": "ok",
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func QuitUser(c *fiber.Ctx) error {
+	var err error
+
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	userid := sess.Get("userid")
+	if userid == nil {
+		return c.Status(http.StatusForbidden).Send([]byte("Unauthorized"))
+	}
+
+	dataRaw, err := crud.GetUserByNameMap(userid.(string))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+	data := dataRaw.(map[string]interface{})
+
+	err = crud.QuitUser(data["idx"].(int64))
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
+	}
+
+	result := map[string]string{
+		"result": "ok",
+	}
+
+	return c.Status(http.StatusOK).JSON(result)
+}
+
+func ResetPasswordAPI(c *fiber.Ctx) error {
+	var err error
+
+	userid := c.FormValue("userid")
 	useremail := c.FormValue("email")
 
-	if username == "" {
-		c.Text(http.StatusBadRequest, "Username is empty")
-		return
+	if userid == "" {
+		return c.Status(http.StatusBadRequest).Send([]byte("userid is empty"))
 	}
 	if useremail == "" {
-		c.Text(http.StatusBadRequest, "Email is empty")
-		return
+		return c.Status(http.StatusBadRequest).Send([]byte("Email is empty"))
 	}
 
 	password := GetRandomString(16)
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 	}
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		user, err := crud.GetUserByNameAndEmail(username, useremail)
-		if err != nil {
-			// c.Text(http.StatusInternalServerError, err.Error())
-			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
-			return
-		}
-
-		user.Password = null.StringFrom(string(passwordHash))
-		crud.UpdateUser(user)
-
-	default:
-		user, err := crud.GetUserByNameAndEmailMap(username, useremail)
-		if err != nil {
-			// c.Text(http.StatusInternalServerError, err.Error())
-			c.Html(http.StatusOK, []byte(consts.MsgPasswordResetUserNotFound))
-			return
-		}
-
-		user.(map[string]interface{})["password"] = string(passwordHash)
-		crud.UpdateUserMap(user.(map[string]interface{}))
+	user, err := crud.GetUserByNameAndEmailMap(userid, useremail)
+	if err != nil {
+		return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetUserNotFound))
 	}
+
+	user.(map[string]interface{})["password"] = string(passwordHash)
+	crud.UpdateUserMap(user.(map[string]interface{}))
 
 	// Send password reset email
 	message := email.Message{
 		Service:          email.Info.Service,
 		AppendFromToName: false,
 		From:             email.From{Email: email.Info.SenderInfo.Email, Name: email.Info.SenderInfo.Name},
-		To:               email.To{Email: useremail, Name: username},
+		To:               email.To{Email: useremail, Name: userid},
 		Subject:          "EnjoyTools - Password changed",
 		Body: `
 		The password for your account was changed on ` + time.Now().UTC().Format("2006-01-02 15:04:05 UTC") + `
@@ -396,96 +339,48 @@ func ResetPassword(c *router.Context) {
 	if email.Info.UseEmail {
 		err = email.SendVerificationEmail(message)
 		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-			return
+			return c.Status(http.StatusInternalServerError).Send([]byte(err.Error()))
 		}
 	}
 
-	c.Html(http.StatusOK, []byte(consts.MsgPasswordResetEmail))
+	return c.Status(http.StatusOK).Send([]byte(consts.MsgPasswordResetEmail))
 }
 
-func HandleUserList(c *router.Context) {
-	// Use struct with default columns or map with default and user defined columns
-	columnsCount, _ := crud.GetUserColumnsCount()
-	// columnsCount, _ := db.Obj.GetColumnCount(db.Info.UserTable)
+func LoadUserColumnDatas() {
+	UserColumnsData, _ = crud.GetUserColumnsList()
+}
 
-	// queries := c.URL.Query()
-	// search := queries.Get("search")
+func Get2FaQR(c *fiber.Ctx) error {
+	// randomSecret := gotp.RandomSecret(16)
+	randomSecret := "ILOYEUDHGQJUSG7WP4RRP3RLT4"
+	fmt.Println(randomSecret)
 
-	var err error
-	queries := c.URL.Query()
+	totp := gotp.NewDefaultTOTP(randomSecret)
+	fmt.Println("current one-time password is:", totp.Now())
 
-	listingOptions := model.UserListingOptions{}
-	listingOptions.Search = null.StringFrom(queries.Get("search"))
+	uri := totp.ProvisioningUri("user@email.com", consts.SiteName)
+	fmt.Println(uri)
 
-	listingOptions.Page = null.IntFrom(1)
-	listingOptions.ListCount = null.IntFrom(100)
-
-	if queries.Get("count") != "" {
-		countPerPage, err := strconv.Atoi(queries.Get("count"))
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		listingOptions.ListCount = null.IntFrom(int64(countPerPage))
-	}
-
-	if queries.Get("page") != "" {
-		page := queries.Get("page")
-		pageNum, err := strconv.Atoi(page)
-		if err != nil {
-			c.Text(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		listingOptions.Page = null.IntFrom(int64(pageNum))
-	}
-
-	listingOptions.Page.Int64--
-
-	h, err := LoadHTML(c)
+	// err := qrcode.WriteFile(uri, qrcode.Medium, 256, "qr.png")
+	qrb64, err := qrcode.Encode(uri, qrcode.Medium, 256)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, err.Error())
-		return
+		return err
 	}
 
-	var listJSON []byte
+	c.Set("Content-type", "image/png")
+	return c.Status(http.StatusOK).Send(qrb64)
+}
 
-	switch columnsCount {
-	case model.UserDataFieldCount:
-		// result, err := crud.GetUsersList(search)
-		// if err != nil {
-		// 	c.Text(http.StatusInternalServerError, err.Error())
-		// 	return
-		// }
+// func Verify2FA(randomSecret string) {
+func Verify2FA(c *fiber.Ctx) error {
+	randomSecret := "ILOYEUDHGQJUSG7WP4RRP3RLT4"
 
-		// c.Json(http.StatusOK, result)
+	totp := gotp.NewDefaultTOTP(randomSecret)
+	otpValue := totp.Now()
+	fmt.Println("current one-time password is:", otpValue)
 
-		list, err := crud.GetUsers(listingOptions)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-		}
+	ok := totp.Verify(otpValue, time.Now().Unix())
+	fmt.Println("verify OTP success:", ok)
 
-		listJSON, _ = json.Marshal(list)
-	default:
-		// result, err := crud.GetUsersListMap(search)
-		// if err != nil {
-		// 	c.Text(http.StatusInternalServerError, err.Error())
-		// 	return
-		// }
-
-		// c.Json(http.StatusOK, result)
-
-		list, err := crud.GetUsersMap(listingOptions)
-		if err != nil {
-			c.Text(http.StatusInternalServerError, err.Error())
-		}
-
-		listJSON, _ = json.Marshal(list)
-	}
-
-	h = bytes.ReplaceAll(h, []byte("$USER_LIST$"), listJSON)
-
-	c.Html(http.StatusOK, h)
+	return c.Status(http.StatusOK).Send([]byte(otpValue))
 }

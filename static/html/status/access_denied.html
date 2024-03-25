@@ -1,0 +1,28 @@
+<html>
+
+<head></head>
+
+<body>
+    <div class="title" data-content="404">
+        Access denied
+    </div>
+</body>
+
+<script>
+    addEventListener("DOMContentLoaded", function () {
+        let seconds = 1.5
+        const countdown = document.getElementById("countdown")
+
+        setInterval(function () {
+            seconds--
+
+            if (seconds <= 0) {
+                // history.back()
+                location.href = "/"
+                return false
+            }
+        }, 500)
+    })
+</script>
+
+</html>

@@ -1,5 +1,0 @@
-@uri = http://localhost:4416
-
-
-### Admin
-GET {{uri}}/api/admin/boards

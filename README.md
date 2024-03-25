@@ -1,75 +1,49 @@
 # 9minutes
 
-Bulletin board
-
-
-## Goal
-
-* Create
-    * HTML file server
-    * Simple Board with user account managing
-* Escape from vaporware :-p
-
+Bulletin board - Small forum application with user account managing
 
 ## Getting started
-
-* Download - See `Sample bins` at `Release`
-
+* Download binary or build from source
 * Run
 ```sh
-$ ./9minutes
+./9minutes
 ```
-* Modify `9minutes.ini` then run again `9minutes` binary
+* Modify `config.ini` then run again `9minutes` binary
 * Open `http://localhost:5525` in browser
-* Sign in with `admin` / `admin`
+* Sign in with initial account - `admin` / `admin`
 
 
 ## HTML modification
-
 * When html files are placed in storage, 9minutes load html files in real storage instead of embedded html
-* Get embedded html files
+* Get embedded html files by follow command then edit them
 ```sh
-$ ./9minutes -get html
+./9minutes -get html
 ```
-* Then, edit html files
-* `Files in admin directory` are not exported hence, if you want to modify them, clone this repository then modify and build
+* Files in `admin` directory are not exported hence, you should edit source
 
 
 ## API, Route
-
-See `setup.go` and `router_*.go`
-
-* Because of regex, used custom router
+See `setup.go` and `router.go`
 
 
-## DB
-
-* SQLite3 - Tested
-* MySQL - Tested with MariaDB 10.5
-* Postgres - Tested with PostgreSQL 12.3
-* SQL Server - Tested with MS SQL Server express 2014 & 2019
-* Oracle - Tested with 12c as local, 19c as autonomous database of oracle cloud. 11g or before not support
-
-
-## File access priority of router
-
-* When router request triggered, router find and load the html file as following table
-
-|        | embed | Find fs first |
-|--------|-------|---------------|
-| embed  | yes   | no            |
-| html   | yes   | yes           |
-| static | no    | yes           |
+## Database
+* Requirement - Account which possible to create/drop database, schema, table
+* Support
+    * SQLite3
+    * MySQL, MariaDB >= 10.3
+    * PostgresSQL >= 12.3
+    * SQL Server >= 2014
+    * Oracle >= 12c
 
 
 ## Email sending
 
 * For the purpose of user verification and password reset
-* See `9minutes.ini`
+* See `config.ini`
 * You can choose `smtp` or `direct sending`
 * When use `direct sending`, you should learn about domain, `DKIM`, `spf record`, `PTR record`
     * Also most of cloud service blocked port 25 so you probably can not use it
-* Get DKIM key files - If not yet generate dkim keys
+* Get DKIM files - If not yet have dkim files
 ```sh
 $ ./9minutes -get dkim
 ```
@@ -77,14 +51,8 @@ $ ./9minutes -get dkim
 
 ## Build
 
-* Set `GOBIN` to `./bin`
-* Windows
-```
-$ mingw32-make.exe
-```
-* Linux, Mac
-```
-$ make
+```sh
+make
 ```
 
 
@@ -117,21 +85,6 @@ server {
 ```powershell
 # https://caddyserver.com/docs/quick-starts/reverse-proxy
 caddy reverse-proxy --from :80 --to 127.0.0.1:5525
-```
-
-### Heroku
-
-* Append following variables to environment setting of dyno
-* Oracle wallet is not supported
-```
-PORT
-DATABASE_TYPE
-DATABASE_ADDRESS
-DATABASE_PORT
-DATABASE_PROTOCOL -> tcp
-DATABASE_NAME
-DATABASE_ID
-DATABASE_PASSWORD
 ```
 
 

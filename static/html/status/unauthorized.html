@@ -1,0 +1,32 @@
+<html>
+
+<head></head>
+
+<body>
+    <div class="title" data-content="401">
+        Unauthorized
+    </div>
+    <!-- <div>
+        <span id="countdown">5</span>Seconds
+    </div> -->
+</body>
+
+<script>
+    addEventListener("DOMContentLoaded", function () {
+        let seconds = 1.5
+        const countdown = document.getElementById("countdown")
+        // countdown.innerHTML = seconds
+
+        setInterval(function () {
+            seconds--
+            // countdown.innerHTML = seconds
+
+            if (seconds <= 0) {
+                location.href = "/"
+                return false
+            }
+        }, 500)
+    })
+</script>
+
+</html>

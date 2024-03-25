@@ -1,30 +1,24 @@
-package main
+package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
+	"net/http"
 	"os"
-	"time"
 
-	"9minutes/auth"
 	"9minutes/config"
-	"9minutes/db"
-	"9minutes/email"
-	"9minutes/fd"
 	"9minutes/handler"
-	"9minutes/logging"
+	"9minutes/internal/db"
+	"9minutes/internal/email"
 	"9minutes/model"
-	"9minutes/router"
-	"9minutes/wsock"
 
-	"github.com/alexedwards/scs/etcdstore"
-	"github.com/alexedwards/scs/redisstore"
-	"github.com/alexedwards/scs/v2"
-	"github.com/alexedwards/scs/v2/memstore"
-	"github.com/gomodule/redigo/redis"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/template/html/v2"
 
-	"github.com/rs/cors"
 	"gopkg.in/ini.v1"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -35,7 +29,7 @@ import (
 )
 
 func setupINI() {
-	iniPath := "9minutes.ini"
+	iniPath := "config.ini"
 
 	cfg, err := ini.Load(iniPath)
 	if err != nil {
@@ -50,13 +44,17 @@ func setupINI() {
 			log.Fatal("Create INI: ", err)
 		}
 
-		fmt.Println("9minutes.ini is created")
-		fmt.Println("Please modify 9minutes.ini then run again")
+		fmt.Println("config.ini is created")
+		fmt.Println("Please modify config.ini then run again")
 
 		os.Exit(1)
 	}
 
 	if cfg != nil {
+		if cfg.Section("").HasKey("SITE_NAME") {
+			config.SiteName = cfg.Section("").Key("SITE_NAME").String()
+		}
+
 		if cfg.Section("server").HasKey("ADDRESS") {
 			ListeningIP = cfg.Section("server").Key("ADDRESS").String()
 		}
@@ -74,25 +72,25 @@ func setupINI() {
 			handler.StoreRoot = cfg.Section("dirpaths").Key("HTML_PATH").String()
 		}
 
-		if cfg.Section("session").HasKey("STORE_TYPE") {
-			switch cfg.Section("session").Key("STORE_TYPE").String() {
-			case "etcd":
-				sessionStoreInfo.StoreType = auth.ETCD
-			case "redis":
-				sessionStoreInfo.StoreType = auth.REDIS
-			default:
-				sessionStoreInfo.StoreType = auth.MEMSTORE
-			}
+		// if cfg.Section("session").HasKey("STORE_TYPE") {
+		// 	switch cfg.Section("session").Key("STORE_TYPE").String() {
+		// 	case "etcd":
+		// 		sessionStoreInfo.StoreType = auth.ETCD
+		// 	case "redis":
+		// 		sessionStoreInfo.StoreType = auth.REDIS
+		// 	default:
+		// 		sessionStoreInfo.StoreType = auth.MEMSTORE
+		// 	}
 
-			if sessionStoreInfo.StoreType != auth.MEMSTORE {
-				if cfg.Section("session").HasKey("ADDRESS") {
-					sessionStoreInfo.Address = cfg.Section("session").Key("ADDRESS").String()
-				}
-				if cfg.Section("session").HasKey("PORT") {
-					sessionStoreInfo.Address = cfg.Section("session").Key("PORT").String()
-				}
-			}
-		}
+		// 	if sessionStoreInfo.StoreType != auth.MEMSTORE {
+		// 		if cfg.Section("session").HasKey("ADDRESS") {
+		// 			sessionStoreInfo.Address = cfg.Section("session").Key("ADDRESS").String()
+		// 		}
+		// 		if cfg.Section("session").HasKey("PORT") {
+		// 			sessionStoreInfo.Address = cfg.Section("session").Key("PORT").String()
+		// 		}
+		// 	}
+		// }
 
 		if cfg.Section("database").HasKey("DBTYPE") {
 			switch cfg.Section("database").Key("DBTYPE").String() {
@@ -104,7 +102,6 @@ func setupINI() {
 				db.Info = config.DatabaseInfoSqlServer
 			case "oracle":
 				db.Info = config.DatabaseInfoOracle
-				db.InfoOracleAdmin = config.DatabaseInfoOracleSystem
 			default:
 				db.Info = config.DatabaseInfoSQLite
 				if cfg.Section("database").HasKey("FILENAME") {
@@ -138,26 +135,6 @@ func setupINI() {
 					if cfg.Section("database").HasKey("FILEPATH") {
 						db.Info.FilePath = cfg.Section("database").Key("FILEPATH").String()
 					}
-
-					if cfg.Section("database_admin").HasKey("ADDRESS") {
-						db.InfoOracleAdmin.Addr = cfg.Section("database_admin").Key("ADDRESS").String()
-					}
-					if cfg.Section("database_admin").HasKey("PORT") {
-						db.InfoOracleAdmin.Port = cfg.Section("database_admin").Key("PORT").String()
-					}
-					if cfg.Section("database_admin").HasKey("USER") {
-						db.InfoOracleAdmin.GrantID = cfg.Section("database_admin").Key("USER").String()
-					}
-					if cfg.Section("database_admin").HasKey("PASSWORD") {
-						db.InfoOracleAdmin.GrantPassword = cfg.Section("database_admin").Key("PASSWORD").String()
-					}
-					if cfg.Section("database_admin").HasKey("DATABASE") {
-						db.InfoOracleAdmin.DatabaseName = cfg.Section("database_admin").Key("DATABASE").String()
-					}
-					if cfg.Section("database_admin").HasKey("FILEPATH") {
-						db.InfoOracleAdmin.FilePath = cfg.Section("database_admin").Key("FILEPATH").String()
-					}
-
 				}
 			}
 		}
@@ -175,7 +152,7 @@ func setupINI() {
 			if email.Info.UseEmail && email.Info.SendDirect {
 				dkimKey, err := os.ReadFile(cfg.Section("email").Key("DKIM_PATH").String())
 				if err != nil {
-					panic(err)
+					panic("check dkim path. " + err.Error())
 				}
 				email.Info.Service.KeyDKIM = string(dkimKey)
 			}
@@ -201,171 +178,124 @@ func setupINI() {
 	}
 }
 
-func setupSession() {
-	auth.SessionManager = scs.New()
+// setupConfig - setup configurations from environment variables or ini
+func setupConfig() {
+	db.Info = config.DatabaseInfoSQLite
+	// email.Info = config.EmailServerSMTP
+	email.Info = config.EmailServerDirect
 
-	switch sessionStoreInfo.StoreType {
-	case auth.ETCD:
-		addr := config.StoreInfoETCD.Address + ":" + config.StoreInfoETCD.Port
-		cli, err := clientv3.New(clientv3.Config{
-			Endpoints:   []string{addr},
-			DialTimeout: 5 * time.Second,
-		})
+	envPORT := os.Getenv("PORT")
+	envDBMS := os.Getenv("DATABASE_TYPE")
+	if envPORT != "" {
+		ListeningIP = "0.0.0.0"
+		ListeningPort = envPORT
 
-		if err != nil {
-			log.Fatal(err)
+		StaticPath = "static"
+		UploadPath = "upload"
+		handler.StoreRoot = "static/html"
+
+		envAddress := os.Getenv("DATABASE_ADDRESS")
+		envDbPort := os.Getenv("DATABASE_PORT")
+		envProtocol := os.Getenv("DATABASE_PROTOCOL")
+		envDbName := os.Getenv("DATABASE_NAME")
+		envDbID := os.Getenv("DATABASE_ID")
+		envDbPassword := os.Getenv("DATABASE_PASSWORD")
+
+		switch envDBMS {
+		case "mysql":
+			db.Info = config.DatabaseInfoMySQL
+			db.Info.Addr = envAddress
+			db.Info.Port = envDbPort
+			db.Info.Protocol = envProtocol
+			db.Info.DatabaseName = envDbName
+			db.Info.GrantID = envDbID
+			db.Info.GrantPassword = envDbPassword
+		case "postgres":
+			db.Info = config.DatabaseInfoPgPublic
+		case "sqlserver":
+			db.Info = config.DatabaseInfoSqlServer
+		default:
+			db.Info = config.DatabaseInfoMySQL
 		}
-
-		auth.SessionManager.Store = etcdstore.New(cli)
-	case auth.REDIS:
-		addr := config.StoreInfoRedis.Address + ":" + config.StoreInfoRedis.Port
-		pool := &redis.Pool{
-			MaxIdle: 10,
-			Dial: func() (redis.Conn, error) {
-				return redis.Dial("tcp", addr)
-			},
-		}
-
-		auth.SessionManager.Store = redisstore.New(pool)
-	default:
-		auth.SessionManager.Store = memstore.New()
+	} else {
+		setupINI()
 	}
 
-	auth.SessionManager.Lifetime = 3 * time.Hour
-	auth.SessionManager.IdleTimeout = 20 * time.Minute
-	auth.SessionManager.Cookie.Name = "session_id"
-
-	// auth.SessionManager.Cookie.Domain = "example.com"
-	// auth.SessionManager.Cookie.HttpOnly = true
-	// auth.SessionManager.Cookie.Path = "/example/"
-	// auth.SessionManager.Cookie.Persist = true
-	// auth.SessionManager.Cookie.SameSite = http.SameSiteStrictMode
-	// auth.SessionManager.Cookie.Secure = true
+	ListeningAddress = ListeningIP + ":" + ListeningPort
 }
 
 func setupDB() {
 	var err error
 
-	err = db.SetupDB()
-	if err != nil {
+	if db.SetupDB() != nil {
 		log.Fatal("SetupDB:", err)
 	}
 
-	err = db.Obj.CreateDB()
-	if err != nil {
+	if db.Obj.CreateDB() != nil {
 		log.Fatal("CreateDB:", err)
 	}
 
-	// Not use
-	// err = db.Obj.CreateTable()
-	// if err != nil {
-	// 	log.Fatal("CreateTable:", err)
-	// }
-
-	err = db.Obj.CreateBoardTable()
-	if err != nil {
+	if db.Obj.CreateBoardTable() != nil {
 		log.Fatal("CreateBoardTable:", err)
 	}
-	err = db.Obj.CreateUploadTable()
-	if err != nil {
+	if db.Obj.CreateUploadTable() != nil {
 		log.Fatal("CreateUploadTable:", err)
 	}
 
-	err = db.Obj.CreateUserTable()
-	if err != nil {
+	if db.Obj.CreateUserTable() != nil {
 		log.Fatal("CreateUserTable:", err)
 	}
-	err = db.Obj.CreateUserVerificationTable()
-	if err != nil {
+	if db.Obj.CreateUserVerificationTable() != nil {
 		log.Fatal("CreateUserVerificationTable:", err)
 	}
 }
 
-func setupKey() {
-	auth.Secret = "practice-golang/9m secret"
-
-	privKeyExist := fd.CheckFileExists(auth.JwtPrivateKeyFileName, false)
-	pubKeyExist := fd.CheckFileExists(auth.JwtPublicKeyFileName, false)
-	if privKeyExist && pubKeyExist {
-		auth.LoadRsaKeys()
-	} else {
-		auth.GenerateRsaKeys()
-		auth.SaveRsaKeys()
-	}
-
-	err := auth.GenerateKeySet()
-	if err != nil {
-		panic(err)
-	}
+func loadBoardDatas() {
+	handler.LoadBoardListData()
 }
 
-func setupLogger() {
-	logging.SetupLogger()
-
-	go func() {
-		now := time.Now()
-		zone, i := now.Zone()
-		nextDay := now.AddDate(0, 0, 1).In(time.FixedZone(zone, i))
-		nextDay = time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 0, 0, 0, 0, nextDay.Location())
-		restTimeNextDay := time.Until(nextDay)
-		time.Sleep(restTimeNextDay)
-		for {
-			if time.Now().Format("15") == "00" {
-				logging.RenewLogger()
-				time.Sleep(24 * time.Hour)
-			} else {
-				time.Sleep(time.Second)
-			}
-		}
-	}()
+func loadUserColumnDatas() {
+	handler.LoadUserColumnDatas()
 }
 
 func setupRouter() {
-	router.StaticPath = StaticPath
-	router.UploadPath = UploadPath
-	router.Content = Content
-	router.EmbedStatic = EmbedStatic
+	var engine *html.Engine
 
-	router.SetupStaticServer()
+	if IsStaticEmbed {
+		htmlRoot, err := fs.Sub(EmbedHTML, "static/html")
+		if err != nil {
+			log.Fatal(err)
+		}
+		engine = html.NewFileSystem(http.FS(htmlRoot), ".html")
+	} else {
+		engine = html.New("./static/html", ".html")
+	}
 
-	r := router.New()
+	engine.AddFunc("unescape", unEscape)
+	engine.AddFunc("format_date", formatDate)
+	engine.AddFunc("js_array", jsArray)
 
-	setPAGEs(r)        // HTML, Assets, Login/Signup
-	setPageAdmin(r)    // Admin
-	setPageContent(r)  // Content
-	setPageMyPage(r)   // MyPage
-	setPageHTMLs(r)    // HTML for both user and anonymous
-	setApiBoard(r)     // API Board
-	setApiUploader(r)  // API Uploader
-	setApiLogin(r)     // API Login, Logout, Signup
-	setApiAdmin(r)     // API Admin
-	setAPIs(r)         // API
-	setOthers(r)       // Others
-	setRouterNotUse(r) // Not use, should be removed at future
+	// engine.Debug(true)
 
-	ServerHandler = auth.SessionManager.LoadAndSave(cors.Default().Handler(r))
-	// ServerHandler = cors.Default().Handler(r)
-	// c := cors.New(cors.Options{
-	// 	AllowedOrigins:   []string{"http://"+listen},
-	// 	AllowedMethods:   []string{"GET"},
-	// 	AllowedHeaders:   []string{"*"},
-	// 	AllowCredentials: true,
-	// 	Debug:            false,
-	// })
-	// ServerHandler := c.Handler(r)
+	cfg := fiber.Config{
+		AppName:               "9minutes",
+		DisableStartupMessage: true,
+		JSONEncoder:           json.Marshal,
+		JSONDecoder:           json.Unmarshal,
+		Views:                 engine,
+	}
+	app = fiber.New(cfg)
+	app.Use(recover.New())
+	app.Use(cors.New())
 
-}
+	setApiAdmin(app)    // API Admin
+	setApiBoard(app)    // API Board
+	setApiUploader(app) // API Uploader
+	setAPIs(app)        // API
 
-func doSetup() {
-	_ = os.Mkdir(StaticPath, os.ModePerm)
-	_ = os.Mkdir(UploadPath, os.ModePerm)
-	_ = os.Mkdir(config.HtmlPath, os.ModePerm)
+	setStaticFiles(app) // Files, Assets
+	setPage(app)        // HTML templates
 
-	setupSession()
-	setupDB()
-	setupKey()
-	setupLogger()
-	setupRouter()
-
-	wsock.InitWebSocketChat()
+	loadBoardDatas()      // Board list
+	loadUserColumnDatas() // User column list
 }

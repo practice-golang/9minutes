@@ -1,12 +1,27 @@
-@INCLUDE@include/header.html
+{{template "layout_header" .}}
 
 <script>
-    document.title = "Front page"
+    document.title = "{{.SiteName}}"
 </script>
 
-It works!!
-$YouArePending$<div>Your account is pending approval. Check email and verify it.</div>
-<hr />
-<a href="/hello.html">Hello</a>
+<div>
+    It works!!
+</div>
 
-@INCLUDE@include/footer.html
+{{if .UserInfo.PendingUser}}
+<div>
+    <p>Your account is pending approval. Check email and verify it.</p>
+</div>
+{{else if eq .UserInfo.UserGrade "admin"}}
+<div>
+    <p>Admin account</p>
+</div>
+{{else if eq .UserInfo.UserGrade "manager"}}
+<div>
+    <p>Manager account</p>
+</div>
+{{end}}
+
+<a href="/hello">Hello</a>
+
+{{template "layout_footer" .}}

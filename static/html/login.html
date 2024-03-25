@@ -1,31 +1,64 @@
-<html lang="ko">
+{{template "layout_nomenu_header" .}}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+<script>
+    document.title = "Login - {{.SiteName}}"
+</script>
 
-    <title>Login</title>
-</head>
+<input type="hidden" name="destination" value="" />
 
-<body>
-    <form method="post" action="/login">
-        <input type="hidden" name="destination" value="" />
+<div id="login-container" class="login-container">
+    <div>
+        <span for="userid">Username:</span>
+        <input type="text" id="userid" name="userid" onkeypress="pressEnter()" tabindex="1" required placeholder="Username" autocomplete="off" autocorrect="off" autocapitalize="none" />
+    </div>
+    <div>
+        <span for="password">Password:</span>
+        <input type="password" id="password" name="password" onkeypress="pressEnter()" tabindex="2" required placeholder="Password" />
+    </div>
 
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" tabindex="1" required />
+    <br />
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" tabindex="2" required />
-
-        <input type="submit" tabindex="3" value="Login" />
-        <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset.html'" />
-        <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup.html'" />
-    </form>
-</body>
+    <input type="submit" tabindex="3" value="Login" onclick="login()" />
+    <input type="button" tabindex="4" value="Reset password" onclick="location.href='/password-reset'" />
+    <input type="button" tabindex="5" value="Sign up" onclick="location.href='/signup'" />
+</div>
 
 <script>
     document.querySelector("input[name='destination']").value = document.referrer
+
+    async function login() {
+        const userid = document.querySelector("input[name='userid']").value
+        const password = document.querySelector("input[name='password']").value
+
+        if (userid == "") {
+            alert("Please fill user id")
+            document.querySelector("#userid").focus()
+            return
+        }
+        if (password == "") {
+            alert("Please fill password")
+            document.querySelector("#password").focus()
+            return
+        }
+
+        const response = await fetch('/api/login', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userid: userid, password: password }),
+        })
+
+        if (response.ok) {
+            location.href = "/"
+        } else {
+            alert(await response.text())
+        }
+    }
+
+    function pressEnter(e) {
+        if (e && e.key == "Enter") { login() }
+    }
+
+    document.querySelector("#login-container").addEventListener("keyup", pressEnter)
 </script>
 
-</html>
+{{template "layout_nomenu_footer" .}}

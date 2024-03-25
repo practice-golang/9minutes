@@ -1,10 +1,101 @@
 # Todo
 
-* [ ] Move folders under static - admin, html, static..
-* [ ] Board list generation for menu items
-* [ ] Page, HTML - Use Svelte component
+* [ ] Add editor link target `_blank`
+* [ ] Add regdate to upload table
+* [ ] Admin - manager page to delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Clean up temporary uploads
+* [ ] Write/Update/Upload text/file size limit
+    * Topic
+    * Comment
+* [ ] Logger
+    * [ ] Add user login history - useridx, ip, regdate
+
+* [x] Rename all post, posting to topic
+* [ ] Board managing page - Add manager account setting for each boards
+    * [ ] API
+        * [ ] Edit board settings
+        * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
+    * [ ] DB
+    * [ ] Admin page
+* [ ] Resurrect session storage - etcd, redis..
+* [ ] Resurrect verification table usage
+
+* [ ] Add like/dislike button
+    * [ ] topic
+    * [ ] comment
+
+* [x] Change to go-fiber
+* [x] Admin - Use Svelte component for Page, HTML
+* [x] Board list generation for menu items
+* [x] Comment edit, Delete
+    * [x] Comment edit
+    * [x] Comment delete
+* [x] All board table names to lowercase
+* [x] Editor
+    * [x] Multiple upload - https://github.com/nhn/tui.editor/issues/1401#issuecomment-785557945
+* [x] Board list cache
+    * [x] When execute
+    * [x] When create
+    * [x] When change
+* [x] User grade from numbers
+    * [x] API - User grade list
+    * Refs. - consts/contant.go
+* [x] Grant,confirm routine for guest
+    * [x] ip address - Add IP_ADDRESS to each db table creation functions
+    * [x] Appear guest board in list selector
+    * [x] Control topic
+        * [x] Password check if user or author is guest
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+    * [x] Control comment
+        * [x] Password check if author is guest
+            * [x] DB
+            * [x] bug - no authorname
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+    * [x] show edit/delete button of guest comment for normal user
+    * [x] Admin allow comment control without password
+        * [x] Edit
+        * [x] Delete
+    * [x] password encryption
+        * Topic
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+        * Comment
+            * [x] Write
+            * [x] Edit
+            * [x] Delete
+* [x] Change less_eq, more_eq to le, ge
+    * https://pkg.go.dev/text/template
+    * [x] change less_eq, more_eq
+    * [x] delete less_eq, more_eq
+* [x] pgsql - correct bugs
+* [x] Control edit/delete button for author only
+* [x] Add timestamp at list
+* [x] Change js prompt to input - password masking
+    * [x] Topic edit
+    * [x] Topic delete
+    * [x] Comment delete
+* [x] Show `empty topic` if list is empty
+* [x] Attachment transaction when edit
+    * [x] Topic write - cancel only, history.back not work
+    * [x] Topic edit
+    * [x] Comment
+* [x] Append `TOPIC_IDX` to upload table
+* [x] Write IDX to upload table
+    * [x] Topic write
+    * [x] Topic edit
+    * [x] Comment write
+    * [x] Comment edit
+    * [x] Add `no index` when delete new upload
+
+* [ ] Banned user time count - When page open or login, check the ban time is gone
+* [ ] Clean up HandleHTML function
+* [ ] escape/unscape comment writing/reading
+* [ ] Move and clean up folders under static - admin, html, static..
 * [ ] Show/Edit default and custom column in mypage
-* [ ] Change to go-fiber
 * [ ] Choose use or delete approval column
 * [ ] User list
     * [ ] Add user custom column not showing in admin page
@@ -14,7 +105,6 @@
     * [ ] files dump, migration - No idea yet
 * [ ] Make user column definitions move to up or down
 * [ ] Add content type in admin page - Page
-    * [ ] Rename board type to content type
 * [ ] Rearrange route paths
 
 * Waive

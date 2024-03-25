@@ -1,0 +1,9 @@
+go 1.21.0
+
+use (
+	.
+	./cmd
+	./misc/fakegen/boards
+	./misc/fakegen/topics
+	./misc/fakegen/users
+)

@@ -1,0 +1,57 @@
+@uri = http://localhost:5525
+@cookie = session_id=be5c9e24-13e4-4c3a-9345-bfd896b70006; 
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+
+### Get user column list
+GET {{uri}}/api/admin/user-columns
+Cookie: {{cookie}}
+
+### Add user column
+POST {{uri}}/api/admin/user-columns
+content-type: application/json
+Cookie: {{cookie}}
+
+{
+    "display-name": "Age",
+    "column-code": "age",
+    "column-type": "text",
+    "column-name": "AGE",
+    "sort-order": 8
+}
+
+### Update user column
+PUT {{uri}}/api/admin/user-columns
+content-type: application/json
+Cookie: {{cookie}}
+
+[
+    {
+        "idx": 36,
+        "display-name": "Ages",
+        "column-code": "ages",
+        "column-type": "text",
+        "column-name": "AGES",
+        "sort-order": 8
+    }
+]
+
+### Delete user column
+DELETE {{uri}}/api/admin/user-columns
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": 36 },
+    { "idx": 44 }
+]

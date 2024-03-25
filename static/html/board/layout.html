@@ -1,0 +1,124 @@
+{{define "layout_board_header"}}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <meta name="google" content="notranslate" />
+
+    <title>Board Template</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <script src="/assets/js/list-renderer.js"></script>
+</head>
+
+<style>
+    html,
+    body {
+        padding: 0;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        max-width: 98vw;
+    }
+
+    @media(max-width: 960px) {
+        body input {
+            max-width: 7em;
+        }
+
+        .title-wrapper {
+            width: 100%;
+        }
+
+        .title-wrapper input {
+            max-width: unset;
+            width: calc(100% - 3.8em) !important;
+        }
+    }
+
+    .title-wrapper {
+        width: 100%;
+    }
+
+    .title-wrapper input {
+        width: calc(100% - 3.8em);
+    }
+
+    .topic-editor {
+        resize: vertical;
+        overflow: hidden;
+        height: 60vh;
+        border: 1px solid silver;
+    }
+</style>
+
+<body>
+    <div>
+        <a href="/">Home</a>
+
+        <div style="text-align: justify;">
+            <span>
+                <label for="board-selection">Board:</label>
+                <input list="board-list" id="board-selection" name="board-selection" onchange="moveBoard(this)" />
+                <datalist id="board-list">
+                    {{range $b := .BoardList}}
+                    {{if le $.UserInfo.UserGradeRank (index $.BoardGrades $b.GrantRead.String).Rank}}
+                    <option value="{{.BoardCode.String}}" data-name="{{.BoardName.String}}"></option>
+                    {{end}}
+                    {{end}}
+                </datalist>
+            </span>
+
+            <style>
+                label {
+                    display: initial;
+                }
+            </style>
+
+            <script>
+                function moveBoard(el) {
+                    const boardList = document.querySelector(`#board-list option[value="${el.value}"]`)
+
+                    const selectedBoardCode = el.value
+                    const selectedBoardName = boardList.dataset.name
+
+                    location.href = `/board/list?board_code=${selectedBoardCode}`
+                }
+            </script>
+
+            |
+
+            <span>
+                {{if ne .UserInfo.UserID ""}}
+                <a href="/mypage">{{.UserInfo.UserID}}</a> | <a href="/logout">Logout</a>
+                {{else}}
+                <a href="/login">Login</a>
+                {{end}}
+
+                {{if eq .UserInfo.UserGrade "admin"}}
+                | <a href="/admin">Admin</a>
+                {{end}}
+            </span>
+        </div>
+
+        <hr />
+    </div>
+    {{end}}
+
+
+    {{define "layout_board_footer"}}
+    <footer>
+        <hr />
+        Template board footer
+        <br />
+        © Organization.
+    </footer>
+</body>
+
+</html>
+{{end}}

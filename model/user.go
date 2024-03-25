@@ -1,13 +1,17 @@
 package model
 
 import (
-	"reflect"
-
 	"gopkg.in/guregu/null.v4"
 )
 
-// UserListingOptions - Search, page
-type UserListingOptions struct {
+type UserGrade struct {
+	Name string `json:"name"`
+	Code string `json:"code"`
+	Rank int    `json:"rank"`
+}
+
+// UserListingOption - Search, page
+type UserListingOption struct {
 	Search    null.String
 	Page      null.Int
 	ListCount null.Int
@@ -15,10 +19,9 @@ type UserListingOptions struct {
 
 // UserPageData - User list
 type UserPageData struct {
-	// UserList    []UserData `json:"user-list"`
-	UserList    interface{} `json:"user-list"`
-	TotalPage   int         `json:"total-page"`
-	CurrentPage int         `json:"current-page"`
+	UserList    []map[string]interface{} `json:"user-list"`
+	TotalPage   int                      `json:"total-page"`
+	CurrentPage int                      `json:"current-page"`
 }
 
 type UserInfo struct {
@@ -36,21 +39,8 @@ type UserColumn struct {
 	SortOrder   null.Int    `json:"sort-order"   db:"SORT_ORDER"   npskip:"insert"`
 }
 
-// UserData - User data
-type UserData struct {
-	Idx      null.Int    `json:"idx"      db:"IDX"      npskip:"insert, update"`
-	UserName null.String `json:"username" db:"USERNAME"`
-	Password null.String `json:"password" db:"PASSWORD"`
-	Email    null.String `json:"email"    db:"EMAIL"`
-	Grade    null.String `json:"grade"    db:"GRADE"`
-	Approval null.String `json:"approval" db:"APPROVAL"`
-	RegDTTM  null.String `json:"reg-dttm" db:"REG_DTTM" npskip:"update"`
-}
-
-var UserDataFieldCount = reflect.TypeOf(UserData{}).NumField()
-
 type SignIn struct {
-	Name     null.String `json:"name"     form:"username"`
+	UserID   null.String `json:"userid"   form:"userid"`
 	Password null.String `json:"password" form:"password"`
 }
 

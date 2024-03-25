@@ -1,288 +1,311 @@
-@INCLUDE@board/include/header.html
+{{template "layout_board_header" .}}
 
-<div>
-    <label for="image-upload">Image:</label>
-    <input type="file" id="image-upload" multiple>
-    <button type="button" onclick="insertImage()">Upload</button>
-
-</div>
-<div>
-    <label for="title-image-upload">Title Image:</label>
-    <input type="file" id="title-image-upload">
-    <button type="button" onclick="insertTitleImage()">Title image upload</button>
-</div>
-<div>
-    <label for="file-upload">File:</label>
-    <input type="file" id="file-upload" multiple>
-    <button type="button" onclick="insertFile()">Upload</button>
-</div>
-
-<div>
-    Title: <input type="text" id="title" value="$TITLE$" placeholder="Title">
-    Title image: $TITLE_IMAGE$
-</div>
-<div id="editor"></div>
-<div>
-    <button type="button" onclick="moveToList()">Cancel</button>
-    <button type="button" onclick="updateContent()">Update</button>
-</div>
-
-<div id="filelist-container">
-    <ul lr-loop="filelist">
-        <li>
-            <span lr-if="deletelist[$index] == undefined">
-                <a href="{{link}}" target="_blank">{{filename}}</a>
-                <button lr-click="setFileToDelete($index)">X</button>
-            </span>
-            <span lr-if="deletelist[$index] != undefined">
-                <s><a href="{{link}}" target="_blank">{{filename}}</a></s>
-                <button lr-click="unsetFileFromDelete($index)">Undo</button>
-            </span>
-        </li>
-    </ul>
-</div>
-
-<link rel="stylesheet" href="/assets/css/editor.css">
-<script>"use strict"</script>
+<link rel="stylesheet" href="/assets/css/myeditor.css" />
 <script src="/assets/js/myeditor.js"></script>
 
+<style>
+    li>div.hover-view {
+        display: none;
+        max-width: 50vw;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 999;
+    }
+
+    li:hover>div.hover-view {
+        display: block;
+    }
+</style>
+
+{{if le .Topic.AuthorIdx.Int64 0}}
+<label for="nickname">Nickname:</label>
+<input type="text" id="nickname" value="{{.Topic.AuthorName.String}}" placeholder="Nickname" disabled />
+<!-- <label for="password">Password:</label> -->
+<input style="display: none" type="password" id="password" value="{{.Topic.EditPassword.String}}" placeholder="Password" disabled />
+{{end}}
+<div class="title-wrapper">
+    <span>Title: </span>
+    <input type="text" id="title" value="{{.Topic.Title.String}}" placeholder="Title" />
+</div>
+
+<div id="editor" class="topic-editor"></div>
+
+<div>
+    <input type="file" id="upload-files" multiple />
+    <button type="button" onclick="uploadFile()">Upload</button>
+</div>
+
+<div id="fileslist-container">
+    <ul></ul>
+</div>
+
+<hr />
+
+<div>
+    <button type="button" onclick="backToList()">Cancel</button>
+    <button type="button" onclick="updateTopic()">Save</button>
+</div>
+
 <script>
-    let statusWriteContent = false
-    let data = `$CONTENT$`;
-    const url = new URL(window.location.href)
-    const urlParams = url.searchParams
+    const imageUploadCallback = function (response) {
+        if (response.message == "success") {
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
 
-    const accessURI = "/upload"
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
 
-    let titleImage = "$TITLE_IMAGE$"
-
-    const filelistString = "$FILE_LIST$"
-    const filelist = new Array()
-    const storelist = new Array()
-    const deletelist = {}
-    const appendlist = new Array()
-
-    const options = {
-        uploadFileActionURI: "/api/uploader/file",
-        uploadImageActionURI: "/api/uploader/image",
-        uploadAccessURI: "/upload",
-    }
-    const editorEL = document.querySelector("#editor")
-    const editor = new MyEditor(data, editorEL, options)
-
-    async function insertFile() {
-        const uploadURI = options.uploadFileActionURI
-        const accessURI = options.uploadAccessURI
-
-        const files = document.querySelector("#file-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
-
-            const formData = new FormData()
-            formData.append("file", file)
-
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
-            })
-            if (r.ok) {
-                const result = await r.json()
-
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
-        }
-
-        document.querySelector("#file-upload").value = ""
-    }
-
-    async function insertImage() {
-        const uploadURI = options.uploadImageActionURI
-        const accessURI = options.uploadAccessURI
-
-        const files = document.querySelector("#image-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
-
-            const formData = new FormData()
-            formData.append("file", file)
-
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
-            })
-            if (r.ok) {
-                const result = await r.json()
-
-                editor.insertImage(`${accessURI}/${result.storename}`)
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
-        }
-
-        document.querySelector("#image-upload").value = ""
-    }
-
-    async function insertTitleImage() {
-        const uploadURI = options.uploadImageActionURI
-        const accessURI = options.uploadAccessURI
-
-        const files = document.querySelector("#title-image-upload").files
-        for (const file of files) {
-            if (file == undefined) {
-                return
-            } // Selected nothing
-
-            const formData = new FormData()
-            formData.append("file", file)
-
-            const r = await fetch(uploadURI, {
-                method: 'POST',
-                body: formData
-            })
-            if (r.ok) {
-                const result = await r.json()
-
-                titleImage = `${accessURI}/${result.storename}`
-
-                filelist.push({ "filename": result.filename })
-                storelist.push({ "filename": result.filename + "/" + result.storename })
-                appendlist.push({ "filename": result.filename + "/" + result.storename })
-
-                lrFileList.reload()
-            }
-        }
-
-        document.querySelector("#title-image-upload").value = ""
-    }
-
-    function setFileToDelete(idx) {
-        const names = storelist[idx].filename.split("/")
-        deletelist[idx] = { "filename": names[0], "storename": names[1] }
-
-        lrFileList.reload()
-    }
-
-    function unsetFileFromDelete(idx) {
-        delete deletelist[idx]
-
-        lrFileList.reload()
-    }
-
-    async function updateContent() {
-        statusWriteContent = true
-
-        for (const idx in storelist) {
-            for (const j in deletelist) {
-                if (deletelist[j].filename + "/" + deletelist[j].storename == storelist[idx].filename) {
-                    storelist.splice(idx, 1)
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
                 }
+
+                fcontainer.appendChild(li)
+                attachmentList["mod"].push(f)
+            })
+        }
+    }
+</script>
+
+<script>
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+
+    const topicIdx = queries.get("idx")
+    const initialContent = "{{.Topic.Content.String}}"
+    let flist = "{{.Topic.Files.String}}"
+    const attachmentList = {
+        "mod": [],             // new and previous files when edit topic
+        "prev": [],            // previous files when edit topic
+        "reserve-delete": [],  // previous files which will be deleted when edit topic
+    }
+
+    function backToList() { location.href = `/board/read?board_code=${boardCode}&idx=${topicIdx}` }
+
+    const editorEL = document.querySelector("#editor")
+    const options = {
+        uploadActionURI: "/api/uploader",
+        uploadAccessURI: "/upload/",
+        uploadCallback: imageUploadCallback,
+    }
+    const editor = new MyEditor(initialContent, editorEL, options)
+
+    async function uploadFile() {
+        const files = document.querySelector("#upload-files").files
+
+        const formData = new FormData()
+        for (const blob of Array.from(files)) {
+            formData.append("upload-files", blob)
+        }
+
+        const uri = options.uploadActionURI
+        const r = await fetch(uri, {
+            method: "POST",
+            body: formData
+        })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.files.forEach((f) => {
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `deleteFile('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
+                }
+
+                fcontainer.appendChild(li)
+
+                attachmentList["mod"].push(f)
+            })
+        }
+    }
+
+    function reserveFileToDelete(idx, storagename) {
+        const reserveInfo = {
+            "fidx": idx,
+            "storagename": storagename
+        }
+        attachmentList["reserve-delete"].push(reserveInfo)
+
+        document.querySelector(`#file-${idx}`).remove()
+        for (const i in attachmentList["mod"]) {
+            if (attachmentList["mod"][i].idx == idx && attachmentList["mod"][i].storagename == storagename) {
+                attachmentList["mod"].splice(i, 1)
+                break
             }
         }
-        const storeListArray = storelist.map(file => { return file.filename })
-        const storeListString = storeListArray.join("?")
-        const deleteFiles = Object.values(deletelist)
-
-        const data = {
-            "idx": urlParams.get("idx"),
-            "title": document.querySelector("#title").value,
-            "title-image": titleImage,
-            "content": editor.getHTML(),
-            "files": storeListString,
-            "delete-files": deleteFiles
+        if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+            const imgTags = document.querySelectorAll("img")
+            imgTags.forEach((img) => {
+                const fnames = img.src.split("/")
+                const fname = fnames[fnames.length - 1]
+                if (fname == storagename) {
+                    img.remove()
+                    return
+                }
+            })
         }
+    }
 
-        const r = await fetch("/api/board/content/$CODE$/$IDX$", {
-            method: "PUT",
+    async function deleteFile(idx, storagename) {
+        const data = [{ "idx": parseInt(idx) }]
+        const uri = options.uploadActionURI
+
+        const r = await fetch(uri, {
+            method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
 
         if (r.ok) {
-            location.href = "/board/read.html?code=$CODE$&idx=$IDX$"
+            const el = document.querySelector(`#file-${idx}`)
+            if (el) { el.remove() }
+            for (const i in attachmentList["mod"]) {
+                if (attachmentList["mod"][i].idx == idx && attachmentList["mod"][i].storagename == storagename) {
+                    attachmentList["mod"].splice(i, 1)
+                    break
+                }
+            }
+            if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                const imgTags = document.querySelectorAll("img")
+                imgTags.forEach((img) => {
+                    const fnames = img.src.split("/")
+                    const fname = fnames[fnames.length - 1]
+                    if (fname == storagename) {
+                        img.remove()
+                        return
+                    }
+                })
+            }
         } else {
-            alert("Server error")
-            statusWriteContent = false
+            alert("Failed to delete file")
+        }
+    }
+
+    async function updateTopic() {
+        const title = document.querySelector("#title").value
+        const initialContent = editor.getHTML()
+
+        flist = ""
+        for (const f of attachmentList["mod"]) { flist += `${f.idx}|` }
+        if (flist.length > 0) { flist = flist.slice(0, -1) }
+
+        let filesToDelete = "";
+        for (const f of attachmentList["reserve-delete"]) {
+            filesToDelete += `${f.fidx}|`
+        }
+        filesToDelete = filesToDelete.slice(0, -1)
+
+        const data = {
+            "title": title,
+            "content": initialContent,
+            "files": flist,
+            "delete-files": filesToDelete
         }
 
+        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
+        const req = {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }
+
+        const authoridx = parseInt("{{.Topic.AuthorIdx.Int64}}")
+        if (authoridx < 0) {
+            req.headers["Edit-Password"] = document.querySelector("#password").value
+        }
+
+        const r = await fetch(uri, req)
+        if (r.ok) {
+            location.href = `/board/list?board_code=${boardCode}`
+            return
+        }
+        
+        alert("Write failed")
         return false
     }
 
-    function moveToList() {
-        location.href = "/board?code=" + urlParams.get("code")
-        // history.back()
-    }
-
-    async function cancelProcess() {
-        if (statusWriteContent) { return false }
-
-        const deleteFiles = new Array()
-        for (const i in appendlist) {
-            const files = appendlist[i].filename.split("/")
-            const deleteFile = { "filename": files[0], "storename": files[1] }
-            deleteFiles.push(deleteFile)
+    async function getFilesInfo() {
+        const indexList = []
+        for (const fidx of flist.split("|")) {
+            indexList.push({ idx: parseInt(fidx) })
         }
 
-        const data = { "board-idx": -1, "post-idx": -1, "delete-files": deleteFiles }
+        const uri = "/api/uploader/files-info"
 
-        const r = await fetch("/api/uploader/file", {
-            method: 'DELETE',
+        const r = await fetch(uri, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            body: JSON.stringify(indexList)
         })
+
+        if (r.ok) {
+            const response = await r.json()
+
+            const fcontainer = document.querySelector("#fileslist-container > ul")
+            response.forEach((f) => {
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `reserveFileToDelete('${f.idx}', '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                    const im = document.createElement("img")
+                    im.setAttribute("src", `/upload/${f.storagename}`)
+                    const d = document.createElement("div")
+                    d.setAttribute("class", "hover-view")
+                    d.appendChild(im)
+                    li.appendChild(d)
+                }
+
+                fcontainer.appendChild(li)
+                attachmentList["mod"].push(f)
+            })
+        }
     }
 
-    window.onbeforeunload = () => { cancelProcess() }
-
-    for (const f of filelistString.split("?")) {
-        if (f == "") { continue }
-
-        storelist.push({ "filename": f })
-
-        const files = f.split("/")
-        filelist.push({
-            "storename": files[1],
-            "filename": files[0],
-            "link": accessURI + "/" + files[1]
-        })
+    async function init() {
+        await getFilesInfo()
+        for (const i in attachmentList["mod"]) {
+            const finfo = {
+                "filename": attachmentList["mod"][i].filename,
+                "idx": attachmentList["mod"][i].idx,
+                "storagename": attachmentList["mod"][i].storagename
+            }
+            attachmentList["prev"].push(finfo)
+        }
     }
 
-
-    const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
-    lrFileList.render()
+    document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    /*
-     Need js for custom resize handle??? :
-     https://spin.atomicobject.com/2019/11/21/creating-a-resizable-html-element
-     */
-    #editor {
-        resize: vertical;
-        overflow: auto;
-
-        border: 1px solid silver;
-    }
-
-    #editor img {
-        max-width: 70vw;
-        overflow: auto;
-    }
-</style>
-
-@INCLUDE@board/include/footer.html
+{{template "layout_board_footer" .}}

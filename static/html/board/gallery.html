@@ -1,45 +1,125 @@
-@INCLUDE@board/include/header.html
+{{template "layout_board_header" .}}
 
-<script>
-    document.title = "Gallery"
-</script>
+<style>
+    html,
+    body {
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        font-family: sans-serif;
+    }
 
-<label for="search">Search:</label>
-<input type="text" id="search" onkeyup="pressEnter()" placeholder="Search for...">
-<button type="button" onclick="search()">Search</button>
+    ul,
+    li {
+        margin: 0;
+        padding: 0;
+        list-style: none
+    }
 
-<div class="gallery">
-    <ul>
-        {{range $i, $o := .ContentList}}
-        <li onclick="moveToContent('{{$i}}')">
-            <div class="title-img"><img src="{{$o.TitleImage.String}}" alt="title-image" /></div>
-            <div class="title-text">{{$o.Title.String}}</div>
-        </li>
-        {{end}}
-    </ul>
+    a:hover {
+        text-decoration: none;
+        border-bottom-width: 0;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+
+    .gallery {
+        margin: 50px -20px;
+        box-sizing: border-box;
+    }
+
+    .gallery:after {
+        content: "";
+        display: block;
+        clear: both;
+        visibility: hidden;
+    }
+
+    .gallery li {
+        width: 20%;
+        float: left;
+        box-sizing: border-box;
+        padding: 0 20px;
+        margin: 0 0 50px 0;
+    }
+
+    .gallery li img {
+        width: 100%;
+        height: auto;
+    }
+
+    @media (max-width:1200px) {
+        .gallery li {
+            width: 25%;
+        }
+    }
+
+    @media (max-width:768px) {
+        .gallery li {
+            width: 33.33333%;
+        }
+    }
+
+    @media (max-width:560px) {
+        .gallery li {
+            width: 50%;
+        }
+    }
+
+    @media (max-width:480px) {
+        .gallery li {
+            width: 100%;
+        }
+    }
+</style>
+
+<div>
+    Search:
+    <input onkeyup="doSearch()" type="text" name="search" value="{{.Data.SearchKeyword}}" placeholder="Search keyword" />
+    <button onclick="doSearch()" type="button">🔍</button>
 </div>
 
 <div>
-    {{range $i, $o := .PageList}}
+    <ul class="gallery">
+        {{range .Data.TopicList}}
+        <li>
+            <a href="/board/read?board_code={{$.BoardCode}}&idx={{.Idx.Int64}}">
+                <img src="/upload/{{.TitleImage.String}}" onerror="this.onerror=null; this.src='/files/panic1.png';" />
+                {{.Title.String}} [{{.CommentCount.String}}] | {{.Views.Int64}}
+                <br />
+                {{.AuthorName.String}}
+                <br />
+                {{format_date .RegDate.String}}
+            </a>
+        </li>
+        {{end}}
+    </ul>
 
-    {{if eq $i 0}}
-    <a href="/board?code=$CODE$&page={{1}}$SEARCH$">&laquo;</a>
-    <a href="/board?code=$CODE$&page={{jump_to_before $o}}$SEARCH$">&lt;</a>
-    ..
-    {{end}}
+    {{if .Data.PageList}}
+    <div>
+        <span class="page-jump">
+            <a href="?board_code={{.BoardCode}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&laquo;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpPrev}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&lt;</a>
+        </span>
 
-    {{if eq $o $.CurrentPage}}
-    <b>{{$o}}</b>
-    {{else}}
-    <a href="/board?code=$CODE$&page={{$o}}$SEARCH$">{{$o}}</a>
-    {{end}}
+        {{range .Data.PageList}}
+        {{if eq . $.Data.CurrentPage}}
+        <b>{{.}}</b>
+        {{else}}
+        <a href="?board_code={{$.BoardCode}}&page={{.}}&search={{$.Data.SearchKeyword}}&count={{$.ListCount}}">{{.}}</a>
+        {{end}}
+        {{end}}
 
-    {{if and (ne $o $.TotalPage) (is_last_index $i)}}
-    ..
-    <a href="/board?code=$CODE$&page={{jump_to_after $o}}$SEARCH$">&gt;</a>
-    <a href="/board?code=$CODE$&page={{$.TotalPage}}$SEARCH$">&raquo;</a>
-    {{end}}
-
+        <span class="page-jump">
+            <a href="?board_code={{.BoardCode}}&page={{.Data.JumpNext}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&gt;</a>
+            <a href="?board_code={{.BoardCode}}&page={{.Data.TotalPage}}&search={{.Data.SearchKeyword}}&count={{.ListCount}}">&raquo;</a>
+        </span>
+    </div>
     {{end}}
 </div>
 
@@ -48,119 +128,32 @@
 </div>
 
 <script>
-    let boardEditIndex = -1
-    const url = new URL(window.location.href)
-    const urlParams = url.searchParams
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+    const listCount = queries.get("count") ? queries.get("count") : "{{.TopicListCount}}"
 
-    let list = new Array()
+    function doSearch() {
+        switch (globalThis.event.type) {
+            case "keyup":
+                if (globalThis.event.code != "Enter") { return false }
+                break
+        }
 
-    function moveToContent(idx) {
-        const index = list[idx].idx
-        location.href = `/board/read.html?code=$CODE$&idx=${index}`
+        let params = `?board_code=${boardCode}&count=${listCount}`
+        const keyword = document.querySelector("input[name=search]").value
+        if (keyword == "") {
+            const search = new URLSearchParams(globalThis.location.search).get("search")
+            if (search == null || search == "") { return false }
+        } else {
+            params += `&search=${keyword}`
+        }
 
-        return false
+        location.href = params
     }
 
     function moveToWrite() {
-        location.href = "/board/write.html?code=$CODE$";
-        return false
-    }
-
-    async function deleteContent(e, idx) {
-        e.stopPropagation()
-
-        const index = list[idx].idx
-        const url = `/api/board/content/$CODE$/${index}`
-
-        const r = await fetch(url, { method: "DELETE" })
-
-        if (r.ok) {
-            location.reload()
-        } else {
-            alert("Failed to delete")
-        }
-
-        return false
-    }
-
-    function pressEnter() { if (window.event.keyCode == 13) { search() } }
-    function search() {
-        const search = document.querySelector("#search").value
-
-        if (search.length < 2) {
-            if (search == "") {
-                const url = `/board?code=$CODE$`
-
-                searchParam = ""
-                if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
-
-                location.href = url + searchParam
-
-                return false
-            }
-
-            alert("Required at least 2 characters")
-
-            return false
-        }
-
-        const url = `/board?code=$CODE$&search=${search}`
-        location.href = url
-
-        return false
-    }
-
-    let contentsData = $CONTENT_LIST$
-    list = contentsData["content-list"]
-
-    let searchParam = ""
-    if (urlParams.get("search")) {
-        document.querySelector("#search").value = urlParams.get("search")
-        searchParam = "&search=" + urlParams.get("search")
-    }
-    if (urlParams.get("count")) { searchParam += "&count=" + urlParams.get("count") }
-
-    let pages = new Array()
-    for (let i = contentsData["current-page"] - 1; i < contentsData["current-page"] + 2; i++) {
-        if (i > contentsData["total-page"]) { break }
-        if (i > 0) {
-            const pageInfo = {
-                "page": i,
-                "link": `/board?code=$CODE$&page=${i}` + searchParam
-            }
-            pages.push(pageInfo)
-        }
+        location.href = `/board/write?board_code=${boardCode}`
     }
 </script>
 
-<style>
-    .gallery {
-        width: 80vw;
-    }
-
-    .gallery ul {
-        display: flex;
-        flex-flow: row wrap;
-        list-style: none;
-        margin: 32px 0;
-    }
-
-    .gallery li {
-        margin: 0 0.2vw;
-        /* flex-basis: calc(50% - 20px); */
-    }
-
-    .gallery li img {
-        width: 20vw;
-        height: 15vw;
-        object-fit: cover;
-    }
-
-    .title-text {
-        margin-top: -25px;
-        margin-left: 5px;
-        color: chocolate;
-    }
-</style>
-
-@INCLUDE@board/include/footer.html
+{{template "layout_board_footer" .}}

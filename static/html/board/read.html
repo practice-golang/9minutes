@@ -1,214 +1,953 @@
-@INCLUDE@board/include/header.html
+{{template "layout_board_header" .}}
 
-<div class="content-container">
-    <h1>$TITLE$</h1>
-    <p>Author: $AUTHOR_NAME$ / Views: $VIEWS$</p>
-    <div id="content">$CONTENT$</div>
+<script>
+    document.title = "{{.Topic.Title.String}} - {{.BoardName}}"
+</script>
 
-    <div id="filelist-container">
-        <ul lr-loop="filelist">
-            <li><a href="{{link}}" download="{{filename}}" target="_blank">{{filename}}</a></li>
-        </ul>
+<link rel="stylesheet" href="/assets/css/myeditor.css" />
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1200;
+    }
+
+    .modal-content {
+        position: fixed;
+        width: 70%;
+        max-width: 15em;
+        background-color: #fefefe;
+        border: 1px solid #888;
+        padding: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, calc(-50% - 68px));
+    }
+
+    .modal-close {
+        float: right;
+        color: #aaa;
+        font-size: 1.85em;
+        font-weight: bold;
+        transform: translateY(-0.65em);
+    }
+
+    .modal-close:hover,
+    .modal-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal-content input {
+        max-width: 70%;
+    }
+
+    .modal-content button {
+        float: right;
+    }
+
+    a:hover {
+        cursor: pointer;
+    }
+
+    a>div.hover-view {
+        display: none;
+        max-width: 50vw;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 999;
+    }
+
+    a:hover>div.hover-view {
+        display: block;
+    }
+
+    .page-jump {
+        display: none;
+    }
+
+    comment-modifier {
+        display: none;
+    }
+
+    .comment-editor {
+        resize: vertical;
+        overflow: hidden;
+        height: 20em;
+        border: 1px solid silver;
+    }
+
+    p:has(iframe) {
+        position: relative;
+        width: 50vw;
+        height: calc(50vw * 0.565);
+    }
+
+    p>iframe {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    @media(max-width: 960px) {
+        p:has(iframe) {
+            width: 94.5vw;
+            height: calc(94.5vw * 0.565);
+        }
+    }
+</style>
+
+<!-- Modal -->
+<div id="password-modal" class="modal">
+    <div class="modal-content">
+        <p>
+            <span onclick="closePasswordModal()" class="modal-close">&times;</span>
+            <span>Enter password:</span>
+        </p>
+        <input onkeypress="passwordInputKeyPress(event)" type="password" id="input-password" />
+        <button onclick="handleInput()">Ok</button>
+    </div>
+</div>
+<!-- Modal -->
+
+<div>
+    <div>
+        <h3>{{.Topic.Title.String}}</h3>
     </div>
 
-    <button type="button" onclick="moveToEdit()">Edit</button>
-    <button type="button" onclick="deleteContent()">Delete</button>
-    <button type="button" onclick="moveToList()">Back to list</button>
+    <div>
+        <span>
+            {{.Topic.AuthorName.String}}
+            {{if le .Topic.AuthorIdx.Int64 0}}
+            ({{.Topic.AuthorIP.String}})
+            {{end}}
+        </span>|
+        <span>{{format_date .Topic.RegDate.String}}</span>|
+        <span>{{.Topic.Views.Int64}}</span>
+    </div>
 
     <hr />
 
-    <div id="comments-container">
-        Comments:
-        <div lr-loop="comments">
-            <div class="comment-item">
-                {{author-name}}
-                <button type="button" lr-click="deleteComment($index)">X</button>
-            </div>
-            <div>{{content}}</div>
-        </div>
-    </div>
-
-    <div id="pages-container">
-        <div lr-loop="pages">
-            <span lr-if="$index == 0 && pages[0].page > 1">&laquo;</span>
-            <span lr-if="$index == 0 && pages[0].page > 1">&lt;</span>
-
-            <b lr-if="page == commentsData['current-page']">{{page}}</b>
-            <a lr-if="page != commentsData['current-page']" lr-click="fetchComments('{{page}}')">{{page}}</a>
-
-            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&gt;</span>
-            <span lr-if="$index == (pages.length - 1) && pages[0].page < pages[pages.length - 1]">&raquo;</span>
-        </div>
-    </div>
-
-    <label for="comment-area">Write a comment:</label>
     <div>
-        <textarea id="comment-area"></textarea>
+        {{unescape .Topic.Content.String}}
     </div>
-    <button type="button" onclick="writeComment()">Save comment</button>
+
+    <div id="topic-fileslist-container">
+        <ul></ul>
+    </div>
 </div>
 
-<script>
-    const url = new URL(window.location.href)
-    const urlParams = url.searchParams
+<div>
+    <button type="button" onclick="backToList()">List</button>
+    {{if or (le .Topic.AuthorIdx.Int64 0) (or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin"))}}
+    <button type="button" onclick="moveToEdit()">Edit</button>
+    <button type="button" onclick="deleteTopic()">Delete</button>
+    {{end}}
+</div>
 
-    const accessURI = "/upload"
+<!-- Comment -->
+<hr />
 
-    function moveToEdit() {
-        location.href = "/board/edit.html?code=$CODE$&idx=$IDX$"
-    }
+<div>
+    <div id="comments">
+        {{range .Comments.CommentList}}
+        <span>
+            {{.AuthorName.String}}
+            {{if le .AuthorIdx.Int64 0}}
+            ({{.AuthorIP.String}})
+            {{end}}
+        </span> |
+        <span>{{format_date .RegDate.String}}</span>
+        {{if or
+        (and
+        (eq $.GrantComment true) (or (eq $.UserInfo.UserIdx .AuthorIdx.Int64) (le .AuthorIdx.Int64 0))
+        )
+        (eq $.UserInfo.UserGrade "admin")
+        }}
+        |
+        <button type="button" onclick="openEditComment('{{.Idx.Int64}}')">edit</button>
+        <button type="button" onclick="deleteComment('{{.Idx.Int64}}')">delete</button>
+        {{end}}
+        <span id="comment-{{.Idx.Int64}}">{{unescape .Content.String}}</span>
+        <comment-modifier id="modifier-{{.Idx.Int64}}" data-idx="{{.Idx.Int64}}" data-author-idx="{{.AuthorIdx.Int64}}" data-author-name="{{.AuthorName.String}}"></comment-modifier>
+        <a onclick="getFilesInfo(parseInt('{{.Idx.Int64}}'))">Attachment</a>
+        <div id="comment-files-container-{{.Idx.Int64}}">
+            <ul></ul>
+        </div>
+        {{end}}
+    </div>
+</div>
 
-    async function deleteContent(e, idx) {
-        const url = `/api/board/content/$CODE$/${urlParams.get("idx")}`
+<div>
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('1'))">&laquo;</a>
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')-5)">&lt;</a>
+    </span>
 
-        const r = await fetch(url, { method: "DELETE" })
+    <span id="comment-pages">
+        {{range .Comments.PageList}}
+        {{if eq . $.Comments.CurrentPage}}
+        <b>{{.}}</b>
+        {{else}}
+        <a onclick="getComments('{{.}}')">{{.}}</a>
+        {{end}}
+        {{end}}
+    </span>
 
-        if (r.ok) {
-            moveToList()
-        } else {
-            alert("Failed to delete")
+    <span class="page-jump">
+        <a onclick="getComments(parseInt('{{.Comments.CurrentPage}}')+5)">&gt;</a>
+        <a onclick="getComments('{{.Comments.TotalPage}}')">&raquo;</a>
+    </span>
+</div>
+
+<div id="topic-buttons-second">
+    <div>
+        <button type="button" onclick="backToList()">List</button>
+        {{if or (eq .UserInfo.UserIdx .Topic.AuthorIdx.Int64) (eq .UserInfo.UserGrade "admin")}}
+        <button type="button" onclick="moveToEdit()">Edit</button>
+        <button type="button" onclick="deleteTopic()">Delete</button>
+        {{end}}
+    </div>
+</div>
+
+{{if eq .GrantComment true}}
+<script src="/assets/js/myeditor.js"></script>
+
+<hr />
+{{if or (eq .UserInfo.UserID "") (le .UserInfo.UserIdx 0)}}
+<input type="text" id="comment-nickname" placeholder="Nickname" />
+<input type="password" id="comment-password" placeholder="Password" />
+{{else}}
+{{.UserInfo.UserID}}
+{{end}}
+
+<div id="writer" class="comment-editor"></div>
+
+<div id="writer-fileslist-container">
+    <ul></ul>
+</div>
+
+<div>
+    <button type="button" onclick="writeComment()">Write comment</button>
+</div>
+{{end}}
+
+<!-- Comment modification editor -->
+<template id="modifier-template">
+    <script src="/assets/js/myeditor.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/assets/css/myeditor.css" />
+
+    <style>
+        input {
+            margin-right: 0;
         }
 
-        return false
+        .comment-modifier {
+            resize: vertical;
+            overflow: hidden;
+            height: 20em;
+            border: 1px solid silver;
+        }
+    </style>
+
+    <span id="comment-edit-nickname"></span>
+    <input type="password" id="comment-edit-password" placeholder="Password" />
+
+    <div id="modifier" class="comment-modifier"></div>
+
+    <div id="modifier-fileslist-container">
+        <ul></ul>
+    </div>
+
+    <div>
+        <button type="button" onclick="cancelEditComment(this)">Cancel</button>
+        <button type="button" onclick="updateComment(this)">Update</button>
+    </div>
+</template>
+<!-- Comment modification editor -->
+
+
+<script>
+    const passwordModal = document.querySelector("#password-modal")
+
+    function openPasswordModal() {
+        const modalPromise = new Promise((resolve, reject) => {
+            passwordModal.style.display = "block"
+            document.querySelector("#input-password").focus()
+
+            window.handleInput = () => {
+                const inputText = document.querySelector("#input-password").value
+                resolve(inputText)
+                closePasswordModal()
+                delete window.handleInput
+            }
+        })
+
+        return modalPromise
     }
-    function moveToList() {
-        location.href = "/board?code=$CODE$"
-        return false
+
+    function passwordInputKeyPress(event) {
+        if (event.key == "Enter") { handleInput() }
     }
 
-    async function fetchComments(page) {
-        const param = "?page=" + page
-        const uri = "/api/board/comment/$CODE$/$IDX$" + param
-        const r = await fetch(uri, { method: 'GET' })
+    function closePasswordModal() {
+        document.querySelector("#input-password").value = ""
+        passwordModal.style.display = "none"
+    }
+</script>
 
-        if (r.ok) {
-            const data = await r.json()
-            commentsData = data
-            comments = commentsData["comment-list"]
+<script>
+    const attachmentList = {
+        "topic": [],
+        "comment-new": [],     // files when create comment
+        "comment-edit": [],     // new and previous files when edit comment
+        "comment-prev": [],    // previous files when edit comment
+        "reserve-delete": [],  // previous files which will be deleted when edit comment
+    }
 
-            pages = new Array()
-            for (let i = commentsData["current-page"] - 1; i < commentsData["current-page"] + 2; i++) {
-                if (i > commentsData["total-page"]) { break }
-                if (i > 0) {
-                    const pageInfo = { "page": i, "link": null }
-                    pages.push(pageInfo)
-                }
+    const imageUploadCallback = (idx) => function (response) {
+        console.log(0, idx, response)
+        if (response.message == "success") {
+            let fcontainer = document.querySelector("#writer-fileslist-container > ul")
+            if (idx) {
+                const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
+                const modifierROOT = modifierEL.shadowRoot
+                fcontainer = modifierROOT.querySelector("#modifier-fileslist-container > ul")
             }
 
-            lrComments.reload()
-            lrPage.reload()
+            response.files.forEach((f) => {
+                let key = "comment-new"
+                let functionName = "deleteFile"
+                if (idx) {
+                    key = "comment-edit"
+                    functionName = "deleteFile"
+                }
+                const btn = document.createElement("button")
+                btn.setAttribute("onclick", `${functionName}(${idx}, ${f.idx}, '${f.storagename}')`)
+                btn.appendChild(document.createTextNode("X"))
+
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+                li.appendChild(document.createTextNode(`${f.filename}`))
+                li.appendChild(btn)
+
+                fcontainer.appendChild(li)
+
+                attachmentList[key].push(f)
+            })
+        }
+    }
+
+    function decodeString(s) {
+        const textArea = document.createElement("textarea")
+        textArea.innerHTML = s
+
+        const result = textArea.value
+        textArea.remove()
+
+        return result
+    }
+</script>
+
+<script>
+    const queries = new URLSearchParams(window.location.search)
+    const boardCode = queries.get("board_code")
+    const topicIdx = queries.get("idx")
+    const topicFileIdxes = "{{.Topic.Files.String}}"
+    let commentsFileIdxes = {}
+    "{{range .Comments.CommentList}}"
+    commentsFileIdxes[parseInt("{{.Idx.Int64}}")] = "{{.Files.String}}"
+    "{{end}}"
+    const grantComment = (/^true$/).test(("{{.GrantComment}}").toLowerCase())
+
+    function backToList() { location.href = `/board/list?board_code=${boardCode}` }
+
+    async function moveToEdit() {
+        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+            const password = await openPasswordModal()
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            document.cookie = `password=${password}`
+        }
+
+        location.href = `/board/edit?board_code=${boardCode}&idx=${topicIdx}`
+    }
+
+    async function deleteTopic() {
+        const uri = `/api/board/${boardCode}/topic/${topicIdx}`
+        const req = { method: "DELETE" }
+
+        const authoridx = "{{.Topic.AuthorIdx.Int64}}"
+        if (!(authoridx.trim()) || parseInt(authoridx.trim()) < 0) {
+            const password = await openPasswordModal()
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            req.headers = { "Delete-Password": password }
+        }
+
+        const r = await fetch(uri, req)
+        if (r.ok) {
+            alert("Deleted")
+            backToList()
+            return
+        }
+
+        const response = await r.json()
+        alert(response.msg)
+
+        return false
+    }
+
+    function reserveFileToDelete(commentIDX, fidx, storagename) {
+        const reserveInfo = {
+            "comment-idx": commentIDX,
+            "fidx": fidx,
+            "storagename": storagename
+        }
+        attachmentList["reserve-delete"].push(reserveInfo)
+
+        let targetRoot = document
+        let container = document.querySelector("#writer-fileslist-container > ul")
+        let targetAttachKey = "comment-new"
+        if (commentIDX) {
+            targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
+            container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
+            targetAttachKey = "comment-edit"
+        }
+
+        container.querySelector(`#file-${fidx}`).remove()
+        for (const i in attachmentList[targetAttachKey]) {
+            const finfo = attachmentList[targetAttachKey][i]
+            if (finfo.idx == fidx && finfo.storagename == storagename) {
+                attachmentList[targetAttachKey].splice(i, 1)
+                break
+            }
+        }
+        if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+            const imgTags = targetRoot.querySelectorAll("img")
+            imgTags.forEach((img) => {
+                const fnames = img.src.split("/")
+                const fname = fnames[fnames.length - 1]
+                if (fname == storagename) {
+                    img.remove()
+                    return
+                }
+            })
+        }
+    }
+
+    async function deleteFile(commentIDX, fidx, storagename) {
+        const data = [{ "idx": parseInt(fidx) }]
+        const uri = options.uploadActionURI
+
+        let targetRoot = document
+        let container = document.querySelector("#writer-fileslist-container > ul")
+        let targetAttachKey = "comment-new"
+        if (commentIDX) {
+            targetRoot = document.querySelector(`comment-modifier#modifier-${commentIDX}`).shadowRoot
+            container = targetRoot.querySelector(`#modifier-fileslist-container > ul`)
+            targetAttachKey = "comment-edit"
+        }
+
+        const r = await fetch(uri, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+
+        if (r.ok) {
+            const el = container.querySelector(`#file-${fidx}`)
+            if (el) { el.remove() }
+            for (const i in attachmentList[targetAttachKey]) {
+                const finfo = attachmentList[targetAttachKey][i]
+                if (finfo.idx == fidx && finfo.storagename == storagename) {
+                    attachmentList[targetAttachKey].splice(i, 1)
+                    break
+                }
+            }
+            if (storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                const imgTags = targetRoot.querySelectorAll("img")
+                imgTags.forEach((img) => {
+                    const fnames = img.src.split("/")
+                    const fname = fnames[fnames.length - 1]
+                    if (fname == storagename) {
+                        img.remove()
+                        return
+                    }
+                })
+            }
+        } else {
+            alert("Failed to delete file")
+        }
+    }
+
+    const initialContent = ""
+    const editorEL = document.querySelector("#writer")
+    const options = {
+        uploadActionURI: "/api/uploader",
+        uploadAccessURI: "/upload",
+        uploadCallback: imageUploadCallback(null)
+    }
+
+    "{{if eq .GrantComment true}}"
+    const editor = new MyEditor(initialContent, editorEL, options)
+    "{{end}}"
+
+    class modifierElement extends HTMLElement {
+        constructor() {
+            super()
+            const templateContent = document.querySelector("#modifier-template").content
+            const shadowRoot = this.attachShadow({ mode: "open" })
+            shadowRoot.appendChild(templateContent.cloneNode(true))
+        }
+    }
+    customElements.define("comment-modifier", modifierElement)
+
+    const commentModifiers = {}
+    let currentCommentPage = parseInt("{{.Comments.CurrentPage}}")
+    let totalCommentPage = parseInt("{{.Comments.TotalPage}}")
+
+    function showCommentPageJumper() {
+        const commentPages = document.querySelector("#comment-pages")
+        if (!commentPages) {
+            return false
+        }
+
+        const pageJumper = document.querySelectorAll(".page-jump")
+        const topicButtonsSecond = document.querySelector("#topic-buttons-second")
+
+        let displayMode = "initial"
+        if (commentPages.innerHTML.trim() == "") { displayMode = "none" }
+
+        pageJumper.forEach((jumper) => { jumper.style.display = displayMode })
+        topicButtonsSecond.style.display = displayMode
+    }
+
+    /*
+    getComments(page)
+    page: number - If page is 1, last comment page
+     */
+    async function getComments(page = 1) {
+        attachmentList["comment-prev"] = []
+        attachmentList["comment-edit"] = []
+        attachmentList["reserve-delete"] = []
+
+        page = parseInt(page)
+        if (page < 0) { page = 1 } // last page
+        if (page > totalCommentPage) { page = totalCommentPage }
+
+        const commentsContainer = document.querySelector("#comments")
+        const pageContainer = document.querySelector("#comment-pages")
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment?page=${page}`
+
+        const r = await fetch(uri)
+
+        let commentsHTML = ""
+        if (r.ok) {
+            const data = await r.json()
+            totalCommentPage = data["total-page"]
+            commentsFileIdxes = {}
+
+            data["comment-list"] && data["comment-list"].forEach((comment) => {
+                const regdate = dayjs(comment["regdate"]).format("YYYY-MM-DD HH:mm:ss")
+
+                commentsHTML += `
+                <span>${comment["author-name"]} %%_AUTHOR_IP_ADDRESS_%%</span> |
+                <span>${regdate}</span> |
+                %%_BUTTON_EDIT_DELETE_%%
+                <span id="comment-${comment['idx']}">${decodeString(comment["content"])}</span>
+                <comment-modifier id="modifier-${comment["idx"]}" data-idx="${comment["idx"]}" data-author-idx="${comment["author-idx"]}" data-author-name="${comment["author-name"]}"></comment-modifier>
+                <a onclick="getFilesInfo(parseInt('${comment["idx"]}'))">Attachment</a>
+                <div id="comment-files-container-${comment["idx"]}">
+                    <ul></ul>
+                </div>
+                `
+                const buttonEditDelete = `
+                <button type="button" onclick="openEditComment('${comment["idx"]}')">edit</button>
+                <button type="button" onclick="deleteComment('${comment["idx"]}')">delete</button>
+                `
+                if ((grantComment && (comment["author-idx"] == parseInt("{{.UserInfo.UserIdx}}") || comment["author-idx"] < 0))
+                    || ("{{.UserInfo.UserGrade}}" == "admin")) {
+                    commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", buttonEditDelete)
+                }
+                if (comment["author-idx"] < 0) {
+                    commentsHTML = commentsHTML.replace("%%_AUTHOR_IP_ADDRESS_%%", `(${comment["author-ip"]})`)
+                }
+                commentsHTML = commentsHTML.replace("%%_AUTHOR_IP_ADDRESS_%%", "")
+                commentsHTML = commentsHTML.replace("%%_BUTTON_EDIT_DELETE_%%", "")
+
+                commentsFileIdxes[parseInt(comment["idx"])] = comment.files
+            })
+
+            commentsContainer.innerHTML = commentsHTML
+
+            // paging
+            const begin = data["current-page"] - 5 > 0 ? data["current-page"] - 5 : 1
+            const fin = data["current-page"] + 5 <= data["total-page"] ? data["current-page"] + 5 : data["total-page"]
+
+            if (page == 0) { page = totalCommentPage }
+
+            let pages = ""
+            data["page-list"].forEach((p) => {
+                if (p == page) {
+                    pages += `<b>${p}</b>`
+                } else {
+                    pages += `<a onclick="getComments('${p}')">${p}</a>`
+                }
+                pages += "\n"
+            })
+            pageContainer.innerHTML = pages
+
+            currentCommentPage = data["current-page"]
+            totalCommentPage = data["total-page"]
+
+            showCommentPageJumper()
         }
     }
 
     async function writeComment() {
-        const comment = document.getElementById("comment-area").value
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment`
 
-        if (comment == "") {
-            alert("Write comment")
+        let authoridx = "{{.UserInfo.UserIdx}}"
+        let authorname = "{{.UserInfo.UserID}}"
+        let nickname, password = ""
+        if (authorname.trim() == "" || authoridx.trim() == "") {
+            nickname = document.querySelector("#comment-nickname").value
+            password = document.querySelector("#comment-password").value
+
+            if (!nickname) {
+                alert("Nickname is required")
+                return false
+            }
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            authoridx = "-1"
+            authorname = nickname
+        }
+
+        const content = editor.getHTML()
+        const emptyContent = "<p></p>"
+        if (content.trim() == emptyContent) {
+            alert("Text is empty")
             return false
         }
 
-        const data = { "content": comment }
+        let flist = ""
+        for (const f of attachmentList["comment-new"]) { flist += `${f.idx}|` }
+        if (flist.length > 0) { flist = flist.slice(0, -1) }
 
-        const r = await fetch("/api/board/comment/$CODE$/$IDX$", {
+        const data = {
+            "author-idx": parseInt(authoridx),
+            "author-name": authorname,
+            "edit-password": password,
+            "content": content,
+            "files": flist
+        }
+
+        const r = await fetch(uri, {
             method: "POST",
-            body: JSON.stringify(data),
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
         })
 
         if (r.ok) {
-            document.querySelector("#comment-area").value = ""
+            getComments(0)
 
-            const pageToMove = Math.ceil((commentsData["total-count"] + 1) / commentsData["list-count"])
-            fetchComments(pageToMove)
-        } else {
-            alert(await r.text())
+            editor.setHTML("")
+            attachmentList["comment-new"] = []
+            document.querySelector("#writer-fileslist-container > ul").innerHTML = ""
+
+            return false
         }
+
+        const response = await r.json()
+        // alert("Write failed")
+        alert(response.message)
 
         return false
     }
 
-    async function deleteComment(index) {
-        const idx = comments[index].idx
-        const uri = "/api/board/comment/$CODE$/$IDX$/" + idx
-        const r = await fetch(uri, { method: 'DELETE' })
+    async function getFilesInfo(idx = null, targetEL = null, reserveDelete = false) {
+        const indexList = []
+        let attachList
+
+        let fileIdxes = topicFileIdxes.split("|")
+        let targetContainer = "#topic-fileslist-container > ul"
+        let targetAttachKey = "topic"
+        if (idx) {
+            fileIdxes = commentsFileIdxes[parseInt(idx)].split("|")
+            targetContainer = `#comment-files-container-${idx} > ul`
+            targetAttachKey = "comment-edit"
+        }
+
+        if (!targetEL) {
+            attachList = document.querySelector(targetContainer)
+        } else {
+            attachList = targetEL
+        }
+
+        if (!fileIdxes.length) { return false }
+
+        for (const fidx of fileIdxes) {
+            indexList.push({ idx: parseInt(fidx) })
+        }
+
+        const uri = "/api/uploader/files-info"
+
+        const r = await fetch(uri, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(indexList)
+        })
 
         if (r.ok) {
-            const pageToMove = Math.ceil((commentsData["total-count"] - 1) / commentsData["list-count"])
-            await fetchComments(pageToMove)
+            const commentData = await r.json()
+            attachmentList[targetAttachKey] = []
+
+            attachList.innerHTML = ""
+            commentData.forEach((f) => {
+                const li = document.createElement("li")
+                li.setAttribute("id", `file-${f.idx}`)
+
+                if (!targetEL) {
+                    const a = document.createElement("a")
+                    a.setAttribute("href", `/upload/${f.storagename}`)
+                    a.setAttribute("target", "_blank")
+                    a.appendChild(document.createTextNode(`${f.filename}`))
+
+                    if (f.storagename.toLowerCase().match(/\.(bmp|jpg|jpeg|png|gif)$/i)) {
+                        const im = document.createElement("img")
+                        im.setAttribute("src", `/upload/${f.storagename}`)
+                        const d = document.createElement("div")
+                        d.setAttribute("class", "hover-view")
+                        d.appendChild(im)
+                        a.appendChild(d)
+                    }
+
+                    li.appendChild(a)
+                } else {
+                    const btn = document.createElement("button")
+
+                    let deleteFunction = "deleteFile"
+                    if (reserveDelete) {
+                        deleteFunction = "reserveFileToDelete"
+                    }
+
+                    btn.setAttribute("onclick", `${deleteFunction}(${idx}, ${f.idx}, '${f.storagename}')`)
+                    btn.appendChild(document.createTextNode("X"))
+
+                    li.appendChild(document.createTextNode(`${f.filename}`))
+                    li.appendChild(btn)
+                }
+
+                attachList.appendChild(li)
+
+                attachmentList[targetAttachKey].push(f)
+            })
+        }
+    }
+
+    async function openEditComment(idx) {
+        attachmentList["comment-edit"] = []
+        attachmentList["comment-prev"] = []
+
+        const modifierEL = document.querySelector(`comment-modifier#modifier-${idx}`)
+        const modifierROOT = modifierEL.shadowRoot
+        const modContent = document.querySelector(`#comment-${idx}`).innerHTML
+
+        const editorEL = modifierROOT.querySelector("#modifier")
+        const options = {
+            uploadActionURI: "/api/uploader",
+            uploadAccessURI: "/upload",
+            uploadCallback: imageUploadCallback(idx)
+        }
+
+        if (!editorEL.hasChildNodes()) {
+            commentModifiers[`modifier-${idx}`] = new MyEditor(modContent, editorEL, options)
+        }
+
+        if (modifierEL.style.display != "block") {
+            modifierROOT.querySelector("#comment-edit-nickname").innerHTML = modifierEL.dataset.authorName
+            if (parseInt(modifierEL.dataset.authorIdx) > 0) {
+                modifierROOT.querySelector("#comment-edit-password").style.display = "none"
+            } else {
+                modifierROOT.querySelector("#comment-edit-password").style.display = "inline-block"
+            }
+            commentModifiers[`modifier-${idx}`].setHTML(modContent)
+        }
+
+        for (const i in commentModifiers) {
+            commentModifiers[i].view.dom.getRootNode().host.style.display = "none"
+        }
+
+        const attachList = modifierROOT.querySelector("#modifier-fileslist-container > ul")
+        await getFilesInfo(idx, attachList, true)
+
+        for (const i in attachmentList["comment-edit"]) {
+            const finfo = {
+                "filename": attachmentList["comment-edit"][i].filename,
+                "idx": attachmentList["comment-edit"][i].idx,
+                "storagename": attachmentList["comment-edit"][i].storagename
+            }
+            attachmentList["comment-prev"].push(finfo)
+        }
+
+        modifierEL.style.display = "block"
+
+        const scrollOffsetY = modifierEL.getBoundingClientRect().top - document.body.getBoundingClientRect().top
+        window.scroll(window.scrollX, scrollOffsetY)
+    }
+
+    async function deleteComment(commentIDX) {
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
+        const req = { method: "DELETE" }
+
+        const modifierEL = document.querySelector(`comment-modifier#modifier-${commentIDX}`)
+        const authoridx = parseInt(modifierEL.dataset.authorIdx)
+        if ("{{.UserInfo.UserGrade}}" != "admin" && authoridx < 0) {
+            const password = await openPasswordModal()
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+
+            req.headers = { "Delete-Password": password }
+        }
+
+        const r = await fetch(uri, req)
+        if (r.ok) {
+            const response = await r.json()
+
+            if (currentCommentPage == totalCommentPage) {
+                await getComments(totalCommentPage)
+            } else {
+                await getComments(currentCommentPage)
+            }
+
+            if (currentCommentPage > totalCommentPage) {
+                await getComments(totalCommentPage)
+            }
         } else {
-            alert(await r.text())
+            const contentType = r.headers.get("content-type")
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const response = await r.json()
+                alert(response.msg)
+            } else {
+                alert("Failed to delete")
+            }
         }
     }
 
-    const filelistString = "$FILE_LIST$"
-    const filelist = new Array()
-    for (const f of filelistString.split("?")) {
-        if (f == "") { continue }
-        const files = f.split("/")
-        filelist.push({
-            "storename": files[1],
-            "filename": files[0],
-            "link": accessURI + "/" + files[1]
-        })
-    }
+    async function updateComment(self) {
+        const modifierEL = self.getRootNode().host
+        const commentIDX = self.getRootNode().host.dataset.idx
+        const content = commentModifiers[modifierEL.id].getHTML()
 
-    let commentsData = $COMMENTS$;
-    let comments = commentsData["comment-list"]
+        let flist = ""
+        for (f of attachmentList["comment-edit"]) {
+            let isDelete = false
+            for (const fdelete of attachmentList["reserve-delete"]) {
+                if (f.idx == fdelete.idx) {
+                    isDelete = true
+                    break
+                }
+            }
 
-    let pages = new Array()
-    for (let i = commentsData["current-page"] - 1; i < commentsData["current-page"] + 2; i++) {
-        if (i > commentsData["total-page"]) { break }
-        if (i > 0) {
-            const pageInfo = { "page": i, "link": null }
-            pages.push(pageInfo)
+            if (!isDelete) { flist += `${f.idx}|` }
         }
+        if (flist.length > 0) { flist = flist.slice(0, -1) }
+
+        let filesToDelete = "";
+        for (const f of attachmentList["reserve-delete"]) {
+            filesToDelete += `${f.fidx}|`
+        }
+        filesToDelete = filesToDelete.slice(0, -1)
+
+        const data = {
+            "content": content,
+            "files": flist,
+            "delete-files": filesToDelete
+        }
+
+        const uri = `/api/board/${boardCode}/${topicIdx}/comment/${commentIDX}`
+        const req = {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }
+
+        const authoridx = parseInt(modifierEL.dataset.authorIdx)
+        if ("{{.UserInfo.UserGrade}}" != "admin" && authoridx < 0) {
+            const modifierROOT = modifierEL.shadowRoot
+            const password = modifierROOT.querySelector("#comment-edit-password").value
+            if (!password) {
+                alert("Password is required")
+                return false
+            }
+            req.headers["Edit-Password"] = password
+        }
+
+        const r = await fetch(uri, req)
+
+        if (r.ok) {
+            if (currentCommentPage == totalCommentPage) {
+                await getComments(totalCommentPage)
+            } else {
+                await getComments(currentCommentPage)
+            }
+        } else {
+            alert("Failed to update")
+            return false
+        }
+
+        modifierEL.style.display = "none"
     }
 
-    const lrFileList = new ListRenderer(document.getElementById("filelist-container"))
-    lrFileList.render()
+    async function cancelEditComment(self) {
+        const modifierEL = self.getRootNode().host
+        const commentIDX = self.getRootNode().host.dataset.idx
+        const modifierROOT = modifierEL.shadowRoot
+        const editorEL = modifierROOT.querySelector("#modifier")
 
-    const lrComments = new ListRenderer(document.querySelector("#comments-container"))
-    lrComments.render()
+        modifierEL.style.display = "none"
 
-    const lrPage = new ListRenderer(document.querySelector("#pages-container"))
-    lrPage.render()
+        const fprev = attachmentList["comment-prev"].map(JSON.stringify)
+        const fnew = attachmentList["comment-edit"].map(JSON.stringify)
+        const fdeletes = attachmentList["comment-edit"].filter(obj => !fprev.includes(JSON.stringify(obj)))
+        for (const i in fdeletes) {
+            await deleteFile(commentIDX, fdeletes[i].idx, fdeletes[i].storagename)
+        }
+
+        attachmentList["comment-prev"] = []
+        attachmentList["comment-edit"] = []
+        attachmentList["reserve-delete"] = []
+    }
+
+    async function init() {
+        showCommentPageJumper()
+        await getFilesInfo()
+    }
+    document.addEventListener("DOMContentLoaded", function () { init() })
 </script>
 
-<style>
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .content-container {
-        width: 95vw;
-    }
-
-    #content img {
-        max-width: 70vw;
-        overflow: auto;
-    }
-
-    #comments-container img {
-        max-width: 25%;
-        overflow: auto;
-    }
-
-    .comment-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    textarea {
-        width: 100%;
-        height: 10vh;
-    }
-</style>
-
-@INCLUDE@board/include/footer.html
+{{template "layout_board_footer" .}}

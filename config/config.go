@@ -1,29 +1,33 @@
 package config
 
 import (
-	"9minutes/auth"
-	"9minutes/db"
-	"9minutes/email"
+	"9minutes/internal/db"
+	"9minutes/internal/email"
 	"9minutes/model"
 )
 
 var (
-	AdminUserCountPerPage  int = 10
-	AdminBoardCountPerPage int = 10
-	// ContentsCountPerPage   int = 25
-	ContentsCountPerPage int = 5
-	CommentCountPerPage  int = 3
+	SiteName = "9minutes"
 )
 
 var (
-	StaticPath = "static"
-	UploadPath = "upload"
-	HtmlPath   = "static/html"
+	AdminUserCountPerPage  int = 20
+	AdminBoardCountPerPage int = 20
+	TopicCountPerPage      int = 20
+	CommentCountPerPage    int = 20
 )
 
 var (
-	UserGrades = newCollection("admin", "manager", "regular_user", "pending_user", "guest", "banned_user")
+	StaticPath string = "static"
+	HtmlPath   string = "static/html"
+	FilesPath  string = "static/files"
+	UploadPath string = "upload"
 )
+
+// Maybe not use
+// var (
+// 	UserGrades = newCollection("admin", "manager", "user_active", "user_hold", "guest", "user_banned")
+// )
 
 var DatabaseInfoSQLite = db.DBInfo{
 	DatabaseType: model.SQLITE,
@@ -94,7 +98,7 @@ var DatabaseInfoOracle = db.DBInfo{
 	Port:          "1521",
 	DatabaseName:  "XE",         // physical&on-premise: database name, cloud: service name
 	SchemaName:    "",           // not use
-	GrantID:       "myaccount",  // physical&on-premise: username only, cloud: username and database name
+	GrantID:       "myaccount",  // physical&on-premise: userid only, cloud: userid and database name
 	GrantPassword: "mypassword", // password
 	FilePath:      "",           // wallet file path for cloud using
 }
@@ -140,23 +144,23 @@ var DatabaseInfoOracleCloudAdmin = db.DBInfo{
 	FilePath:      "./wallet_admin",
 }
 
-var StoreInfoMemory = auth.SessionStoreInfo{
-	StoreType: auth.MEMSTORE,
-	Address:   "",
-	Port:      "",
-}
+// var StoreInfoMemory = auth.SessionStoreInfo{
+// 	StoreType: auth.MEMSTORE,
+// 	Address:   "",
+// 	Port:      "",
+// }
 
-var StoreInfoETCD = auth.SessionStoreInfo{
-	StoreType: auth.ETCD,
-	Address:   "localhost",
-	Port:      "2379",
-}
+// var StoreInfoETCD = auth.SessionStoreInfo{
+// 	StoreType: auth.ETCD,
+// 	Address:   "localhost",
+// 	Port:      "2379",
+// }
 
-var StoreInfoRedis = auth.SessionStoreInfo{
-	StoreType: auth.REDIS,
-	Address:   "localhost",
-	Port:      "6379",
-}
+// var StoreInfoRedis = auth.SessionStoreInfo{
+// 	StoreType: auth.REDIS,
+// 	Address:   "localhost",
+// 	Port:      "6379",
+// }
 
 var EmailServerDirect = email.Config{
 	UseEmail:   false,

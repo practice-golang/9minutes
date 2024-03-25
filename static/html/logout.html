@@ -1,0 +1,28 @@
+<html>
+
+<head></head>
+
+<body></body>
+
+<script>
+    async function doLogout() {
+        const uri = "/api/logout"
+
+        const response = await fetch(uri, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include"
+        })
+
+        if (!response.ok) { alert("Failed to logout") }
+        location.href = "/"
+
+        return false
+    }
+
+    doLogout()
+
+    // addEventListener("DOMContentLoaded", () => { doLogout() })
+</script>
+
+</html>

@@ -1,0 +1,69 @@
+{{define "layout_nomenu_header"}}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <meta name="google" content="notranslate" />
+
+    <title>Template</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <script src="/assets/js/list-renderer.js"></script>
+</head>
+
+<style>
+    html,
+    body {
+        padding: 0;
+    }
+
+    body {
+        max-width: 98vw;
+    }
+
+    .title-wrapper {
+        width: 100%;
+    }
+
+    .title-wrapper input {
+        width: calc(100% - 3.8em);
+    }
+
+    .login-container {
+        width: fit-content;
+    }
+
+    .login-container>div {
+        width: 100%;
+        text-align: right;
+    }
+
+    /* .login-container input {
+        width: calc(100% - 3.3em);
+    } */
+</style>
+
+<body>
+    <div>
+        <a href="/">Home</a>
+    </div>
+
+    <hr />
+{{end}}
+
+
+{{define "layout_nomenu_footer"}}
+    <footer>
+        <hr />
+        Template footer
+        <br />
+        © Organization.
+    </footer>
+</body>
+
+</html>
+{{end}}

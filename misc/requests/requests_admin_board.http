@@ -1,0 +1,77 @@
+@uri = http://localhost:5525
+@cookie = session_id=60eab1eb-1c40-412f-beac-927dc8a419d7;
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+### Board list
+GET {{uri}}/api/admin/board
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Board list - page
+GET {{uri}}/api/admin/board?page=2&list-count=5
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Board list - search
+GET {{uri}}/api/admin/board?search=mis
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### Add board
+POST {{uri}}/api/admin/board
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "board-name": "misc",
+    "board-code": "misc",
+    "board-type": "board",
+    "board-table": "board_misc",
+    "comment-table": "comment_misc",
+    "grant-read": "guest",
+    "grant-write": "user_active",
+    "grant-comment": "user_active",
+    "grant-upload": "user_active",
+    "fields": null
+}
+
+### Edit board
+PUT {{uri}}/api/admin/board
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    {
+        "idx": "1",
+        "board-name": "misc1",
+        "board-code": "misc1",
+        "board-type": "board",
+        "board-table": "board_misc1",
+        "comment-table": "comment_misc1",
+        "grant-read": "guest",
+        "grant-write": "user_active",
+        "grant-comment": "user_active",
+        "grant-upload": "user_active",
+        "fields": null
+    }
+]
+
+### Delete board
+DELETE {{uri}}/api/admin/board
+Content-Type: application/json
+Cookie: {{cookie}}
+
+[
+    { "idx": "1" },
+    { "idx": "9" }
+]

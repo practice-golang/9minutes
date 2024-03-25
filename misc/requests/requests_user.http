@@ -1,0 +1,65 @@
+@uri = http://localhost:5525
+# @uri = http://enjoytools.net:5525
+@cookie = session_id=4fcc9af0-ff9e-483b-9ea3-f8031f2d067d;
+
+### health
+GET {{uri}}/api/health
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+### Logout
+GET {{uri}}/api/logout HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+### Signup
+POST {{uri}}/api/signup HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "practice",
+    "email": "practice-golang@gmail.com",
+    "password": "11a11"
+}
+
+### Myinfo
+GET {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+### Update
+PUT {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+{
+    "userid": "admin",
+    "old-password": "admin",
+    "password": "admin"
+}
+
+### Delete
+DELETE {{uri}}/api/myinfo HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+### 2FA QR code test
+GET {{uri}}/api/2fa/qr HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+
+
+### 2FA verification test
+GET {{uri}}/api/2fa/verify HTTP/1.1
+content-type: application/json
+Cookie: {{cookie}}
+

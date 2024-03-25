@@ -1,4 +1,4 @@
-@INCLUDE@include/header.html
+{{template "layout_header" .}}
 
 <script>
     document.title = "My page"
@@ -6,9 +6,18 @@
 
 <div>
     <span id="username"></span>
+
+    <br />
+
     <input type="password" name="old-password" value="" placeholder="Old password" />
+
+    <br />
+
     <input type="password" name="password" value="" placeholder="New password" />
     <input type="password" name="password-confirm" value="" placeholder="Confirm new password" />
+
+    <br />
+
     <input type="text" name="email" value="" placeholder="Email" />
     <!-- <input type="text" name="phone" value="" placeholder="Phone" /> -->
 </div>
@@ -18,7 +27,7 @@
 
 <br />
 
-<button onclick="resignUser()">Resign</button>
+<button onclick="quitUser()">Remove this account</button>
 
 <script>
     async function updateUser() {
@@ -70,14 +79,14 @@
         }
     }
 
-    async function resignUser() {
-        const confirmed = confirm("Are you sure you want to resign?")
+    async function quitUser() {
+        const confirmed = confirm("Are you sure you want to quit?")
         if (!confirmed) { return }
 
         let r = await fetch('/api/myinfo', { method: 'DELETE' })
 
         if (r.ok) {
-            alert("Resign successful")
+            alert("User quit successful")
             location.href = '/logout'
         } else {
             alert(await r.text())
@@ -93,9 +102,9 @@
             document.querySelector('input[name="email"]').value = data.email
             // document.querySelector('input[name="phone"]').value = data.phone
         } else {
-            location.href = '/'
+            // location.href = '/'
         }
     })
 </script>
 
-@INCLUDE@include/footer.html
+{{template "layout_footer" .}}
