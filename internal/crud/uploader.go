@@ -6,6 +6,7 @@ import (
 	"9minutes/model"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/blockloop/scan"
 )
@@ -87,11 +88,14 @@ func AddUploadedFile(fileName, storageName string) (int64, int64, error) {
 	dbtype := db.GetDatabaseTypeString()
 	tableName := db.GetFullTableName(db.Info.UploadTable)
 
+	now := time.Now().Format("20060102150405")
+
 	data := map[string]interface{}{
 		"FILE_NAME":    fileName,
 		"TOPIC_IDX":    -1,
 		"COMMENT_IDX":  -1,
 		"STORAGE_NAME": storageName,
+		"REGDATE":      now,
 	}
 	columns := np.CreateString(data, dbtype, "", false)
 

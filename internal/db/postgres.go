@@ -107,11 +107,12 @@ func (d *Postgres) CreateBoardTable() error {
 func (d *Postgres) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UploadTable + ` (
-		"IDX"             SERIAL        PRIMARY KEY,
-		"TOPIC_IDX"       BIGINT,
-		"COMMENT_IDX"     BIGINT,
-		"FILE_NAME"       VARCHAR(512)  NULL DEFAULT NULL,
-		"STORAGE_NAME"    VARCHAR(512)  NULL DEFAULT NULL
+		"IDX"          SERIAL       PRIMARY KEY,
+		"TOPIC_IDX"    BIGINT,
+		"COMMENT_IDX"  BIGINT,
+		"FILE_NAME"    VARCHAR(512) NULL DEFAULT NULL,
+		"STORAGE_NAME" VARCHAR(512) NULL DEFAULT NULL,
+		"REGDATE"      VARCHAR(14)  NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)
@@ -127,12 +128,12 @@ func (d *Postgres) CreateUserTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.UserTable + ` (
 		"IDX"      SERIAL       PRIMARY KEY,
-		"USERID" VARCHAR(128) UNIQUE NULL DEFAULT NULL,
+		"USERID"   VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"PASSWORD" VARCHAR(128) NULL DEFAULT NULL,
 		"EMAIL"    VARCHAR(128) UNIQUE NULL DEFAULT NULL,
 		"GRADE"    VARCHAR(24)  NULL DEFAULT NULL,
 		"APPROVAL" VARCHAR(2)   NULL DEFAULT NULL,
-		"REGDATE" VARCHAR(14)  NULL DEFAULT NULL,
+		"REGDATE"  VARCHAR(14)  NULL DEFAULT NULL,
 
 		CONSTRAINT "USERS_UQ" UNIQUE ("USERID", "EMAIL")
 	);`
@@ -167,7 +168,7 @@ func (d *Postgres) CreateUserTable() error {
 	userfieldTable := "user_fields"
 	sql = `
 	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + userfieldTable + ` (
-		"IDX"          SERIAL PRIMARY KEY,
+		"IDX"          SERIAL       PRIMARY KEY,
 		"DISPLAY_NAME" VARCHAR(128) NULL DEFAULT NULL,
 		"COLUMN_CODE"  VARCHAR(128) NULL DEFAULT NULL,
 		"COLUMN_TYPE"  VARCHAR(128) NULL DEFAULT NULL,
@@ -210,7 +211,7 @@ func (d *Postgres) CreateUserVerificationTable() error {
 		"IDX"      SERIAL       PRIMARY KEY,
 		"USER_IDX" INTEGER      NULL DEFAULT NULL,
 		"TOKEN"    VARCHAR(128) NULL DEFAULT NULL,
-		"REGDATE" VARCHAR(14)  NULL DEFAULT NULL
+		"REGDATE"  VARCHAR(14)  NULL DEFAULT NULL
 	);`
 
 	_, err := Con.Exec(sql)

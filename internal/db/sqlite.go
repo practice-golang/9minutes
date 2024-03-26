@@ -89,11 +89,12 @@ func (d *SQLite) CreateBoardTable() error {
 func (d *SQLite) CreateUploadTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.UploadTable + `" (
-		"IDX"             INTEGER,
-		"TOPIC_IDX"       INTEGER,
-		"COMMENT_IDX"     INTEGER,
-		"FILE_NAME"       TEXT,
-		"STORAGE_NAME"    TEXT,
+		"IDX"          INTEGER,
+		"TOPIC_IDX"    INTEGER,
+		"COMMENT_IDX"  INTEGER,
+		"FILE_NAME"    TEXT,
+		"STORAGE_NAME" TEXT,
+		"REGDATE"      TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
@@ -111,12 +112,12 @@ func (d *SQLite) CreateUserTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.UserTable + `" (
 		"IDX"      INTEGER,
-		"USERID" TEXT UNIQUE,
+		"USERID"   TEXT UNIQUE,
 		"PASSWORD" TEXT,
 		"EMAIL"    TEXT UNIQUE,
 		"GRADE"    TEXT,
 		"APPROVAL" TEXT,
-		"REGDATE" TEXT,
+		"REGDATE"  TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
