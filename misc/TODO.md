@@ -1,23 +1,26 @@
 # Todo
 
 * [ ] Logger - request, user login history - useridx, ip, regdate
-* [ ] Add editor link target `_blank`
 
-* [ ] Write/Update/Upload text/file size limit
-    * [ ] Topic
-    * [ ] Comment
-* [ ] Resurrect account verification table usage
-* [ ] Resurrect session storage - etcd, redis..
-* [ ] Admin - page for temporary files flushing - `TOPIC_IDX` and `COMMENT_IDX` are `-1`
-* [ ] Add like/dislike button
-    * [ ] topic
-    * [ ] comment
 * [ ] manager account
     * [ ] API
         * [ ] Edit board settings
         * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
     * [ ] DB
     * [ ] Admin page - add/edit manager account setting for each boards
+
+* [ ] Resurrect account verification table usage
+    * [ ] Email
+    * [ ] Verifying
+
+* [ ] Write/Update/Upload text/file size limit
+    * [ ] Topic
+    * [ ] Comment
+* [ ] Resurrect session storage - etcd, ~~redis~~..
+* [ ] Admin - page for temporary files flushing - `TOPIC_IDX` and `COMMENT_IDX` are `-1`
+* [ ] Add like/dislike button
+    * [ ] topic
+    * [ ] comment
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
@@ -88,6 +91,7 @@
     * [x] Add `no index` when delete new upload
 * [x] Rename all post, posting to topic
 * [x] Add regdate to upload table
+* [x] Add editor link target `_blank`
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
