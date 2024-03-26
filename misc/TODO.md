@@ -1,27 +1,23 @@
 # Todo
 
-* [ ] Add editor link target `_blank`
-* [ ] Add regdate to upload table
-* [ ] Admin - manager page to delete if both `TOPIC_IDX` and `COMMENT_IDX` are `-1` - Clean up temporary uploads
 * [ ] Write/Update/Upload text/file size limit
-    * Topic
-    * Comment
-* [ ] Logger
-    * [ ] Add user login history - useridx, ip, regdate
+    * [ ] Topic
+    * [ ] Comment
+* [ ] Logger - request, user login history - useridx, ip, regdate
 
-* [x] Rename all post, posting to topic
-* [ ] Board managing page - Add manager account setting for each boards
+* [ ] Resurrect verification table usage
+* [ ] Add editor link target `_blank`
+* [ ] Resurrect session storage - etcd, redis..
+* [ ] Admin - page for temporary files flushing - `TOPIC_IDX` and `COMMENT_IDX` are `-1`
+* [ ] Add like/dislike button
+    * [ ] topic
+    * [ ] comment
+* [ ] manager account
     * [ ] API
         * [ ] Edit board settings
         * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
     * [ ] DB
-    * [ ] Admin page
-* [ ] Resurrect session storage - etcd, redis..
-* [ ] Resurrect verification table usage
-
-* [ ] Add like/dislike button
-    * [ ] topic
-    * [ ] comment
+    * [ ] Admin page - add/edit manager account setting for each boards
 
 * [x] Change to go-fiber
 * [x] Admin - Use Svelte component for Page, HTML
@@ -90,6 +86,8 @@
     * [x] Comment write
     * [x] Comment edit
     * [x] Add `no index` when delete new upload
+* [x] Rename all post, posting to topic
+* [x] Add regdate to upload table
 
 * [ ] Banned user time count - When page open or login, check the ban time is gone
 * [ ] Clean up HandleHTML function
