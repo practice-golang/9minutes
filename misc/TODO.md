@@ -1,12 +1,12 @@
 # Todo
 
+* [ ] Logger - request, user login history - useridx, ip, regdate
+* [ ] Add editor link target `_blank`
+
 * [ ] Write/Update/Upload text/file size limit
     * [ ] Topic
     * [ ] Comment
-* [ ] Logger - request, user login history - useridx, ip, regdate
-
-* [ ] Resurrect verification table usage
-* [ ] Add editor link target `_blank`
+* [ ] Resurrect account verification table usage
 * [ ] Resurrect session storage - etcd, redis..
 * [ ] Admin - page for temporary files flushing - `TOPIC_IDX` and `COMMENT_IDX` are `-1`
 * [ ] Add like/dislike button
