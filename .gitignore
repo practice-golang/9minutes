@@ -2,6 +2,7 @@
 bin/
 upload/*
 !upload/.gitkeep
+vendor/
 coverage.out
 coverage.html
 /codecov.*

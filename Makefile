@@ -1,6 +1,10 @@
 build:
 	go build -ldflags "-w -s" -trimpath -o bin/ ./cmd
 
+build-vendor:
+	go work vendor
+	go build -mod vendor -ldflags "-w -s" -trimpath -o bin/ ./cmd
+
 debug:
 	go build -o bin/ ./cmd
 
