@@ -9,7 +9,7 @@ dist:
 	go build -mod=readonly -o ./bin/ github.com/mitchellh/gox
 	go mod tidy
 	go env -w GOFLAGS=-trimpath
-	bin/gox -mod="readonly" -ldflags="-w -s" -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}" -osarch="windows/amd64 linux/amd64 linux/arm darwin/amd64 darwin/arm64" ./cmd
+	bin/gox -mod="readonly" -ldflags="-w -s" -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}" -osarch="windows/amd64 linux/amd64 linux/arm linux/arm64 darwin/amd64 darwin/arm64" ./cmd
 	rm ./bin/gox*
 
 test:
