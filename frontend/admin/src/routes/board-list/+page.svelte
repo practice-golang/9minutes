@@ -2,6 +2,7 @@
     import { onMount, onDestroy, beforeUpdate, afterUpdate } from "svelte";
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
+    import BoardMember from "./board-member.svelte";
 
     import "$lib/styles/table.css";
 
@@ -233,6 +234,17 @@
         invalidateAll();
     }
 
+    let boardMember;
+    let dialogTitle;
+    let dialogMessage;
+    function openBoardMemberDialog() {
+        dialogTitle = "Board member";
+        dialogMessage = "Hello!!";
+
+        boardMember.showModal();
+        boardMember.title = "hahaha";
+    }
+
     onMount(() => {});
 
     afterUpdate(() => {
@@ -244,6 +256,12 @@
         selectAll = selectedIndices.length == boards.length;
     });
 </script>
+
+<BoardMember
+    bind:BoardMember={boardMember}
+    title={dialogTitle}
+    message={dialogMessage}
+/>
 
 <h1>Boards</h1>
 
@@ -283,6 +301,10 @@
         <option value={listCountNum}>{listCountNum}</option>
     {/each}
 </select>
+
+<dialog>
+    <h2>Hello dialog!!</h2>
+</dialog>
 
 <table id="boards-list-container">
     <thead>
@@ -438,6 +460,14 @@
                     {/each}
 
                     <td>
+                        <!-- <button
+                            type="button"
+                            on:click={() => {
+                                openBoardMemberDialog();
+                            }}
+                        >
+                            Members
+                        </button> -->
                         <button
                             type="button"
                             on:click={() => {
