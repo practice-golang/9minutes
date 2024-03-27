@@ -2,12 +2,23 @@
 
 * [ ] Logger - request, user login history - useridx, ip, regdate
 
-* [ ] manager account
+* [ ] member account
+    * [ ] DB
+        * [x] Member table creation
+        * [ ] add
+        * [ ] edit
+        * [ ] delete
     * [ ] API
         * [ ] Edit board settings
+            * [ ] member add
+            * [ ] member delete
         * [ ] Add/edit/remove user as member -> Add manager, member column to board setting table
-    * [ ] DB
-    * [ ] Admin page - add/edit manager account setting for each boards
+    * [ ] Admin page
+        * [ ] add/edit manager account setting for each boards
+        * [ ] delete manager when delete board
+    * [ ] User page
+        * [ ] control listing
+        * [ ] access grant
 
 * [ ] Resurrect account verification table usage
     * [ ] Email

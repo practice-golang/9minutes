@@ -123,6 +123,25 @@ func (d *Postgres) CreateUploadTable() error {
 	return nil
 }
 
+// CreateMemberTable - Create board member table
+func (d *Postgres) CreateMemberTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS ` + Info.SchemaName + `.` + Info.MemberTable + ` (
+		"IDX"          SERIAL       PRIMARY KEY,
+		"BOARD_IDX"    BIGINT,
+		"USER_IDX"     BIGINT,
+		"GRADE"        VARCHAR(24)  NULL DEFAULT NULL,
+		"REGDATE"      VARCHAR(14)  NULL DEFAULT NULL
+	);`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *Postgres) CreateUserTable() error {
 	sql := `

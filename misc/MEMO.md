@@ -1,4 +1,4 @@
-# Memo for oracle test
+# Memo for oracle
 
 ## Host info
 * docker image: truevoly/oracle-12c

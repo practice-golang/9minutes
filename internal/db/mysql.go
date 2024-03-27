@@ -47,7 +47,7 @@ func (d *Mysql) Exec(sql string, colValues []interface{}, options string) (int64
 	return count, idx, nil
 }
 
-// CreateBoardTable - Create board manager table
+// CreateBoardTable - Create board creation table
 func (d *Mysql) CreateBoardTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.BoardTable + ` (
@@ -86,6 +86,30 @@ func (d *Mysql) CreateUploadTable() error {
 		COMMENT_IDX  INT(11)      UNSIGNED NOT NULL,
 		FILE_NAME    VARCHAR(512) NULL DEFAULT NULL,
 		STORAGE_NAME VARCHAR(512) NULL DEFAULT NULL,
+		REGDATE      VARCHAR(14)  NULL DEFAULT NULL,
+
+		PRIMARY KEY (IDX),
+		INDEX   IDX (IDX)
+	)
+	COLLATE='utf8_general_ci'
+	ENGINE=InnoDB;`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateMemberTable - Create board member table
+func (d *Mysql) CreateMemberTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS ` + Info.DatabaseName + `.` + Info.MemberTable + ` (
+		IDX          INT(11)      UNSIGNED NOT NULL AUTO_INCREMENT,
+		BOARD_IDX    INT(11)      UNSIGNED NOT NULL,
+		USER_IDX     INT(11)      UNSIGNED NOT NULL,
+		GRADE        VARCHAR(24)  NULL DEFAULT NULL,
 		REGDATE      VARCHAR(14)  NULL DEFAULT NULL,
 
 		PRIMARY KEY (IDX),

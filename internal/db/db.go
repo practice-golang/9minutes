@@ -21,6 +21,7 @@ type (
 		TableName     string
 		BoardTable    string
 		UploadTable   string
+		MemberTable   string
 		UserTable     string
 		GrantID       string
 		GrantPassword string
@@ -70,6 +71,7 @@ func SetupDB() error {
 	Info.BoardTable = "boards"
 	Info.UploadTable = "uploads"
 	Info.UserTable = "users"
+	Info.MemberTable = "managers"
 
 	switch Info.DatabaseType {
 

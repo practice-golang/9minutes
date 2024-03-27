@@ -128,6 +128,27 @@ func (d *SqlServer) CreateUploadTable() error {
 	return nil
 }
 
+// CreateMemberTable - Create board member table
+func (d *SqlServer) CreateMemberTable() error {
+	sql := `USE "` + Info.DatabaseName + `"`
+	sql += `
+	IF OBJECT_ID(N'` + Info.MemberTable + `', N'U') IS NULL
+	CREATE TABLE "` + Info.MemberTable + `" (
+		IDX          BIGINT       NOT NULL IDENTITY PRIMARY KEY,
+		BOARD_IDX    BIGINT       NOT NULL,
+		USER_IDX     BIGINT       NOT NULL,
+		GRADE        VARCHAR(24)  NULL DEFAULT NULL,
+		REGDATE      VARCHAR(14)  NULL DEFAULT NULL
+	)`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *SqlServer) CreateUserTable() error {
 	// sql := `

@@ -151,6 +151,49 @@ func (d *Oracle) CreateUploadTable() error {
 	return nil
 }
 
+// CreateMemberTable - Create board member table
+func (d *Oracle) CreateMemberTable() error {
+	var err error
+
+	var tableCNT int64
+
+	sql := `
+	SELECT
+		COUNT(table_name) AS CNT
+	FROM all_tables
+	WHERE owner = '` + strings.ToUpper(Info.GrantID) + `'
+		AND table_name = '` + strings.ToUpper(Info.MemberTable) + `'`
+
+	rows, _ := Con.Query(sql)
+	for rows.Next() {
+		_ = rows.Scan(&tableCNT)
+	}
+
+	if tableCNT > 0 {
+		return nil
+	}
+
+	memberTable := strings.ToUpper(`"` + Info.GrantID + `"."` + Info.MemberTable + `"`)
+
+	sql = `
+	CREATE TABLE ` + memberTable + ` (
+		IDX          NUMBER(11) GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL,
+		BOARD_IDX    NUMBER(11),
+		USER_IDX     NUMBER(11),
+		GRADE        VARCHAR2(24),
+		REGDATE      VARCHAR2(14),
+
+		CONSTRAINT member_pk PRIMARY KEY (IDX)
+	)`
+
+	_, err = Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUserTable - Create user table
 func (d *Oracle) CreateUserTable() error {
 	var err error

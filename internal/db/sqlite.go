@@ -58,7 +58,7 @@ func (d *SQLite) Exec(sql string, colValues []interface{}, options string) (int6
 	return count, idx, nil
 }
 
-// CreateBoardTable - Create board manager table
+// CreateBoardTable - Create board creation table
 func (d *SQLite) CreateBoardTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.BoardTable + `" (
@@ -95,6 +95,27 @@ func (d *SQLite) CreateUploadTable() error {
 		"FILE_NAME"    TEXT,
 		"STORAGE_NAME" TEXT,
 		"REGDATE"      TEXT,
+
+		PRIMARY KEY("IDX" AUTOINCREMENT)
+	);`
+
+	_, err := Con.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateMemberTable - Create board member table
+func (d *SQLite) CreateManagerTable() error {
+	sql := `
+	CREATE TABLE IF NOT EXISTS "` + Info.MemberTable + `" (
+		"IDX"             INTEGER,
+		"BOARD_IDX"       INTEGER,
+		"USER_IDX"        INTEGER,
+		"GRADE"           TEXT,
+		"REGDATE"         TEXT,
 
 		PRIMARY KEY("IDX" AUTOINCREMENT)
 	);`
