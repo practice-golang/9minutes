@@ -2,7 +2,7 @@
     import { onMount, onDestroy, beforeUpdate, afterUpdate } from "svelte";
     import { invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
-    import BoardMember from "./board-member.svelte";
+    import BoardMember from "./member.svelte";
 
     import "$lib/styles/table.css";
 
