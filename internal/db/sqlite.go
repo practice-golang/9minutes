@@ -108,7 +108,7 @@ func (d *SQLite) CreateUploadTable() error {
 }
 
 // CreateMemberTable - Create board member table
-func (d *SQLite) CreateManagerTable() error {
+func (d *SQLite) CreateMemberTable() error {
 	sql := `
 	CREATE TABLE IF NOT EXISTS "` + Info.MemberTable + `" (
 		"IDX"             INTEGER,

@@ -39,6 +39,7 @@ type (
 		Exec(string, []interface{}, string) (int64, int64, error)
 		CreateBoardTable() error
 		CreateUploadTable() error
+		CreateMemberTable() error
 		CreateUserTable() error
 		CreateUserVerificationTable() error
 
@@ -71,7 +72,7 @@ func SetupDB() error {
 	Info.BoardTable = "boards"
 	Info.UploadTable = "uploads"
 	Info.UserTable = "users"
-	Info.MemberTable = "managers"
+	Info.MemberTable = "members"
 
 	switch Info.DatabaseType {
 

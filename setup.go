@@ -242,6 +242,10 @@ func setupDB() {
 		log.Fatal("CreateUploadTable:", err)
 	}
 
+	if db.Obj.CreateMemberTable() != nil {
+		log.Fatal("CreateUserTable:", err)
+	}
+
 	if db.Obj.CreateUserTable() != nil {
 		log.Fatal("CreateUserTable:", err)
 	}
