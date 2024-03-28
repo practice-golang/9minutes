@@ -28,7 +28,7 @@ See `setup.go` and `router.go`
 
 ## Database
 * SQLite3
-* MySQL, MariaDB >= 10.3
+* MariaDB >= 10.3
 * PostgresSQL >= 12.3
 * SQL Server >= 2014
 * Oracle >= 12c
