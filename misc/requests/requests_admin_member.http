@@ -1,0 +1,28 @@
+@uri = http://localhost:5525
+@cookie = session_id=29213f23-6538-4c9b-9567-fdad4f4dc709
+
+
+### Login
+POST {{uri}}/api/login HTTP/1.1
+content-type: application/json
+Origin: {{uri}}
+
+{
+    "userid": "admin",
+    "password": "admin"
+}
+
+
+### Get member list
+GET {{uri}}/api/admin/member
+Cookie: {{cookie}}
+
+### Add member
+POST {{uri}}/api/admin/member
+Cookie: {{cookie}}
+
+{
+    "board-idx": 1,
+    "user-idx": 1,
+    "grade": "member"
+}

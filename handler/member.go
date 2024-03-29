@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"9minutes/model"
 	"log"
 	"net/http"
 	"time"
@@ -17,11 +18,13 @@ func GetMemberListAPI(c *fiber.Ctx) error {
 }
 
 func AddMemberAPI(c *fiber.Ctx) (err error) {
+	var member model.MemberRequest
 	now := time.Now().Format("20060102150405")
 
-	data := make(map[string]interface{})
-	err = c.BodyParser(&data)
+	// data := make(map[string]interface{})
+	err = c.BodyParser(&member)
 	if err != nil {
+		log.Println(err)
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
