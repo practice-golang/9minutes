@@ -10,8 +10,10 @@ var (
 
 	BcryptCost       int    = 8
 	TableBoards      string = "boards"
+	TableUploads     string = "uploads"
 	TableUsers       string = "users"
 	TableUserColumns string = "user_fields"
+	TableMembers     string = "members"
 
 	UserGrades = map[string]model.UserGrade{
 		"admin":       {Name: "Admin", Code: "admin", Rank: 1},

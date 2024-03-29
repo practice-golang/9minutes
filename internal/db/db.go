@@ -1,6 +1,7 @@
 package db
 
 import (
+	"9minutes/consts"
 	"9minutes/model"
 	"database/sql"
 	"errors"
@@ -12,20 +13,21 @@ import (
 
 type (
 	DBInfo struct {
-		DatabaseType  int
-		Protocol      string
-		Addr          string
-		Port          string
-		DatabaseName  string
-		SchemaName    string
-		TableName     string
-		BoardTable    string
-		UploadTable   string
-		MemberTable   string
-		UserTable     string
-		GrantID       string
-		GrantPassword string
-		FilePath      string
+		DatabaseType    int
+		Protocol        string
+		Addr            string
+		Port            string
+		DatabaseName    string
+		SchemaName      string
+		TableName       string
+		BoardTable      string
+		UploadTable     string
+		MemberTable     string
+		UserTable       string
+		UserColumnTable string
+		GrantID         string
+		GrantPassword   string
+		FilePath        string
 	}
 
 	DBObject interface {
@@ -69,10 +71,11 @@ var (
 func SetupDB() error {
 	var err error
 
-	Info.BoardTable = "boards"
-	Info.UploadTable = "uploads"
-	Info.UserTable = "users"
-	Info.MemberTable = "members"
+	Info.BoardTable = consts.TableBoards
+	Info.UploadTable = consts.TableUploads
+	Info.UserTable = consts.TableUsers
+	Info.UserColumnTable = consts.TableUserColumns
+	Info.MemberTable = consts.TableMembers
 
 	switch Info.DatabaseType {
 

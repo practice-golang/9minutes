@@ -72,7 +72,6 @@ func AddUserAPI(c *fiber.Ctx) error {
 	now := time.Now().Format("20060102150405")
 
 	data := make(map[string]interface{})
-
 	err = c.BodyParser(&data)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
@@ -91,9 +90,7 @@ func AddUserAPI(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	result := map[string]string{
-		"result": "ok",
-	}
+	result := map[string]string{"result": "ok"}
 
 	return c.Status(http.StatusOK).JSON(result)
 }
