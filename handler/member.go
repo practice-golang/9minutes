@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"9minutes/internal/crud"
 	"9minutes/model"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/guregu/null.v4"
 )
 
 func GetMemberListAPI(c *fiber.Ctx) error {
@@ -19,18 +22,25 @@ func GetMemberListAPI(c *fiber.Ctx) error {
 
 func AddMemberAPI(c *fiber.Ctx) (err error) {
 	var member model.MemberRequest
-	now := time.Now().Format("20060102150405")
 
-	// data := make(map[string]interface{})
 	err = c.BodyParser(&member)
 	if err != nil {
-		log.Println(err)
 		return c.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	log.Println(now)
+	now := time.Now().Format("20060102150405")
+	member.RegDate = null.StringFrom(now)
 
-	result := map[string]string{"result": "ok"}
+	_, idx, err := crud.AddMember(member)
+	if err != nil {
+		log.Println("AddMemberAPI:", err)
+	}
+
+	idxSTR := strconv.FormatInt(idx, 10)
+	result := map[string]string{
+		"result": "ok",
+		"idx":    idxSTR,
+	}
 
 	return c.Status(http.StatusOK).JSON(result)
 }

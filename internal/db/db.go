@@ -34,6 +34,7 @@ type (
 		connect() (*sql.DB, error)
 		CreateDB() error
 		// CreateTable() error // Not use
+
 		// Exec - Almost Same as sql.Exec()
 		// Because of PostgreSQL and MS SQL Server, INSERT query and RETURN id way is not enough to use sql.Exec()
 		// Return affected rows, last insert id, error

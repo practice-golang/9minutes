@@ -1,5 +1,5 @@
 @uri = http://localhost:5525
-@cookie = session_id=29213f23-6538-4c9b-9567-fdad4f4dc709
+@cookie = session_id=9e401e22-0aa7-4c1d-9ea7-c2dc6d11005b;
 
 
 ### Login
@@ -20,6 +20,7 @@ Cookie: {{cookie}}
 ### Add member
 POST {{uri}}/api/admin/member
 Cookie: {{cookie}}
+content-type: application/json
 
 {
     "board-idx": 1,

@@ -3,6 +3,7 @@ package crud
 import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
+	"9minutes/model"
 	"log"
 )
 
@@ -26,4 +27,25 @@ func GetMemberList(boardIDX int64) {
 	`
 
 	log.Println(sql)
+}
+
+func AddMember(data model.MemberRequest) (count, idx int64, err error) {
+	dbtype := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(db.Info.MemberTable)
+
+	columns := np.CreateString(data, dbtype, "insert", false)
+
+	sql := `
+	INSERT INTO ` + tablename + `(
+		` + columns.Name + `
+	) VALUES (
+		` + columns.Value + `
+	)`
+
+	count, idx, err = db.Obj.Exec(sql, nil, "IDX")
+	if err != nil {
+		return -1, -1, err
+	}
+
+	return count, idx, err
 }
