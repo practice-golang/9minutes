@@ -55,9 +55,9 @@ func setApiAdmin(a *fiber.App) {
 	gaboard.Delete("/", handler.DeleteBoardAPI)
 
 	/* API Board Member */
-	gamember := gadmin.Group("/member") // required add auth middleware
+	gamember := gadmin.Group("/member/:board_code") // required add auth middleware
 	gamember.Get("/", handler.GetMemberListAPI)
-	gamember.Post("/", handler.AddMemberAPI)
+	gamember.Post("/:user_idx", handler.AddMemberAPI)
 	gamember.Put("/", handler.UpdateMemberAPI)
 	gamember.Delete("/", handler.DeleteMemberAPI)
 }

@@ -14,16 +14,9 @@ Origin: {{uri}}
 
 
 ### Get member list
-GET {{uri}}/api/admin/member
+GET {{uri}}/api/admin/member/scratch
 Cookie: {{cookie}}
 
 ### Add member
-POST {{uri}}/api/admin/member
+POST {{uri}}/api/admin/member/scratch/1
 Cookie: {{cookie}}
-content-type: application/json
-
-{
-    "board-idx": 1,
-    "user-idx": 1,
-    "grade": "member"
-}

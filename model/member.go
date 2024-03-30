@@ -4,7 +4,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-type MemberRequest struct {
+type Member struct {
 	Idx      null.Int    `json:"idx"          db:"IDX"          npskip:"insert, update"`
 	BoardIdx null.Int    `json:"board-idx"    db:"BOARD_IDX"`
 	UserIdx  null.Int    `json:"user-idx"     db:"USER_IDX"`

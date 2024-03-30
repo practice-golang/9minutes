@@ -4,32 +4,41 @@ import (
 	"9minutes/internal/db"
 	"9minutes/internal/np"
 	"9minutes/model"
-	"log"
+
+	"github.com/blockloop/scan"
 )
 
-func GetMemberList(boardIDX int64) {
-	dbtype := db.GetDatabaseTypeString()
-	tablename := db.GetFullTableName(db.Info.UserTable)
+func GetMemberList(boardIDX int64) ([]model.Member, error) {
+	var result []model.Member
 
-	columnList, _ := GetUserColumnsList()
-	columnNames := map[string]interface{}{}
-	for _, column := range columnList {
-		if column.ColumnName.Valid {
-			columnNames["A."+column.ColumnName.String] = nil
-		}
-	}
-	columns := np.CreateString(columnNames, dbtype, "", false)
+	dbtype := db.GetDatabaseTypeString()
+	tablename := db.GetFullTableName(db.Info.MemberTable)
+
+	columns := np.CreateString(model.Member{}, dbtype, "select", false)
+	whereVar := map[string]interface{}{"BOARD_IDX": boardIDX}
+	where := np.CreateWhereString(whereVar, dbtype, "=", "AND", "", false)
 
 	sql := `
 	SELECT
 		` + columns.Name + `
 	FROM ` + tablename + ` AS A
-	`
+	` + where + ``
 
-	log.Println(sql)
+	r, err := db.Con.Query(sql)
+	if err != nil {
+		return result, err
+	}
+	defer r.Close()
+
+	err = scan.Rows(&result, r)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
 }
 
-func AddMember(data model.MemberRequest) (count, idx int64, err error) {
+func AddMember(data model.Member) (count, idx int64, err error) {
 	dbtype := db.GetDatabaseTypeString()
 	tablename := db.GetFullTableName(db.Info.MemberTable)
 
